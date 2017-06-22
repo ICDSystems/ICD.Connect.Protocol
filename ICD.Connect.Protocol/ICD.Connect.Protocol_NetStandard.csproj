@@ -21,13 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove=".git" />
-    <None Remove=".gitignore" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RSD.SimplSharp.Common.Interfaces\ICD.SimplSharp.API\ICD.NetStandard.API.csproj" />
-    <ProjectReference Include="..\RSD.SimplSharp.Common.Interfaces\ICD.SimplSharp.Common\ICD.NetStandard.Common.csproj" />
+    <None Remove="ICD.Connect.Protocol_SimplSharp.suo" />
+    <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 
 </Project>

@@ -21,13 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ICD.Connect.Protocol.Crosspoints_SimplSharp.suo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ICD.SimplSharp.Network.Protocol\ICD.NetStandard.Network.Protocol.csproj" />
-    <ProjectReference Include="..\RSD.SimplSharp.Common.Interfaces\ICD.SimplSharp.API\ICD.NetStandard.API.csproj" />
-    <ProjectReference Include="..\RSD.SimplSharp.Common.Interfaces\ICD.SimplSharp.Common\ICD.NetStandard.Common.csproj" />
   </ItemGroup>
 
 </Project>
