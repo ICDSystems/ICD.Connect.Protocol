@@ -2,12 +2,12 @@
 #if STANDARD
 using System;
 using System.Net.Sockets;
-using ICD.SimplSharp.Common.Utils;
+using ICD.Common.Utils;
 using System.Threading.Tasks;
-using ICD.SimplSharp.Common.Console.Nodes;
-using ICD.SimplSharp.Common.Services.Logging;
+using ICD.Connect.API.Nodes;
+using ICD.Common.Services.Logging;
 
-namespace ICD.SimplSharp.API.Ports.Tcp
+namespace ICD.Connect.Protocol.Network.Tcp
 {
 	public sealed partial class AsyncTcpClient
 	{

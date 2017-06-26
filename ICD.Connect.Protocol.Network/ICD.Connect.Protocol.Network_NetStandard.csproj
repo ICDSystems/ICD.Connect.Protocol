@@ -25,4 +25,12 @@
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SSH.NET" Version="2016.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
+  </ItemGroup>
+
 </Project>

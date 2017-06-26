@@ -1,17 +1,16 @@
 ﻿
 #if STANDARD
-using ICD.SimplSharp.Common.Annotations;
-using ICD.SimplSharp.Common.EventArguments;
-using ICD.SimplSharp.Common.Utils;
-using ICD.SimplSharp.Common.Utils.Extensions;
+using ICD.Common.Properties;
+using ICD.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using ICD.SimplSharp.Common.Services.Logging;
+using ICD.Common.Services.Logging;
+using ICD.Connect.Protocol.Ports;
 
-namespace ICD.SimplSharp.API.Ports.Tcp
+namespace ICD.Connect.Protocol.Network.Tcp
 {
     public sealed partial class AsyncTcpServer
     {

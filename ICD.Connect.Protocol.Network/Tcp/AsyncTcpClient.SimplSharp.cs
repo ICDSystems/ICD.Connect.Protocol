@@ -1,10 +1,9 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Connect.API.Nodes;
-
-#if SIMPLSHARP
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
