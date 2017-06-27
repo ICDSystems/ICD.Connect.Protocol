@@ -2,7 +2,7 @@
 #if STANDARD
 using System;
 
-namespace ICD.SimplSharp.API.Ports.WebPorts.Https
+namespace ICD.Connect.Protocol.Network.WebPorts.Https
 {
     public sealed partial class HttpsPort
     {

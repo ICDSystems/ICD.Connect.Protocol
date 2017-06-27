@@ -1,4 +1,5 @@
-﻿using Crestron.SimplSharp.CrestronIO;
+﻿#if SIMPLSHARP
+using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Properties;
@@ -6,7 +7,7 @@ using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
-#if SIMPLSHARP
+
 
 namespace ICD.Connect.Protocol.Network.WebPorts.Https
 {

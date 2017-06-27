@@ -25,4 +25,10 @@
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
+  </ItemGroup>
+
 </Project>

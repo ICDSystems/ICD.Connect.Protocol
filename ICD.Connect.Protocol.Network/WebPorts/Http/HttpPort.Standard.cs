@@ -1,6 +1,6 @@
 ﻿
 #if STANDARD
-namespace ICD.SimplSharp.API.Ports.WebPorts.Http
+namespace ICD.Connect.Protocol.Network.WebPorts.Http
 {
     public sealed partial class HttpPort
     {

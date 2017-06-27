@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.EventArguments;
 using ICD.Common.Properties;
@@ -8,8 +9,6 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-
-#if SIMPLSHARP
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
@@ -6,15 +7,13 @@ using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 
-#if SIMPLSHARP
-
 namespace ICD.Connect.Protocol.Network.Udp
 {
 	public sealed partial class AsyncUdpClient
 	{
 		private UDPServer m_UdpClient;
 
-		#region Properties
+#region Properties
 
 		/// <summary>
 		/// Address to accept connections from.
@@ -26,9 +25,9 @@ namespace ICD.Connect.Protocol.Network.Udp
 			set { m_Address = IcdEnvironment.NetworkAddresses.Contains(m_Address) ? "127.0.0.1" : value; }
 		}
 
-		#endregion
+#endregion
 
-		#region Methods
+#region Methods
 
 		/// <summary>
 		/// Connects to the end point.
@@ -129,9 +128,9 @@ namespace ICD.Connect.Protocol.Network.Udp
 			return true;
 		}
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		/// <summary>
 		/// Handles Receiving Data from the Active TCP Connection
@@ -158,7 +157,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			UpdateIsConnectedState();
 		}
 
-		#endregion
+#endregion
 	}
 }
 

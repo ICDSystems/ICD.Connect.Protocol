@@ -1,8 +1,6 @@
 ﻿using System;
-using Crestron.SimplSharp.CrestronSockets;
-
 #if SIMPLSHARP
-
+using Crestron.SimplSharp.CrestronSockets;
 #endif
 
 namespace ICD.Connect.Protocol.EventArguments

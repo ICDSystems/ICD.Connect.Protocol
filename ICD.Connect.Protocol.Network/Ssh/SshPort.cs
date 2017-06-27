@@ -1,13 +1,6 @@
-﻿#if SIMPLSHARP
-#else
-using Renci.SshNet;
-using Renci.SshNet.Common;
-#endif
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Crestron.SimplSharp.Ssh;
-using Crestron.SimplSharp.Ssh.Common;
 using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
@@ -15,6 +8,13 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Core;
+#if SIMPLSHARP
+using Crestron.SimplSharp.Ssh;
+using Crestron.SimplSharp.Ssh.Common;
+#else
+using Renci.SshNet;
+using Renci.SshNet.Common;
+#endif
 
 namespace ICD.Connect.Protocol.Network.Ssh
 {

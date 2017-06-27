@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Crestron.SimplSharp.Reflection;
 using ICD.Common.Attributes.Rpc;
 using ICD.Common.Properties;
 using ICD.Common.Utils.IO;
@@ -12,7 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 #if SIMPLSHARP
-
+using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif

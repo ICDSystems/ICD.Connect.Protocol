@@ -1,12 +1,13 @@
 ﻿
 #if !SIMPLSHARP
-using ICD.SimplSharp.Common.Annotations;
-using ICD.SimplSharp.Common.Utils;
+using ICD.Common.Properties;
+using ICD.Common.Utils;
+using ICD.Connect.Protocol.Ports;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace ICD.SimplSharp.API.Ports.Udp
+namespace ICD.Connect.Protocol.Network.Udp
 {
     public sealed partial class AsyncUdpClient : AbstractSerialPort<AsyncUdpClientSettings>
     {
