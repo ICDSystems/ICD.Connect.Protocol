@@ -1,4 +1,5 @@
-﻿using ICD.Common.Properties;
+﻿using System;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
@@ -29,6 +30,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(HttpsPort); } }
+
 		#endregion
 
 		#region Methods
@@ -51,19 +57,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 
 			if (CertificateType != default(HttpsPort.eCertificateType))
 				writer.WriteElementString(CERTIFICATE_TYPE_ELEMENT, CertificateType.ToString());
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			HttpsPort output = new HttpsPort();
-			output.ApplySettings(this, factory);
-
-			return output;
 		}
 
 		/// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
@@ -14,16 +15,9 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
 		/// <summary>
-		/// Creates a new originator instance from the settings.
+		/// Gets the type of the originator for this settings instance.
 		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			ComPortPlus output = new ComPortPlus();
-			output.ApplySettings(this, factory);
-			return output;
-		}
+		public override Type OriginatorType { get { return typeof(ComPortPlus); } }
 
 		/// <summary>
 		/// Returns the collection of ids that the settings will depend on.

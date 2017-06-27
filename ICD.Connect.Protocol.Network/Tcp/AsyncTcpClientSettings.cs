@@ -1,3 +1,4 @@
+using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
@@ -23,6 +24,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(AsyncTcpClient); } }
+
 		public string Address { get; set; }
 		public ushort Port { get; set; }
 		public ushort BufferSize { get { return m_BufferSize; } set { m_BufferSize = value; } }
@@ -40,18 +46,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			writer.WriteElementString(ADDRESS_ELEMENT, Address);
 			writer.WriteElementString(HOST_PORT_ELEMENT, IcdXmlConvert.ToString(Port));
 			writer.WriteElementString(BUFFER_SIZE_ELEMENT, IcdXmlConvert.ToString(BufferSize));
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			AsyncTcpClient output = new AsyncTcpClient();
-			output.ApplySettings(this, factory);
-			return output;
 		}
 
 		/// <summary>

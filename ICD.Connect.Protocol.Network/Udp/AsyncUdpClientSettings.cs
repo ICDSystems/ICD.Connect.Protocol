@@ -1,3 +1,4 @@
+using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
@@ -14,6 +15,11 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// Gets the originator factory name.
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
+
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(AsyncUdpClient); } }
 
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string HOST_PORT_ELEMENT = "Port";
@@ -36,18 +42,6 @@ namespace ICD.Connect.Protocol.Network.Udp
 			writer.WriteElementString(ADDRESS_ELEMENT, Address);
 			writer.WriteElementString(HOST_PORT_ELEMENT, IcdXmlConvert.ToString(Port));
 			writer.WriteElementString(BUFFER_SIZE_ELEMENT, IcdXmlConvert.ToString(BufferSize));
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			AsyncUdpClient output = new AsyncUdpClient();
-			output.ApplySettings(this, factory);
-			return output;
 		}
 
 		/// <summary>

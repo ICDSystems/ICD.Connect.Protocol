@@ -1,4 +1,5 @@
-﻿using ICD.Common.Properties;
+﻿using System;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.Factories;
@@ -32,6 +33,11 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(SshPort); } }
+
 		#endregion
 
 		#region Method
@@ -48,19 +54,6 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			writer.WriteElementString(HOST_PORT_ELEMENT, IcdXmlConvert.ToString(Port));
 			writer.WriteElementString(USERNAME_ELEMENT, Username);
 			writer.WriteElementString(PASSWORD_ELEMENT, Password);
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			SshPort output = new SshPort();
-			output.ApplySettings(this, factory);
-
-			return output;
 		}
 
 		/// <summary>
