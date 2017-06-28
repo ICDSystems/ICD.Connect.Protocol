@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
