@@ -139,13 +139,44 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			try
 			{
-				SocketStateEventArgs.eSocketStatus socketStatus = SocketStateEventArgs.GetSocketStatus(status);
+				SocketStateEventArgs.eSocketStatus socketStatus = GetSocketStatus(status);
 				OnSocketStateChange.Raise(this, new SocketStateEventArgs(socketStatus, clientId));
 			}
 			catch (Exception e)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
 				               .AddEntry(eSeverity.Error, e, "Exception in OnSocketStateChange callback - {0}", e.Message);
+			}
+		}
+
+		private static SocketStateEventArgs.eSocketStatus GetSocketStatus(SocketStatus status)
+		{
+			switch (status)
+			{
+				case SocketStatus.SOCKET_STATUS_NO_CONNECT:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect;
+				case SocketStatus.SOCKET_STATUS_WAITING:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusWaiting;
+				case SocketStatus.SOCKET_STATUS_CONNECTED:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusConnected;
+				case SocketStatus.SOCKET_STATUS_CONNECT_FAILED:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusConnectFailed;
+				case SocketStatus.SOCKET_STATUS_BROKEN_REMOTELY:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusBrokenRemotely;
+				case SocketStatus.SOCKET_STATUS_BROKEN_LOCALLY:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusBrokenLocally;
+				case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusDnsLookup;
+				case SocketStatus.SOCKET_STATUS_DNS_FAILED:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusDnsFailed;
+				case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusDnsResolved;
+				case SocketStatus.SOCKET_STATUS_LINK_LOST:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusLinkLost;
+				case SocketStatus.SOCKET_STATUS_SOCKET_NOT_EXIST:
+					return SocketStateEventArgs.eSocketStatus.SocketStatusSocketNotExist;
+				default:
+					throw new ArgumentOutOfRangeException("status");
 			}
 		}
 
