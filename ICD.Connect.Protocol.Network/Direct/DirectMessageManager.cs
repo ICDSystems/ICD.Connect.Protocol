@@ -186,11 +186,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			m_MessageCallbacks.Clear();
 
-			foreach (KeyValuePair<Type, IMessageHandler> handler in m_MessageHandlers)
-			{
-				if (handler.Value is IDisposable)
-					(handler.Value as IDisposable).Dispose();
-			}
+			foreach (IDisposable handler in m_MessageHandlers.Values.OfType<IDisposable>())
+				handler.Dispose();
 
 			m_MessageHandlers.Clear();
 			m_Server.Dispose();

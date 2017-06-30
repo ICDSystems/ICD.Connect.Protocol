@@ -9,6 +9,7 @@ namespace ICD.Connect.Protocol.Extensions
 		/// <summary>
 		/// Lazy-loads the port with the given id.
 		/// </summary>
+		/// <param name="factory"></param>
 		/// <param name="id"></param>
 		/// <returns></returns>
 		[PublicAPI]

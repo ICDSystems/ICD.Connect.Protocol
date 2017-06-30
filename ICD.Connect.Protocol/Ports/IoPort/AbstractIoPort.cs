@@ -139,7 +139,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 			string configurationHelp = string.Format("SetConfiguration <{0}>",
 			                                         StringUtils.ArrayFormat(EnumUtils.GetValues<eIoPortConfiguration>()));
 			yield return
-				new GenericConsoleCommand<eIoPortConfiguration>("SetConfiguration", configurationHelp, (a) => SetConfiguration(a));
+				new GenericConsoleCommand<eIoPortConfiguration>("SetConfiguration", configurationHelp, a => SetConfiguration(a));
 			yield return new GenericConsoleCommand<bool>("SetDigitalOut", "SetDigitalOut <true/false>", a => SetDigitalOut(a));
 		}
 

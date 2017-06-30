@@ -146,7 +146,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
-			addRow("Broadcast Data", m_BroadcastData.ToString());
+			addRow("Broadcast Data", m_BroadcastData);
 		}
 
 		/// <summary>

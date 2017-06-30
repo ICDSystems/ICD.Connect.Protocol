@@ -8,11 +8,12 @@ namespace ICD.Connect.Protocol.Extensions
 {
 	public sealed class CorePortCollection : AbstractOriginatorCollection<IPort>
 	{
-		public CorePortCollection() : base()
+		public CorePortCollection()
 		{
 		}
 
-		public CorePortCollection(IEnumerable<IPort> children) : base(children)
+		public CorePortCollection(IEnumerable<IPort> children)
+			: base(children)
 		{
 		}
 	}

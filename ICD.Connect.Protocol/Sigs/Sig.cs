@@ -242,6 +242,7 @@ namespace ICD.Connect.Protocol.Sigs
 			writer.WriteStartObject();
 			{
 				writer.WritePropertyName(TYPE_PROPERTY);
+// ReSharper disable once ImpureMethodCallOnReadonlyValueField
 				writer.WriteValue(m_Type.ToString());
 
 				if (m_Number != 0)
