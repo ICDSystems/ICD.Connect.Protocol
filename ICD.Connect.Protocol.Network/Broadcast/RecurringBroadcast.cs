@@ -156,9 +156,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		[PublicAPI]
 		public void UpdateData(T info)
 		{
-			if (info != null && info.Equals(m_BroadcastData))
-				return;
-
 			m_BroadcastData = info;
 		}
 
