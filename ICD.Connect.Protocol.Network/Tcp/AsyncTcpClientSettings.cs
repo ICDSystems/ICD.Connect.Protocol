@@ -55,9 +55,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI, XmlPortSettingsFactoryMethod(FACTORY_NAME)]
 		public static AsyncTcpClientSettings FromXml(string xml)
 		{
-			string address = XmlUtils.ReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			ushort port = (ushort)XmlUtils.ReadChildElementContentAsInt(xml, HOST_PORT_ELEMENT);
-			ushort bufferSize = (ushort)XmlUtils.ReadChildElementContentAsInt(xml, BUFFER_SIZE_ELEMENT);
+			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			ushort port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
+			ushort bufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ?? AsyncTcpClient.DEFAULT_BUFFER_SIZE;
 
 			AsyncTcpClientSettings output = new AsyncTcpClientSettings
 			{
