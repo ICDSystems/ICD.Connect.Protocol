@@ -155,7 +155,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			base.BuildStringRepresentationProperties(addPropertyAndValue);
 
-			addPropertyAndValue("Address", Address);
+			addPropertyAndValue("Address", StringUtils.ToRepresentation(Address));
 			addPropertyAndValue("Port", Port);
 		}
 
