@@ -3,7 +3,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.Devices;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports
 {
@@ -11,7 +10,7 @@ namespace ICD.Connect.Protocol.Ports
 	/// Base class for all ports.
 	/// </summary>
 	public abstract class AbstractPort<T> : AbstractDeviceBase<T>, IPort
-		where T : ISettings, new()
+		where T : IPortSettings, new()
 	{
 		#region Properties
 

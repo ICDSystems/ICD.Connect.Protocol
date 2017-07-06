@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
 	public abstract class AbstractIrPort<T> : AbstractPort<T>, IIrPort
-		where T : ISettings, new()
+		where T : IPortSettings, new()
 	{
 		#region Properties
 
