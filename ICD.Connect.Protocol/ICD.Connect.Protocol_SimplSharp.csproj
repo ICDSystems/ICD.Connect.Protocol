@@ -72,6 +72,7 @@
     <Compile Include="AbstractPortSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
+    <Compile Include="Ports\IPortSettings.cs" />
     <Compile Include="Utils\ComSpecUtils.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
     <Compile Include="Data\AbstractSerialData.cs" />

@@ -7,7 +7,6 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports
 {
@@ -15,7 +14,7 @@ namespace ICD.Connect.Protocol.Ports
 	/// AbstractSerialPort is the base class for RSD serial ports.
 	/// </summary>
 	public abstract class AbstractSerialPort<T> : AbstractPort<T>, ISerialPort
-		where T : ISettings, new()
+		where T : IPortSettings, new()
 	{
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
 		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;

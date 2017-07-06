@@ -4,12 +4,11 @@ using ICD.Common.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.RelayPort
 {
 	public abstract class AbstractRelayPort<T> : AbstractPort<T>, IRelayPort
-		where T : ISettings, new()
+		where T : IPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnClosedStateChanged;
 

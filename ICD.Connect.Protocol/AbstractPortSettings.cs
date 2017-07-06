@@ -1,9 +1,11 @@
-﻿namespace ICD.Connect.Settings
+﻿using ICD.Connect.Protocol.Ports;
+
+namespace ICD.Connect.Settings
 {
 	/// <summary>
 	/// Base class for port settings.
 	/// </summary>
-	public abstract class AbstractPortSettings : AbstractDeviceBaseSettings
+	public abstract class AbstractPortSettings : AbstractDeviceBaseSettings, IPortSettings
 	{
 		public const string PORT_ELEMENT = "Port";
 

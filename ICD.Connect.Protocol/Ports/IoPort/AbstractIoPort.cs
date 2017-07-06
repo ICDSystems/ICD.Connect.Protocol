@@ -5,12 +5,11 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
 	public abstract class AbstractIoPort<T> : AbstractPort<T>, IIoPort
-		where T : ISettings, new()
+		where T : IPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnDigitalInChanged;
 		public event EventHandler<BoolEventArgs> OnDigitalOutChanged;
