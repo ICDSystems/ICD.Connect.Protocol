@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Base class for port settings.
 	/// </summary>
-	public abstract class AbstractPortSettings : AbstractDeviceSettings
+	public abstract class AbstractPortSettings : AbstractDeviceBaseSettings
 	{
 		public const string PORT_ELEMENT = "Port";
 
