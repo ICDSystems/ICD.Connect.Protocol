@@ -25,7 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".gitignore" />
     <None Remove="ICD.Connect.Protocol.Network_SimplSharp.suo" />
+    <None Remove="ICD.Connect.Protocol.projectinfo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 
