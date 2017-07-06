@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if SIMPLSHARP
+using System.Collections.Generic;
 using Crestron.SimplSharp;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -6,8 +7,6 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Sigs;
-
-#if SIMPLSHARP
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
