@@ -111,6 +111,14 @@
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ICD.Common.Logging\ICD.Common.Logging.Console\ICD.Common.Logging.Console_SimplSharp.csproj">
+      <Project>{8093AE94-7250-411E-9C55-68AB2B5D705A}</Project>
+      <Name>ICD.Common.Logging.Console_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Common.Permissions\ICD.Common.Permissions\ICD.Common.Permissions_SimplSharp.csproj">
+      <Project>{36A8C910-4035-4F68-B0B6-2EC2D18FD939}</Project>
+      <Name>ICD.Common.Permissions_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
       <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
       <Name>ICD.Connect.Protocol.Network</Name>
@@ -122,10 +130,6 @@
     <ProjectReference Include="..\..\lib\ICD.Common.Utils\src\ICD.Common\ICD.Common_SimplSharp.csproj">
       <Project>{CB4055C6-D59E-479E-9C56-2C92335A7D9A}</Project>
       <Name>ICD.SimplSharp.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\ICD.Common.Logging\src\ICD.Common.Logging.Console\ICD.Common.Logging.Console_SimplSharp.csproj">
-      <Project>{8093AE94-7250-411E-9C55-68AB2B5D705A}</Project>
-      <Name>RSD.SimplSharp.LoggingUtils</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\lib\ICD.Connect.Settings\src\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
