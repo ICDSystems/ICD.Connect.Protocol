@@ -9,7 +9,6 @@ using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
