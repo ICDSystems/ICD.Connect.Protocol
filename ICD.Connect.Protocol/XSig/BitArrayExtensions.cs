@@ -77,7 +77,13 @@ namespace ICD.Connect.Protocol.XSig
 		{
 			int length = extends.GetBytesLength();
 			byte[] byteArray = new byte[length];
+
+#if SIMPLSHARP
 			extends.CopyTo(byteArray, 0);
+#else
+			(extends as ICollection).CopyTo(byteArray, 0);
+#endif
+
 			return byteArray;
 		}
 
