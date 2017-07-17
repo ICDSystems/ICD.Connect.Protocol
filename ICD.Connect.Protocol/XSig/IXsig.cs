@@ -1,6 +1,6 @@
 ﻿namespace ICD.Connect.Protocol.XSig
 {
-	public interface ISignal
+	public interface IXsig
 	{
 		/// <summary>
 		/// Gets the raw signal data.
@@ -13,7 +13,7 @@
 		ushort Index { get; }
 	}
 
-	public interface ISignal<T> : ISignal
+	public interface IXsig<T> : IXsig
 	{
 		/// <summary>
 		/// Gets the analog signal value.

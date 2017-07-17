@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
 {
@@ -10,30 +10,26 @@ namespace ICD.Connect.Protocol.XSig
 	///		1 0 value # # # # #    0 # # # # # # #
 	/// Where the 12 bit index is spread over the #s.
 	/// </summary>
-	public struct DigitalSignal : ISignal<bool>
+	public struct DigitalXsig : IXsig<bool>
 	{
-		private const int SIGNIFICANT_BIT = 15;
-		private const int VALUE_BIT = 13;
-		private const int HIGH_ORDER_BIT = 7;
-
-		private readonly BitArray m_Data;
+		private readonly byte[] m_Data;
 
 		#region Properties
 
 		/// <summary>
 		/// Gets the raw signal data.
 		/// </summary>
-		public byte[] Data { get { return m_Data.ToBytes(); } }
+		public byte[] Data { get { return m_Data.ToArray(); } }
 
 		/// <summary>
 		/// Gets the high/low signal value.
 		/// </summary>
-		public bool Value { get { return !m_Data[VALUE_BIT]; } }
+		public bool Value { get { return GetValue(); } }
 
 		/// <summary>
 		/// Gets the signal index.
 		/// </summary>
-		public ushort Index { get { return GetIndex(m_Data); } }
+		public ushort Index { get { return GetIndex(); } }
 
 		#endregion
 
@@ -43,14 +39,14 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the DigitalSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public DigitalSignal(IEnumerable<byte> bytes)
+		public DigitalXsig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
 			if (!IsDigital(array))
-				throw new ArgumentException();
+				throw new ArgumentException("Byte array is not a digital xsig");
 
-			m_Data = new BitArray(array);
+			m_Data = array;
 		}
 
 		/// <summary>
@@ -58,14 +54,16 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public DigitalSignal(bool value, ushort index)
+		public DigitalXsig(bool value, ushort index)
 		{
-			m_Data = new BitArray(16);
+			if(index >= (1 << 12))
+				throw new ArgumentException("Index must be between 0 and 4095");
 
-			SetIndex(m_Data, index);
+			m_Data = new byte[2];
 
-			m_Data[SIGNIFICANT_BIT] = true;
-			m_Data[VALUE_BIT] = !value;
+			SetFixedBits();
+			SetIndex(index);
+			SetValue(value);
 		}
 
 		#endregion
@@ -82,28 +80,32 @@ namespace ICD.Connect.Protocol.XSig
 			if (array.Length != 2)
 				return false;
 
-			BitArray bits = new BitArray(array);
-
 			// One bit is always true and two bits are always false.
-			return bits[15] && !bits[14] && !bits[7];
+			return array[0].GetBit(7) && !array[0].GetBit(6) && !array[1].GetBit(7);
 		}
 
 		#region Private Methods
+
+		private void SetFixedBits()
+		{
+			m_Data[0].SetBitOn(7);
+		}
 
 		/// <summary>
 		/// Sets the index bits into the bit array.
 		/// </summary>
 		/// <param name="array"></param>
 		/// <param name="index"></param>
-		private static void SetIndex(BitArray array, ushort index)
+		private void SetIndex(ushort index)
 		{
-			byte[] bytes = BitConverter.GetBytes(index);
-			BitArray indexBits = new BitArray(bytes);
-
-			indexBits.Insert(HIGH_ORDER_BIT, false);
-
-			for (int bitIndex = 0; bitIndex < VALUE_BIT; bitIndex++)
-				array[bitIndex] = indexBits[bitIndex];
+			byte[] iBytes = BitConverter.GetBytes(index);
+			m_Data[1] = iBytes[0].SetBitOff(7);
+			m_Data[0] = m_Data[0]
+					.SetBit(0, iBytes[0].GetBit(7))
+					.SetBit(1, iBytes[1].GetBit(0))
+					.SetBit(2, iBytes[1].GetBit(1))
+					.SetBit(3, iBytes[1].GetBit(2))
+					.SetBit(4, iBytes[1].GetBit(3));
 		}
 
 		/// <summary>
@@ -111,15 +113,26 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="array"></param>
 		/// <returns></returns>
-		private static ushort GetIndex(BitArray array)
+		private ushort GetIndex()
 		{
-			BitArray temp = new BitArray(array);
+			byte[] index = new byte[2];
+			index[0] = m_Data[1].SetBit(7, m_Data[0].GetBit(0));
+			index[1] = ((byte) (m_Data[0] >> 1))
+				.SetBitOff(7)
+				.SetBitOff(6)
+				.SetBitOff(5)
+				.SetBitOff(4);
+			return BitConverter.ToUInt16(index, 0);
+		}
 
-			for (int index = SIGNIFICANT_BIT; index >= VALUE_BIT; index--)
-				temp[index] = false;
-			temp.Remove(HIGH_ORDER_BIT);
+		private bool GetValue()
+		{
+			return !m_Data[0].GetBit(5);
+		}
 
-			return temp.ToUShort();
+		private void SetValue(bool value)
+		{
+			m_Data[0].SetBit(5, !value);
 		}
 
 		#endregion
