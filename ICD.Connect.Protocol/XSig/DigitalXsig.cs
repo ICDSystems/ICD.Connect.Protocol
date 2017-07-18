@@ -88,7 +88,10 @@ namespace ICD.Connect.Protocol.XSig
 
 		private void SetFixedBits()
 		{
-			m_Data[0].SetBitOn(7);
+			m_Data[0] = m_Data[0]
+					.SetBitOn(7)
+					.SetBitOff(6);
+			m_Data[1] = m_Data[1].SetBitOff(7);
 		}
 
 		/// <summary>
@@ -132,7 +135,7 @@ namespace ICD.Connect.Protocol.XSig
 
 		private void SetValue(bool value)
 		{
-			m_Data[0].SetBit(5, !value);
+			m_Data[0] = m_Data[0].SetBit(5, !value);
 		}
 
 		#endregion
