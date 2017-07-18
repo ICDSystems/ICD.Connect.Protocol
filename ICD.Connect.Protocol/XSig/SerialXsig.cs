@@ -54,6 +54,7 @@ namespace ICD.Connect.Protocol.XSig
 		{
 			if (index >= (1 << 10))
 				throw new ArgumentException("Index must be between 0 and 1023");
+			value = value ?? "";
 
 			m_Data = new byte[value.Length + 3];
 

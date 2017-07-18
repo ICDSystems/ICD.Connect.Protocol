@@ -141,7 +141,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 							aBuilder.Append(StringUtils.ToString(a.Data));
 							break;
 						case eSigType.Serial:
-							var s = new SerialXsig(sig.GetStringValue(), (ushort)(sig.Number - 1));
+							var s = new SerialXsig(sig.GetStringValue() ?? "", (ushort)(sig.Number - 1));
 							DelSerialJoinXsig callback = SerialSigReceivedXsigCallback;
 							if (callback != null)
 								callback(StringUtils.ToString(s.Data));
