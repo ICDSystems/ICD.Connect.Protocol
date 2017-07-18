@@ -93,9 +93,6 @@
     </Compile>
     <Compile Include="Crosspoints\IEquipmentCrosspoint.cs" />
     <Compile Include="CrosspointData.cs" />
-    <Compile Include="SimplPlus\SimplPlusControlCrosspoint.cs" />
-    <Compile Include="SimplPlus\SimplPlusControlCrosspointQueued.cs" />
-    <Compile Include="SimplPlus\SimplPlusEquipmentCrosspoint.cs" />
     <Compile Include="SimplPlus\SimplPlusStaticCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimplPlus\SimplPlusXsigControlCrosspoint.cs" />
