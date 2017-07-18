@@ -3,6 +3,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Ports;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -112,8 +113,13 @@ namespace ICD.Connect.Protocol.Network.Udp
             PrintRx(data);
             Receive(data);
 
-            m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
-
+            if (m_ListeningRequested)
+            {
+                if (!m_UdpClient.Client.Connected)
+                    Connect();
+                m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
+            }
+            
             UpdateIsConnectedState();
         }
     }
