@@ -199,17 +199,24 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="bytesReceived"></param>
 		private void TcpClientReceiveHandler(TCPServer tcpListener, uint clientId, int bytesReceived)
 		{
-			if (clientId == 0)
-				return;
-
-			byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
-
-			OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, bytesReceived));
-
-			if (!ClientConnected(clientId))
+			try
 			{
-				RemoveClient(clientId);
-				return;
+				if (clientId == 0)
+					return;
+
+				byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
+
+				OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, bytesReceived));
+
+				if (!ClientConnected(clientId))
+				{
+					RemoveClient(clientId);
+					return;
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, e, "Exception occurred while processing received data");
 			}
 
 			// Spawn a new listening thread
@@ -218,9 +225,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				return;
 
 			ServiceProvider.TryGetService<ILoggerService>()
-			               .AddEntry(eSeverity.Error,
-			                         "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
-			                         clientId, GetHostnameForClientId(clientId), socketError);
+					.AddEntry(eSeverity.Error,
+							"AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
+							clientId, GetHostnameForClientId(clientId), socketError);
 
 			RemoveClient(clientId);
 		}

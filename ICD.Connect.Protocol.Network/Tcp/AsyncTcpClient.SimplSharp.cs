@@ -161,21 +161,29 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="bytesReceived"></param>
 		private void TcpClientReceiveHandler(TCPClient tcpClient, int bytesReceived)
 		{
-			if (bytesReceived <= 0)
-				return;
+			try
+			{
+				if (bytesReceived <= 0)
+					return;
 
-			string data = StringUtils.ToString(tcpClient.IncomingDataBuffer, bytesReceived);
+				string data = StringUtils.ToString(tcpClient.IncomingDataBuffer, bytesReceived);
 
-			PrintRx(data);
-			Receive(data);
+				PrintRx(data);
+				Receive(data);
+				
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, e, "Exception occurred while processing received data");
+			}
 
 			SocketErrorCodes socketError = tcpClient.ReceiveDataAsync(TcpClientReceiveHandler);
 
 			if (socketError != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 			{
 				Logger.AddEntry(eSeverity.Error, "{0} failed to ReceiveDataAsync from host {1}:{2}", this,
-				                tcpClient.AddressClientConnectedTo,
-				                tcpClient.PortNumber);
+						tcpClient.AddressClientConnectedTo,
+						tcpClient.PortNumber);
 			}
 
 			UpdateIsConnectedState();
