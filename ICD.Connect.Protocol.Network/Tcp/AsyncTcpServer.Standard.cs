@@ -9,6 +9,8 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using ICD.Common.Services.Logging;
 using ICD.Connect.Protocol.Ports;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.EventArguments;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
@@ -17,6 +19,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
         private TcpListener m_TcpListener;
 
         private Dictionary<uint, TcpClient> m_Clients = new Dictionary<uint, TcpClient>();
+        private Dictionary<uint, byte[]> m_ClientBuffers = new Dictionary<uint, byte[]>();
 
         /// <summary>
         /// Starts the TCP Server
@@ -121,7 +124,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
         /// <param name="clientId"></param>
         private void TcpClientConnectCallback(Task<TcpClient> tcpClient)
         {
-            m_Clients.Add((uint)m_Clients.Count, tcpClient.Result);
+            var clientId = (uint)m_Clients.Count + 1;
+            m_Clients[clientId] = tcpClient.Result;
+            m_ClientBuffers[clientId] = new byte[16384];
+            AddClient(clientId);
+            m_Clients[clientId].GetStream().ReadAsync(m_ClientBuffers[clientId], 0, 16384).ContinueWith(a => TcpClientReceiveHandler(a, clientId));
             // Spawn new thread for accepting new clients
             m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
         }
@@ -132,16 +139,15 @@ namespace ICD.Connect.Protocol.Network.Tcp
         /// <param name="tcpListener"></param>
         /// <param name="clientId"></param>
         /// <param name="bytesReceived"></param>
-        private void TcpClientReceiveHandler(TcpListener tcpListener, uint clientId, int bytesReceived)
+        private void TcpClientReceiveHandler(Task<int> task, uint clientId)
         {
-            throw new NotImplementedException();
-            /*
+            
             if (clientId == 0)
                 return;
 
-            byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
+            byte[] buffer = m_ClientBuffers[clientId];
 
-            OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, bytesReceived));
+            OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, task.Result));
 
             if (!ClientConnected(clientId))
             {
@@ -150,15 +156,15 @@ namespace ICD.Connect.Protocol.Network.Tcp
             }
 
             // Spawn a new listening thread
-            SocketErrorCodes socketError = tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
-            if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
-                return;
+            m_Clients[clientId].GetStream().ReadAsync(buffer, 0, 16384).ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+            //if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
+                //return;
 
-            Logger.AddEntry(eSeverity.Error, "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
-                              clientId, GetHostnameForClientId(clientId), socketError);
+            //Logger.AddEntry(eSeverity.Error, "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
+                    //clientId, GetHostnameForClientId(clientId), socketError);
 
-            RemoveClient(clientId);
-            */
+            //RemoveClient(clientId);
+            
         }
 
         /// <summary>
