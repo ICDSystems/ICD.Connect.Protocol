@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Crestron.SimplSharp;
+using ICD.Common.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
+using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Protocol.XSig;
 
@@ -64,10 +66,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			m_Manager.RegisterCrosspoint(m_Crosspoint);
 
 			m_Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
-
-			var statusDelegate = CrosspointStatusCallback;
-			if (statusDelegate != null)
-				statusDelegate(1);
+			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
+			m_Crosspoint.OnControlCrosspointCountChanged += CrosspointOnControlCrosspointCountChanged;
 		}
 
 		[PublicAPI]
@@ -115,7 +115,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		public delegate void DelSerialJoinXsig(SimplSharpString xsig);
 
-		public delegate void DelCrosspointStatus(ushort status);
+		public delegate void DelStatusUpdate(ushort status);
 
 		[PublicAPI]
 		public DelDigitalJoinXsig DigitalSigReceivedXsigCallback { get; set; }
@@ -127,8 +127,10 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		public DelSerialJoinXsig SerialSigReceivedXsigCallback { get; set; }
 
 		[PublicAPI]
-		public DelCrosspointStatus CrosspointStatusCallback { get; set; }
+		public DelStatusUpdate CrosspointStatusCallback { get; set; }
 
+		[PublicAPI]
+		public DelStatusUpdate ControlCrosspointsConnectedCallback { get; set; }
 		#endregion
 
 		private void CrosspointOnSendOutputData(ICrosspoint sender, CrosspointData data)
@@ -176,6 +178,20 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			{
 				m_ReceiveSection.Leave();
 			}
+		}
+
+		private void CrosspointOnStatusChanged(object sender, CrosspointStatusEventArgs args)
+		{
+			DelStatusUpdate callback = CrosspointStatusCallback;
+			if (callback != null)
+				callback((ushort) args.Data);
+		}
+
+		private void CrosspointOnControlCrosspointCountChanged(object sender, IntEventArgs args)
+		{
+			DelStatusUpdate callback = ControlCrosspointsConnectedCallback;
+			if (callback != null)
+				callback((ushort) args.Data);
 		}
 
 		/// <summary>

@@ -8,6 +8,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 using Newtonsoft.Json;
 
@@ -30,11 +31,18 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// </summary>
 		public event CrosspointDataReceived OnSendOutputData;
 
+		/// <summary>
+		/// Raised when the status of this crosspoint changes.
+		/// </summary>
+		public event EventHandler<CrosspointStatusEventArgs> OnStatusChanged;
+
 		private readonly Dictionary<string, DateTime> m_PingTimes;
 		private readonly SafeCriticalSection m_PingTimesSection;
 
 		private readonly int m_Id;
 		private readonly string m_Name;
+
+		private eCrosspointStatus m_Status;
 
 		#region Properties
 
@@ -57,6 +65,22 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// Gets the help information for the node.
 		/// </summary>
 		public virtual string ConsoleHelp { get { return string.Empty; } }
+
+		/// <summary>
+		/// Gets or sets the status of the crosspoint
+		/// </summary>
+		public eCrosspointStatus Status
+		{
+			get { return m_Status; }
+			internal set
+			{
+				if (m_Status == value)
+					return;
+
+				m_Status = value;
+				OnStatusChanged.Raise(this, new CrosspointStatusEventArgs(m_Status));
+			}
+		}
 
 		#endregion
 
@@ -402,5 +426,16 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		}
 
 		#endregion
+	}
+
+	public enum eCrosspointStatus
+	{
+		Uninitialized = 0,
+		Idle = 1,
+		Connected = 2,
+		EquipmentNotFound = 3,
+		ConnectFailed = 4,
+		ConnectionDropped = 5,
+		ConnectionClosedRemote = 6,
 	}
 }

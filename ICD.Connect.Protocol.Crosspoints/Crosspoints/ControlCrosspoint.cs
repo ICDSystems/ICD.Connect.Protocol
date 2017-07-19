@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
@@ -49,6 +52,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
+			Status = eCrosspointStatus.Idle;
 		}
 
 		#region Methods
@@ -132,9 +136,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			}
 
 			// Attempt to connect, return false if connection failed.
-			bool output = RequestConnectCallback != null && RequestConnectCallback(this, equipmentId);
-			if (output == false)
-				return false;
+			var callback = RequestConnectCallback;
+			if(callback != null)
+				Status = RequestConnectCallback(this, equipmentId);
+
 
 			EquipmentCrosspoint = equipmentId;
 			return true;
@@ -149,9 +154,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
 				return false;
 
-			bool output = RequestDisconnectCallback != null && RequestDisconnectCallback(this);
-			if (output == false)
-				return false;
+			var callback = RequestDisconnectCallback;
+			if (callback != null)
+				Status = callback(this);
 
 			ClearSigs();
 

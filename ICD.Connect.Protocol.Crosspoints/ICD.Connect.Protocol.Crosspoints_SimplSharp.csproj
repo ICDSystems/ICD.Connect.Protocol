@@ -73,6 +73,7 @@
     <Compile Include="Advertisements\Advertisement.cs" />
     <Compile Include="Advertisements\AdvertisementEventArgs.cs" />
     <Compile Include="Advertisements\AdvertisementManager.cs" />
+    <Compile Include="EventArguments\CrosspointStatusEventArgs.cs" />
     <Compile Include="CrosspointManagers\AbstractCrosspointManager.cs" />
     <Compile Include="CrosspointManagers\ControlCrosspointManager.cs" />
     <Compile Include="CrosspointManagers\EquipmentCrosspointManager.cs" />

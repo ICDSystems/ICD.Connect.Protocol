@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.EventArguments;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
@@ -20,6 +22,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		// We cache changed sigs to send to controls on connect.
 		private readonly SigCache m_SigCache;
 		private readonly SafeCriticalSection m_SigCacheSection;
+
+		public event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
 
 		#region Properties
 
@@ -95,6 +99,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				if (!m_ControlCrosspoints.Add(controlId))
 					return;
+				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
 
 				connect = CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
 			}

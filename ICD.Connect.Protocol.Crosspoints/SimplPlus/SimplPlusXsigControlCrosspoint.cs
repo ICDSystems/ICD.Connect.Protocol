@@ -8,6 +8,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
+using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Protocol.XSig;
 
@@ -64,6 +65,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			m_Manager.RegisterCrosspoint(m_Crosspoint);
 
 			m_Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
+			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
 		}
 
 		[PublicAPI]
@@ -109,6 +111,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		public delegate void DelSerialJoinXsig(SimplSharpString xsig);
 
+		public delegate void DelStatusUpdate(ushort status);
+
 		[PublicAPI]
 		public DelDigitalJoinXsig DigitalSigReceivedXsigCallback { get; set; }
 
@@ -117,6 +121,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		[PublicAPI]
 		public DelSerialJoinXsig SerialSigReceivedXsigCallback { get; set; }
+
+		[PublicAPI]
+		public DelStatusUpdate CrosspointStatusCallback { get; set; }
 
 		#endregion
 
@@ -165,6 +172,13 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			{
 				m_ReceiveSection.Leave();
 			}
+		}
+
+		private void CrosspointOnStatusChanged(object sender, CrosspointStatusEventArgs args)
+		{
+			DelStatusUpdate callback = CrosspointStatusCallback;
+			if (callback != null)
+				callback((ushort) args.Data);
 		}
 
 		/// <summary>

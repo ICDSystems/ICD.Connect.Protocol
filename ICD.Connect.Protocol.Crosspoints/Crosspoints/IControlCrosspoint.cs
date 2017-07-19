@@ -2,9 +2,9 @@
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
-	public delegate bool ControlRequestConnectCallback(IControlCrosspoint sender, int equipmentId);
+	public delegate eCrosspointStatus ControlRequestConnectCallback(IControlCrosspoint sender, int equipmentId);
 
-	public delegate bool ControlRequestDisconnectCallback(IControlCrosspoint sender);
+	public delegate eCrosspointStatus ControlRequestDisconnectCallback(IControlCrosspoint sender);
 
 	public interface IControlCrosspoint : ICrosspoint
 	{

@@ -74,7 +74,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="equipmentId"></param>
 		/// <returns>False if connection failed.</returns>
 		[PublicAPI]
-		public bool ConnectCrosspoint(IControlCrosspoint crosspoint, int equipmentId)
+		public eCrosspointStatus ConnectCrosspoint(IControlCrosspoint crosspoint, int equipmentId)
 		{
 			return ConnectCrosspoint(crosspoint.Id, equipmentId);
 		}
@@ -86,7 +86,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="equipmentId"></param>
 		/// <returns>False if connection failed.</returns>
 		[PublicAPI]
-		public bool ConnectCrosspoint(int crosspointId, int equipmentId)
+		public eCrosspointStatus ConnectCrosspoint(int crosspointId, int equipmentId)
 		{			
 			m_ControlClientMapSection.Enter();
 
@@ -98,7 +98,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				{
 					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - No equipment with given id.",
 									 crosspointId, equipmentId);
-					return false;
+					return eCrosspointStatus.EquipmentNotFound;
 				}
 
 				// Get the TCP client from the pool
@@ -110,7 +110,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				{
 					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - Client failed to connect.",
 									 crosspointId, equipmentId);
-					return false;
+					return eCrosspointStatus.ConnectFailed;
 				}
 
 				// Add everything to the map
@@ -126,7 +126,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				m_ControlClientMapSection.Leave();
 			}
 
-			return true;
+			return eCrosspointStatus.Connected;
 		}
 
 		/// <summary>
@@ -135,7 +135,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="crosspoint"></param>
 		/// <returns>False if disconnect failed.</returns>
 		[PublicAPI]
-		public bool DisconnectCrosspoint(IControlCrosspoint crosspoint)
+		public eCrosspointStatus DisconnectCrosspoint(IControlCrosspoint crosspoint)
 		{
 			return DisconnectCrosspoint(crosspoint.Id);
 		}
@@ -146,7 +146,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="crosspointId"></param>
 		/// <returns>False if disconnect failed.</returns>
 		[PublicAPI]
-		public bool DisconnectCrosspoint(int crosspointId)
+		public eCrosspointStatus DisconnectCrosspoint(int crosspointId)
 		{
 			m_ControlClientMapSection.Enter();
 
@@ -158,36 +158,47 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				int equipmentId;
 				m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
 
-				// Remove everything from the dictionaries
-				m_ControlClientMap.Remove(crosspointId);
-				m_ControlEquipmentMap.Remove(crosspointId);
-
 				if (client == null)
 				{
 					IcdErrorLog.Warn("Failed to disconnect ControlCrosspoint {0} - No associated TCP Client.", crosspointId);
-					return false;
+					return eCrosspointStatus.Idle;
 				}
 
 				if (equipmentId == 0)
 				{
 					IcdErrorLog.Warn("Failed to disconnect ControlCrosspoint {0} - No associated equipment.", crosspointId);
-					return false;
+					return eCrosspointStatus.Idle;
 				}
 
 				// Send the disconnect message
 				CrosspointData message = CrosspointData.ControlDisconnect(crosspointId, equipmentId);
 				client.Send(message.Serialize());
 
-				// If there are no other controls using this client we can remove it.
-				if (m_ControlClientMap.Values.All(c => c != client))
-					m_ClientPool.DisposeClient(client, CLIENT_KEEP_ALIVE);
+				RemoveControlFromDictionaries(crosspointId);
 			}
 			finally
 			{
 				m_ControlClientMapSection.Leave();
 			}
 
-			return true;
+			return eCrosspointStatus.Idle;
+		}
+
+		private void RemoveControlFromDictionaries(int crosspointId)
+		{
+			AsyncTcpClient client;
+			m_ControlClientMap.TryGetValue(crosspointId, out client);
+
+			int equipmentId;
+			m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
+
+			// Remove everything from the dictionaries
+			m_ControlClientMap.Remove(crosspointId);
+			m_ControlEquipmentMap.Remove(crosspointId);
+
+			// If there are no other controls using this client we can remove it.
+			if (m_ControlClientMap.Values.All(c => c != client))
+				m_ClientPool.DisposeClient(client, CLIENT_KEEP_ALIVE);
 		}
 
 		/// <summary>
@@ -281,6 +292,21 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			// If the client disconnects attempt to reconnect it
 			if (!connected)
 				client.Connect();
+
+			if (!client.IsConnected)
+			{
+				m_ControlClientMapSection.Enter();
+				try
+				{
+					var ids = m_ControlClientMap.Where(c => c.Value == client).Select(c => c.Key);
+					foreach (var control in ids.Select(i => GetCrosspoint(i)).OfType<ControlCrosspoint>())
+						control.Status = eCrosspointStatus.ConnectionDropped;
+				}
+				finally
+				{
+					m_ControlClientMapSection.Leave();
+				}
+			}
 		}
 
 		#endregion
@@ -315,6 +341,24 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 														  string data)
 		{
 			CrosspointData crosspointData = CrosspointData.Deserialize(data);
+
+			switch (crosspointData.MessageType)
+			{
+				case CrosspointData.eMessageType.EquipmentDisconnect:
+					// Unregister the ControlIds
+					foreach (int controlId in crosspointData.GetControlIds())
+					{
+						int equipment;
+						if (TryGetEquipmentForControl(controlId, out equipment) && equipment == crosspointData.EquipmentId)
+						{
+							RemoveControlFromDictionaries(controlId);
+							var crosspoint = GetCrosspoint(controlId) as ControlCrosspoint;
+							if(crosspoint != null)
+								crosspoint.Status = eCrosspointStatus.ConnectionClosedRemote;
+						}
+					}
+					break;
+			}
 
 			foreach (int controlId in crosspointData.GetControlIds())
 			{
