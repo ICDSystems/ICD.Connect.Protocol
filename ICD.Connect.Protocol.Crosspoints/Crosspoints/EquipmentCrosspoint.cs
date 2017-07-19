@@ -100,6 +100,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				if (!m_ControlCrosspoints.Add(controlId))
 					return;
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
+				if(ControlCrosspointsCount > 0)
+					Status = eCrosspointStatus.Connected;
 
 				connect = CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
 			}
@@ -125,6 +127,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				if (!m_ControlCrosspoints.Remove(controlId))
 					return;
+				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
+				if(ControlCrosspointsCount <= 0)
+					Status = eCrosspointStatus.Idle;
 
 				disconnect = CrosspointData.EquipmentDisconnect(controlId, Id);
 			}
