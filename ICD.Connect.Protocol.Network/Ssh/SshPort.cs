@@ -276,6 +276,11 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				Logger.AddEntry(eSeverity.Error, e, "{0}.Send - Failed writing to stream - {1}", GetType().Name, e.Message);
 				return false;
 			}
+			catch (ObjectDisposedException e)
+			{
+				Logger.AddEntry(eSeverity.Error, e, "{0}.Send - Failed writing to stream - {1}", GetType().Name, e.Message);
+				return false;
+			}
 			finally
 			{
 				m_SshSection.Leave();
