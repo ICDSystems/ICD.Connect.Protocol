@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -19,6 +21,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		// We cache changed sigs for the clear operation.
 		private readonly SigCache m_SigCache;
 		private readonly SafeCriticalSection m_SigCacheSection;
+		private bool m_SigsWaitingToBeCleared;
 
 		#region Properties
 
@@ -52,6 +55,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
+			m_SigsWaitingToBeCleared = false;
 		}
 
 		#region Methods
@@ -82,6 +86,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				data = CrosspointData.ControlClear(Id, EquipmentCrosspoint, m_SigCache);
 				m_SigCache.Clear();
+				m_SigsWaitingToBeCleared = false;
 			}
 			finally
 			{
@@ -103,7 +108,23 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				// Cache changed sigs for clear
 				if (data != null)
-					m_SigCache.AddHighRemoveLow(data.GetSigs());
+				{
+					if (m_SigsWaitingToBeCleared &&
+					    (data.MessageType == CrosspointData.eMessageType.EquipmentConnect ||
+					     data.MessageType == CrosspointData.eMessageType.Message))
+					{
+						var newSigs = data.GetSigs().ToArray();
+						m_SigCache.RemoveRange(newSigs);
+						data.AddSigs(m_SigCache);
+						m_SigsWaitingToBeCleared = false;
+						m_SigCache.Clear();
+						m_SigCache.AddHighClearRemoveLow(newSigs);
+					}
+					else
+					{
+						m_SigCache.AddHighClearRemoveLow(data.GetSigs());
+					}
+				}
 			}
 			finally
 			{
@@ -121,13 +142,15 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns>True if the initialization, including connection, was successful. False if already initialized with the equipment.</returns>
 		public bool Initialize(int equipmentId)
 		{
+			eCrosspointStatus connectStatus = eCrosspointStatus.Uninitialized;
+
 			if (equipmentId == EquipmentCrosspoint)
 				return false;
 
 			// If we are currently initialized, or we specifically want to deninit, attempt to deinit from the previous equipment.
 			if (EquipmentCrosspoint != Xp3Utils.NULL_EQUIPMENT || equipmentId == Xp3Utils.NULL_EQUIPMENT)
 			{
-				bool deinit = Deinitialize();
+				bool deinit = Deinitialize(equipmentId == Xp3Utils.NULL_EQUIPMENT);
 
 				// If deinit failed, or equipment id is null equipment (i.e. we just wanted to deinit) return the value.
 				if (deinit == false || equipmentId == Xp3Utils.NULL_EQUIPMENT)
@@ -136,9 +159,13 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			// Attempt to connect, return false if connection failed.
 			var callback = RequestConnectCallback;
-			if(callback != null)
-				Status = RequestConnectCallback(this, equipmentId);
+			if (callback != null)
+				connectStatus = RequestConnectCallback(this, equipmentId);
 
+			if ( connectStatus != eCrosspointStatus.Connected )
+				ClearSigs();
+
+			Status = connectStatus;
 
 			EquipmentCrosspoint = equipmentId;
 			return true;
@@ -167,6 +194,29 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Performs some cleanup action and calls RequestDisconnectCallback.
+		/// </summary>
+		/// <returns></returns>
+		private bool Deinitialize(bool clearSigsOnDisconnect)
+		{
+			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
+				return false;
+
+			var callback = RequestDisconnectCallback;
+			if (callback != null)
+				Status = callback(this);
+
+			if (clearSigsOnDisconnect)
+				ClearSigs();
+			else
+				m_SigsWaitingToBeCleared = true;
+
+			EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
+
+			return true;
+		}
 
 		/// <summary>
 		/// Gets the source control or the destination controls for a message originating from this crosspoint.

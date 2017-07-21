@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 
@@ -130,6 +131,27 @@ namespace ICD.Connect.Protocol.Sigs
 				Remove(sig);
 		}
 
+		/// <summary>
+		/// Adds clear version of sigs that have a value, removes sigs that do not have a value
+		/// </summary>
+		/// <param name="sigs"></param>
+		public void AddHighClearRemoveLow(IEnumerable<Sig> sigs)
+		{
+			sigs.ForEach(AddHighClearRemoveLow);
+		}
+
+		/// <summary>
+		/// Adds clear version of the sig if it has a value, otherwise removes it.
+		/// </summary>
+		/// <param name="sig"></param>
+		public void AddHighClearRemoveLow(Sig sig)
+		{
+			if (sig.HasValue())
+				Add(sig.ToClearSig());
+			else
+				Remove(sig);
+		}
+
 		public void Clear()
 		{
 			m_KeyToSig.Clear();
@@ -148,6 +170,14 @@ namespace ICD.Connect.Protocol.Sigs
 		public bool Remove(Sig item)
 		{
 			return m_KeyToSig.Remove(SigKey.FromSig(item));
+		}
+
+		public void RemoveRange(IEnumerable<Sig> sigs)
+		{
+			foreach (var s in sigs)
+			{
+				Remove(s);
+			}
 		}
 
 		#endregion
