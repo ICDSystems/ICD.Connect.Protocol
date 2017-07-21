@@ -102,6 +102,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			m_Id = id;
 			m_Name = name;
+
+			m_Status = eCrosspointStatus.Idle;
 		}
 
 		#region Methods

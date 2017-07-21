@@ -52,7 +52,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
-			Status = eCrosspointStatus.Idle;
 		}
 
 		#region Methods

@@ -66,6 +66,10 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 			m_Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
 			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
+
+			var statusCallback = CrosspointStatusCallback;
+			if (statusCallback != null)
+				statusCallback((ushort)m_Crosspoint.Status);
 		}
 
 		[PublicAPI]
