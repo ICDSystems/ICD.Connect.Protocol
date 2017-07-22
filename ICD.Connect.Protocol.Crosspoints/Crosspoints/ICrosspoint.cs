@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
+using ICD.Connect.Protocol.Crosspoints.EventArguments;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
@@ -48,5 +49,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <param name="data"></param>
 		[PublicAPI]
 		void SendInputData(CrosspointData data);
+
+		/// <summary>
+		/// Gets or sets the status of the crosspoint
+		/// </summary>
+		[PublicAPI]
+		eCrosspointStatus Status { get; }
+
+		/// <summary>
+		/// Raised when the status of this crosspoint changes.
+		/// </summary>
+		[PublicAPI]
+		event EventHandler<CrosspointStatusEventArgs> OnStatusChanged;
 	}
 }
