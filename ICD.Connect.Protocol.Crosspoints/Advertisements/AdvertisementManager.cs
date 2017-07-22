@@ -425,6 +425,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
 			yield return new GenericConsoleCommand<string>("AddAddress", "Adds the address to the list of broadcast destinations", s => AddAdvertisementAddress(s));
+			yield return
+				new GenericConsoleCommand<string>("RemoveAddress", "Removes the address from the list of broadcast destinations",
+				                                  s => RemoveAdvertisementAddress(s));
 			yield return new ConsoleCommand("Broadcast", "Immediately broadcasts the local crosspoints to the network", () => Broadcast());
 			yield return new ConsoleCommand("PrintAddresses", "Prints the addresses that advertisements are being sent to", () => PrintAddresses());
 		}
