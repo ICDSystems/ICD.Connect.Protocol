@@ -372,6 +372,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 				return;
 
 			crosspointManager.OnCrosspointRegistered += CrosspointManagerOnCrosspointRegistered;
+			crosspointManager.OnCrosspointUnregistered += CrosspointManagerOnCrosspointUnregistered;
 		}
 
 		/// <summary>
@@ -384,6 +385,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 				return;
 
 			crosspointManager.OnCrosspointRegistered -= CrosspointManagerOnCrosspointRegistered;
+			crosspointManager.OnCrosspointUnregistered -= CrosspointManagerOnCrosspointUnregistered;
 		}
 
 		/// <summary>
@@ -394,6 +396,45 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		private void CrosspointManagerOnCrosspointRegistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
 			Broadcast();
+		}
+
+		/// <summary>
+		/// Called when a CrosspointManager unregisteres a crosspoint.
+		/// Sends an advertisement to remove the crosspoint immediately from all neighbors.
+		/// todo: Clean this up somehow
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspoint"></param>
+		private void CrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
+		{
+			CrosspointInfo[] controls = new CrosspointInfo[1];
+			CrosspointInfo[] equipment = new CrosspointInfo[1];
+
+			CrosspointInfo crosspointInfo = new CrosspointInfo(crosspoint.Id, crosspoint.Name, GetHostInfo());
+			
+			if (sender == m_ControlManager)
+			{
+				controls[0] = crosspointInfo;
+			}
+			else if (sender == m_EquipmentManager)
+			{
+				equipment[0] = crosspointInfo;
+			}
+			else
+			{
+				return;
+			}
+
+			// Loop over the addressest to advertise to
+			foreach (var address in GetAdvertisementAddresses())
+			{
+				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, eAdvertisementType.CrosspointRemove);
+				string serial = advertisement.Serialize();
+
+				// Loop over the ports for the different program slots
+				foreach (ushort port in GetAdvertisementPorts())
+					m_UdpClient.SendToAddress(serial, address.Key, port);
+			}
 		}
 
 		#endregion
