@@ -94,6 +94,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			Broadcast = 2,
 			Directed = 3,
 			DirectedRemove = 4,
-			Mesh = 5
+			Mesh = 5,
+			MeshRemove = 6,
+			CrosspointRemove = 7
 		}
 }

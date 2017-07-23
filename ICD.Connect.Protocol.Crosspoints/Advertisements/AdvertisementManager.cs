@@ -471,12 +471,25 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 					AddAdvertisementAddress(address, eAdvertisementType.Directed);
 					break;
 				}
+
+				// The below cases are all remove types, which should all goto CrosspointRemove,
+				// to notify the managers that the received crosspoints should be removed from
+				// their remote crosspoints list.
 				case eAdvertisementType.DirectedRemove:
 				{
 					RemoveAdvertisementAddress(advertisement.Source.Address);
+					goto case eAdvertisementType.CrosspointRemove;
+				}
+				case eAdvertisementType.MeshRemove:
+				{
+					// If/when Mesh is implemented, add mesh remove commands here (if any)
+					goto case eAdvertisementType.CrosspointRemove;
+				}
+				case eAdvertisementType.CrosspointRemove:
+				{
 					OnCrosspointsRemoved.Raise(this, new AdvertisementEventArgs(advertisement));
 					return;
-					break;
+					//break;
 				}
 			}
 
