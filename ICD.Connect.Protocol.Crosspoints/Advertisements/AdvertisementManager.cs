@@ -459,6 +459,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		{
 			Advertisement advertisement = Advertisement.Deserialize(args.Data);
 
+			if (advertisement == null)
+				return;
+
 			// Broadcast back to the place we got this advertisement from
 			switch (advertisement.AdvertisementType)
 			{

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
@@ -55,7 +56,15 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <returns></returns>
 		public static Advertisement Deserialize(string data)
 		{
-			return JsonConvert.DeserializeObject<Advertisement>(data);
+			try
+			{
+				return JsonConvert.DeserializeObject<Advertisement>(data);
+			}
+			catch (JsonSerializationException e)
+			{
+				IcdErrorLog.Exception(e, "XP3: Exception deserializing advertisement");
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -74,13 +83,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		#endregion
 	}
 
+	/// <summary>
+	/// This is what type of advertisement is being sent.  Mesh and Broadcast are not used yet.
+	/// Integer values added to make sure future updates don't completely break compatability between versions with JSON serialization.
+	/// </summary>
 	public enum eAdvertisementType
 		{
-			Localhost,
-			Multicast,
-			Broadcast,
-			Directed,
-			DirectedRemove,
-			Mesh
+			Localhost = 0,
+			Multicast = 1,
+			Broadcast = 2,
+			Directed = 3,
+			DirectedRemove = 4,
+			Mesh = 5
 		}
 }
