@@ -12,6 +12,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		private readonly HostInfo m_Source;
 		private readonly CrosspointInfo[] m_Controls;
 		private readonly CrosspointInfo[] m_Equipment;
+		private readonly eAdvertisementType m_AdvertisementType;
 
 		#region Properties
 
@@ -30,19 +31,19 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// </summary>
 		public IEnumerable<CrosspointInfo> Equipment { get { return m_Equipment.ToArray(); } }
 
+		/// <summary>
+		/// The type of advertisement this is
+		/// </summary>
+		public eAdvertisementType AdvertisementType { get { return m_AdvertisementType; }}
+
 		#endregion
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="source"></param>
-		/// <param name="controls"></param>
-		/// <param name="equipment"></param>
-		public Advertisement(HostInfo source, IEnumerable<CrosspointInfo> controls, IEnumerable<CrosspointInfo> equipment)
+		public Advertisement(HostInfo source, IEnumerable<CrosspointInfo> controls, IEnumerable<CrosspointInfo> equipment, eAdvertisementType advertisementType)
 		{
 			m_Source = source;
 			m_Controls = controls.ToArray();
 			m_Equipment = equipment.ToArray();
+			m_AdvertisementType = advertisementType;
 		}
 
 		#region Methods
@@ -72,4 +73,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 		#endregion
 	}
+
+	public enum eAdvertisementType
+		{
+			Localhost,
+			Multicast,
+			Broadcast,
+			Directed,
+			DirectedRemove,
+			Mesh
+		}
 }

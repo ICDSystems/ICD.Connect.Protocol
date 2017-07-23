@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Crestron.SimplSharp;
 using ICD.Common.Properties;
+using ICD.Connect.Protocol.Crosspoints.Advertisements;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
@@ -34,7 +35,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 				return;
 			if (address == null)
 				return;
-			m_System.AdvertisementManager.AddAdvertisementAddress(address);
+			m_System.AdvertisementManager.AddAdvertisementAddress(address, eAdvertisementType.Directed);
 		}
 
 		[PublicAPI]

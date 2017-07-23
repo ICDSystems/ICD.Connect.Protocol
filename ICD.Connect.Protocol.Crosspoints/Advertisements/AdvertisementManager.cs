@@ -6,7 +6,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Common.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Protocol.Network.Udp;
@@ -33,7 +32,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// </summary>
 		public event EventHandler<AdvertisementEventArgs> OnCrosspointsDiscovered;
 
-		private readonly IcdHashSet<string> m_Addresses;
+		private readonly Dictionary<string, eAdvertisementType> m_Addresses;
 		private readonly SafeCriticalSection m_AddressesSection;
 
 		private readonly AsyncUdpClient m_UdpClient;
@@ -65,13 +64,18 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <param name="systemId"></param>
 		public AdvertisementManager(int systemId)
 		{
-			m_Addresses = new IcdHashSet<string>
+			m_Addresses = new Dictionary<string, eAdvertisementType>
 			{
-				// Broadcast to ourself and other programs on the same processor.
-				Xp3Utils.LOCALHOST_ADDRESS,
-
-				// Broadcast to processors on the current subnet (does not include localhost)
-				Xp3Utils.MULTICAST_ADDRESS
+				{
+					// Broadcast to ourself and other programs on the same processor.
+					Xp3Utils.LOCALHOST_ADDRESS,
+					eAdvertisementType.Localhost
+				},
+				{
+					// Broadcast to processors on the current subnet (does not include localhost)
+					Xp3Utils.MULTICAST_ADDRESS,
+					eAdvertisementType.Multicast
+				}
 			};
 			m_AddressesSection = new SafeCriticalSection();
 
@@ -125,15 +129,32 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			if (controls.Length == 0 && equipment.Length == 0)
 				return;
 
-			Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment);
+			// Loop over the addressest to advertise to
+			foreach (var address in GetAdvertisementAddresses())
+			{
+				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, address.Value);
+				string serial = advertisement.Serialize();
+
+				// Loop over the ports for the different program slots
+				foreach (ushort port in GetAdvertisementPorts())
+					m_UdpClient.SendToAddress(serial, address.Key, port);
+			}
+		}
+
+		/// <summary>
+		/// Sends a directed remove advertisement to the specified address
+		/// </summary>
+		/// <param name="address"></param>
+		private void SendRemoveDirected(string address)
+		{
+			CrosspointInfo[] controls = GetCrosspointInfo(m_ControlManager).ToArray();
+			CrosspointInfo[] equipment = GetCrosspointInfo(m_EquipmentManager).ToArray();
+
+			Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, eAdvertisementType.DirectedRemove);
 			string serial = advertisement.Serialize();
 
-			// Loop over the ports for the different program slots
-			foreach (string address in GetAdvertisementAddresses())
-			{
-				foreach (ushort port in GetAdvertisementPorts())
-					m_UdpClient.SendToAddress(serial, address, port);
-			}
+			foreach (ushort port in GetAdvertisementPorts())
+				m_UdpClient.SendToAddress(serial, address, port);
 		}
 
 		/// <summary>
@@ -209,15 +230,40 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// Multicast does not work between subnets, so we can manually add known addresses to be advertised to.
 		/// </summary>
 		/// <param name="address"></param>
+		/// <param name="advertisementType"></param>
 		[PublicAPI]
-		public void AddAdvertisementAddress(string address)
+		public void AddAdvertisementAddress(string address, eAdvertisementType advertisementType)
 		{
 			m_AddressesSection.Enter();
 
 			try
 			{
-				if (!m_Addresses.Add(address))
+				if (m_Addresses.ContainsKey(address))
 					return;
+				m_Addresses.Add(address, advertisementType);
+			}
+			finally
+			{
+				m_AddressesSection.Leave();
+			}
+
+			Broadcast();
+		}
+
+		/// <summary>
+		/// Multicast does not work between subnets, so we can manually add known addresses to be advertised to.
+		/// </summary>
+		/// <param name="address"></param>
+		[PublicAPI]
+		public void AddDirectedAdvertisementAddress(string address)
+		{
+			m_AddressesSection.Enter();
+
+			try
+			{
+				if (m_Addresses.ContainsKey(address))
+					return;
+				m_Addresses.Add(address, eAdvertisementType.Directed);
 			}
 			finally
 			{
@@ -232,10 +278,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// </summary>
 		/// <param name="addresses"></param>
 		[PublicAPI]
-		public void AddAdvertisementAddresses(IEnumerable<string> addresses)
+		public void AddDirectedAdvertisementAddresses(IEnumerable<string> addresses)
 		{
 			foreach (string address in addresses)
-				AddAdvertisementAddress(address);
+				AddDirectedAdvertisementAddress(address);
 		}
 
 		/// <summary>
@@ -245,7 +291,29 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		[PublicAPI]
 		public void RemoveAdvertisementAddress(string address)
 		{
-			m_AddressesSection.Execute(() => m_Addresses.Remove(address));
+			bool isDirected = false;
+
+			m_AddressesSection.Enter();
+
+			try
+			{
+				eAdvertisementType advertisementType;
+				if (m_Addresses.TryGetValue(address, out advertisementType))
+				{
+					isDirected = advertisementType == eAdvertisementType.Directed;
+					m_Addresses.Remove(address);
+				}
+			}
+			finally
+			{
+				m_AddressesSection.Leave();
+			}
+
+			//If we removed a directed address, send an advertisement to the remote host to remove us also
+
+			if (isDirected)
+				SendRemoveDirected(address);
+
 		}
 
 		#endregion
@@ -256,9 +324,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// Gets all of the addresses each advertisement is broadcast to.
 		/// </summary>
 		/// <returns></returns>
-		private IEnumerable<string> GetAdvertisementAddresses()
+		private IEnumerable<KeyValuePair<string, eAdvertisementType>> GetAdvertisementAddresses()
 		{
-			return m_AddressesSection.Execute(() => m_Addresses.Order().ToArray());
+			return m_AddressesSection.Execute(() => m_Addresses.ToArray());
 		}
 
 		/// <summary>
@@ -387,8 +455,20 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			Advertisement advertisement = Advertisement.Deserialize(args.Data);
 
 			// Broadcast back to the place we got this advertisement from
-			string address = advertisement.Source.AddressOrLocalhost;
-			AddAdvertisementAddress(address);
+			switch (advertisement.AdvertisementType)
+			{
+				case eAdvertisementType.Directed:
+				{
+					string address = advertisement.Source.AddressOrLocalhost;
+					AddAdvertisementAddress(address, eAdvertisementType.Directed);
+				}
+					break;
+				case eAdvertisementType.DirectedRemove:
+					RemoveAdvertisementAddress(advertisement.Source.Address);
+					//todo: Send crosspoints received in this advertisement to managers to be removed immediatly.
+					return;
+					break;
+			}
 
 			OnCrosspointsDiscovered.Raise(this, new AdvertisementEventArgs(advertisement));
 		}
@@ -424,7 +504,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <returns></returns>
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			yield return new GenericConsoleCommand<string>("AddAddress", "Adds the address to the list of broadcast destinations", s => AddAdvertisementAddress(s));
+			yield return new GenericConsoleCommand<string>("AddAddress", "Adds the address to the list of broadcast destinations with type Directed", s => AddAdvertisementAddress(s, eAdvertisementType.Directed));
 			yield return
 				new GenericConsoleCommand<string>("RemoveAddress", "Removes the address from the list of broadcast destinations",
 				                                  s => RemoveAdvertisementAddress(s));
