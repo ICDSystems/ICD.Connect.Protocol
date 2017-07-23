@@ -131,6 +131,12 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 		}
 
+		public void RemoveCrosspointInfo(IEnumerable<CrosspointInfo> crosspoints)
+		{
+			foreach (CrosspointInfo info in crosspoints)
+				RemoveCrosspointInfo(info.Id);
+		}
+
 		/// <summary>
 		/// Gets the crosspoints in the crosspoint lookup table.
 		/// </summary>

@@ -32,6 +32,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// </summary>
 		public event EventHandler<AdvertisementEventArgs> OnCrosspointsDiscovered;
 
+		/// <summary>
+		/// Raised when crosspoints are removed.
+		/// </summary>
+		public event EventHandler<AdvertisementEventArgs> OnCrosspointsRemoved;
+
 		private readonly Dictionary<string, eAdvertisementType> m_Addresses;
 		private readonly SafeCriticalSection m_AddressesSection;
 
@@ -461,13 +466,15 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 				{
 					string address = advertisement.Source.AddressOrLocalhost;
 					AddAdvertisementAddress(address, eAdvertisementType.Directed);
-				}
 					break;
+				}
 				case eAdvertisementType.DirectedRemove:
+				{
 					RemoveAdvertisementAddress(advertisement.Source.Address);
-					//todo: Send crosspoints received in this advertisement to managers to be removed immediatly.
+					OnCrosspointsRemoved.Raise(this, new AdvertisementEventArgs(advertisement));
 					return;
 					break;
+				}
 			}
 
 			OnCrosspointsDiscovered.Raise(this, new AdvertisementEventArgs(advertisement));

@@ -78,6 +78,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 			m_AdvertisementManager = new AdvertisementManager(m_Id);
 			m_AdvertisementManager.OnCrosspointsDiscovered += AdvertisementManagerOnCrosspointsDiscovered;
+			m_AdvertisementManager.OnCrosspointsRemoved += AdvertisementManagerOnCrosspointsRemoved;
 		}
 
 		#region Methods
@@ -88,6 +89,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		public void Dispose()
 		{
 			m_AdvertisementManager.OnCrosspointsDiscovered -= AdvertisementManagerOnCrosspointsDiscovered;
+			m_AdvertisementManager.OnCrosspointsRemoved -= AdvertisementManagerOnCrosspointsRemoved;
 			m_AdvertisementManager.Dispose();
 
 			if (m_ControlCrosspointManager != null)
@@ -209,6 +211,29 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 				if (m_EquipmentCrosspointManager != null)
 					m_EquipmentCrosspointManager.RemoteCrosspoints.AddCrosspointInfo(args.Data.Controls);
+			}
+			finally
+			{
+				m_CreateManagersSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Called by the AdvertisementMananger when we discover new equipment/controls on the network.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		private void AdvertisementManagerOnCrosspointsRemoved(object sender, AdvertisementEventArgs args)
+		{
+			m_CreateManagersSection.Enter();
+
+			try
+			{
+				if (m_ControlCrosspointManager != null)
+					m_ControlCrosspointManager.RemoteCrosspoints.RemoveCrosspointInfo(args.Data.Equipment);
+
+				if (m_EquipmentCrosspointManager != null)
+					m_EquipmentCrosspointManager.RemoteCrosspoints.RemoveCrosspointInfo(args.Data.Controls);
 			}
 			finally
 			{
