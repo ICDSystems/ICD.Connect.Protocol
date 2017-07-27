@@ -40,6 +40,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			// Create Wrapper instance
 			WrapperManager = new SimplPlusCrosspointWrapperManager();
 			ApiConsole.RegisterChild(WrapperManager);
+
+			WrapperManager.RegisterXp3(Xp3Core);
 		}
 	}
 }

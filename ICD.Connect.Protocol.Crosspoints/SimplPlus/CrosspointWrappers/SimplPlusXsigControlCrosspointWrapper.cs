@@ -122,6 +122,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			UnregisterCrosspoint();
 
+			m_Crosspoint.Dispose();
+
 			m_Crosspoint = null;
 		}
 

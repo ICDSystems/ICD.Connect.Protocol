@@ -7,6 +7,8 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
+using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
@@ -18,6 +20,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		private readonly SafeCriticalSection m_CrosspointWrapperssCriticalSection;
 
+		//private Dictionary<int, > 
+
 		public void RegisterSPlusCrosspointWrapper(ISimplPlusCrosspointWrapper crosspointWrapper)
 		{
 			m_CrosspointWrapperssCriticalSection.Execute(() => m_CrosspointWrappers.Add(crosspointWrapper));
@@ -27,7 +31,75 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		{
 			m_CrosspointWrappers = new List<ISimplPlusCrosspointWrapper>();
 			m_CrosspointWrapperssCriticalSection = new SafeCriticalSection();
+		}
 
+		public void RegisterXp3(Xp3 xp3)
+		{
+			xp3.OnSystemCreated += Xp3OnSystemCreated;
+			xp3.OnSystemRemoved += Xp3OnSystemRemoved;
+		}
+
+		public void UnregisterXp3(Xp3 xp3)
+		{
+			xp3.OnSystemCreated -= Xp3OnSystemCreated;
+			xp3.OnSystemRemoved -= Xp3OnSystemRemoved;
+		}
+
+		private void Xp3OnSystemCreated(object sender, CrosspointSystemEventArgs crosspointSystemEventArgs)
+		{
+			crosspointSystemEventArgs.System.OnControlCrosspointManagerCreated += SystemOnControlCrosspointManagerCreated;
+			crosspointSystemEventArgs.System.OnEquipmentCrosspointManagerCreated += SystemOnEquipmentCrosspointManagerCreated;
+		}
+
+		private void Xp3OnSystemRemoved(object sender, CrosspointSystemEventArgs crosspointSystemEventArgs)
+		{
+			crosspointSystemEventArgs.System.OnControlCrosspointManagerCreated -= SystemOnControlCrosspointManagerCreated;
+			crosspointSystemEventArgs.System.OnEquipmentCrosspointManagerCreated -= SystemOnEquipmentCrosspointManagerCreated;
+		}
+
+		private void SystemOnEquipmentCrosspointManagerCreated(object sender, EventArgs eventArgs)
+		{
+			var system = sender as CrosspointSystem;
+
+			if (system == null)
+				return;
+
+			system.EquipmentCrosspointManager.OnCrosspointRegistered += EquipmentCrosspointManagerOnCrosspointRegistered;
+			system.EquipmentCrosspointManager.OnCrosspointUnregistered += EquipmentCrosspointManagerOnCrosspointUnregistered;
+		}
+		
+		private void SystemOnControlCrosspointManagerCreated(object sender, EventArgs eventArgs)
+		{
+			var system = sender as CrosspointSystem;
+
+			if (system == null)
+				return;
+
+			system.ControlCrosspointManager.OnCrosspointRegistered += ControlCrosspointManagerOnCrosspointRegistered;
+			system.ControlCrosspointManager.OnCrosspointUnregistered += ControlCrosspointManagerOnCrosspointUnregistered;
+		}
+
+
+
+		private void EquipmentCrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void EquipmentCrosspointManagerOnCrosspointRegistered(ICrosspointManager sender, ICrosspoint crosspoint)
+		{
+			throw new NotImplementedException();
+		}
+
+
+		private void ControlCrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void ControlCrosspointManagerOnCrosspointRegistered(ICrosspointManager sender, ICrosspoint crosspoint)
+		{
+			throw new NotImplementedException();
 		}
 
 		#region Console
