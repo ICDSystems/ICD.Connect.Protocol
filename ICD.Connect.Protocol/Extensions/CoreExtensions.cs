@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
@@ -22,7 +21,7 @@ namespace ICD.Connect.Protocol.Extensions
 	{
 		public static CorePortCollection GetPorts(this ICore core)
 		{
-			return new CorePortCollection(core.Originators.OfType<IPort>());
+			return new CorePortCollection(core.Originators.GetChildren<IPort>());
 		}
 	}
 }
