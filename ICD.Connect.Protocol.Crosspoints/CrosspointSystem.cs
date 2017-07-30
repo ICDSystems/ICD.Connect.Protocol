@@ -66,6 +66,14 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 		#endregion
 
+		#region Events
+
+		public event EventHandler OnControlCrosspointManagerCreated;
+
+		public event EventHandler OnEquipmentCrosspointManagerCreated;
+
+		#endregion
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
@@ -120,13 +128,15 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 				m_ControlCrosspointManager = new ControlCrosspointManager(Id);
 				m_AdvertisementManager.AdvertiseControlCrosspoints(m_ControlCrosspointManager);
-
-				return m_ControlCrosspointManager;
 			}
 			finally
 			{
 				m_CreateManagersSection.Leave();
 			}
+
+			OnControlCrosspointManagerCreated.Invoke(this, EventArgs.Empty);
+
+			return m_ControlCrosspointManager;
 		}
 
 		/// <summary>
@@ -167,12 +177,14 @@ namespace ICD.Connect.Protocol.Crosspoints
 				m_EquipmentCrosspointManager = new EquipmentCrosspointManager(Id);
 				m_AdvertisementManager.AdvertiseEquipmentCrosspoints(m_EquipmentCrosspointManager);
 
-				return m_EquipmentCrosspointManager;
+				OnEquipmentCrosspointManagerCreated.Invoke(this, EventArgs.Empty);
 			}
 			finally
 			{
 				m_CreateManagersSection.Leave();
 			}
+
+			return m_EquipmentCrosspointManager;
 		}
 
 		/// <summary>

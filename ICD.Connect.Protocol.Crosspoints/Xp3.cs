@@ -27,6 +27,16 @@ namespace ICD.Connect.Protocol.Crosspoints
 		public string ConsoleHelp { get { return "The top level Crosspoint manager object"; } }
 
 		/// <summary>
+		/// Event called when a crosspoint system is created
+		/// </summary>
+		public event EventHandler<CrosspointSystemEventArgs> OnSystemCreated;
+
+		/// <summary>
+		/// Event called when a crosspoint system is removed
+		/// </summary>
+		public event EventHandler<CrosspointSystemEventArgs> OnSystemRemoved; 
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public Xp3()
@@ -89,6 +99,8 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <returns></returns>
 		public CrosspointSystem CreateSystem(int id)
 		{
+			CrosspointSystem output;
+
 			m_SystemsSection.Enter();
 
 			try
@@ -99,15 +111,19 @@ namespace ICD.Connect.Protocol.Crosspoints
 					                                                GetType().Name, typeof(CrosspointSystem).Name, id));
 				}
 
-				CrosspointSystem output = new CrosspointSystem(id);
+				output = new CrosspointSystem(id);
 				m_Systems[id] = output;
 
-				return output;
+
 			}
 			finally
 			{
 				m_SystemsSection.Leave();
 			}
+
+			OnSystemCreated.Raise(this, new CrosspointSystemEventArgs(output));
+
+			return output;
 		}
 
 		/// <summary>
@@ -138,21 +154,29 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="id"></param>
 		public bool RemoveSystem(int id)
 		{
+
+			bool result;
+			CrosspointSystem system;
+
 			m_SystemsSection.Enter();
 
 			try
 			{
-				CrosspointSystem system;
 				if (!m_Systems.TryGetValue(id, out system))
 					return false;
 
 				system.Dispose();
-				return m_Systems.Remove(id);
+				result =  m_Systems.Remove(id);
 			}
 			finally
 			{
 				m_SystemsSection.Leave();
 			}
+
+			if (result)
+				OnSystemRemoved.Raise(this, new CrosspointSystemEventArgs(system));
+
+			return result;
 		}
 
 		#endregion
