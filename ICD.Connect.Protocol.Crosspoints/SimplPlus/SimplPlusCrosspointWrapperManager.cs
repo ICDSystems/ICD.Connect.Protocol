@@ -80,26 +80,44 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		}
 
 
-
+		/// <summary>
+		/// todo: implement method
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspoint"></param>
 		private void EquipmentCrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// todo: implement method
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspoint"></param>
 		private void EquipmentCrosspointManagerOnCrosspointRegistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
-
+		/// <summary>
+		/// todo: implement method
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspoint"></param>
 		private void ControlCrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// todo: implement method
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspoint"></param>
 		private void ControlCrosspointManagerOnCrosspointRegistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
 		#region Console
