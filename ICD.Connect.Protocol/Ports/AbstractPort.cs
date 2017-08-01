@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 
 namespace ICD.Connect.Protocol.Ports
@@ -67,7 +68,19 @@ namespace ICD.Connect.Protocol.Ports
 
 		#region Console
 
-		/// <summary>
+	    /// <summary>
+	    /// Calls the delegate for each console status item.
+	    /// </summary>
+	    /// <param name="addRow"></param>
+	    public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+	    {
+	        base.BuildConsoleStatus(addRow);
+
+	        addRow("Debug Rx", DebugRx);
+	        addRow("Debug Tx", DebugTx);
+	    }
+
+	    /// <summary>
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>
