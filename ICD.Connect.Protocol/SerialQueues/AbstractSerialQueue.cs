@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using ICD.Common.EventArguments;
 using ICD.Common.Properties;
+using ICD.Common.Services;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
@@ -310,8 +312,16 @@ namespace ICD.Connect.Protocol.SerialQueues
 				m_CommandLock.Leave();
 			}
 
-			// Fire the event to allow devices to prioritize commands.
-			callback(command);
+			try
+			{
+				// Fire the event to allow devices to prioritize commands.
+				callback(command);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, e, "Failed to execute callback - {0}", e.Message);
+			}
 
 			CommandFinished();
 		}
