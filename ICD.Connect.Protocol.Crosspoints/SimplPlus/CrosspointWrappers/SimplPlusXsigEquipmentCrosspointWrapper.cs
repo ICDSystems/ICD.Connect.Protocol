@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Crestron.SimplSharp;
@@ -342,3 +343,4 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		}
 	}
 }
+#endif
