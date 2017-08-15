@@ -69,7 +69,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			instance.Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
 			instance.Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT);
 
-			AbstractDeviceSettings.ParseXml(instance, xml);
+            AbstractPortSettings.ParseXml(instance, xml);
 		}
 
 		#endregion
