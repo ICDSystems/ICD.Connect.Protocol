@@ -16,6 +16,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	public abstract class AbstractWebPort<T> : AbstractPort<T>, IWebPort
 		where T : AbstractWebPortSettings, new()
 	{
+	    private const string DEFAULT_ACCEPT = "text/html";
+
 		protected const string SOAP_ACCEPT = "application/xml";
 		protected const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
 		protected const string SOAP_ACTION_HEADER = "SOAPAction";
@@ -186,7 +188,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			base.ClearSettingsFinal();
 
 			Accept = null;
-			Address = null;
+			Address = DEFAULT_ACCEPT;
 			Password = null;
 			Username = null;
 		}
@@ -203,7 +205,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			Address = settings.Address;
 			Password = settings.Password;
 			Username = settings.Username;
-			Accept = settings.Accept;
+			Accept = settings.Accept ?? DEFAULT_ACCEPT;
 		}
 
 		#endregion
