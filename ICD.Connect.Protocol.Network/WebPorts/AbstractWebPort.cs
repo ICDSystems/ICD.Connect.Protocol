@@ -59,6 +59,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		#endregion
 
 		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractWebPort()
+		{
+			m_LastRequestSucceeded = true;
+		}
+
+		/// <summary>
 		/// Destructor.
 		/// </summary>
 		~AbstractWebPort()
