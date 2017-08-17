@@ -64,6 +64,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		protected AbstractWebPort()
 		{
 			m_LastRequestSucceeded = true;
+			UpdateCachedOnlineStatus();
 		}
 
 		/// <summary>
