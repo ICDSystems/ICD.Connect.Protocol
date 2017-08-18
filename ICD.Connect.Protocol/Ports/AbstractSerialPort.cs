@@ -167,7 +167,7 @@ namespace ICD.Connect.Protocol.Ports
 
 			yield return new ConsoleCommand("Connect", "Connects to the physical endpoint", () => Connect());
 			yield return new ConsoleCommand("Disconnect", "Disconnects from the physical endpoint", () => Disconnect());
-			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => Send(a));
+			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => ConsoleSend(a));
 			yield return new ParamsConsoleCommand("SendHex", "Sends hex data in the format \\xFF\\xFF...", b => SendHex(b));
 		}
 
@@ -184,7 +184,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// Shim to send data from console command.
 		/// </summary>
 		/// <param name="data"></param>
-		private void Send(params string[] data)
+		private void ConsoleSend(params string[] data)
 		{
 			Send(string.Join(" ", data));
 		}
