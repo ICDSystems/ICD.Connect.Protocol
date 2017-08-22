@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.EventArguments;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
@@ -36,6 +37,8 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_DigitalIn = value;
 
+				Logger.AddEntry(eSeverity.Informational, "{0} digital-in changed to {1}", this, m_DigitalIn);
+
 				OnDigitalInChanged.Raise(this, new BoolEventArgs(m_DigitalIn));
 			}
 		}
@@ -52,6 +55,8 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 					return;
 
 				m_DigitalOut = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} digital-out changed to {1}", this, m_DigitalOut);
 
 				OnDigitalOutChanged.Raise(this, new BoolEventArgs(m_DigitalOut));
 			}
@@ -70,6 +75,8 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_AnalogIn = value;
 
+				Logger.AddEntry(eSeverity.Informational, "{0} analog-in changed to {1}", this, m_AnalogIn);
+
 				OnAnalogInChanged.Raise(this, new UShortEventArgs(m_AnalogIn));
 			}
 		}
@@ -86,6 +93,8 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 					return;
 
 				m_Configuration = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} configuration changed to {1}", this, m_Configuration);
 
 				IoPortConfigurationCallback handler = OnConfigurationChanged;
 				if (handler != null)
