@@ -113,8 +113,6 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 				output = new CrosspointSystem(id);
 				m_Systems[id] = output;
-
-
 			}
 			finally
 			{
