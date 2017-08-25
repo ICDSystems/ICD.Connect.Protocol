@@ -21,7 +21,7 @@ namespace ICD.Connect.Settings
 		/// <param name="xml"></param>
 		protected static void ParseXml(AbstractPortSettings instance, string xml)
 		{
-			AbstractDeviceSettings.ParseXml(instance, xml);
+			AbstractDeviceBaseSettings.ParseXml(instance, xml);
 		}
 	}
 }
