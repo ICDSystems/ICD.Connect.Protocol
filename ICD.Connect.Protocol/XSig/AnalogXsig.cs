@@ -108,7 +108,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Sets the ushort value to the data BitArray.
 		/// </summary>
-		/// <param name="array"></param>
 		/// <param name="value"></param>
 		private void SetValue(ushort value)
 		{
@@ -130,7 +129,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Gets the ushort value from the data BitArray.
 		/// </summary>
-		/// <param name="array"></param>
 		private ushort GetValue()
 		{
 			byte[] val = new byte[2];
@@ -146,7 +144,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Sets the index bits into the bit array.
 		/// </summary>
-		/// <param name="array"></param>
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
@@ -162,7 +159,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Gets the index bits out of the bit array.
 		/// </summary>
-		/// <param name="array"></param>
 		/// <returns></returns>
 		private ushort GetIndex()
 		{

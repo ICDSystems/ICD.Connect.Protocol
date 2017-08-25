@@ -39,7 +39,6 @@ namespace ICD.Connect.Protocol.XSig
 						noSigFound = true;
 				}
 			}
-			yield break;
 		}
 	}
 }

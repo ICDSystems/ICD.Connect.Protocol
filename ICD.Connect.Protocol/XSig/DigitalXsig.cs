@@ -97,7 +97,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Sets the index bits into the bit array.
 		/// </summary>
-		/// <param name="array"></param>
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
@@ -114,7 +113,6 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Gets the index bits out of the bit array.
 		/// </summary>
-		/// <param name="array"></param>
 		/// <returns></returns>
 		private ushort GetIndex()
 		{
