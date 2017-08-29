@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using ICD.Common.Services.Logging;
 using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.EventArguments;
+using ICD.Common.Utils.EventArguments;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
