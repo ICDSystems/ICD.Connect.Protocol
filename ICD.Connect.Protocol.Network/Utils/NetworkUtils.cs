@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Utils
 {
@@ -22,7 +23,25 @@ namespace ICD.Connect.Protocol.Network.Utils
 		public const string MULTICAST_ADDRESS = "239.64.0.1";
 		public const string LOCALHOST_ADDRESS = "127.0.0.1";
 
-		#region Methods
+		/// <summary>
+		/// Gets the local hostinfo for the given system id.
+		/// </summary>
+		/// <returns></returns>
+		public static HostInfo GetLocalHostInfo(int systemId)
+		{
+			ushort port = GetDirectMessagePortForSystem(systemId);
+			return GetLocalHostInfo(port);
+		}
+
+		/// <summary>
+		/// Gets the local hostinfo for the given port.
+		/// </summary>
+		/// <returns></returns>
+		public static HostInfo GetLocalHostInfo(ushort port)
+		{
+			string address = IcdEnvironment.NetworkAddresses.FirstOrDefault();
+			return new HostInfo(address, port);
+		}
 
 		/// <summary>
 		/// Enumerates over the UDP advertisement ports for the different program slots. 
@@ -54,8 +73,6 @@ namespace ICD.Connect.Protocol.Network.Utils
 		{
 			return GetBroadcastPortForProgramSlot(ProgramUtils.ProgramNumber, systemId);
 		}
-
-		#endregion
 
 		/// <summary>
 		/// Enumerates over the UDP advertisement ports for the different program slots. 
