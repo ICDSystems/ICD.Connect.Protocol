@@ -104,6 +104,19 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 		#endregion
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnDigitalInChanged = null;
+			OnDigitalOutChanged = null;
+			OnAnalogInChanged = null;
+			OnConfigurationChanged = null;
+
+			base.DisposeFinal(disposing);
+		}
+
 		#region Methods
 
 		/// <summary>
