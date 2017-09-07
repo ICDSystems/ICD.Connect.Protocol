@@ -3,6 +3,7 @@ using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
+using ICD.Connect.Protocol.XSig;
 using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
@@ -226,6 +227,28 @@ namespace ICD.Connect.Protocol.Sigs
 		#endregion
 
 		#region Serialization
+
+		/// <summary>
+		/// Serializes the sig to Crestron XSig format.
+		/// </summary>
+		/// <returns></returns>
+		public string ToXSig()
+		{
+			switch (m_Type)
+			{
+				case eSigType.Digital:
+					return new DigitalXsig(m_BoolValue, (ushort)(m_Number - 1)).ToString();
+
+				case eSigType.Analog:
+					return new AnalogXsig(m_UshortValue, (ushort)(m_Number - 1)).ToString();
+
+				case eSigType.Serial:
+					return new SerialXsig(m_StringValue, (ushort)(m_Number - 1)).ToString();
+
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
 
 		/// <summary>
 		/// Serializes the sig to JSON.
