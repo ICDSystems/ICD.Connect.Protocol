@@ -107,7 +107,7 @@
     <Compile Include="Sigs\ISig.cs" />
     <Compile Include="Sigs\ISigs.cs" />
     <Compile Include="Sigs\SigCache.cs" />
-    <Compile Include="Sigs\Sig.cs" />
+    <Compile Include="Sigs\SigInfo.cs" />
     <Compile Include="EventArguments\SocketStateEventArgs.cs" />
     <Compile Include="XSig\AnalogXsig.cs" />
     <Compile Include="XSig\DigitalXsig.cs" />

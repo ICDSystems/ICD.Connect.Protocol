@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
 {
-	public struct Sig : IUShortOutputSig, IStringOutputSig, IBoolOutputSig
+	public struct SigInfo : IUShortOutputSig, IStringOutputSig, IBoolOutputSig
 	{
 		// JSON
 		private const string TYPE_PROPERTY = "T";
@@ -51,55 +51,65 @@ namespace ICD.Connect.Protocol.Sigs
 
 		#region Constructors
 
-		public Sig(uint number, ushort smartObject, string value)
+		public SigInfo(ISig sig)
+			: this(sig.Type, sig.Number, sig.Name, 0)
+		{
+		}
+
+		public SigInfo(ISig sig, ushort smartObject)
+			: this(sig.Type, sig.Number, sig.Name, smartObject)
+		{
+		}
+
+		public SigInfo(uint number, ushort smartObject, string value)
 			: this(number, null, smartObject, value)
 		{
 		}
 
-		public Sig(uint number, ushort smartObject, bool value)
+		public SigInfo(uint number, ushort smartObject, bool value)
 			: this(number, null, smartObject, value)
 		{
 		}
 
-		public Sig(uint number, ushort smartObject, ushort value)
+		public SigInfo(uint number, ushort smartObject, ushort value)
 			: this(number, null, smartObject, value)
 		{
 		}
 
-		public Sig(string name, ushort smartObject, string value)
+		public SigInfo(string name, ushort smartObject, string value)
 			: this(0, name, smartObject, value)
 		{
 		}
 
-		public Sig(string name, ushort smartObject, bool value)
+		public SigInfo(string name, ushort smartObject, bool value)
 			: this(0, name, smartObject, value)
 		{
 		}
 
-		public Sig(string name, ushort smartObject, ushort value)
+		public SigInfo(string name, ushort smartObject, ushort value)
 			: this(0, name, smartObject, value)
 		{
 		}
 
-		public Sig(uint number, string name, ushort smartObject, string value)
+		public SigInfo(uint number, string name, ushort smartObject, string value)
 			: this(eSigType.Serial, number, name, smartObject)
 		{
 			m_StringValue = value;
 		}
 
-		public Sig(uint number, string name, ushort smartObject, bool value)
+		public SigInfo(uint number, string name, ushort smartObject, bool value)
 			: this(eSigType.Digital, number, name, smartObject)
 		{
 			m_BoolValue = value;
 		}
 
-		public Sig(uint number, string name, ushort smartObject, ushort value)
+		public SigInfo(uint number, string name, ushort smartObject, ushort value)
 			: this(eSigType.Analog, number, name, smartObject)
 		{
 			m_UshortValue = value;
 		}
 
-		private Sig(eSigType type, uint number, string name, ushort smartObject)
+		private SigInfo(eSigType type, uint number, string name, ushort smartObject)
 		{
 			m_Type = type;
 			m_Number = number;
@@ -119,9 +129,9 @@ namespace ICD.Connect.Protocol.Sigs
 		/// Gets a copy of the sig with empty values.
 		/// </summary>
 		/// <returns></returns>
-		public Sig ToClearSig()
+		public SigInfo ToClearSig()
 		{
-			return new Sig(m_Type, m_Number, m_Name, m_SmartObject);
+			return new SigInfo(m_Type, m_Number, m_Name, m_SmartObject);
 		}
 
 		/// <summary>
@@ -173,7 +183,7 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public override bool Equals(object obj)
 		{
-			return obj is Sig && this == (Sig)obj;
+			return obj is SigInfo && this == (SigInfo)obj;
 		}
 
 		public override int GetHashCode()
@@ -195,7 +205,7 @@ namespace ICD.Connect.Protocol.Sigs
 			}
 		}
 
-		public static bool operator ==(Sig x, Sig y)
+		public static bool operator ==(SigInfo x, SigInfo y)
 		{
 			bool output = x.m_Type == y.m_Type &&
 						  x.m_Number == y.m_Number &&
@@ -208,7 +218,7 @@ namespace ICD.Connect.Protocol.Sigs
 			return output;
 		}
 
-		public static bool operator !=(Sig x, Sig y)
+		public static bool operator !=(SigInfo x, SigInfo y)
 		{
 			return !(x == y);
 		}
@@ -291,7 +301,7 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <param name="json"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static Sig Deserialize(string json)
+		public static SigInfo Deserialize(string json)
 		{
 			using (JsonTextReader reader = new JsonTextReader(new IcdStringReader(json).WrappedStringReader))
 				return Deserialize(reader);
@@ -303,7 +313,7 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <param name="reader"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static Sig Deserialize(JsonReader reader)
+		public static SigInfo Deserialize(JsonReader reader)
 		{
 			eSigType type = eSigType.Na;
 			uint number = 0;
@@ -374,11 +384,11 @@ namespace ICD.Connect.Protocol.Sigs
 			switch (type)
 			{
 				case eSigType.Digital:
-					return new Sig(number, name, smartObject, boolValue);
+					return new SigInfo(number, name, smartObject, boolValue);
 				case eSigType.Analog:
-					return new Sig(number, name, smartObject, ushortValue);
+					return new SigInfo(number, name, smartObject, ushortValue);
 				case eSigType.Serial:
-					return new Sig(number, name, smartObject, stringValue);
+					return new SigInfo(number, name, smartObject, stringValue);
 
 				default:
 					throw new ArgumentOutOfRangeException();

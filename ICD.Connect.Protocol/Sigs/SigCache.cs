@@ -9,7 +9,7 @@ namespace ICD.Connect.Protocol.Sigs
 	/// Provides unique collection of sigs, ignoring serial/analog/digital values for comparison.
 	/// </summary>
 	[PublicAPI]
-	public sealed class SigCache : ICollection<Sig>
+	public sealed class SigCache : ICollection<SigInfo>
 	{
 		/// <summary>
 		/// We cache the sigs by their type and address.
@@ -29,9 +29,9 @@ namespace ICD.Connect.Protocol.Sigs
 				m_SmartObject = smartObject;
 			}
 
-			public static SigKey FromSig(Sig sig)
+			public static SigKey FromSig(SigInfo sigInfo)
 			{
-				return new SigKey(sig.Type, sig.Number, sig.Name, sig.SmartObject);
+				return new SigKey(sigInfo.Type, sigInfo.Number, sigInfo.Name, sigInfo.SmartObject);
 			}
 
 			#region Equality
@@ -75,7 +75,7 @@ namespace ICD.Connect.Protocol.Sigs
 		}
 
 		// The internal collection
-		private readonly Dictionary<SigKey, Sig> m_KeyToSig; 
+		private readonly Dictionary<SigKey, SigInfo> m_KeyToSig; 
 
 		#region Properties
 
@@ -89,22 +89,22 @@ namespace ICD.Connect.Protocol.Sigs
 		/// </summary>
 		public SigCache()
 		{
-			m_KeyToSig = new Dictionary<SigKey, Sig>();
+			m_KeyToSig = new Dictionary<SigKey, SigInfo>();
 		}
 
 		#region Methods
 
-		public IEnumerator<Sig> GetEnumerator()
+		public IEnumerator<SigInfo> GetEnumerator()
 		{
 			return m_KeyToSig.Values.GetEnumerator();
 		}
 
-		public void Add(Sig item)
+		public void Add(SigInfo item)
 		{
 			m_KeyToSig[SigKey.FromSig(item)] = item;
 		}
 
-		public void AddRange(IEnumerable<Sig> sigs)
+		public void AddRange(IEnumerable<SigInfo> sigs)
 		{
 			sigs.ForEach(Add);
 		}
@@ -113,7 +113,7 @@ namespace ICD.Connect.Protocol.Sigs
 		/// Adds sigs that have a value, removes sigs that do not have a value
 		/// </summary>
 		/// <param name="sigs"></param>
-		public void AddHighRemoveLow(IEnumerable<Sig> sigs)
+		public void AddHighRemoveLow(IEnumerable<SigInfo> sigs)
 		{
 			sigs.ForEach(AddHighRemoveLow);
 		}
@@ -121,20 +121,20 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <summary>
 		/// Adds the sig if it has a value, otherwise removes it.
 		/// </summary>
-		/// <param name="sig"></param>
-		public void AddHighRemoveLow(Sig sig)
+		/// <param name="sigInfo"></param>
+		public void AddHighRemoveLow(SigInfo sigInfo)
 		{
-			if (sig.HasValue())
-				Add(sig);
+			if (sigInfo.HasValue())
+				Add(sigInfo);
 			else
-				Remove(sig);
+				Remove(sigInfo);
 		}
 
 		/// <summary>
 		/// Adds clear version of sigs that have a value, removes sigs that do not have a value
 		/// </summary>
 		/// <param name="sigs"></param>
-		public void AddHighClearRemoveLow(IEnumerable<Sig> sigs)
+		public void AddHighClearRemoveLow(IEnumerable<SigInfo> sigs)
 		{
 			sigs.ForEach(AddHighClearRemoveLow);
 		}
@@ -142,13 +142,13 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <summary>
 		/// Adds clear version of the sig if it has a value, otherwise removes it.
 		/// </summary>
-		/// <param name="sig"></param>
-		public void AddHighClearRemoveLow(Sig sig)
+		/// <param name="sigInfo"></param>
+		public void AddHighClearRemoveLow(SigInfo sigInfo)
 		{
-			if (sig.HasValue())
-				Add(sig.ToClearSig());
+			if (sigInfo.HasValue())
+				Add(sigInfo.ToClearSig());
 			else
-				Remove(sig);
+				Remove(sigInfo);
 		}
 
 		public void Clear()
@@ -156,22 +156,22 @@ namespace ICD.Connect.Protocol.Sigs
 			m_KeyToSig.Clear();
 		}
 
-		public bool Contains(Sig item)
+		public bool Contains(SigInfo item)
 		{
 			return m_KeyToSig.ContainsKey(SigKey.FromSig(item));
 		}
 
-		public void CopyTo(Sig[] array, int arrayIndex)
+		public void CopyTo(SigInfo[] array, int arrayIndex)
 		{
 			m_KeyToSig.Values.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(Sig item)
+		public bool Remove(SigInfo item)
 		{
 			return m_KeyToSig.Remove(SigKey.FromSig(item));
 		}
 
-		public void RemoveRange(IEnumerable<Sig> sigs)
+		public void RemoveRange(IEnumerable<SigInfo> sigs)
 		{
 			foreach (var s in sigs)
 			{
