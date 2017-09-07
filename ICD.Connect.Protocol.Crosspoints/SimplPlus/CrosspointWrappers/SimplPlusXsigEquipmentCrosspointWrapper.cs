@@ -1,12 +1,10 @@
 ﻿#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Crestron.SimplSharp;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Crosspoints.EventArguments;
@@ -174,22 +172,18 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#region SPlusDelegates
 
-		public delegate void DelDigitalJoinXsig(SimplSharpString xsig);
-
-		public delegate void DelAnalogJoinXsig(SimplSharpString xsig);
-
-		public delegate void DelSerialJoinXsig(SimplSharpString xsig);
+		public delegate void DelJoinXsig(SimplSharpString xsig);
 
 		public delegate void DelStatusUpdate(ushort status);
 
 		[PublicAPI]
-		public DelDigitalJoinXsig DigitalSigReceivedXsigCallback { get; set; }
+		public DelJoinXsig DigitalSigReceivedXsigCallback { get; set; }
 
 		[PublicAPI]
-		public DelAnalogJoinXsig AnalogSigReceivedXsigCallback { get; set; }
+		public DelJoinXsig AnalogSigReceivedXsigCallback { get; set; }
 
 		[PublicAPI]
-		public DelSerialJoinXsig SerialSigReceivedXsigCallback { get; set; }
+		public DelJoinXsig SerialSigReceivedXsigCallback { get; set; }
 
 		[PublicAPI]
 		public DelStatusUpdate CrosspointStatusCallback { get; set; }
@@ -201,11 +195,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		public string GetWrapperInfo()
 		{
-			StringBuilder sb = new StringBuilder();
-
 			TableBuilder tb = new TableBuilder("Property", "Value");
 
-			tb.AddRow("Wrapper Type", this.GetType());
+			tb.AddRow("Wrapper Type", GetType());
 			tb.AddRow("Wrapper Location", CrosspointSymbolInstanceName);
 			tb.AddRow("Wrapper Has Crosspoint", m_Crosspoint == null ? "False" : "True");
 			if (m_Crosspoint == null)
@@ -253,11 +245,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			var statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
-				statusCallback((ushort)0);
+				statusCallback(0);
 
 			var connectedControlsCallback = ControlCrosspointsConnectedCallback;
 			if (connectedControlsCallback != null)
-				connectedControlsCallback((ushort)0);
+				connectedControlsCallback(0);
 
 			var crosspointChangedEvent = OnCrosspointChanged;
 			if (crosspointChangedEvent != null)
@@ -270,8 +262,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				StringBuilder dBuilder = new StringBuilder();
-				StringBuilder aBuilder = new StringBuilder();
 				foreach (SigInfo sig in data.GetSigs())
 				{
 					//Only pass along SmartObject of 0
@@ -279,35 +269,28 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 					if (sig.SmartObject != 0)
 						continue;
 
+					DelJoinXsig callback;
+
 					switch (sig.Type)
 					{
 						case eSigType.Digital:
-							var d = new DigitalXsig(sig.GetBoolValue(), (ushort)(sig.Number - 1));
-							dBuilder.Append(StringUtils.ToString(d.Data));
+							callback = DigitalSigReceivedXsigCallback;
 							break;
+
 						case eSigType.Analog:
-							var a = new AnalogXsig(sig.GetUShortValue(), (ushort)(sig.Number - 1));
-							aBuilder.Append(StringUtils.ToString(a.Data));
+							callback = AnalogSigReceivedXsigCallback;
 							break;
+
 						case eSigType.Serial:
-							var s = new SerialXsig(sig.GetStringValue() ?? "", (ushort)(sig.Number - 1));
-							DelSerialJoinXsig callback = SerialSigReceivedXsigCallback;
-							if (callback != null)
-								callback(StringUtils.ToString(s.Data));
+							callback = SerialSigReceivedXsigCallback;
 							break;
+
+						default:
+							throw new ArgumentOutOfRangeException();
 					}
-				}
-				foreach (var xsig in dBuilder.ToString().Split(254))
-				{
-					DelDigitalJoinXsig callback = DigitalSigReceivedXsigCallback;
+
 					if (callback != null)
-						callback(xsig);
-				}
-				foreach (var xsig in aBuilder.ToString().Split(252))
-				{
-					DelAnalogJoinXsig callback = AnalogSigReceivedXsigCallback;
-					if (callback != null)
-						callback(xsig);
+						callback(sig.ToXSig());
 				}
 			}
 			finally
