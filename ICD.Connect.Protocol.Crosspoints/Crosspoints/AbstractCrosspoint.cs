@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
@@ -308,7 +307,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			IcdStopwatch stopwatch = IcdStopwatch.StartNew();
 			for (uint index = 0; index < 100; index++)
-				ping.AddSig(new Sig(index, 0, "ping"));
+				ping.AddSig(new SigInfo(index, 0, "ping"));
 			IcdConsole.PrintLine("{0} milliseconds to create sigs", stopwatch.ElapsedMilliseconds);
 
 			SendInputData(ping);
@@ -330,7 +329,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			IcdStopwatch stopwatch = IcdStopwatch.StartNew();
 			for (uint index = 0; index < 100; index++)
-				pong.AddSig(new Sig(index, 0, "pong"));
+				pong.AddSig(new SigInfo(index, 0, "pong"));
 			IcdConsole.PrintLine("{0} milliseconds to create sigs", stopwatch.ElapsedMilliseconds);
 
 			SendInputData(pong);

@@ -108,7 +108,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="sigs"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static CrosspointData ControlClear(int controlId, int equipmentId, IEnumerable<Sig> sigs)
+		public static CrosspointData ControlClear(int controlId, int equipmentId, IEnumerable<SigInfo> sigs)
 		{
 			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.ControlClear);
 
@@ -125,11 +125,11 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="sigs"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static CrosspointData EquipmentConnect(int controlId, int equipmentId, IEnumerable<Sig> sigs)
+		public static CrosspointData EquipmentConnect(int controlId, int equipmentId, IEnumerable<SigInfo> sigs)
 		{
 			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.EquipmentConnect);
 
-			IEnumerable<Sig> initialize = sigs.Where(s => s.HasValue());
+			IEnumerable<SigInfo> initialize = sigs.Where(s => s.HasValue());
 			output.AddSigs(initialize);
 
 			return output;
@@ -283,7 +283,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// Adds the sig to the data.
 		/// </summary>
 		/// <param name="sig"></param>
-		public void AddSig(Sig sig)
+		public void AddSig(SigInfo sig)
 		{
 			m_Sigs.Add(sig);
 		}
@@ -296,7 +296,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="value"></param>
 		public void AddSig(ushort smartObject, uint number, bool value)
 		{
-			Sig sig = new Sig(number, smartObject, value);
+			SigInfo sig = new SigInfo(number, smartObject, value);
 			AddSig(sig);
 		}
 
@@ -308,7 +308,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="value"></param>
 		public void AddSig(ushort smartObject, uint number, ushort value)
 		{
-			Sig sig = new Sig(number, smartObject, value);
+			SigInfo sig = new SigInfo(number, smartObject, value);
 			AddSig(sig);
 		}
 
@@ -320,7 +320,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="value"></param>
 		public void AddSig(ushort smartObject, uint number, string value)
 		{
-			Sig sig = new Sig(number, smartObject, value);
+			SigInfo sig = new SigInfo(number, smartObject, value);
 			AddSig(sig);
 		}
 
@@ -328,7 +328,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// Removes the sig from the data.
 		/// </summary>
 		/// <param name="sig"></param>
-		public void RemoveSig(Sig sig)
+		public void RemoveSig(SigInfo sig)
 		{
 			m_Sigs.Remove(sig);
 		}
@@ -337,7 +337,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// Adds the sigs to the data.
 		/// </summary>
 		/// <param name="sigs"></param>
-		public void AddSigs(IEnumerable<Sig> sigs)
+		public void AddSigs(IEnumerable<SigInfo> sigs)
 		{
 			m_Sigs.AddRange(sigs);
 		}
@@ -346,7 +346,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// Gets the sigs in the data.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<Sig> GetSigs()
+		public IEnumerable<SigInfo> GetSigs()
 		{
 			return m_Sigs.ToArray();
 		}
@@ -429,7 +429,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 						writer.WritePropertyName(SIGS_PROPERTY);
 						writer.WriteStartArray();
 						{
-							foreach (Sig sig in m_Sigs)
+							foreach (SigInfo sig in m_Sigs)
 								sig.Serialize(writer);
 						}
 						writer.WriteEndArray();
@@ -514,7 +514,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 						case SIGS_PROPERTY:
 							while (reader.TokenType != JsonToken.EndArray)
-								sigs.Add(Sig.Deserialize(reader));
+								sigs.Add(SigInfo.Deserialize(reader));
 							break;
 					}
 				}

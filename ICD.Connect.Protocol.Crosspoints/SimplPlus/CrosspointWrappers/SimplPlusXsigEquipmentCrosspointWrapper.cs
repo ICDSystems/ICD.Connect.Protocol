@@ -15,7 +15,7 @@ using ICD.Connect.Protocol.XSig;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 {
-	public class SimplPlusXsigEquipmentCrosspointWrapper : ISimplPlusCrosspointWrapper
+	public sealed class SimplPlusXsigEquipmentCrosspointWrapper : ISimplPlusCrosspointWrapper
 	{
 		#region Fields
 
@@ -159,7 +159,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				IEnumerable<Sig> sigs = Xsig.ParseMultiple(xsig.ToString());
+				IEnumerable<SigInfo> sigs = Xsig.ParseMultiple(xsig.ToString());
 				CrosspointData data = new CrosspointData();
 				data.AddSigs(sigs);
 				m_Crosspoint.SendInputData(data);
@@ -272,7 +272,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			{
 				StringBuilder dBuilder = new StringBuilder();
 				StringBuilder aBuilder = new StringBuilder();
-				foreach (Sig sig in data.GetSigs())
+				foreach (SigInfo sig in data.GetSigs())
 				{
 					//Only pass along SmartObject of 0
 					//todo: Setup for other modules to hook in for smart object joins
