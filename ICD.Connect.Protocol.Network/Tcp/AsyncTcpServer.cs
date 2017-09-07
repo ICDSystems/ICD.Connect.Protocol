@@ -138,15 +138,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		}
 
 		/// <summary>
-		/// Stops and Disables the TCP Server
-		/// </summary>
-		[PublicAPI]
-		public void Stop()
-		{
-			Stop(false);
-		}
-
-		/// <summary>
 		/// Stops and starts the server.
 		/// </summary>
 		public void Restart()
@@ -194,7 +185,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 					break;
 
 				case IcdEnvironment.eEthernetEventType.LinkDown:
-					Stop(false);
+					Stop();
 					break;
 
 				default:

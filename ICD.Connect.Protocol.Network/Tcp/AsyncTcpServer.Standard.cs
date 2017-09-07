@@ -40,11 +40,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
         /// <summary>
         /// Stops and Disables the TCP Server
         /// </summary>
-        /// <param name="retainEnabledState">Should the TcpListener be enabled, normally false, true for link state handling</param>
         [PublicAPI]
-        public void Stop(bool retainEnabledState)
+        public void Stop()
         {
-            Active = retainEnabledState;
+            Active = false;
 
             if (m_TcpListener != null)
             {
