@@ -53,7 +53,12 @@ namespace ICD.Connect.Protocol.Sigs
 		#region Constructors
 
 		public SigInfo(ISig sig)
-			: this(sig.Type, sig.Number, sig.Name, 0)
+			: this(sig, 0)
+		{
+		}
+
+		public SigInfo(ISig sig, ushort smartObject)
+			: this(sig.Type, sig.Number, sig.Name, smartObject)
 		{
 			switch (sig.Type)
 			{
@@ -69,11 +74,6 @@ namespace ICD.Connect.Protocol.Sigs
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-		}
-
-		public SigInfo(ISig sig, ushort smartObject)
-			: this(sig.Type, sig.Number, sig.Name, smartObject)
-		{
 		}
 
 		public SigInfo(uint number, ushort smartObject, string value)
