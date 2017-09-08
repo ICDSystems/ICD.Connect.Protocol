@@ -55,6 +55,20 @@ namespace ICD.Connect.Protocol.Sigs
 		public SigInfo(ISig sig)
 			: this(sig.Type, sig.Number, sig.Name, 0)
 		{
+			switch (sig.Type)
+			{
+				case eSigType.Digital:
+					m_BoolValue = sig.GetBoolValue();
+					break;
+				case eSigType.Analog:
+					m_UshortValue = sig.GetUShortValue();
+					break;
+				case eSigType.Serial:
+					m_StringValue = sig.GetStringValue();
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		public SigInfo(ISig sig, ushort smartObject)
