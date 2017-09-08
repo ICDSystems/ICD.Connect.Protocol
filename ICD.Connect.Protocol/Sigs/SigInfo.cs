@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Connect.Protocol.XSig;
@@ -188,8 +189,15 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return string.Format("{0}(Type={1}, Number={2}, Name={3}, SmartObject={4}, Value={5})",
-			                     GetType().Name, m_Type, m_Number, m_Name, m_SmartObject, this.GetValue());
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Type", m_Type);
+			builder.AppendProperty("Number", m_Number);
+			builder.AppendProperty("Name", m_Name);
+			builder.AppendProperty("SmartObject", m_SmartObject);
+			builder.AppendProperty("Value", this.GetValue());
+
+			return builder.ToString();
 		}
 
 		#endregion
