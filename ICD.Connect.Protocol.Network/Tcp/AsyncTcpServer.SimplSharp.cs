@@ -37,7 +37,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <summary>
 		/// Stops and Disables the TCP Server
 		/// </summary>
-		private void Stop()
+		public void Stop()
 		{
 			Active = false;
 
