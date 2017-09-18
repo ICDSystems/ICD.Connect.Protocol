@@ -1,17 +1,11 @@
 ﻿#if SIMPLSHARP
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Advertisements;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
-	public class SimplPlusAdvertisementManagerControls
+	public sealed class SimplPlusAdvertisementManagerControls
 	{
-
 		#region fields
 
 		private int m_SystemId;
@@ -20,13 +14,12 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		#endregion
 
-
 		#region SPlus Methods
 
 		[PublicAPI]
 		public void SetSystemId(ushort systemId)
 		{
-			m_SystemId = (int)systemId;
+			m_SystemId = systemId;
 		}
 
 		[PublicAPI]

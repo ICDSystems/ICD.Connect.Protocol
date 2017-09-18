@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints

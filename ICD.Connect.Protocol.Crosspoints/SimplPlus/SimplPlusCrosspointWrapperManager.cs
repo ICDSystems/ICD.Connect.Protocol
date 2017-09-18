@@ -1,9 +1,6 @@
 ﻿#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
@@ -14,9 +11,8 @@ using ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
-	public class SimplPlusCrosspointWrapperManager : IConsoleNode
+	public sealed class SimplPlusCrosspointWrapperManager : IConsoleNode
 	{
-
 		private readonly List<ISimplPlusCrosspointWrapper> m_CrosspointWrappers;
 
 		private readonly SafeCriticalSection m_CrosspointWrapperssCriticalSection;
@@ -65,8 +61,12 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			if (system == null)
 				return;
 
-			system.EquipmentCrosspointManager.OnCrosspointRegistered += EquipmentCrosspointManagerOnCrosspointRegistered;
-			system.EquipmentCrosspointManager.OnCrosspointUnregistered += EquipmentCrosspointManagerOnCrosspointUnregistered;
+			EquipmentCrosspointManager equipmentCrosspointManager = system.EquipmentCrosspointManager;
+			if (equipmentCrosspointManager == null)
+				return;
+
+			equipmentCrosspointManager.OnCrosspointRegistered += EquipmentCrosspointManagerOnCrosspointRegistered;
+			equipmentCrosspointManager.OnCrosspointUnregistered += EquipmentCrosspointManagerOnCrosspointUnregistered;
 		}
 		
 		private void SystemOnControlCrosspointManagerCreated(object sender, EventArgs eventArgs)
@@ -76,8 +76,12 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			if (system == null)
 				return;
 
-			system.ControlCrosspointManager.OnCrosspointRegistered += ControlCrosspointManagerOnCrosspointRegistered;
-			system.ControlCrosspointManager.OnCrosspointUnregistered += ControlCrosspointManagerOnCrosspointUnregistered;
+			ControlCrosspointManager controlCrosspointManager = system.ControlCrosspointManager;
+			if (controlCrosspointManager == null)
+				return;
+
+			controlCrosspointManager.OnCrosspointRegistered += ControlCrosspointManagerOnCrosspointRegistered;
+			controlCrosspointManager.OnCrosspointUnregistered += ControlCrosspointManagerOnCrosspointUnregistered;
 		}
 
 

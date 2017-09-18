@@ -1,8 +1,4 @@
 ﻿#if SIMPLSHARP
-using System.Collections.Generic;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Collections;
-using ICD.Connect.API.Nodes;
 using ICD.Connect.API;
 using ICD.Common.Logging.Console;
 using ICD.Common.Logging.Console.Loggers;
