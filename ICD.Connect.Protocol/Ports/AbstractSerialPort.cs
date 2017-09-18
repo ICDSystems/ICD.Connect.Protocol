@@ -85,7 +85,7 @@ namespace ICD.Connect.Protocol.Ports
 		public bool Send(string data)
 		{
 			if (IsDisposed)
-				throw new ObjectDisposedException(GetType().Name);
+				throw new ObjectDisposedException(GetType().Name, string.Format("{0} is disposed", this));
 
 			return ConnectAndSend(data, SendFinal);
 		}

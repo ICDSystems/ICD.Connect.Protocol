@@ -275,7 +275,15 @@ namespace ICD.Connect.Protocol.SerialQueues
 				m_CommandQueue.RemoveAt(0);
 				IsCommandInProgress = true;
 
-				return Port.Send(CurrentCommand.Serialize());
+				try
+				{
+					return Port.Send(CurrentCommand.Serialize());
+				}
+				catch (ObjectDisposedException e)
+				{
+					Clear();
+					return false;
+				}
 			}
 			finally
 			{
