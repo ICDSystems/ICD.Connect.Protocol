@@ -44,8 +44,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			if (m_TcpListener != null)
 			{
 				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
+
+				m_TcpListener.Stop();
 				m_TcpListener.DisconnectAll();
-				
+
 				ServiceProvider.TryGetService<ILoggerService>()
 				               .AddEntry(eSeverity.Notice,
 				                         string.Format("AsyncTcpServer No Longer Listening on Port {0}", m_TcpListener.PortNumber));
