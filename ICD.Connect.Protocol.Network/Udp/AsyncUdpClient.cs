@@ -57,15 +57,6 @@ namespace ICD.Connect.Protocol.Network.Udp
 		}
 
 		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return true;
-		}
-
-		/// <summary>
 		/// Sends serial data to a specific endpoint.
 		/// </summary>
 		/// <param name="data"></param>

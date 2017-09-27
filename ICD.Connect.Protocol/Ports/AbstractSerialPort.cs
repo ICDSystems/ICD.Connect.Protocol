@@ -36,6 +36,8 @@ namespace ICD.Connect.Protocol.Ports
 
 				m_IsConnected = value;
 
+				UpdateCachedOnlineStatus();
+
 				OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
 			}
 		}
@@ -59,6 +61,15 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		/// <returns></returns>
 		protected abstract bool GetIsConnectedState();
+
+		/// <summary>
+		/// Gets the current online status of the device.
+		/// </summary>
+		/// <returns></returns>
+		protected override bool GetIsOnlineStatus()
+		{
+			return GetIsConnectedState();
+		}
 
 		protected void UpdateIsConnectedState()
 		{

@@ -139,15 +139,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		}
 
 		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return true;
-		}
-
-		/// <summary>
 		/// Override to add additional properties to the ToString representation.
 		/// </summary>
 		/// <param name="addPropertyAndValue"></param>
