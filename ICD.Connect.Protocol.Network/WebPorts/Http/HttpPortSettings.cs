@@ -1,6 +1,6 @@
 ﻿using System;
 using ICD.Common.Properties;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.WebPorts.Http
 {
@@ -26,7 +26,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Http
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlPortSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static HttpPortSettings FromXml(string xml)
 		{
 			HttpPortSettings output = new HttpPortSettings();

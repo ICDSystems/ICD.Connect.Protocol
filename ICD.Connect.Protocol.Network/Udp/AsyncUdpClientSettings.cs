@@ -1,7 +1,7 @@
 using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -47,7 +47,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlPortSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static AsyncUdpClientSettings FromXml(string xml)
 		{
 			string address = XmlUtils.ReadChildElementContentAsString(xml, ADDRESS_ELEMENT);

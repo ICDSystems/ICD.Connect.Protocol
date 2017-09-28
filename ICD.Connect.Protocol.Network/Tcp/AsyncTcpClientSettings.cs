@@ -1,7 +1,7 @@
 using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
@@ -51,7 +51,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlPortSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static AsyncTcpClientSettings FromXml(string xml)
 		{
 			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);

@@ -2,7 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.WebPorts.Https
 {
@@ -62,7 +62,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlPortSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static HttpsPortSettings FromXml(string xml)
 		{
 			string certificate = XmlUtils.TryReadChildElementContentAsString(xml, CERTIFICATE_ELEMENT);
