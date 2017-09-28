@@ -7,8 +7,6 @@ using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
-
-
 namespace ICD.Connect.Protocol.Network.WebPorts.Https
 {
 	public sealed partial class HttpsPort
