@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
-[assembly: AssemblyTitle("ICD.SimplSharp.XP3")]
+[assembly: AssemblyTitle("ICD.Connect.Protocol.Crosspoints")]
 [assembly: AssemblyCompany("ICD Systems")]
-[assembly: AssemblyProduct("ICD.SimplSharp.XP3")]
-[assembly: AssemblyCopyright("Copyright © ICD Systems 2016")]
+[assembly: AssemblyProduct("ICD.Connect.Protocol.Crosspoints")]
+[assembly: AssemblyCopyright("Copyright © ICD Systems 2017")]
 [assembly: AssemblyVersion("2.0.0.*")]
