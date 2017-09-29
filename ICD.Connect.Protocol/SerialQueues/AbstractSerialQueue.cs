@@ -279,7 +279,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				{
 					return Port.Send(CurrentCommand.Serialize());
 				}
-				catch (ObjectDisposedException e)
+				catch (ObjectDisposedException)
 				{
 					Clear();
 					return false;
