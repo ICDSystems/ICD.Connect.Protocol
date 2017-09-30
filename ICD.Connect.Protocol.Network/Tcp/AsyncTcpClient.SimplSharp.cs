@@ -170,7 +170,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				PrintRx(data);
 				Receive(data);
-				
 			}
 			catch (Exception e)
 			{

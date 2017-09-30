@@ -1,5 +1,4 @@
-﻿
-#if STANDARD
+﻿#if STANDARD
 using System;
 using System.Net.Sockets;
 using ICD.Common.Utils;
@@ -45,9 +44,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} failed to connect to host {1}:{2}", this,
-									  m_TcpClient,
-									  m_TcpClient);
+				Logger.AddEntry(eSeverity.Error, e, "{0} failed to connect to host {1}:{2}", this, Address, Port);
 			}
 			finally
 			{
@@ -105,34 +102,31 @@ namespace ICD.Connect.Protocol.Network.Tcp
             }
         }
 
-        /// <summary>
+		/// <summary>
 		/// Handles Receiving Data from the Active TCP Connection
 		/// </summary>
-		/// <param name="tcpClient"></param>
 		/// <param name="task"></param>
 		private void TcpClientReceiveHandler(Task<int> task)
-        {
-            if (task.IsFaulted)
-            {
-                Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2}", this,
-                                  Address, Port);
-            }
-            int bytesRead = task.Result;
-            if (bytesRead <= 0)
-                return;
+		{
+			if (task.IsFaulted)
+				Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2}", this, Address, Port);
 
-            string data = StringUtils.ToString(m_Buffer, bytesRead);
+			int bytesRead = task.Result;
+			if (bytesRead <= 0)
+				return;
 
-            PrintRx(data);
-            Receive(data);
+			string data = StringUtils.ToString(m_Buffer, bytesRead);
 
-            if(m_TcpClient.Connected)
-                m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
+			PrintRx(data);
+			Receive(data);
 
-            UpdateIsConnectedState();
-        }
+			if (m_TcpClient.Connected)
+				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
 
-        /// <summary>
+			UpdateIsConnectedState();
+		}
+
+		/// <summary>
         /// Calls the delegate for each console status item.
         /// </summary>
         /// <param name="addRow"></param>
