@@ -12,7 +12,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 	{
 		private TcpClient m_TcpClient;
         private NetworkStream m_Stream;
-        private byte[] m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
+        private readonly byte[] m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
 
 		/// <summary>
 		/// Connects to the remote end point Asyncrohnously
@@ -60,11 +60,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
         /// <returns></returns>
         protected override bool GetIsConnectedState()
 		{
-			if (m_TcpClient == null)
-				return false;
-
-			return m_TcpClient.Client.Connected;
-        }
+			return m_TcpClient != null && m_TcpClient.Client.Connected;
+		}
 
         /// <summary>
         /// Disconnects and clears the existing TCP Client instance.

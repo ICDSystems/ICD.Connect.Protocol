@@ -61,7 +61,7 @@ namespace ICD.Connect.Protocol.Ports
 		private void PrintData(string data, string context)
 		{
 			IcdConsole.Print("{0} ID:{1} {2} - {3}", GetType().Name, Id, context, data);
-			IcdConsole.PrintLine("");
+			IcdConsole.PrintLine(string.Empty);
 		}
 
 		#endregion
@@ -105,7 +105,7 @@ namespace ICD.Connect.Protocol.Ports
 				                                DebugRx = false;
 			                                });
 
-			yield return new ConsoleCommand("ToggleDebugTx", "When enabled prints TX tx data to console",
+			yield return new ConsoleCommand("ToggleDebugTx", "When enabled prints TX data to console",
 			                                () => DebugTx = !DebugTx);
 			yield return new ConsoleCommand("ToggleDebugRx", "When enabled prints RX data to console",
 			                                () => DebugRx = !DebugRx);
