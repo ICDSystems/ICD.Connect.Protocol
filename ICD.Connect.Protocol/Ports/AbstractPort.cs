@@ -60,7 +60,8 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="context"></param>
 		private void PrintData(string data, string context)
 		{
-			data = data.TrimEnd('\r', '\n');
+			data = data.Replace("\n", "\\n");
+			data = data.Replace("\r", "\\r");
 
 			IcdConsole.Print("{0} {1} - {2}", this, context, data);
 			IcdConsole.PrintLine(string.Empty);
