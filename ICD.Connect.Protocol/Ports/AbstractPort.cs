@@ -60,7 +60,9 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="context"></param>
 		private void PrintData(string data, string context)
 		{
-			IcdConsole.Print("{0} ID:{1} {2} - {3}", GetType().Name, Id, context, data);
+			data = data.TrimEnd('\r', '\n');
+
+			IcdConsole.Print("{0} {1} - {2}", this, context, data);
 			IcdConsole.PrintLine(string.Empty);
 		}
 
