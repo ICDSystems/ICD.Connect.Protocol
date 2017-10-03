@@ -1,8 +1,8 @@
 ﻿using System;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
 
-namespace ICD.Connect.Protocol.Ports
+namespace ICD.Connect.Protocol.Ports.RelayPort
 {
 	public interface IRelayPort : IPort
 	{

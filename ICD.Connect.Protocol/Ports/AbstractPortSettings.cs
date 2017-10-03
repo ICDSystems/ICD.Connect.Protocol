@@ -1,7 +1,6 @@
-﻿using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings;
+﻿using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol
+namespace ICD.Connect.Protocol.Ports
 {
 	/// <summary>
 	/// Base class for port settings.

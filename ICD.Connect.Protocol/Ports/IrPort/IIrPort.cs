@@ -1,6 +1,6 @@
 ﻿using ICD.Common.Properties;
 
-namespace ICD.Connect.Protocol.Ports
+namespace ICD.Connect.Protocol.Ports.IrPort
 {
 	/// <summary>
 	/// Interface for managing an IR Port.

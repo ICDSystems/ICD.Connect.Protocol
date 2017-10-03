@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils.EventArguments;
 
-namespace ICD.Connect.Protocol.Ports
+namespace ICD.Connect.Protocol.Ports.IoPort
 {
 	public enum eIoPortConfiguration
 	{

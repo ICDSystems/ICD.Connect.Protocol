@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
 {
