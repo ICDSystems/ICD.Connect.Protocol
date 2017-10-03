@@ -1,8 +1,6 @@
-﻿
-#if !SIMPLSHARP
+﻿#if !SIMPLSHARP
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Ports;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -10,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
-    public sealed partial class AsyncUdpClient : AbstractSerialPort<AsyncUdpClientSettings>
+    public sealed partial class AsyncUdpClient
     {
         private UdpClient m_UdpClient;
 

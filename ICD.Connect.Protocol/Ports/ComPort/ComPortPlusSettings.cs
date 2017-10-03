@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
-	public sealed class ComPortPlusSettings : AbstractPortSettings
+	public sealed class ComPortPlusSettings : AbstractComPortSettings
 	{
 		private const string FACTORY_NAME = "ComPortPlus";
 

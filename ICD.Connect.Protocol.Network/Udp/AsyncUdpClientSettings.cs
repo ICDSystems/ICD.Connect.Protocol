@@ -1,11 +1,12 @@
 using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
-	public sealed class AsyncUdpClientSettings : AbstractPortSettings
+	public sealed class AsyncUdpClientSettings : AbstractSerialPortSettings
 	{
 		private const string FACTORY_NAME = "UDP";
 

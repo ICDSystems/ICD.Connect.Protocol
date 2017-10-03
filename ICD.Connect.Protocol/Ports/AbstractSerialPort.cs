@@ -11,10 +11,10 @@ using ICD.Connect.API.Nodes;
 namespace ICD.Connect.Protocol.Ports
 {
 	/// <summary>
-	/// AbstractSerialPort is the base class for RSD serial ports.
+	/// AbstractSerialPort is the base class for ICD serial ports.
 	/// </summary>
 	public abstract class AbstractSerialPort<T> : AbstractPort<T>, ISerialPort
-		where T : IPortSettings, new()
+		where T : ISerialPortSettings, new()
 	{
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
 		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;

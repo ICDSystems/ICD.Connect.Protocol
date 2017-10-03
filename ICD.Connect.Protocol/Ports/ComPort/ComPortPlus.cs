@@ -9,7 +9,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	/// <summary>
 	/// ComPortPlus provides a bridge between S+ ComPorts and the S#/Pro libraries.
 	/// </summary>
-	public sealed class ComPortPlus : AbstractSerialPort<ComPortPlusSettings>, IComPort
+	public sealed class ComPortPlus : AbstractComPort<ComPortPlusSettings>, IComPort
 	{
 		public event EventHandler<StringEventArgs> OnComSpecToChange;
 		public event EventHandler<StringEventArgs> OnDataToSend;
@@ -95,31 +95,6 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		}
 
 		/// <summary>
-		/// Sets IsConnected to true.
-		/// </summary>
-		public override void Connect()
-		{
-			IsConnected = true;
-		}
-
-		/// <summary>
-		/// Sets IsConnected to false.
-		/// </summary>
-		public override void Disconnect()
-		{
-			IsConnected = false;
-		}
-
-		/// <summary>
-		/// Returns the connection state of the port
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsConnectedState()
-		{
-			return true;
-		}
-
-		/// <summary>
 		/// Raises the OnComSpecToChange event.
 		/// 
 		/// Raises 0 (success) if OnComSpecToChange has a listener (assumes the ComPort
@@ -167,20 +142,18 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <param name="reportCtsChanges"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public int SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
-		                          eComStopBits numberOfStopBits, eComProtocolType protocolType,
-		                          eComHardwareHandshakeType hardwareHandShake,
-		                          eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges)
+		public override int SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
+										   eComStopBits numberOfStopBits, eComProtocolType protocolType, eComHardwareHandshakeType hardwareHandShake,
+										   eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges)
 		{
 			EventHandler<StringEventArgs> handler = OnComSpecToChange;
 			if (handler == null)
 				return 1;
 
-			string comSpec = ComSpecUtils.AssembleComSpec(PortIndex, baudRate, numberOfDataBits, parityType,
-			                                              numberOfStopBits, protocolType, hardwareHandShake, softwareHandshake,
-			                                              reportCtsChanges);
+			string comSpec = ComSpecUtils.AssembleComSpec(PortIndex, baudRate, numberOfDataBits, parityType, numberOfStopBits,
+														  protocolType, hardwareHandShake, softwareHandshake, reportCtsChanges);
 
-			OnComSpecToChange(this, new StringEventArgs(comSpec));
+			OnComSpecToChange.Raise(this, new StringEventArgs(comSpec));
 
 			return 0;
 		}

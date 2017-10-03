@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Ssh
@@ -8,7 +9,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 	/// <summary>
 	/// Provides a temporary store for SSH port settings.
 	/// </summary>
-	public sealed class SshPortSettings : AbstractPortSettings
+	public sealed class SshPortSettings : AbstractSerialPortSettings
 	{
 		private const string FACTORY_NAME = "SSH";
 
