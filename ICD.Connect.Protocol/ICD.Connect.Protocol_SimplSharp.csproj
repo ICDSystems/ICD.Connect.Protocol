@@ -76,8 +76,14 @@
     <Compile Include="Ports\ComPort\AbstractComPort.cs" />
     <Compile Include="Ports\ComPort\AbstractComPortSettings.cs" />
     <Compile Include="Ports\ComPort\IComPortSettings.cs" />
+    <Compile Include="Ports\IoPort\AbstractIoPortSettings.cs" />
+    <Compile Include="Ports\IoPort\IIoPortSettings.cs" />
     <Compile Include="Ports\IPortSettings.cs" />
+    <Compile Include="Ports\IrPort\AbstractIrPortSettings.cs" />
+    <Compile Include="Ports\IrPort\IIrPortSettings.cs" />
     <Compile Include="Ports\ISerialPortSettings.cs" />
+    <Compile Include="Ports\RelayPort\AbstractRelayPortSettings.cs" />
+    <Compile Include="Ports\RelayPort\IRelayPortSettings.cs" />
     <Compile Include="Utils\ComSpecUtils.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
     <Compile Include="Data\AbstractSerialData.cs" />

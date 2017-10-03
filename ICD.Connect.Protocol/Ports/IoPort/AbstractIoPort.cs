@@ -10,7 +10,7 @@ using ICD.Connect.API.Nodes;
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
 	public abstract class AbstractIoPort<T> : AbstractPort<T>, IIoPort
-		where T : IPortSettings, new()
+		where T : IIoPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnDigitalInChanged;
 		public event EventHandler<BoolEventArgs> OnDigitalOutChanged;

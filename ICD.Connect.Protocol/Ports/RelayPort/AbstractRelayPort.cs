@@ -8,7 +8,7 @@ using ICD.Connect.API.Nodes;
 namespace ICD.Connect.Protocol.Ports.RelayPort
 {
 	public abstract class AbstractRelayPort<T> : AbstractPort<T>, IRelayPort
-		where T : IPortSettings, new()
+		where T : IRelayPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnClosedStateChanged;
 

@@ -5,7 +5,7 @@ using ICD.Connect.API.Nodes;
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
 	public abstract class AbstractIrPort<T> : AbstractPort<T>, IIrPort
-		where T : IPortSettings, new()
+		where T : IIrPortSettings, new()
 	{
 		#region Properties
 
