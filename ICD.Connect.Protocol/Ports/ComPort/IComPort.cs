@@ -2,7 +2,6 @@
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
-
 	#region ComPort enums
 
 	[Flags]
@@ -81,9 +80,8 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	/// </summary>
 	public interface IComPort : ISerialPort
 	{
-		int SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
-		                   eComStopBits numberOfStopBits, eComProtocolType protocolType,
-		                   eComHardwareHandshakeType hardwareHandShake,
-		                   eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges);
+		void SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
+							eComStopBits numberOfStopBits, eComProtocolType protocolType, eComHardwareHandshakeType hardwareHandShake,
+							eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges);
 	}
 }

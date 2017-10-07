@@ -33,8 +33,8 @@
 			return true;
 		}
 
-		public abstract int SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
-										   eComStopBits numberOfStopBits, eComProtocolType protocolType, eComHardwareHandshakeType hardwareHandShake,
-										   eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges);
+		public abstract void SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
+											eComStopBits numberOfStopBits, eComProtocolType protocolType, eComHardwareHandshakeType hardwareHandShake,
+											eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges);
 	}
 }
