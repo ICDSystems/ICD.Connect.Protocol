@@ -4,11 +4,6 @@
 		where TSettings : IComPortSettings, new()
 	{
 		/// <summary>
-		/// Returns the connection state of the port.
-		/// </summary>
-		public override bool IsConnected { get { return true; } protected set { } }
-
-		/// <summary>
 		/// Sets IsConnected to true.
 		/// </summary>
 		public override void Connect()
