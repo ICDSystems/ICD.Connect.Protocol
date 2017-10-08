@@ -150,7 +150,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 			try
 			{
 				string url = GetRequestUrl(localUrl);
-				return Request(url, s => m_Client.GetAsync(s).Result.Content.ReadAsStringAsync().Result);
+				return Request(url, s => m_Client.GetStringAsync(s).Result);
 			}
 			finally
 			{
@@ -221,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 			string output = Address;
 
 			if (!string.IsNullOrEmpty(data))
-				output = string.Format("{0}/{1}", output, data);
+				output = string.Format("{0}{1}", output, data);
 
 			return output;
 		}
