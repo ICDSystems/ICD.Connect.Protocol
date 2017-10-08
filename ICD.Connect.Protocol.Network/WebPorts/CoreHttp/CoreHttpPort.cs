@@ -149,8 +149,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
-				return Request(url, s => m_Client.GetStringAsync(s).Result);
+				return Request(localUrl, s => m_Client.GetStringAsync(s).Result);
 			}
 			finally
 			{
@@ -170,10 +169,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
 				HttpContent content = new ByteArrayContent(data);
-
-				return Request(url, s => m_Client.PostAsync(s, content).Result.Content.ReadAsStringAsync().Result);
+				return Request(localUrl, s => m_Client.PostAsync(s, content).Result.Content.ReadAsStringAsync().Result);
 			}
 			finally
 			{
@@ -205,25 +202,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 			{
 				m_ClientBusySection.Leave();
 			}
-		}
-
-		/// <summary>
-		/// Builds a request url from the given path.
-		/// e.g.
-		///		"Test/Path"
-		/// May result in
-		///		https://10.3.14.15/Test/Path
-		/// </summary>
-		/// <param name="data"></param>
-		/// <returns></returns>
-		private string GetRequestUrl(string data)
-		{
-			string output = Address;
-
-			if (!string.IsNullOrEmpty(data))
-				output = string.Format("{0}{1}", output, data);
-
-			return output;
 		}
 
 		/// <summary>

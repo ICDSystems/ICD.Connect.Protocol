@@ -89,7 +89,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		public void GetTest()
 		{
 			const string address = "http://jsonplaceholder.typicode.com/";
-			const string request = "posts/1";
+			const string request = "/posts/1";
 
 			CoreHttpPort port = new CoreHttpPort
 			{
@@ -110,7 +110,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		public void PostTest()
 		{
 			const string address = "http://jsonplaceholder.typicode.com/";
-			const string request = "posts";
+			const string request = "/posts";
 
 			CoreHttpPort port = new CoreHttpPort
 			{
