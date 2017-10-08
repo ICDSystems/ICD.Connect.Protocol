@@ -1,18 +1,18 @@
-﻿using ICD.Common.Services.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 
-namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttpPort
+namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 {
 	public sealed class CoreHttpPort : AbstractPort<CoreHttpPortSettings>, IWebPort
     {
@@ -34,7 +34,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttpPort
 		/// <summary>
 		/// The server address.
 		/// </summary>
-		public string Address { get { return m_Client.BaseAddress.AbsoluteUri; } set { m_Client.BaseAddress = new Uri(value); } }
+		public string Address
+		{
+			get { return m_Client.BaseAddress == null ? null : m_Client.BaseAddress.AbsoluteUri; }
+			set { m_Client.BaseAddress = value == null ? null : new Uri(value); }
+		}
 
 		/// <summary>
 		/// Content type for the server to respond with.
@@ -334,8 +338,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttpPort
 		{
 			base.ClearSettingsFinal();
 
-			Accept = null;
-			Address = DEFAULT_ACCEPT;
+			Accept = DEFAULT_ACCEPT;
+			Address = null;
 			Password = null;
 			Username = null;
 		}
