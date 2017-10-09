@@ -101,16 +101,10 @@
     <Compile Include="Udp\AsyncUdpClient.Standard.cs" />
     <Compile Include="Udp\AsyncUdpClientSettings.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
-    <Compile Include="WebPorts\AbstractWebPort.cs" />
-    <Compile Include="WebPorts\AbstractWebPortSettings.cs" />
-    <Compile Include="WebPorts\Https\HttpsPort.cs" />
-    <Compile Include="WebPorts\Https\HttpsPort.SimplSharp.cs" />
-    <Compile Include="WebPorts\Https\HttpsPort.Standard.cs" />
-    <Compile Include="WebPorts\Https\HttpsPortSettings.cs" />
-    <Compile Include="WebPorts\Http\HttpPort.cs" />
-    <Compile Include="WebPorts\Http\HttpPort.SimplSharp.cs" />
-    <Compile Include="WebPorts\Http\HttpPort.Standard.cs" />
-    <Compile Include="WebPorts\Http\HttpPortSettings.cs" />
+    <Compile Include="WebPorts\HttpPort.cs" />
+    <Compile Include="WebPorts\HttpPort.SimplSharp.cs" />
+    <Compile Include="WebPorts\HttpPort.Standard.cs" />
+    <Compile Include="WebPorts\HttpPortSettings.cs" />
     <Compile Include="WebPorts\IWebPort.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
