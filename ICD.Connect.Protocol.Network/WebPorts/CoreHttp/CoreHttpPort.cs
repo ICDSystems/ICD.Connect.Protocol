@@ -34,11 +34,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 		/// <summary>
 		/// The server address.
 		/// </summary>
-		public string Address
-		{
-			get { return m_Client.BaseAddress == null ? null : m_Client.BaseAddress.AbsoluteUri; }
-			set { m_Client.BaseAddress = value == null ? null : new Uri(value); }
-		}
+		public string Address { get; set; }
 
 		/// <summary>
 		/// Content type for the server to respond with.
@@ -149,7 +145,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 
 			try
 			{
-				return Request(localUrl, s => m_Client.GetStringAsync(s).Result);
+				Uri uri = new Uri(new Uri(Address), localUrl);
+				return Request(localUrl, s => m_Client.GetStringAsync(uri).Result);
 			}
 			finally
 			{
@@ -169,8 +166,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 
 			try
 			{
+				Uri uri = new Uri(new Uri(Address), localUrl);
 				HttpContent content = new ByteArrayContent(data);
-				return Request(localUrl, s => m_Client.PostAsync(s, content).Result.Content.ReadAsStringAsync().Result);
+				return Request(localUrl, s => m_Client.PostAsync(uri, content).Result.Content.ReadAsStringAsync().Result);
 			}
 			finally
 			{

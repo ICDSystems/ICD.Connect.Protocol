@@ -104,6 +104,8 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 			Assert.AreEqual(1, post.UserId);
 			Assert.AreEqual("sunt aut facere repellat provident occaecati excepturi optio reprehenderit", post.Title);
 			Assert.AreEqual("quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto", post.Body);
+
+			port.Dispose();
 		}
 
 		[Test]
@@ -125,6 +127,8 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 			Post post = JsonConvert.DeserializeObject<Post>(result);
 
 			Assert.AreEqual(101, post.Id);
+
+			port.Dispose();
 		}
 
 		[Test]
