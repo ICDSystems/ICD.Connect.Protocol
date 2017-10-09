@@ -13,6 +13,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	public sealed class HttpPortSettings : AbstractPortSettings
 	{
 		private const string FACTORY_NAME = "HTTP";
+		private const string FACTORY_NAME_HTTPS = "HTTPS";
 
 		/// <summary>
 		/// Gets the originator factory name.
@@ -92,6 +93,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			ParseXml(output, xml);
 			return output;
+		}
+
+		/// <summary>
+		/// Loads the settings from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		/// <returns></returns>
+		[XmlFactoryMethod(FACTORY_NAME_HTTPS)]
+		public static HttpPortSettings FromXmlHttps(string xml)
+		{
+			return FromXml(xml);
 		}
 	}
 }
