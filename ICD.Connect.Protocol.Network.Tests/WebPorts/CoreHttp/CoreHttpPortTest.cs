@@ -125,9 +125,6 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 			Post post = JsonConvert.DeserializeObject<Post>(result);
 
 			Assert.AreEqual(101, post.Id);
-			Assert.AreEqual(1, post.UserId);
-			Assert.AreEqual("foo", post.Title);
-			Assert.AreEqual("bar", post.Body);
 		}
 
 		[Test]
