@@ -88,7 +88,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 		[Test]
 		public void GetTest()
 		{
-			const string address = "http://jsonplaceholder.typicode.com/";
+			const string address = "https://test.icdpf.net/";
 			const string request = "/posts/1";
 
 			HttpPort port = new HttpPort
@@ -111,7 +111,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 		[Test]
 		public void PostTest()
 		{
-			const string address = "http://jsonplaceholder.typicode.com/";
+			const string address = "https://test.icdpf.net/";
 			const string request = "/posts";
 
 			HttpPort port = new HttpPort
