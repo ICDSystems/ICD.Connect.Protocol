@@ -1,10 +1,10 @@
-﻿using System.Text;
+using System.Text;
 using ICD.Common.Properties;
-using ICD.Connect.Protocol.Network.WebPorts.CoreHttp;
+using ICD.Connect.Protocol.Network.WebPorts;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
+namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 {
 	[TestFixture]
     public sealed class CoreHttpPortTest
@@ -29,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		[TestCase("http://google.com/")]
 		public void AddressTest(string address)
 		{
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Address = address
 			};
@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		[TestCase("text/plain")]
 		public void AcceptTest(string accept)
 		{
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Accept = accept
 			};
@@ -56,7 +56,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		[TestCase("test")]
 		public void UsernameTest(string username)
 		{
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Username = username
 			};
@@ -69,7 +69,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 		[TestCase("test")]
 		public void PasswordTest(string password)
 		{
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Password = password
 			};
@@ -91,7 +91,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 			const string address = "http://jsonplaceholder.typicode.com/";
 			const string request = "/posts/1";
 
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Address = address,
 				Accept = "application/json"
@@ -114,7 +114,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.CoreHttp
 			const string address = "http://jsonplaceholder.typicode.com/";
 			const string request = "/posts";
 
-			CoreHttpPort port = new CoreHttpPort
+			HttpPort port = new HttpPort
 			{
 				Address = address,
 				Accept = "application/json"

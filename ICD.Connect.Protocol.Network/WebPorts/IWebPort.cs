@@ -1,5 +1,4 @@
-﻿using System.Text;
-using ICD.Common.Properties;
+﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
@@ -63,39 +62,5 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		[PublicAPI]
 		string DispatchSoap(string action, string content);
-	}
-
-	/// <summary>
-	/// Extension methods for IWebPort.
-	/// </summary>
-	public static class WebPortExtensions
-	{
-		/// <summary>
-		/// Sends a POST request to the server. Assumes data is ASCII.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="localUrl"></param>
-		/// <param name="data"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static string Post(this IWebPort extends, string localUrl, string data)
-		{
-			return extends.Post(localUrl, data, new ASCIIEncoding());
-		}
-
-		/// <summary>
-		/// Sends a POST request to the server using the given encoding for data.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="localUrl"></param>
-		/// <param name="data"></param>
-		/// <param name="encoding"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static string Post(this IWebPort extends, string localUrl, string data, Encoding encoding)
-		{
-			byte[] bytes = encoding.GetBytes(data);
-			return extends.Post(localUrl, bytes);
-		}
 	}
 }

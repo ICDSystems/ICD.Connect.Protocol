@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -11,115 +12,44 @@ using ICD.Connect.Settings.Core;
 namespace ICD.Connect.Protocol.Network.WebPorts
 {
 	/// <summary>
-	/// Base class for web ports.
+	/// Allows for communication with a HTTP service.
 	/// </summary>
-	public abstract class AbstractWebPort<T> : AbstractPort<T>, IWebPort
-		where T : AbstractWebPortSettings, new()
+	public sealed partial class HttpPort : AbstractPort<HttpPortSettings>, IWebPort
 	{
-	    private const string DEFAULT_ACCEPT = "text/html";
+		private const string DEFAULT_ACCEPT = "text/html";
 
-		protected const string SOAP_ACCEPT = "application/xml";
-		protected const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
-		protected const string SOAP_ACTION_HEADER = "SOAPAction";
+		private const string SOAP_ACCEPT = "application/xml";
+		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
+		private const string SOAP_ACTION_HEADER = "SOAPAction";
 
 		private bool m_LastRequestSucceeded;
-
-		#region Properties
-
-		/// <summary>
-		/// The server address.
-		/// </summary>
-		public string Address { get; set; }
-
-		/// <summary>
-		/// The request protocol, i.e. http or https.
-		/// </summary>
-		protected abstract string Protocol { get; }
-
-		/// <summary>
-		/// Content type for the server to respond with. See HttpClient.Accept.
-		/// </summary>
-		public abstract string Accept { get; set; }
-
-		/// <summary>
-		/// Username for the server.
-		/// </summary>
-		public abstract string Username { get; set; }
-
-		/// <summary>
-		/// Password for the server.
-		/// </summary>
-		public abstract string Password { get; set; }
-
-		/// <summary>
-		/// Returns true if currently waiting for a response from the server.
-		/// </summary>
-		public abstract bool Busy { get; }
-
-		#endregion
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractWebPort()
-		{
-			m_LastRequestSucceeded = true;
-			UpdateCachedOnlineStatus();
-		}
-
-		/// <summary>
-		/// Destructor.
-		/// </summary>
-		~AbstractWebPort()
-		{
-			Dispose();
-		}
 
 		#region Methods
 
 		/// <summary>
-		/// Sends a GET request to the server.
+		/// Sends a POST request to the server. Assumes data is ASCII.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		public abstract string Get(string localUrl);
-
-		/// <summary>
-		/// Sends a POST request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="data"></param>
-		/// <returns></returns>
-		public abstract string Post(string localUrl, byte[] data);
-
-		/// <summary>
-		/// Sends a SOAP request to the server.
-		/// </summary>
-		/// <param name="action"></param>
-		/// <param name="content"></param>
-		/// <returns></returns>
-		public abstract string DispatchSoap(string action, string content);
-
-		/// <summary>
-		/// Builds a request url from the given path.
-		/// e.g.
-		///		"Test/Path"
-		/// May result in
-		///		https://10.3.14.15/Test/Path
-		/// </summary>
 		/// <param name="data"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public string GetRequestUrl(string data)
+		public string Post(string localUrl, string data)
 		{
-			string output = Address;
+			return Post(localUrl, data, new ASCIIEncoding());
+		}
 
-			if (!output.Contains("://"))
-				output = string.Format("{0}://{1}", Protocol, output);
-
-			if (!string.IsNullOrEmpty(data))
-				output = string.Format("{0}/{1}", output, data);
-
-			return output;
+		/// <summary>
+		/// Sends a POST request to the server using the given encoding for data.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="data"></param>
+		/// <param name="encoding"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public string Post(string localUrl, string data, Encoding encoding)
+		{
+			byte[] bytes = encoding.GetBytes(data);
+			return Post(localUrl, bytes);
 		}
 
 		#endregion
@@ -151,7 +81,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="content"></param>
 		/// <param name="requestMethod"></param>
 		/// <returns></returns>
-		protected string Request(string content, Func<string, string> requestMethod)
+		private string Request(string content, Func<string, string> requestMethod)
 		{
 			string output;
 
@@ -179,7 +109,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// Override to apply properties to the settings instance.
 		/// </summary>
 		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(T settings)
+		protected override void CopySettingsFinal(HttpPortSettings settings)
 		{
 			base.CopySettingsFinal(settings);
 
@@ -196,8 +126,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ClearSettingsFinal();
 
-			Accept = null;
-			Address = DEFAULT_ACCEPT;
+			Accept = DEFAULT_ACCEPT;
+			Address = null;
 			Password = null;
 			Username = null;
 		}
@@ -207,7 +137,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		protected override void ApplySettingsFinal(HttpPortSettings settings, IDeviceFactory factory)
 		{
 			base.ApplySettingsFinal(settings, factory);
 
@@ -230,7 +160,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			base.BuildConsoleStatus(addRow);
 
 			addRow("Address", Address);
-			addRow("Protocol", Protocol);
 			addRow("Accept", Accept);
 			addRow("Username", Username);
 			addRow("Password", StringUtils.PasswordFormat(Password));

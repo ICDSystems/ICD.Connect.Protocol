@@ -1,14 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
 {
 	/// <summary>
-	/// Base class for web port settings.
+	/// Settings for a HttpPort.
 	/// </summary>
-	public abstract class AbstractWebPortSettings : AbstractPortSettings
+	public sealed class HttpPortSettings : AbstractPortSettings
 	{
+		private const string FACTORY_NAME = "HTTP";
+
+		/// <summary>
+		/// Gets the originator factory name.
+		/// </summary>
+		public override string FactoryName { get { return FACTORY_NAME; } }
+
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(HttpPort); } }
+
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string USERNAME_ELEMENT = "Username";
 		private const string PASSWORD_ELEMENT = "Password";
@@ -57,21 +72,26 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			yield break;
 		}
 
-		/// <summary>
-		/// Parses the xml and applies the properties to the instance.
-		/// </summary>
-		/// <param name="instance"></param>
-		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractWebPortSettings instance, string xml)
-		{
-			instance.Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			instance.Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
-			instance.Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
-			instance.Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT);
-
-            AbstractPortSettings.ParseXml(instance, xml);
-		}
-
 		#endregion
+
+		/// <summary>
+		/// Loads the settings from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		/// <returns></returns>
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
+		public static HttpPortSettings FromXml(string xml)
+		{
+			HttpPortSettings output = new HttpPortSettings
+			{
+				Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT),
+				Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT),
+				Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT),
+				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)
+			};
+
+			ParseXml(output, xml);
+			return output;
+		}
 	}
 }

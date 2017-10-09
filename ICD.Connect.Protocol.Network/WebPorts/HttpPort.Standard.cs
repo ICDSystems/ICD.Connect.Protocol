@@ -1,31 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if STANDARD
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
-using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
+namespace ICD.Connect.Protocol.Network.WebPorts
 {
-	public sealed class CoreHttpPort : AbstractPort<CoreHttpPortSettings>, IWebPort
+	public sealed partial class HttpPort
     {
-		private const string DEFAULT_ACCEPT = "text/html";
-
-		private const string SOAP_ACCEPT = "application/xml";
-		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
-		private const string SOAP_ACTION_HEADER = "SOAPAction";
-
 		private readonly HttpClient m_Client;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
-		private bool m_LastRequestSucceeded;
 		private string m_Username;
 		private string m_Password;
 
@@ -108,7 +96,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public CoreHttpPort()
+		public HttpPort()
 		{
 			m_LastRequestSucceeded = true;
 			
@@ -190,8 +178,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 			{
 				Accept = SOAP_ACCEPT;
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Address);
-				request.Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE);
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Address)
+				{
+					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
+				};
+
 				request.Headers.Add(SOAP_ACTION_HEADER, action);
 
 				return Request(content, s => Dispatch(request));
@@ -244,151 +235,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.CoreHttp
 			m_Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 		}
 
-		/// <summary>
-		/// Updates the IsOnline status and raises events.
-		/// </summary>
-		/// <param name="succeeded"></param>
-		private void SetLastRequestSucceeded(bool succeeded)
-		{
-			m_LastRequestSucceeded = succeeded;
-			UpdateCachedOnlineStatus();
-		}
-
-		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return m_LastRequestSucceeded;
-		}
-
-		/// <summary>
-		/// Common logic for sending a request to the port.
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="requestMethod"></param>
-		/// <returns></returns>
-		private string Request(string content, Func<string, string> requestMethod)
-		{
-			string output;
-
-			try
-			{
-				PrintTx(content);
-				output = requestMethod(content);
-				SetLastRequestSucceeded(true);
-			}
-			catch (Exception)
-			{
-				SetLastRequestSucceeded(false);
-				throw;
-			}
-
-			PrintRx(output);
-			return output;
-		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(CoreHttpPortSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Address = Address;
-			settings.Accept = Accept;
-			settings.Password = Password;
-			settings.Username = Username;
-		}
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			Accept = DEFAULT_ACCEPT;
-			Address = null;
-			Password = null;
-			Username = null;
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(CoreHttpPortSettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			Address = settings.Address;
-			Password = settings.Password;
-			Username = settings.Username;
-			Accept = settings.Accept ?? DEFAULT_ACCEPT;
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("Address", Address);
-			addRow("Accept", Accept);
-			addRow("Username", Username);
-			addRow("Password", StringUtils.PasswordFormat(Password));
-			addRow("Busy", Busy);
-		}
-
-		/// <summary>
-		/// Gets the console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new GenericConsoleCommand<string>("SetAddress", "Sets the address for requests", s => Address = s);
-			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
-			yield return new GenericConsoleCommand<string>("SetUsername", "Sets the username for requests", s => Username = s);
-			yield return new GenericConsoleCommand<string>("SetPassword", "Sets the password for requests", s => Password = s);
-
-			yield return new ParamsConsoleCommand("Get", "Performs a request at the given path", a => ConsoleGet(a));
-		}
-
-		/// <summary>
-		/// Shim to avoid "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
-		/// <summary>
-		/// Shim to perform a get request from the console.
-		/// </summary>
-		/// <param name="paths"></param>
-		private void ConsoleGet(params string[] paths)
-		{
-			paths.ForEach(p => Get(p));
-		}
-
 		#endregion
 	}
 }
+#endif

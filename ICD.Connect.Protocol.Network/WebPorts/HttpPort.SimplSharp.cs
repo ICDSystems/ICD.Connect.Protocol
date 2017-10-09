@@ -1,40 +1,41 @@
 ﻿#if SIMPLSHARP
-using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharp.Net.Http;
-using Crestron.SimplSharp.Net.Https;
-using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
-using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
-namespace ICD.Connect.Protocol.Network.WebPorts.Https
+namespace ICD.Connect.Protocol.Network.WebPorts
 {
-	public sealed partial class HttpsPort
+	public sealed partial class HttpPort
 	{
-		private readonly HttpsClient m_Client;
+		private readonly HttpClient m_Client;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
 		#region Properties
 
 		/// <summary>
+		/// The server address.
+		/// </summary>
+		public string Address { get; set; }
+
+		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
-		public override string Accept { get { return m_Client.Accept; } set { m_Client.Accept = value; } }
+		public string Accept { get { return m_Client.Accept; } set { m_Client.Accept = value; } }
 
 		/// <summary>
 		/// Username for the server.
 		/// </summary>
-		public override string Username { get { return m_Client.UserName; } set { m_Client.UserName = value; } }
+		public string Username { get { return m_Client.UserName; } set { m_Client.UserName = value; } }
 
 		/// <summary>
 		/// Password for the server.
 		/// </summary>
-		public override string Password { get { return m_Client.Password; } set { m_Client.Password = value; } }
+		public string Password { get { return m_Client.Password; } set { m_Client.Password = value; } }
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public override bool Busy { get { return m_Client.ProcessBusy; } }
+		public bool Busy { get { return m_Client.ProcessBusy; } }
 
 		#endregion
 
@@ -43,15 +44,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public HttpsPort()
+		public HttpPort()
 		{
-			m_Client = new HttpsClient
+			m_Client = new HttpClient
 			{
 				KeepAlive = false,
 				TimeoutEnabled = true,
-				Timeout = 2,
-				HostVerification = false,
-				PeerVerification = false
+				Timeout = 2
 			};
 
 			m_ClientBusySection = new SafeCriticalSection();
@@ -80,35 +79,10 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		}
 
 		/// <summary>
-		/// Loads the SSL certificate from the given path.
-		/// </summary>
-		/// <param name="fullPath"></param>
-		/// <param name="password"></param>
-		/// <param name="type"></param>
-		[PublicAPI]
-		public void LoadClientCertificateFinal(string fullPath, string password, eCertificateType type)
-		{
-			m_ClientBusySection.Enter();
-
-			try
-			{
-				m_Client.SetClientCertificate(fullPath, password, (HttpsClient.ClientCertificateType)type);
-			}
-			catch (FileNotFoundException)
-			{
-				Logger.AddEntry(eSeverity.Error, "SSL Certificate does not exist: {0}", fullPath);
-			}
-			finally
-			{
-				m_ClientBusySection.Leave();
-			}
-		}
-
-		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		public override string Get(string localUrl)
+		public string Get(string localUrl)
 		{
 			m_ClientBusySection.Enter();
 
@@ -129,7 +103,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		public override string Post(string localUrl, byte[] data)
+		public string Post(string localUrl, byte[] data)
 		{
 			m_ClientBusySection.Enter();
 
@@ -150,16 +124,15 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 		/// <param name="action"></param>
 		/// <param name="content"></param>
 		/// <returns></returns>
-		public override string DispatchSoap(string action, string content)
+		public string DispatchSoap(string action, string content)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
 				m_Client.Accept = SOAP_ACCEPT;
-				m_Client.IncludeHeaders = false;
 
-				HttpsClientRequest request = new HttpsClientRequest
+				HttpClientRequest request = new HttpClientRequest
 				{
 					RequestType = RequestType.Post,
 					Url = new UrlParser(Address),
@@ -176,18 +149,42 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 			}
 		}
 
+		#endregion
+
+		/// <summary>
+		/// Builds a request url from the given path.
+		/// e.g.
+		///		"Test/Path"
+		/// May result in
+		///		https://10.3.14.15/Test/Path
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		private string GetRequestUrl(string data)
+		{
+			string output = Address;
+
+			if (string.IsNullOrEmpty(data))
+				return output;
+
+			if (data.StartsWith("/"))
+				data = data.Substring(1);
+
+			return string.Format("{0}/{1}", output, data);
+		}
+
 		/// <summary>
 		/// Dispatches the request and returns the result.
 		/// </summary>
 		/// <param name="request"></param>
 		/// <returns></returns>
-		public string Dispatch(HttpsClientRequest request)
+		private string Dispatch(HttpClientRequest request)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				HttpsClientResponse response = m_Client.Dispatch(request);
+				HttpClientResponse response = m_Client.Dispatch(request);
 
 				if (response == null)
 				{
@@ -206,8 +203,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts.Https
 				m_ClientBusySection.Leave();
 			}
 		}
-
-		#endregion
 	}
 }
 
