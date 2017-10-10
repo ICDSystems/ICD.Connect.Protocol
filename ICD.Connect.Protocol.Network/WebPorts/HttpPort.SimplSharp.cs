@@ -1,5 +1,7 @@
-﻿#if SIMPLSHARP
+﻿using System;
+#if SIMPLSHARP
 using Crestron.SimplSharp.Net.Http;
+using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 
@@ -7,7 +9,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 {
 	public sealed partial class HttpPort
 	{
-		private readonly HttpClient m_Client;
+		private readonly HttpClient m_HttpClient;
+		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
 		#region Properties
@@ -20,22 +23,46 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
-		public string Accept { get { return m_Client.Accept; } set { m_Client.Accept = value; } }
+		public string Accept
+		{
+			get { return m_HttpClient.Accept; }
+			set
+			{
+				m_HttpClient.Accept = value;
+				m_HttpsClient.Accept = value;
+			}
+		}
 
 		/// <summary>
 		/// Username for the server.
 		/// </summary>
-		public string Username { get { return m_Client.UserName; } set { m_Client.UserName = value; } }
+		public string Username
+		{
+			get { return m_HttpClient.UserName; }
+			set
+			{
+				m_HttpClient.UserName = value;
+				m_HttpsClient.UserName = value;
+			}
+		}
 
 		/// <summary>
 		/// Password for the server.
 		/// </summary>
-		public string Password { get { return m_Client.Password; } set { m_Client.Password = value; } }
+		public string Password
+		{
+			get { return m_HttpClient.Password; }
+			set
+			{
+				m_HttpClient.Password = value;
+				m_HttpsClient.Password = value;
+			}
+		}
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public bool Busy { get { return m_Client.ProcessBusy; } }
+		public bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
 
 		#endregion
 
@@ -46,7 +73,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		public HttpPort()
 		{
-			m_Client = new HttpClient
+			m_HttpClient = new HttpClient
+			{
+				KeepAlive = false,
+				TimeoutEnabled = true,
+				Timeout = 2
+			};
+
+			m_HttpsClient = new HttpsClient
 			{
 				KeepAlive = false,
 				TimeoutEnabled = true,
@@ -69,11 +103,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				m_Client.Abort();
+				m_HttpClient.Abort();
 			}
-				// ReSharper disable EmptyGeneralCatchClause
 			catch
-				// ReSharper restore EmptyGeneralCatchClause
+			{
+			}
+
+			try
+			{
+				m_HttpsClient.Abort();
+			}
+			catch
 			{
 			}
 		}
@@ -89,7 +129,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			try
 			{
 				string url = GetRequestUrl(localUrl);
-				return Request(url, s => m_Client.Get(s));
+				return IsHttpsUrl(url)
+					? Request(url, s => m_HttpsClient.Get(s))
+					: Request(url, s => m_HttpClient.Get(s));
 			}
 			finally
 			{
@@ -110,7 +152,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			try
 			{
 				string url = GetRequestUrl(localUrl);
-				return Request(url, s => m_Client.Post(s, data));
+				return IsHttpsUrl(url)
+					? Request(url, s => m_HttpsClient.Post(s, data))
+					: Request(url, s => m_HttpClient.Post(s, data));
 			}
 			finally
 			{
@@ -126,22 +170,38 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		public string DispatchSoap(string action, string content)
 		{
+			Accept = SOAP_ACCEPT;
+
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				m_Client.Accept = SOAP_ACCEPT;
-
-				HttpClientRequest request = new HttpClientRequest
+				if (IsHttpsUrl(Address))
 				{
-					RequestType = RequestType.Post,
-					Url = new UrlParser(Address),
-					Header = {ContentType = SOAP_CONTENT_TYPE},
-					ContentString = content
-				};
-				request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
+					HttpsClientRequest request = new HttpsClientRequest
+					{
+						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
+						Url = new UrlParser(Address),
+						Header = { ContentType = SOAP_CONTENT_TYPE },
+						ContentString = content
+					};
+					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-				return Request(content, s => Dispatch(request));
+					return Request(content, s => Dispatch(request));
+				}
+				else
+				{
+					HttpClientRequest request = new HttpClientRequest
+					{
+						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post,
+						Url = new UrlParser(Address),
+						Header = { ContentType = SOAP_CONTENT_TYPE },
+						ContentString = content
+					};
+					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
+
+					return Request(content, s => Dispatch(request));
+				}
 			}
 			finally
 			{
@@ -174,6 +234,50 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		}
 
 		/// <summary>
+		/// Returns true if the given address is a https url.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		private bool IsHttpsUrl(string url)
+		{
+			if (url == null)
+				throw new ArgumentNullException("url");
+
+			return url.ToLower().StartsWith("https://");
+		}
+
+		/// <summary>
+		/// Dispatches the request and returns the result.
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns></returns>
+		private string Dispatch(HttpsClientRequest request)
+		{
+			m_ClientBusySection.Enter();
+
+			try
+			{
+				HttpsClientResponse response = m_HttpsClient.Dispatch(request);
+
+				if (response == null)
+				{
+					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.Url);
+					return null;
+				}
+
+				if (response.Code < 300)
+					return response.ContentString;
+
+				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.Url, response.Code);
+				return null;
+			}
+			finally
+			{
+				m_ClientBusySection.Leave();
+			}
+		}
+
+		/// <summary>
 		/// Dispatches the request and returns the result.
 		/// </summary>
 		/// <param name="request"></param>
@@ -184,7 +288,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				HttpClientResponse response = m_Client.Dispatch(request);
+				HttpClientResponse response = m_HttpClient.Dispatch(request);
 
 				if (response == null)
 				{
