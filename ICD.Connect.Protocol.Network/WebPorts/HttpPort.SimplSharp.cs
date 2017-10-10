@@ -88,6 +88,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			};
 
 			m_ClientBusySection = new SafeCriticalSection();
+
+			UpdateCachedOnlineStatus();
 		}
 
 		#endregion
@@ -262,13 +264,18 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.Url);
+					SetLastRequestSucceeded(false);
 					return null;
 				}
 
 				if (response.Code < 300)
+				{
+					SetLastRequestSucceeded(true);
 					return response.ContentString;
+				}
 
 				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.Url, response.Code);
+				SetLastRequestSucceeded(false);
 				return null;
 			}
 			finally
@@ -293,13 +300,18 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.Url);
+					SetLastRequestSucceeded(false);
 					return null;
 				}
 
 				if (response.Code < 300)
+				{
+					SetLastRequestSucceeded(true);
 					return response.ContentString;
+				}
 
 				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.Url, response.Code);
+				SetLastRequestSucceeded(false);
 				return null;
 			}
 			finally

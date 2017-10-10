@@ -209,13 +209,18 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.RequestUri);
+					SetLastRequestSucceeded(false);
 					return null;
 				}
 
 				if ((int)response.StatusCode < 300)
+				{
+					SetLastRequestSucceeded(true);
 					return response.Content.ReadAsStringAsync().Result;
+				}
 
 				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri, response.StatusCode);
+				SetLastRequestSucceeded(false);
 				return null;
 			}
 			finally
