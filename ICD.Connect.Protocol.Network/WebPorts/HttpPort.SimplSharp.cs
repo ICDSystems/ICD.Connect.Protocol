@@ -220,19 +220,30 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// May result in
 		///		https://10.3.14.15/Test/Path
 		/// </summary>
-		/// <param name="data"></param>
+		/// <param name="localAddress"></param>
 		/// <returns></returns>
-		private string GetRequestUrl(string data)
+		private string GetRequestUrl(string localAddress)
 		{
 			string output = Address;
 
-			if (string.IsNullOrEmpty(data))
+			// Ensure the address starts with a protocol
+			if (!output.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+			    !output.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+				output = string.Format("http://{0}", output);
+
+			// Ensure the address ends with a trailing slash
+			if (!output.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+				output = string.Format("{0}/", output);
+
+			if (string.IsNullOrEmpty(localAddress))
 				return output;
 
-			if (data.StartsWith("/"))
-				data = data.Substring(1);
+			// Avoid doubling up the trailing slash
+			if (localAddress.StartsWith("/"))
+				localAddress = localAddress.Substring(1);
 
-			return string.Format("{0}/{1}", output, data);
+			// Append the local address to the base address
+			return string.Format("{0}/{1}", output, localAddress);
 		}
 
 		/// <summary>
