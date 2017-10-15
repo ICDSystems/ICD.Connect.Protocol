@@ -202,22 +202,23 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		public string Serialize()
 		{
 			StringBuilder builder = new StringBuilder();
-			IcdStringWriter writer = new IcdStringWriter(builder);
-			JsonWriter jsonWriter = new JsonTextWriter(writer.WrappedStringWriter);
 
-			using (jsonWriter)
+			using (IcdStringWriter writer = new IcdStringWriter(builder))
 			{
-				jsonWriter.Formatting = Formatting.Indented;
-				jsonWriter.WriteStartObject();
+				using (JsonWriter jsonWriter = new JsonTextWriter(writer.WrappedStringWriter))
+				{
+					jsonWriter.Formatting = Formatting.Indented;
+					jsonWriter.WriteStartObject();
 
-				WriteProcedureType(jsonWriter);
-				WriteKey(jsonWriter);
-				WriteParameters(jsonWriter);
+					WriteProcedureType(jsonWriter);
+					WriteKey(jsonWriter);
+					WriteParameters(jsonWriter);
 
-				jsonWriter.WriteEndObject();
+					jsonWriter.WriteEndObject();
+
+					return builder.ToString();
+				}
 			}
-
-			return builder.ToString();
 		}
 
 		/// <summary>
