@@ -7,6 +7,45 @@ namespace ICD.Connect.Protocol.Utils
 	public static class ComSpecUtils
 	{
 		/// <summary>
+		/// Returns the number of stop bits.
+		/// </summary>
+		/// <param name="stopBits"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static int StopBitsToCount(eComStopBits stopBits)
+		{
+			switch (stopBits)
+			{
+				case eComStopBits.ComspecStopBits1:
+					return 1;
+				case eComStopBits.ComspecStopBits2:
+					return 2;
+				default:
+					throw new ArgumentOutOfRangeException("stopBits");
+			}
+		}
+
+		/// <summary>
+		/// Returns the number of stop bits.
+		/// </summary>
+		/// <param name="count"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static eComStopBits StopBitsFromCount(int count)
+		{
+			switch (count)
+			{
+				case 1:
+					return eComStopBits.ComspecStopBits1;
+				case 2:
+					return eComStopBits.ComspecStopBits2;
+
+				default:
+					throw new ArgumentOutOfRangeException("count");
+			}
+		}
+
+		/// <summary>
 		/// Returns the numeric portion of the baud rate.
 		/// </summary>
 		/// <param name="baudRate"></param>
