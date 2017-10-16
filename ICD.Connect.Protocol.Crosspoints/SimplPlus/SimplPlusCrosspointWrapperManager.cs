@@ -84,7 +84,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			controlCrosspointManager.OnCrosspointUnregistered += ControlCrosspointManagerOnCrosspointUnregistered;
 		}
 
-
 		/// <summary>
 		/// todo: implement method
 		/// </summary>

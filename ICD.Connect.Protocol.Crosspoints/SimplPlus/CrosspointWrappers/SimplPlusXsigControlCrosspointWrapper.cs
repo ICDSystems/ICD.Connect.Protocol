@@ -33,13 +33,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#endregion
 
-
 		#region Events
 
 		public event EventHandler OnCrosspointChanged;
 
 		#endregion
-
 
 		#region Properties
 
@@ -54,7 +52,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		public ICrosspoint Crosspoint { get { return m_Crosspoint; }}
 
 		#endregion
-
 
 		#region SPlusMethods
 
