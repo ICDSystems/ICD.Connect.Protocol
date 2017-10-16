@@ -124,6 +124,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				int hash = 17;
 				hash = hash * 23 + m_Id;
 				hash = hash * 23 + (m_Name == null ? 0 : m_Name.GetHashCode());
+// ReSharper disable once ImpureMethodCallOnReadonlyValueField
 				hash = hash * 23 + m_Host.GetHashCode();
 				return hash;
 			}
