@@ -138,8 +138,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns>True if the initialization, including connection, was successful. False if already initialized with the equipment.</returns>
 		public bool Initialize(int equipmentId)
 		{
-			eCrosspointStatus connectStatus = eCrosspointStatus.Uninitialized;
-
 			if (equipmentId == EquipmentCrosspoint)
 				return false;
 
@@ -153,12 +151,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					return deinit;
 			}
 
+			eCrosspointStatus connectStatus = eCrosspointStatus.Uninitialized;
+
 			// Attempt to connect, return false if connection failed.
-			var callback = RequestConnectCallback;
+			ControlRequestConnectCallback callback = RequestConnectCallback;
 			if (callback != null)
 				connectStatus = RequestConnectCallback(this, equipmentId);
 
-			if ( connectStatus != eCrosspointStatus.Connected )
+			if (connectStatus != eCrosspointStatus.Connected)
 				ClearSigs();
 
 			Status = connectStatus;
@@ -176,7 +176,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
 				return false;
 
-			var callback = RequestDisconnectCallback;
+			ControlRequestDisconnectCallback callback = RequestDisconnectCallback;
 			if (callback != null)
 				Status = callback(this);
 
@@ -200,7 +200,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
 				return false;
 
-			var callback = RequestDisconnectCallback;
+			ControlRequestDisconnectCallback callback = RequestDisconnectCallback;
 			if (callback != null)
 				Status = callback(this);
 

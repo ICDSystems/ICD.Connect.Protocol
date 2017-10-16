@@ -466,7 +466,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <summary>
 		/// Prints the table of active connections to the console.
 		/// </summary>
-		private void PrintConnections()
+		private string PrintConnections()
 		{
 			TableBuilder builder = new TableBuilder("Control", "Equipment", "Equipment Host");
 
@@ -493,7 +493,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				m_ControlClientMapSection.Leave();
 			}
 
-			IcdConsole.ConsoleCommandResponse(builder.ToString());
+			return builder.ToString();
 		}
 
 		#endregion

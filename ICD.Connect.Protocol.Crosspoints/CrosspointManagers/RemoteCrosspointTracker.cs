@@ -256,7 +256,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <summary>
 		/// Prints all of the remote crosspoint information.
 		/// </summary>
-		private void PrintCrosspoints()
+		private string PrintCrosspoints()
 		{
 			TableBuilder builder = new TableBuilder("Id", "Name", "Host", "Last Seen");
 
@@ -275,7 +275,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				m_CrosspointsSection.Leave();
 			}
 
-			IcdConsole.ConsoleCommandResponse(builder.ToString());
+			return builder.ToString();
 		}
 
 		#endregion

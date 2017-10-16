@@ -576,10 +576,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			yield return new ConsoleCommand("PrintAddresses", "Prints the addresses that advertisements are being sent to", () => PrintAddresses());
 		}
 
-		private void PrintAddresses()
+		private string PrintAddresses()
 		{
-			IcdConsole.ConsoleCommandResponseLine("Addresses: {0}", StringUtils.ArrayFormat(GetAdvertisementAddresses()));
-			IcdConsole.ConsoleCommandResponse("Ports: {0}", StringUtils.ArrayRangeFormat(GetAdvertisementPorts()));
+			return string.Format("Addresses: {0}{1}Ports: {2}",
+			                     StringUtils.ArrayFormat(GetAdvertisementAddresses()),
+			                     IcdEnvironment.NewLine,
+			                     StringUtils.ArrayRangeFormat(GetAdvertisementPorts()));
 		}
 
 		#endregion
