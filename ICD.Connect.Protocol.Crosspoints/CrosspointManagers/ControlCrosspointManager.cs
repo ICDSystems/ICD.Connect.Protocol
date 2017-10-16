@@ -292,19 +292,24 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			if (!connected)
 				client.Connect();
 
-			if (!client.IsConnected)
+			if (client.IsConnected)
+				return;
+
+			m_ControlClientMapSection.Enter();
+
+			try
 			{
-				m_ControlClientMapSection.Enter();
-				try
-				{
-					var ids = m_ControlClientMap.Where(c => c.Value == client).Select(c => c.Key);
-					foreach (var control in ids.Select(i => GetCrosspoint(i)).OfType<ControlCrosspoint>())
-						control.Status = eCrosspointStatus.ConnectionDropped;
-				}
-				finally
-				{
-					m_ControlClientMapSection.Leave();
-				}
+				IEnumerable<ControlCrosspoint> controls =
+					m_ControlClientMap.Where(c => c.Value == client)
+					                  .Select(c => GetCrosspoint(c.Key))
+					                  .OfType<ControlCrosspoint>();
+
+				foreach (ControlCrosspoint control in controls)
+					control.Status = eCrosspointStatus.ConnectionDropped;
+			}
+			finally
+			{
+				m_ControlClientMapSection.Leave();
 			}
 		}
 
@@ -348,13 +353,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					foreach (int controlId in crosspointData.GetControlIds())
 					{
 						int equipment;
-						if (TryGetEquipmentForControl(controlId, out equipment) && equipment == crosspointData.EquipmentId)
-						{
-							RemoveControlFromDictionaries(controlId);
-							var crosspoint = GetCrosspoint(controlId) as ControlCrosspoint;
-							if(crosspoint != null)
-								crosspoint.Status = eCrosspointStatus.ConnectionClosedRemote;
-						}
+						if (!TryGetEquipmentForControl(controlId, out equipment) || equipment != crosspointData.EquipmentId)
+							continue;
+
+						RemoveControlFromDictionaries(controlId);
+
+						ControlCrosspoint crosspoint = GetCrosspoint(controlId) as ControlCrosspoint;
+						if(crosspoint != null)
+							crosspoint.Status = eCrosspointStatus.ConnectionClosedRemote;
 					}
 					break;
 			}
