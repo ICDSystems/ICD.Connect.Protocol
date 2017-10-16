@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ICD.Common.Attributes.Rpc;
 using ICD.Common.Properties;
+using ICD.Common.Utils.Attributes.Rpc;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Data;
