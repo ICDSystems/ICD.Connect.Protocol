@@ -207,7 +207,6 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			{
 				using (JsonWriter jsonWriter = new JsonTextWriter(writer.WrappedStringWriter))
 				{
-					jsonWriter.Formatting = Formatting.Indented;
 					jsonWriter.WriteStartObject();
 
 					WriteProcedureType(jsonWriter);
