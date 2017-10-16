@@ -183,23 +183,6 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			return eCrosspointStatus.Idle;
 		}
 
-		private void RemoveControlFromDictionaries(int crosspointId)
-		{
-			AsyncTcpClient client;
-			m_ControlClientMap.TryGetValue(crosspointId, out client);
-
-			int equipmentId;
-			m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
-
-			// Remove everything from the dictionaries
-			m_ControlClientMap.Remove(crosspointId);
-			m_ControlEquipmentMap.Remove(crosspointId);
-
-			// If there are no other controls using this client we can remove it.
-			if (m_ControlClientMap.Values.All(c => c != client))
-				m_ClientPool.DisposeClient(client, CLIENT_KEEP_ALIVE);
-		}
-
 		/// <summary>
 		/// Gets info for the equipment that the control is currently connected to.
 		/// </summary>
@@ -240,6 +223,32 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		#endregion
 
 		#region Private Methods
+
+		private void RemoveControlFromDictionaries(int crosspointId)
+		{
+			m_ControlClientMapSection.Enter();
+
+			try
+			{
+				AsyncTcpClient client;
+				m_ControlClientMap.TryGetValue(crosspointId, out client);
+
+				int equipmentId;
+				m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
+
+				// Remove everything from the dictionaries
+				m_ControlClientMap.Remove(crosspointId);
+				m_ControlEquipmentMap.Remove(crosspointId);
+
+				// If there are no other controls using this client we can remove it.
+				if (m_ControlClientMap.Values.All(c => c != client))
+					m_ClientPool.DisposeClient(client, CLIENT_KEEP_ALIVE);
+			}
+			finally
+			{
+				m_ControlClientMapSection.Leave();
+			}
+		}
 
 		/// <summary>
 		/// Gets the TCP client for the given control.
