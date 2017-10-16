@@ -69,8 +69,13 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 		public override string ToString()
 		{
-			return string.Format("{0}(Id={1}, Name={2}, Host={3})", GetType().Name, m_Id, StringUtils.ToRepresentation(m_Name),
-			                     m_Host);
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Id", m_Id);
+			builder.AppendProperty("Name", m_Name);
+			builder.AppendProperty("Host", m_Host);
+
+			return builder.ToString();
 		}
 
 		/// <summary>
