@@ -33,6 +33,12 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		public override string ConsoleHelp { get { return "Contains the local control crosspoints."; } }
 
 		/// <summary>
+		/// When true, attempts to reconnect to equipment on disconnect.
+		/// </summary>
+		[PublicAPI]
+		public bool KeepAlive { get; set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public ControlCrosspointManager(int systemId)
@@ -298,7 +304,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private void PoolOnClientConnectionStateChanged(TcpClientPool sender, AsyncTcpClient client, bool connected)
 		{
 			// If the client disconnects attempt to reconnect it
-			if (!connected)
+			if (!connected && KeepAlive)
 				client.Connect();
 
 			if (client.IsConnected)

@@ -168,6 +168,19 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			}
 		}
 
+		/// <summary>
+		/// When true, the crosspoint manager will attempt to reconnect when a connection is dropped.
+		/// </summary>
+		/// <param name="keepAlive"></param>
+		[PublicAPI]
+		public void SetKeepAlive(ushort keepAlive)
+		{
+			if (m_Manager == null)
+				return;
+
+			m_Manager.KeepAlive = keepAlive != 0;
+		}
+
 		#endregion
 
 		#region SPlusDelegates
