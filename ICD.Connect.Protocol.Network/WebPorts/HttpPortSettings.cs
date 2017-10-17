@@ -81,18 +81,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="xml"></param>
 		/// <returns></returns>
 		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static HttpPortSettings FromXml(string xml)
+		public static HttpPortSettings FromXmlHttp(string xml)
 		{
-			HttpPortSettings output = new HttpPortSettings
-			{
-				Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT),
-				Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT),
-				Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT),
-				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)
-			};
-
-			ParseXml(output, xml);
-			return output;
+			return FromXml(xml, "http");
 		}
 
 		/// <summary>
@@ -103,7 +94,35 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		[XmlFactoryMethod(FACTORY_NAME_HTTPS)]
 		public static HttpPortSettings FromXmlHttps(string xml)
 		{
-			return FromXml(xml);
+			return FromXml(xml, "https");
+		}
+
+		/// <summary>
+		/// Loads the settings from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		/// <param name="protocol"></param>
+		/// <returns></returns>
+		private static HttpPortSettings FromXml(string xml, string protocol)
+		{
+			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+
+			if (!address.Contains("://"))
+				address = string.Format("{0}://{1}", address, protocol);
+
+			if (!address.EndsWith("/"))
+				address = string.Format("{0}/", address);
+
+			HttpPortSettings output = new HttpPortSettings
+			{
+				Address = address,
+				Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT),
+				Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT),
+				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)
+			};
+
+			ParseXml(output, xml);
+			return output;
 		}
 	}
 }
