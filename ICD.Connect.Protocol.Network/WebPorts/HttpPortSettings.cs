@@ -108,7 +108,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
 
 			if (!address.Contains("://"))
-				address = string.Format("{0}://{1}", address, protocol);
+				address = string.Format("{0}://{1}", protocol, address);
 
 			if (!address.EndsWith("/"))
 				address = string.Format("{0}/", address);
