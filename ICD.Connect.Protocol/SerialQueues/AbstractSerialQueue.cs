@@ -122,6 +122,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public virtual void Dispose()
 		{
 			OnSerialResponse = null;
+			OnTimeout = null;
 
 			m_TimeoutTimer.Dispose();
 			m_DisconnectedTimer.Stop();
