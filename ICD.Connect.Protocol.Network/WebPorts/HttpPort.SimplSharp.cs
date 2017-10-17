@@ -84,7 +84,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			{
 				KeepAlive = false,
 				TimeoutEnabled = true,
-				Timeout = 2
+				Timeout = 2,
+				HostVerification = false,
+				PeerVerification = false
 			};
 
 			m_ClientBusySection = new SafeCriticalSection();
