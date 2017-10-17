@@ -229,12 +229,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			string output = Address;
 
 			// Ensure the address starts with a protocol
-			if (!output.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-			    !output.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+			if (!output.Contains("://"))
 				output = string.Format("http://{0}", output);
 
 			// Ensure the address ends with a trailing slash
-			if (!output.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+			if (!output.EndsWith("/"))
 				output = string.Format("{0}/", output);
 
 			if (string.IsNullOrEmpty(localAddress))
@@ -245,7 +244,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				localAddress = localAddress.Substring(1);
 
 			// Append the local address to the base address
-			return string.Format("{0}/{1}", output, localAddress);
+			return string.Format("{0}{1}", output, localAddress);
 		}
 
 		/// <summary>
