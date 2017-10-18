@@ -452,6 +452,8 @@ namespace ICD.Connect.Protocol.Crosspoints
 		[PublicAPI]
 		public static CrosspointData Deserialize(string json)
 		{
+			json = json.TrimEnd(MESSAGE_TERMINATOR);
+
 			using (JsonTextReader reader = new JsonTextReader(new IcdStringReader(json).WrappedStringReader))
 				return Deserialize(reader);
 		}

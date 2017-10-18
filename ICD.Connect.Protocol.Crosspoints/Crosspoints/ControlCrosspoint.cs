@@ -52,6 +52,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
 			m_SigsWaitingToBeCleared = false;
+
+			EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
 		}
 
 		#region Methods
@@ -151,20 +153,19 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					return deinit;
 			}
 
-			eCrosspointStatus connectStatus = eCrosspointStatus.Uninitialized;
-
 			// Attempt to connect, return false if connection failed.
 			ControlRequestConnectCallback callback = RequestConnectCallback;
-			if (callback != null)
-				connectStatus = RequestConnectCallback(this, equipmentId);
+			if (callback == null)
+				return false;
 
+			eCrosspointStatus connectStatus = RequestConnectCallback(this, equipmentId);
 			if (connectStatus != eCrosspointStatus.Connected)
 				ClearSigs();
 
 			Status = connectStatus;
+			EquipmentCrosspoint = connectStatus == eCrosspointStatus.Connected ? equipmentId : Xp3Utils.NULL_EQUIPMENT;
 
-			EquipmentCrosspoint = equipmentId;
-			return true;
+			return connectStatus == eCrosspointStatus.Connected;
 		}
 
 		/// <summary>

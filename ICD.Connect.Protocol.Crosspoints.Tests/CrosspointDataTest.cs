@@ -136,8 +136,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Parsing
 
 			string json = data.Serialize();
 
-			JsonUtils.Print(json);
-
 			CrosspointData deserialized = CrosspointData.Deserialize(json);
 
 			Assert.AreEqual(CrosspointData.eMessageType.ControlConnect, data.MessageType);
