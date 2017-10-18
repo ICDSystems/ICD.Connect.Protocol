@@ -1,11 +1,23 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
+using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 {
 	[TestFixture, UsedImplicitly]
-	public sealed class ControlCrosspointManagerTest : AbstractCrosspointManagerTest
+	public sealed class ControlCrosspointManagerTest : AbstractCrosspointManagerTest<ControlCrosspointManager, IControlCrosspoint>
 	{
+		protected override ControlCrosspointManager InstantiateManager(int systemId)
+		{
+			return new ControlCrosspointManager(systemId);
+		}
+
+		protected override IControlCrosspoint InstantiateCrosspoint(int id)
+		{
+			return new ControlCrosspoint(id, id.ToString());
+		}
+
 		[Test, UsedImplicitly]
 		public void ConnectCrosspointTest()
 		{

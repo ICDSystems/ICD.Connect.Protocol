@@ -130,7 +130,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			if (m_Crosspoint == null)
 				return;
 
-
 			m_Crosspoint.Initialize(equipmentId);
 		}
 
@@ -141,7 +140,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			if (m_Crosspoint == null)
 				return;
 
-
 			m_Crosspoint.Deinitialize();
 		}
 
@@ -151,7 +149,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			//Don't do things without a crosspoint
 			if (m_Crosspoint == null)
 				return;
-
 
 			m_SendSection.Enter();
 
@@ -210,6 +207,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			tb.AddRow("Wrapper Type", GetType());
 			tb.AddRow("Wrapper Location", CrosspointSymbolInstanceName);
 			tb.AddRow("Wrapper Has Crosspoint", m_Crosspoint == null ? "False" : "True");
+
 			if (m_Crosspoint == null)
 			{
 				tb.AddRow("Wrapper SystemID", m_SystemId);
