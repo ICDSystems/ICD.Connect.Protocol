@@ -199,7 +199,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				for (int index = 0; index < m_CommandQueue.Count; index++)
 				{
 					ISerialData other = m_CommandQueue[index];
-					if (!comparer(data, (T)other))
+					if (!(other is T) || !comparer(data, (T)other))
 						continue;
 
 					m_CommandQueue[index] = data;
