@@ -110,9 +110,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			if (!address.Contains("://"))
 				address = string.Format("{0}://{1}", protocol, address);
 
-			if (!address.EndsWith("/"))
-				address = string.Format("{0}/", address);
-
 			HttpPortSettings output = new HttpPortSettings
 			{
 				Address = address,

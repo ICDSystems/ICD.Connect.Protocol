@@ -175,6 +175,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		public string DispatchSoap(string action, string content)
 		{
 			Accept = SOAP_ACCEPT;
+			m_HttpsClient.IncludeHeaders = false;
 
 			m_ClientBusySection.Enter();
 
@@ -232,12 +233,12 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			if (!output.Contains("://"))
 				output = string.Format("http://{0}", output);
 
+			if (string.IsNullOrEmpty(localAddress))
+				return output;
+
 			// Ensure the address ends with a trailing slash
 			if (!output.EndsWith("/"))
 				output = string.Format("{0}/", output);
-
-			if (string.IsNullOrEmpty(localAddress))
-				return output;
 
 			// Avoid doubling up the trailing slash
 			if (localAddress.StartsWith("/"))
