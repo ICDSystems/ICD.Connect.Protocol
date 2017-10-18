@@ -3,7 +3,7 @@ using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using NUnit.Framework;
 
-namespace ICD.SimplSharp.XP3.Tests.Crosspoints
+namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 {
 	[TestFixture, UsedImplicitly]
 	public sealed class EquipmentCrosspointTest : AbstractCrosspointTest

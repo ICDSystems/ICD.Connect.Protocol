@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using NUnit.Framework;
 
-namespace ICD.SimplSharp.XP3.Tests.CrosspointManagers
+namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 {
 	[TestFixture, UsedImplicitly]
 	public sealed class RemoteCrosspointTrackerTest

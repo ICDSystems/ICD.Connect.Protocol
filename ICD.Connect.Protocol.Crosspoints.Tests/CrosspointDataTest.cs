@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Sigs;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Crosspoints.Tests.Parsing
+namespace ICD.Connect.Protocol.Crosspoints.Tests
 {
 	[TestFixture, UsedImplicitly]
 	public sealed class CrosspointDataTest

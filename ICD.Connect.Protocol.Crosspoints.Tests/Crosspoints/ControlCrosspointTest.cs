@@ -1,6 +1,5 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
-using ICD.SimplSharp.XP3.Tests.Crosspoints;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
