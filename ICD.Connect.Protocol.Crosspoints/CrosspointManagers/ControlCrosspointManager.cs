@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// When true, attempts to reconnect to equipment on disconnect.
 		/// </summary>
 		[PublicAPI]
-		public bool KeepAlive { get; set; }
+		public bool AutoReconnect { get; set; }
 
 		/// <summary>
 		/// Constructor.
@@ -304,7 +304,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private void PoolOnClientConnectionStateChanged(TcpClientPool sender, AsyncTcpClient client, bool connected)
 		{
 			// If the client disconnects attempt to reconnect it
-			if (!connected && KeepAlive)
+			if (!connected && AutoReconnect)
 				client.Connect();
 
 			if (client.IsConnected)

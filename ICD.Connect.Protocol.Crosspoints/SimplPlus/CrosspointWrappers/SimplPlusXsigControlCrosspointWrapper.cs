@@ -171,14 +171,14 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		/// <summary>
 		/// When true, the crosspoint manager will attempt to reconnect when a connection is dropped.
 		/// </summary>
-		/// <param name="keepAlive"></param>
+		/// <param name="autoReconnect"></param>
 		[PublicAPI]
-		public void SetKeepAlive(ushort keepAlive)
+		public void SetAutoReconnect(ushort autoReconnect)
 		{
 			if (m_Manager == null)
 				return;
 
-			m_Manager.KeepAlive = keepAlive != 0;
+			m_Manager.AutoReconnect = autoReconnect != 0;
 		}
 
 		#endregion
