@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
@@ -18,6 +19,16 @@ namespace ICD.Connect.Protocol.Network.Udp
 		private string m_Address;
 
 		#region Properties
+
+		/// <summary>
+		/// Address to accept connections from.
+		/// </summary>
+		[PublicAPI]
+		public string Address
+		{
+			get { return m_Address; }
+			set { m_Address = IcdEnvironment.NetworkAddresses.Contains(value) ? "127.0.0.1" : value; }
+		}
 
 		/// <summary>
 		/// Port to accept connections from.
@@ -134,7 +145,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			base.ClearSettingsFinal();
 
-			Address = null;
+			Address = ACCEPT_ALL;
 			Port = 0;
 			BufferSize = DEFAULT_BUFFER_SIZE;
 		}

@@ -18,8 +18,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
     {
         private TcpListener m_TcpListener;
 
-        private Dictionary<uint, TcpClient> m_Clients = new Dictionary<uint, TcpClient>();
-        private Dictionary<uint, byte[]> m_ClientBuffers = new Dictionary<uint, byte[]>();
+        private readonly Dictionary<uint, TcpClient> m_Clients = new Dictionary<uint, TcpClient>();
+        private readonly Dictionary<uint, byte[]> m_ClientBuffers = new Dictionary<uint, byte[]>();
 
         /// <summary>
         /// Starts the TCP Server

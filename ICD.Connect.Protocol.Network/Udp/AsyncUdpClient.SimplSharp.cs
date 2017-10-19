@@ -13,20 +13,6 @@ namespace ICD.Connect.Protocol.Network.Udp
 	{
 		private UDPServer m_UdpClient;
 
-#region Properties
-
-		/// <summary>
-		/// Address to accept connections from.
-		/// </summary>
-		[PublicAPI]
-		public string Address
-		{
-			get { return m_Address; }
-			set { m_Address = IcdEnvironment.NetworkAddresses.Contains(m_Address) ? "127.0.0.1" : value; }
-		}
-
-#endregion
-
 #region Methods
 
 		/// <summary>
