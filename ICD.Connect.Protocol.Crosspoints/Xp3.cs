@@ -152,8 +152,6 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <param name="id"></param>
 		public bool RemoveSystem(int id)
 		{
-
-			bool result;
 			CrosspointSystem system;
 
 			m_SystemsSection.Enter();
@@ -164,17 +162,15 @@ namespace ICD.Connect.Protocol.Crosspoints
 					return false;
 
 				system.Dispose();
-				result =  m_Systems.Remove(id);
+				m_Systems.Remove(id);
 			}
 			finally
 			{
 				m_SystemsSection.Leave();
 			}
 
-			if (result)
-				OnSystemRemoved.Raise(this, new CrosspointSystemEventArgs(system));
-
-			return result;
+			OnSystemRemoved.Raise(this, new CrosspointSystemEventArgs(system));
+			return true;
 		}
 
 		#endregion
