@@ -4,6 +4,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.Advertisements;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 
@@ -134,7 +135,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 				m_CreateManagersSection.Leave();
 			}
 
-			OnControlCrosspointManagerCreated.Invoke(this, EventArgs.Empty);
+			OnControlCrosspointManagerCreated.Raise(this);
 
 			return m_ControlCrosspointManager;
 		}
@@ -176,13 +177,13 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 				m_EquipmentCrosspointManager = new EquipmentCrosspointManager(Id);
 				m_AdvertisementManager.AdvertiseEquipmentCrosspoints(m_EquipmentCrosspointManager);
-
-				OnEquipmentCrosspointManagerCreated.Invoke(this, EventArgs.Empty);
 			}
 			finally
 			{
 				m_CreateManagersSection.Leave();
 			}
+
+			OnEquipmentCrosspointManagerCreated.Raise(this);
 
 			return m_EquipmentCrosspointManager;
 		}
