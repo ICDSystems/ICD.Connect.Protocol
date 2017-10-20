@@ -434,9 +434,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		Uninitialized = 0,
 		Idle = 1,
 		Connected = 2,
-		EquipmentNotFound = 3,
-		ConnectFailed = 4,
-		ConnectionDropped = 5,
-		ConnectionClosedRemote = 6,
+		ControlNotFound = 3,
+		EquipmentNotFound = 4,
+		ConnectFailed = 5,
+		ConnectionDropped = 6,
+		ConnectionClosedRemote = 7,
 	}
 }

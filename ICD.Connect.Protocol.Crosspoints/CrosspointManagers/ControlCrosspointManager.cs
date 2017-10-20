@@ -97,6 +97,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			try
 			{
+				IControlCrosspoint unused;
+				if (!TryGetCrosspoint(crosspointId, out unused))
+				{
+					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - No control with given id.",
+					                 crosspointId, equipmentId);
+					return eCrosspointStatus.ControlNotFound;
+				}
+
 				// Get the host info for the equipment
 				CrosspointInfo equipmentInfo;
 				if (!RemoteCrosspoints.TryGetCrosspointInfo(equipmentId, out equipmentInfo))

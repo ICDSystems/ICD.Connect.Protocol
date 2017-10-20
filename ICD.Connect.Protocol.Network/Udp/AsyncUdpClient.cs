@@ -65,6 +65,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 			IcdEnvironment.OnEthernetEvent -= IcdEnvironmentOnEthernetEvent;
 
 			base.DisposeFinal(disposing);
+
+			Disconnect();
 		}
 
 		/// <summary>

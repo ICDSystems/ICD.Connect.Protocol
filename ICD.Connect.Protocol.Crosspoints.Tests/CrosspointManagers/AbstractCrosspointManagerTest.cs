@@ -21,11 +21,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		[TestCase(1)]
 		public void SystemIdTest(int systemId)
 		{
-			TManager manager = InstantiateManager(systemId);
-			
-			Assert.AreEqual(systemId, manager.SystemId);
-
-			manager.Dispose();
+			using (TManager manager = InstantiateManager(systemId))
+			{
+				Assert.AreEqual(systemId, manager.SystemId);
+			}
 		}
 
 		[Test, UsedImplicitly]
@@ -43,80 +42,80 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		[Test, UsedImplicitly]
 		public void GetCrosspointIdsTest()
 		{
-			TManager manager = InstantiateManager(1);
-			TCrosspoint a = InstantiateCrosspoint(1);
-			TCrosspoint b = InstantiateCrosspoint(2);
-			TCrosspoint c = InstantiateCrosspoint(3);
+			using (TManager manager = InstantiateManager(1))
+			{
+				TCrosspoint a = InstantiateCrosspoint(1);
+				TCrosspoint b = InstantiateCrosspoint(2);
+				TCrosspoint c = InstantiateCrosspoint(3);
 
-			manager.RegisterCrosspoint(a);
-			manager.RegisterCrosspoint(b);
-			manager.RegisterCrosspoint(c);
+				manager.RegisterCrosspoint(a);
+				manager.RegisterCrosspoint(b);
+				manager.RegisterCrosspoint(c);
 
-			int[] crosspoints = manager.GetCrosspointIds().ToArray();
+				int[] crosspoints = manager.GetCrosspointIds().ToArray();
 
-			Assert.AreEqual(3, crosspoints.Length);
-			Assert.IsTrue(crosspoints.Contains(1));
-			Assert.IsTrue(crosspoints.Contains(2));
-			Assert.IsTrue(crosspoints.Contains(3));
-
-			manager.Dispose();
+				Assert.AreEqual(3, crosspoints.Length);
+				Assert.IsTrue(crosspoints.Contains(1));
+				Assert.IsTrue(crosspoints.Contains(2));
+				Assert.IsTrue(crosspoints.Contains(3));
+			}
 		}
 
 		[Test]
 		public void GetCrosspointsTest()
 		{
-			TManager manager = InstantiateManager(1);
-			TCrosspoint a = InstantiateCrosspoint(1);
-			TCrosspoint b = InstantiateCrosspoint(2);
-			TCrosspoint c = InstantiateCrosspoint(3);
+			using (TManager manager = InstantiateManager(1))
+			{
+				TCrosspoint a = InstantiateCrosspoint(1);
+				TCrosspoint b = InstantiateCrosspoint(2);
+				TCrosspoint c = InstantiateCrosspoint(3);
 
-			manager.RegisterCrosspoint(a);
-			manager.RegisterCrosspoint(b);
-			manager.RegisterCrosspoint(c);
+				manager.RegisterCrosspoint(a);
+				manager.RegisterCrosspoint(b);
+				manager.RegisterCrosspoint(c);
 
-			TCrosspoint[] crosspoints = manager.GetCrosspoints().ToArray();
+				TCrosspoint[] crosspoints = manager.GetCrosspoints().ToArray();
 
-			Assert.AreEqual(3, crosspoints.Length);
-			Assert.IsTrue(crosspoints.Contains(a));
-			Assert.IsTrue(crosspoints.Contains(b));
-			Assert.IsTrue(crosspoints.Contains(c));
-
-			manager.Dispose();
+				Assert.AreEqual(3, crosspoints.Length);
+				Assert.IsTrue(crosspoints.Contains(a));
+				Assert.IsTrue(crosspoints.Contains(b));
+				Assert.IsTrue(crosspoints.Contains(c));
+			}
 		}
 
 		[UsedImplicitly]
 		[TestCase(1)]
 		public void GetCrosspointTest(int id)
 		{
-			TManager manager = InstantiateManager(1);
-			TCrosspoint a = InstantiateCrosspoint(id);
+			using (TManager manager = InstantiateManager(1))
+			{
+				TCrosspoint a = InstantiateCrosspoint(id);
 
-			Assert.Throws<KeyNotFoundException>(() => manager.GetCrosspoint(id));
+				Assert.Throws<KeyNotFoundException>(() => manager.GetCrosspoint(id));
 
-			manager.RegisterCrosspoint(a);
-			TCrosspoint b = manager.GetCrosspoint(id);
+				manager.RegisterCrosspoint(a);
+				TCrosspoint b = manager.GetCrosspoint(id);
 
-			Assert.AreEqual(a, b);
-
-			manager.Dispose();
+				Assert.AreEqual(a, b);
+			}
 		}
 
 		[UsedImplicitly]
 		[TestCase(1)]
 		public void TryGetCrosspointTest(int id)
 		{
-			TManager manager = InstantiateManager(1);
-			TCrosspoint a = InstantiateCrosspoint(id);
+			using (TManager manager = InstantiateManager(1))
+			{
+				TCrosspoint a = InstantiateCrosspoint(id);
 
-			TCrosspoint b;
-			Assert.IsFalse(manager.TryGetCrosspoint(id, out b));
+				TCrosspoint b;
+				Assert.IsFalse(manager.TryGetCrosspoint(id, out b));
 
-			manager.RegisterCrosspoint(a);
-			Assert.IsTrue(manager.TryGetCrosspoint(id, out b));
+				manager.RegisterCrosspoint(a);
+				Assert.IsTrue(manager.TryGetCrosspoint(id, out b));
 
-			Assert.AreEqual(a, b);
-
-			manager.Dispose();
+				Assert.AreEqual(a, b);
+			}
 		}
 
 		[UsedImplicitly]
@@ -125,17 +124,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		{
 			List<ICrosspoint> registered = new List<ICrosspoint>();
 
-			TManager manager = InstantiateManager(1);
-			manager.OnCrosspointRegistered += (sender, cp) => registered.Add(cp);
+			using (TManager manager = InstantiateManager(1))
+			{
+				manager.OnCrosspointRegistered += (sender, cp) => registered.Add(cp);
 
-			TCrosspoint crosspoint = InstantiateCrosspoint(id);
+				TCrosspoint crosspoint = InstantiateCrosspoint(id);
 
-			Assert.DoesNotThrow(() => manager.RegisterCrosspoint(crosspoint));
-			Assert.Throws<ArgumentException>(() => manager.RegisterCrosspoint(crosspoint));
-			Assert.AreEqual(1, registered.Count);
-			Assert.IsTrue(registered.Contains(crosspoint));
-
-			manager.Dispose();
+				Assert.DoesNotThrow(() => manager.RegisterCrosspoint(crosspoint));
+				Assert.Throws<ArgumentException>(() => manager.RegisterCrosspoint(crosspoint));
+				Assert.AreEqual(1, registered.Count);
+				Assert.IsTrue(registered.Contains(crosspoint));
+			}
 		}
 
 		[UsedImplicitly]
@@ -144,18 +143,18 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		{
 			List<ICrosspoint> unregistered = new List<ICrosspoint>();
 
-			TManager manager = InstantiateManager(1);
-			manager.OnCrosspointUnregistered += (sender, cp) => unregistered.Add(cp);
+			using (TManager manager = InstantiateManager(1))
+			{
+				manager.OnCrosspointUnregistered += (sender, cp) => unregistered.Add(cp);
 
-			TCrosspoint crosspoint = InstantiateCrosspoint(id);
-			manager.RegisterCrosspoint(crosspoint);
-			manager.UnregisterCrosspoint(crosspoint);
-			manager.UnregisterCrosspoint(crosspoint);
+				TCrosspoint crosspoint = InstantiateCrosspoint(id);
+				manager.RegisterCrosspoint(crosspoint);
+				manager.UnregisterCrosspoint(crosspoint);
+				manager.UnregisterCrosspoint(crosspoint);
 
-			Assert.AreEqual(1, unregistered.Count);
-			Assert.IsTrue(unregistered.Contains(crosspoint));
-
-			manager.Dispose();
+				Assert.AreEqual(1, unregistered.Count);
+				Assert.IsTrue(unregistered.Contains(crosspoint));
+			}
 		}
 
 		[Test, UsedImplicitly]

@@ -97,7 +97,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			m_Buffer = new JsonSerialBuffer();
 			Subscribe(m_Buffer);
 
-			m_BroadcastTimer = new SafeTimer(Broadcast, BROADCAST_INTERVAL, BROADCAST_INTERVAL);
+			m_BroadcastTimer = new SafeTimer(TryBroadcast, BROADCAST_INTERVAL, BROADCAST_INTERVAL);
 
 			m_UdpClient.Connect();
 		}
@@ -318,12 +318,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 			if (isDirected)
 				SendRemoveDirected(address);
-
 		}
 
 		#endregion
 
 		#region Private Methods
+
+		private void TryBroadcast()
+		{
+			if (!m_UdpClient.IsDisposed)
+				Broadcast();
+		}
 
 		/// <summary>
 		/// Gets all of the addresses each advertisement is broadcast to.

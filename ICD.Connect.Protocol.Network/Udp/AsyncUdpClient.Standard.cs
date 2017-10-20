@@ -1,9 +1,11 @@
 ﻿#if !SIMPLSHARP
-using ICD.Common.Properties;
+using System;
 using ICD.Common.Utils;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using eSeverity = ICD.Common.Services.Logging.eSeverity;
+using ICD.Common.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -55,10 +57,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// <returns></returns>
 		protected override bool GetIsConnectedState()
 		{
-			if (m_UdpClient == null)
-				return false;
-
-			return true;
+			return m_UdpClient != null;
 		}
 
 		/// <summary>
@@ -81,8 +80,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
+				m_UdpClient.Client.Send(bytes, bytes.Length, SocketFlags.Broadcast);
 			PrintTx(data);
-			m_UdpClient.Client.Send(bytes, bytes.Length, SocketFlags.Broadcast);
 
 			return true;
 		}
@@ -93,7 +92,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// <param name="task"></param>
 		private void UdpClientReceiveHandler(Task<UdpReceiveResult> task)
 		{
-			var result = task.Result;
+			UdpReceiveResult result = task.Result;
 			if (result.Buffer.Length <= 0)
 				return;
 

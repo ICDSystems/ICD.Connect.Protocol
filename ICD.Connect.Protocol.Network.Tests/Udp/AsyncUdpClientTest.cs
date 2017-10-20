@@ -11,36 +11,35 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[Test]
 		public void AddressTest()
 		{
-			AsyncUdpClient client = new AsyncUdpClient();
+			using (AsyncUdpClient client = new AsyncUdpClient())
+			{
+				Assert.AreEqual(AsyncUdpClient.ACCEPT_ALL, client.Address);
 
-			Assert.AreEqual(AsyncUdpClient.ACCEPT_ALL, client.Address);
+				client.Address = "127.0.0.1";
+				Assert.AreEqual("127.0.0.1", client.Address);
 
-			client.Address = "127.0.0.1";
-			Assert.AreEqual("127.0.0.1", client.Address);
-
-			client.Address = IcdEnvironment.NetworkAddresses.First();
-			Assert.AreEqual("127.0.0.1", client.Address);
-
-			client.Dispose();
+				client.Address = IcdEnvironment.NetworkAddresses.First();
+				Assert.AreEqual("127.0.0.1", client.Address);
+			}
 		}
 
 		[TestCase((ushort)0)]
 		[TestCase((ushort)10)]
 		public void PortTest(ushort port)
 		{
-			AsyncUdpClient client = new AsyncUdpClient {Port = port};
-			Assert.AreEqual(port, client.Port);
-
-			client.Dispose();
+			using (AsyncUdpClient client = new AsyncUdpClient {Port = port})
+			{
+				Assert.AreEqual(port, client.Port);
+			}
 		}
 
 		[TestCase(10000)]
 		public void BufferSizeTest(int bufferSize)
 		{
-			AsyncUdpClient client = new AsyncUdpClient {BufferSize = bufferSize};
-			Assert.AreEqual(bufferSize, client.BufferSize);
-
-			client.Dispose();
+			using (AsyncUdpClient client = new AsyncUdpClient {BufferSize = bufferSize})
+			{
+				Assert.AreEqual(bufferSize, client.BufferSize);
+			}
 		}
 
 		[Test]
@@ -58,7 +57,11 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[Test]
 		public void DisposeTest()
 		{
-			Assert.Inconclusive();
+			using (AsyncUdpClient client = new AsyncUdpClient())
+			{
+				client.Connect();
+				Assert.DoesNotThrow(() => client.Dispose());
+			}
 		}
 
 		[Test]
