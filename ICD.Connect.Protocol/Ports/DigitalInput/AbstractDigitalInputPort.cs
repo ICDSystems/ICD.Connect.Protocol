@@ -62,24 +62,6 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 			addRow("State", State);
 		}
 
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-		    return GetBaseConsoleCommands();
-		}
-
-	    /// <summary>
-		/// Workaround for "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
 		#endregion
 	}
 }
