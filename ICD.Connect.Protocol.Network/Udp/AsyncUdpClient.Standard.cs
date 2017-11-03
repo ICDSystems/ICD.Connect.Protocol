@@ -4,8 +4,6 @@ using ICD.Common.Utils;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using eSeverity = ICD.Common.Services.Logging.eSeverity;
-using ICD.Common.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -21,7 +19,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			Disconnect();
 
-			m_ConnectedAddress = IPAddress.Parse(Address);
+			m_ConnectedAddress = Address == ACCEPT_ALL ? IPAddress.Any : IPAddress.Parse(Address);
 
 			m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
 			m_UdpClient.JoinMulticastGroup(m_ConnectedAddress);
