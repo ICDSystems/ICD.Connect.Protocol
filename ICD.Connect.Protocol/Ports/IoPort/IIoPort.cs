@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Protocol.Ports.DigitalInput;
 
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
@@ -13,7 +14,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 	public delegate void IoPortConfigurationCallback(IIoPort port, eIoPortConfiguration configuration);
 
-	public interface IIoPort : IPort
+	public interface IIoPort : IDigitalInputPort
 	{
 		/// <summary>
 		/// Raised when a change in the digital input signal is detected.

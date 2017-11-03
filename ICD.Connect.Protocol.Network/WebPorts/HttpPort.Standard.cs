@@ -133,7 +133,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(Address), localUrl);
+				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
 				return Request(localUrl, s => m_Client.GetStringAsync(uri).Result);
 			}
 			finally
@@ -154,7 +154,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(Address), localUrl);
+				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
 				HttpContent content = new ByteArrayContent(data);
 				return Request(localUrl, s => m_Client.PostAsync(uri, content).Result.Content.ReadAsStringAsync().Result);
 			}
@@ -178,7 +178,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			{
 				Accept = SOAP_ACCEPT;
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Address)
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, GetAddressWithProtocol())
 				{
 					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
 				};

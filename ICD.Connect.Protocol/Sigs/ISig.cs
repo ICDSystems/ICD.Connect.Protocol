@@ -33,7 +33,7 @@ namespace ICD.Connect.Protocol.Sigs
 		uint Number { get; }
 
 		/// <summary>
-		/// Get/Set the name of this Sig.
+		/// Name of this Sig.
 		/// </summary>
 		string Name { get; }
 
