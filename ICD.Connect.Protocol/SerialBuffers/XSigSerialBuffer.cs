@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
@@ -81,7 +79,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
                         continue;
                     }
                     //Check for Digital Pattern
-                    if (Xsig.IsValidDigitalSigHeader(m_RxData.ToArray()))
+                    if (XSigParser.IsValidDigitalSigHeader(m_RxData.ToArray()))
                     {
                         char[] charsInMessage = m_RxData.Take(2).Select(b => (char)b).ToArray();
                         OnCompletedSerial.Raise(this, new StringEventArgs(new string(charsInMessage)));
@@ -94,7 +92,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
                         continue;
                     }
                     //Check for Analog Pattern
-                    if (Xsig.IsValidAnalogSigHeader(m_RxData.ToArray()))
+                    if (XSigParser.IsValidAnalogSigHeader(m_RxData.ToArray()))
                     {
                         char[] charsInMessage = m_RxData.Take(4).Select(b => (char)b).ToArray();
                         OnCompletedSerial.Raise(this, new StringEventArgs(new string(charsInMessage)));
@@ -102,12 +100,12 @@ namespace ICD.Connect.Protocol.SerialBuffers
                         continue;
                     }
                     //check for Serial Pattern
-                    if (Xsig.IsValidSerialSigHeader(m_RxData.ToArray()))
+                    if (XSigParser.IsValidSerialSigHeader(m_RxData.ToArray()))
                     {
                         int indexOfSerialTerminator;
                         for (indexOfSerialTerminator = 2; indexOfSerialTerminator < m_RxData.Count; indexOfSerialTerminator++)
                         {
-                            if (!Xsig.IsValidSerialSigTerminator(m_RxData[indexOfSerialTerminator]))
+                            if (!XSigParser.IsValidSerialSigTerminator(m_RxData[indexOfSerialTerminator]))
                             {
                                 continue;
                             }

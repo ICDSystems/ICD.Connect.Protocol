@@ -126,11 +126,11 @@
     <Compile Include="Sigs\SigCache.cs" />
     <Compile Include="Sigs\SigInfo.cs" />
     <Compile Include="EventArguments\SocketStateEventArgs.cs" />
-    <Compile Include="XSig\AnalogXsig.cs" />
-    <Compile Include="XSig\DigitalXsig.cs" />
-    <Compile Include="XSig\IXsig.cs" />
-    <Compile Include="XSig\SerialXsig.cs" />
-    <Compile Include="XSig\XsigParser.cs" />
+    <Compile Include="XSig\AnalogXSig.cs" />
+    <Compile Include="XSig\DigitalXSig.cs" />
+    <Compile Include="XSig\IXSig.cs" />
+    <Compile Include="XSig\SerialXSig.cs" />
+    <Compile Include="XSig\XSigParser.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

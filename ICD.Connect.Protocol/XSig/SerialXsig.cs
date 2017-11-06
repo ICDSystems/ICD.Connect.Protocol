@@ -6,7 +6,7 @@ using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
 {
-	public sealed class SerialXsig : IXsig<string>
+	public sealed class SerialXSig : IXSig<string>
 	{
 		private readonly byte[] m_Data;
 
@@ -35,7 +35,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the SerialSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public SerialXsig(IEnumerable<byte> bytes)
+		public SerialXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -50,7 +50,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public SerialXsig(string value, ushort index)
+		public SerialXSig(string value, ushort index)
 		{
 			if (index >= (1 << 10))
 				throw new ArgumentException("Index must be between 0 and 1023");

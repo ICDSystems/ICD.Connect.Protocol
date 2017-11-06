@@ -10,7 +10,7 @@ namespace ICD.Connect.Protocol.XSig
 	///		1 0 value # # # # #    0 # # # # # # #
 	/// Where the 12 bit index is spread over the #s.
 	/// </summary>
-	public struct DigitalXsig : IXsig<bool>
+	public struct DigitalXSig : IXSig<bool>
 	{
 		private readonly byte[] m_Data;
 
@@ -39,7 +39,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the DigitalSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public DigitalXsig(IEnumerable<byte> bytes)
+		public DigitalXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -54,7 +54,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public DigitalXsig(bool value, ushort index)
+		public DigitalXSig(bool value, ushort index)
 		{
 			if(index >= (1 << 12))
 				throw new ArgumentException("Index must be between 0 and 4095");

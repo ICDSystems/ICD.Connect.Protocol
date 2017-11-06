@@ -12,7 +12,7 @@ namespace ICD.Connect.Protocol.XSig
 	/// Where the 10 bit index is spread over the #'s.
 	/// And the 16 bit value is spread over the a's.
 	/// </summary>
-	public struct AnalogXsig : IXsig<ushort>
+	public struct AnalogXSig : IXSig<ushort>
 	{
 		private readonly byte[] m_Data;
 
@@ -41,7 +41,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the AnalogSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public AnalogXsig(IEnumerable<byte> bytes)
+		public AnalogXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -56,7 +56,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public AnalogXsig(ushort value, ushort index)
+		public AnalogXSig(ushort value, ushort index)
 		{
 			if (index >= (1 << 10))
 				throw new ArgumentException("index must be between 0 and 1023");
