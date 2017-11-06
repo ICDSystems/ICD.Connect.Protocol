@@ -88,6 +88,7 @@
     <Compile Include="Ports\ISerialPortSettings.cs" />
     <Compile Include="Ports\RelayPort\AbstractRelayPortSettings.cs" />
     <Compile Include="Ports\RelayPort\IRelayPortSettings.cs" />
+    <Compile Include="SerialBuffers\XSigSerialBuffer.cs" />
     <Compile Include="Utils\ComSpecUtils.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
     <Compile Include="Data\AbstractSerialData.cs" />
