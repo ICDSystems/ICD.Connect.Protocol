@@ -84,6 +84,24 @@ namespace ICD.Connect.Protocol.XSig
 			return array[0].GetBit(7) && !array[0].GetBit(6) && !array[1].GetBit(7);
 		}
 
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent a digital sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsDigitalIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0 || array.Length > 2)
+				return false;
+
+			if (!array[0].GetBit(7) || array[0].GetBit(6))
+				return false;
+
+			return array.Length != 2 || !array[1].GetBit(7);
+		}
+
 		#region Private Methods
 
 		private void SetFixedBits()

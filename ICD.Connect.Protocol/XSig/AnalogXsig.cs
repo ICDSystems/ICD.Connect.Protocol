@@ -91,6 +91,35 @@ namespace ICD.Connect.Protocol.XSig
 				&& !array[3].GetBit(7);
 		}
 
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent an analog sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsAnalogIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0 || array.Length > 4)
+				return false;
+
+			if (!(array[0].GetBit(7)
+			      && array[0].GetBit(6)
+			      && !array[0].GetBit(3)))
+				return false;
+
+			if (array.Length > 1 && array[1].GetBit(7))
+				return false;
+
+			if (array.Length > 2 && array[2].GetBit(7))
+				return false;
+
+			if (array.Length > 3 && array[3].GetBit(7))
+				return false;
+
+			return true;
+		}
+
 		#region Private Methods
 
 		private void SetFixedBits()

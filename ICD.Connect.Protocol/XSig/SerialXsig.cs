@@ -90,6 +90,37 @@ namespace ICD.Connect.Protocol.XSig
 			       && !array[1].GetBit(7);
 		}
 
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent a serial sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsSerialIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0)
+				return false;
+
+			// Leads with 11001### 0...
+			if (!(array[0].GetBit(7)
+			      && array[0].GetBit(6)
+			      && !array[0].GetBit(5)
+			      && !array[0].GetBit(4)
+			      && array[0].GetBit(3)))
+				return false;
+
+			if (array.Length > 1 && array[1].GetBit(7))
+				return false;
+
+			// Ends with a 1111 1111
+			int end = array.FindIndex(b => b == 0xFF);
+			if (end >= 0 && end != array.Length - 1)
+				return false;
+
+			return true;
+		}
+
 		#region Private Methods
 
 		private void SetFixedBits()
