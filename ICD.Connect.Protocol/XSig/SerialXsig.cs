@@ -121,6 +121,16 @@ namespace ICD.Connect.Protocol.XSig
 			return true;
 		}
 
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Index", Index);
+			builder.AppendProperty("Value", Value);
+
+			return builder.ToString();
+		}
+
 		#region Private Methods
 
 		private void SetFixedBits()

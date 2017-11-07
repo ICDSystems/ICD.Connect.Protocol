@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
@@ -100,6 +101,16 @@ namespace ICD.Connect.Protocol.XSig
 				return false;
 
 			return array.Length != 2 || !array[1].GetBit(7);
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Index", Index);
+			builder.AppendProperty("Value", Value);
+
+			return builder.ToString();
 		}
 
 		#region Private Methods
