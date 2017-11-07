@@ -12,7 +12,7 @@ using ICD.Connect.Protocol.XSig;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 {
-	public sealed class SimplPlusXsigControlCrosspointWrapper : ISimplPlusCrosspointWrapper
+	public sealed class SimplPlusXSigControlCrosspointWrapper : ISimplPlusCrosspointWrapper
 	{
 		#region Fields
 
@@ -144,7 +144,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		}
 
 		[PublicAPI]
-		public void SendXsig(SimplSharpString xsig)
+		public void SendXSig(SimplSharpString xsig)
 		{
 			//Don't do things without a crosspoint
 			if (m_Crosspoint == null)
@@ -154,7 +154,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				IEnumerable<SigInfo> sigs = Xsig.ParseMultiple(xsig.ToString());
+				IEnumerable<SigInfo> sigs = XSig.ParseMultiple(xsig.ToString());
 				CrosspointData data = new CrosspointData();
 				data.AddSigs(sigs);
 				m_Crosspoint.SendInputData(data);
@@ -182,18 +182,18 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#region SPlusDelegates
 
-		public delegate void DelJoinXsig(SimplSharpString xsig);
+		public delegate void DelJoinXSig(SimplSharpString xsig);
 
 		public delegate void DelStatusUpdate(ushort status);
 
 		[PublicAPI]
-		public DelJoinXsig DigitalSigReceivedXsigCallback { get; set; }
+		public DelJoinXSig DigitalSigReceivedXSigCallback { get; set; }
 
 		[PublicAPI]
-		public DelJoinXsig AnalogSigReceivedXsigCallback { get; set; }
+		public DelJoinXSig AnalogSigReceivedXSigCallback { get; set; }
 
 		[PublicAPI]
-		public DelJoinXsig SerialSigReceivedXsigCallback { get; set; }
+		public DelJoinXSig SerialSigReceivedXSigCallback { get; set; }
 
 		[PublicAPI]
 		public DelStatusUpdate CrosspointStatusCallback { get; set; }
@@ -266,20 +266,20 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 					if (sig.SmartObject != 0)
 						continue;
 
-					DelJoinXsig callback;
+					DelJoinXSig callback;
 
 					switch (sig.Type)
 					{
 						case eSigType.Digital:
-							callback = DigitalSigReceivedXsigCallback;
+							callback = DigitalSigReceivedXSigCallback;
 							break;
 
 						case eSigType.Analog:
-							callback = AnalogSigReceivedXsigCallback;
+							callback = AnalogSigReceivedXSigCallback;
 							break;
 
 						case eSigType.Serial:
-							callback = SerialSigReceivedXsigCallback;
+							callback = SerialSigReceivedXSigCallback;
 							break;
 
 						default:
@@ -307,7 +307,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		/// Default constructor for S+.
 		/// </summary>
 		[UsedImplicitly]
-		public SimplPlusXsigControlCrosspointWrapper()
+		public SimplPlusXSigControlCrosspointWrapper()
 		{
 			m_SendSection = new SafeCriticalSection();
 			m_ReceiveSection = new SafeCriticalSection();

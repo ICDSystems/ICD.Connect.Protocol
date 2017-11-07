@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Tests.XSig
         [TestCase((ushort)233, (ushort) 9, "\xC0\x09\x01\x69")]
         public void AnalogDataTest(ushort value, ushort index, string expected)
         {
-            AnalogXsig sig = new AnalogXsig(value, index);
+            AnalogXSig sig = new AnalogXSig(value, index);
             Assert.AreEqual(StringUtils.ToBytes(expected), sig.Data);
         }
 
@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.Tests.XSig
         ///// Instantiates the AnalogSignal from a collection of bytes.
         ///// </summary>
         ///// <param name="bytes"></param>
-        //public AnalogXsig(IEnumerable<byte> bytes)
+        //public AnalogXSig(IEnumerable<byte> bytes)
         //{
         //    byte[] array = bytes.ToArray();
 
@@ -51,7 +51,7 @@ namespace ICD.Connect.Protocol.Tests.XSig
         ///// </summary>
         ///// <param name="value"></param>
         ///// <param name="index"></param>
-        //public AnalogXsig(ushort value, ushort index)
+        //public AnalogXSig(ushort value, ushort index)
         //{
         //    if (index >= (1 << 10))
         //        throw new ArgumentException("index must be between 0 and 1023");
