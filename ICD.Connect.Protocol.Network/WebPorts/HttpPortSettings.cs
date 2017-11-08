@@ -13,7 +13,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	public sealed class HttpPortSettings : AbstractPortSettings
 	{
 		private const string FACTORY_NAME = "HTTP";
-		private const string FACTORY_NAME_HTTPS = "HTTPS";
 
 		/// <summary>
 		/// Gets the originator factory name.
@@ -81,38 +80,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="xml"></param>
 		/// <returns></returns>
 		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static HttpPortSettings FromXmlHttp(string xml)
+		public static HttpPortSettings FromXml(string xml)
 		{
-			return FromXml(xml, "http");
-		}
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[XmlFactoryMethod(FACTORY_NAME_HTTPS)]
-		public static HttpPortSettings FromXmlHttps(string xml)
-		{
-			return FromXml(xml, "https");
-		}
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <param name="protocol"></param>
-		/// <returns></returns>
-		private static HttpPortSettings FromXml(string xml, string protocol)
-		{
-			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-
-			if (!address.Contains("://"))
-				address = string.Format("{0}://{1}", protocol, address);
-
 			HttpPortSettings output = new HttpPortSettings
 			{
-				Address = address,
+				Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT),
 				Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT),
 				Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT),
 				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)

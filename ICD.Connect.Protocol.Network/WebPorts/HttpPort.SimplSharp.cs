@@ -221,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		private bool IsHttpsUrl(string url)
+		private static bool IsHttpsUrl(string url)
 		{
 			if (url == null)
 				throw new ArgumentNullException("url");
