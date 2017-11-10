@@ -61,17 +61,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				writer.WriteElementString(ACCEPT_ELEMENT, Accept);
 		}
 
-		/// <summary>
-		/// Returns the collection of ids that the settings will depend on.
-		/// For example, to instantiate an IR Port from settings, the device the physical port
-		/// belongs to will need to be instantiated first.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<int> GetDeviceDependencies()
-		{
-			yield break;
-		}
-
 		#endregion
 
 		/// <summary>
