@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
@@ -10,7 +11,7 @@ namespace ICD.Connect.Protocol.XSig
 	///		1 0 value # # # # #    0 # # # # # # #
 	/// Where the 12 bit index is spread over the #s.
 	/// </summary>
-	public struct DigitalXsig : IXsig<bool>
+	public struct DigitalXSig : IXSig<bool>
 	{
 		private readonly byte[] m_Data;
 
@@ -39,7 +40,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the DigitalSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public DigitalXsig(IEnumerable<byte> bytes)
+		public DigitalXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -54,7 +55,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public DigitalXsig(bool value, ushort index)
+		public DigitalXSig(bool value, ushort index)
 		{
 			if(index >= (1 << 12))
 				throw new ArgumentException("Index must be between 0 and 4095");
@@ -82,6 +83,34 @@ namespace ICD.Connect.Protocol.XSig
 
 			// One bit is always true and two bits are always false.
 			return array[0].GetBit(7) && !array[0].GetBit(6) && !array[1].GetBit(7);
+		}
+
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent a digital sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsDigitalIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0 || array.Length > 2)
+				return false;
+
+			if (!array[0].GetBit(7) || array[0].GetBit(6))
+				return false;
+
+			return array.Length != 2 || !array[1].GetBit(7);
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Index", Index);
+			builder.AppendProperty("Value", Value);
+
+			return builder.ToString();
 		}
 
 		#region Private Methods

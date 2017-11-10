@@ -6,7 +6,7 @@ using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
 {
-	public sealed class SerialXsig : IXsig<string>
+	public sealed class SerialXSig : IXSig<string>
 	{
 		private readonly byte[] m_Data;
 
@@ -35,7 +35,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the SerialSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public SerialXsig(IEnumerable<byte> bytes)
+		public SerialXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -50,7 +50,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public SerialXsig(string value, ushort index)
+		public SerialXSig(string value, ushort index)
 		{
 			if (index >= (1 << 10))
 				throw new ArgumentException("Index must be between 0 and 1023");
@@ -88,6 +88,47 @@ namespace ICD.Connect.Protocol.XSig
 			       && !array[0].GetBit(4)
 			       && array[0].GetBit(3)
 			       && !array[1].GetBit(7);
+		}
+
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent a serial sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsSerialIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0)
+				return false;
+
+			// Leads with 11001### 0...
+			if (!(array[0].GetBit(7)
+			      && array[0].GetBit(6)
+			      && !array[0].GetBit(5)
+			      && !array[0].GetBit(4)
+			      && array[0].GetBit(3)))
+				return false;
+
+			if (array.Length > 1 && array[1].GetBit(7))
+				return false;
+
+			// Ends with a 1111 1111
+			int end = array.FindIndex(b => b == 0xFF);
+			if (end >= 0 && end != array.Length - 1)
+				return false;
+
+			return true;
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Index", Index);
+			builder.AppendProperty("Value", Value);
+
+			return builder.ToString();
 		}
 
 		#region Private Methods

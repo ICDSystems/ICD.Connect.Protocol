@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.XSig
@@ -12,7 +13,7 @@ namespace ICD.Connect.Protocol.XSig
 	/// Where the 10 bit index is spread over the #'s.
 	/// And the 16 bit value is spread over the a's.
 	/// </summary>
-	public struct AnalogXsig : IXsig<ushort>
+	public struct AnalogXSig : IXSig<ushort>
 	{
 		private readonly byte[] m_Data;
 
@@ -41,7 +42,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// Instantiates the AnalogSignal from a collection of bytes.
 		/// </summary>
 		/// <param name="bytes"></param>
-		public AnalogXsig(IEnumerable<byte> bytes)
+		public AnalogXSig(IEnumerable<byte> bytes)
 		{
 			byte[] array = bytes.ToArray();
 
@@ -56,7 +57,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
-		public AnalogXsig(ushort value, ushort index)
+		public AnalogXSig(ushort value, ushort index)
 		{
 			if (index >= (1 << 10))
 				throw new ArgumentException("index must be between 0 and 1023");
@@ -89,6 +90,45 @@ namespace ICD.Connect.Protocol.XSig
 				&& !array[1].GetBit(7) 
 				&& !array[2].GetBit(7) 
 				&& !array[3].GetBit(7);
+		}
+
+		/// <summary>
+		/// Returns true if the given, potentially incomplete data could represent an analog sig.
+		/// </summary>
+		/// <param name="bytes"></param>
+		/// <returns></returns>
+		public static bool IsAnalogIncomplete(IEnumerable<byte> bytes)
+		{
+			byte[] array = bytes.ToArray();
+
+			if (array.Length == 0 || array.Length > 4)
+				return false;
+
+			if (!(array[0].GetBit(7)
+			      && array[0].GetBit(6)
+			      && !array[0].GetBit(3)))
+				return false;
+
+			if (array.Length > 1 && array[1].GetBit(7))
+				return false;
+
+			if (array.Length > 2 && array[2].GetBit(7))
+				return false;
+
+			if (array.Length > 3 && array[3].GetBit(7))
+				return false;
+
+			return true;
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Index", Index);
+			builder.AppendProperty("Value", Value);
+
+			return builder.ToString();
 		}
 
 		#region Private Methods

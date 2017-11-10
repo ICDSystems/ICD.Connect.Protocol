@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Services.Logging;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Protocol.Ports.DigitalInput
