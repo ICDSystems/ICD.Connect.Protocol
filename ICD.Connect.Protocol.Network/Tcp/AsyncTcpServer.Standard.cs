@@ -56,6 +56,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				else
 					Logger.AddEntry(eSeverity.Notice, "AsyncTcpServer no longer listening on Port {0}", endpoint.Port);
 			}
+
 			m_TcpListener = null;
 
 			foreach (uint client in GetClients())
