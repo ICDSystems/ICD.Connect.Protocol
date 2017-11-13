@@ -3,7 +3,6 @@ using ICD.Common.Utils.EventArguments;
 
 namespace ICD.Connect.Protocol.Ports.DigitalInput
 {
-
 	public interface IDigitalInputPort : IPort
 	{
 		/// <summary>
