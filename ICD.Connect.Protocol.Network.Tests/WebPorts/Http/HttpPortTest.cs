@@ -97,7 +97,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 				Accept = "application/json"
 			};
 
-			string result = port.Get(request);
+			string result;
+			Assert.IsTrue(port.Get(request, out result));
+
 			Post post = JsonConvert.DeserializeObject<Post>(result);
 
 			Assert.AreEqual(1, post.Id);
@@ -123,7 +125,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 			const string dataString = @"{title: 'foo', body: 'bar', userId: 1}";
 			byte[] data = Encoding.ASCII.GetBytes(dataString);
 
-			string result = port.Post(request, data);
+			string result;
+			Assert.IsTrue(port.Post(request, data, out result));
+
 			Post post = JsonConvert.DeserializeObject<Post>(result);
 
 			Assert.AreEqual(101, post.Id);

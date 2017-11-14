@@ -126,9 +126,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		public string Get(string localUrl)
+		/// <param name="response"></param>
+		public bool Get(string localUrl, out string response)
 		{
-			string output;
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -149,7 +149,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 				else
 				{
@@ -161,7 +161,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 			}
 			finally
@@ -170,8 +170,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		/// <summary>
@@ -179,10 +179,10 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
-		public string Post(string localUrl, byte[] data)
+		public bool Post(string localUrl, byte[] data, out string response)
 		{
-			string output;
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -206,7 +206,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 				else
 				{
@@ -221,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 			}
 			finally
@@ -230,8 +230,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		/// <summary>
@@ -239,16 +239,16 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="content"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
-		public string DispatchSoap(string action, string content)
+		public bool DispatchSoap(string action, string content, out string response)
 		{
+			bool success;
+
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
 			m_HttpsClient.IncludeHeaders = false;
-
-			string output;
-			bool success;
 
 			m_ClientBusySection.Enter();
 
@@ -265,7 +265,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 				else
 				{
@@ -278,7 +278,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-					success = Dispatch(request, out output);
+					success = Dispatch(request, out response);
 				}
 			}
 			finally
@@ -287,8 +287,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		#endregion

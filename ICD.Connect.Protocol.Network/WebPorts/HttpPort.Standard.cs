@@ -135,9 +135,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		public string Get(string localUrl)
+		/// <param name="response"></param>
+		public bool Get(string localUrl, out string response)
 		{
-			string output;
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -148,7 +148,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
-				success = Dispatch(request, out output);
+				success = Dispatch(request, out response);
 			}
 			finally
 			{
@@ -156,8 +156,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		/// <summary>
@@ -165,10 +165,10 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
-		public string Post(string localUrl, byte[] data)
+		public bool Post(string localUrl, byte[] data, out string response)
 		{
-			string output;
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -183,7 +183,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					Content = new ByteArrayContent(data)
 				};
 
-				success = Dispatch(request, out output);
+				success = Dispatch(request, out response);
 			}
 			finally
 			{
@@ -191,8 +191,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		/// <summary>
@@ -200,14 +200,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="content"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
-		public string DispatchSoap(string action, string content)
+		public bool DispatchSoap(string action, string content, out string response)
 		{
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
 
-			string output;
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -221,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				request.Headers.Add(SOAP_ACTION_HEADER, action);
 
-				success = Dispatch(request, out output);
+				success = Dispatch(request, out response);
 			}
 			finally
 			{
@@ -229,8 +229,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(output);
-			return output;
+			PrintRx(response);
+			return success;
 		}
 
 		/// <summary>

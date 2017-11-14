@@ -42,25 +42,28 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
+		/// <param name="response"></param>
 		[PublicAPI]
-		string Get(string localUrl);
+		bool Get(string localUrl, out string response);
 
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		string Post(string localUrl, byte[] data);
+		bool Post(string localUrl, byte[] data, out string response);
 
 		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="content"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		string DispatchSoap(string action, string content);
+		bool DispatchSoap(string action, string content, out string response);
 	}
 }

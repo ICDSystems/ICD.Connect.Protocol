@@ -30,11 +30,12 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public string Post(string localUrl, string data)
+		public bool Post(string localUrl, string data, out string response)
 		{
-			return Post(localUrl, data, new ASCIIEncoding());
+			return Post(localUrl, data, new ASCIIEncoding(), out response);
 		}
 
 		/// <summary>
@@ -43,12 +44,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="localUrl"></param>
 		/// <param name="data"></param>
 		/// <param name="encoding"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public string Post(string localUrl, string data, Encoding encoding)
+		public bool Post(string localUrl, string data, Encoding encoding, out string response)
 		{
 			byte[] bytes = encoding.GetBytes(data);
-			return Post(localUrl, bytes);
+			return Post(localUrl, bytes, out response);
 		}
 
 		#endregion
@@ -191,8 +193,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
 			yield return new GenericConsoleCommand<string>("SetUsername", "Sets the username for requests", s => Username = s);
 			yield return new GenericConsoleCommand<string>("SetPassword", "Sets the password for requests", s => Password = s);
-
-			yield return new ParamsConsoleCommand("Get", "Performs a request at the given path", a => ConsoleGet(a));
+			
+			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
 		}
 
 		/// <summary>
@@ -207,10 +209,12 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <summary>
 		/// Shim to perform a get request from the console.
 		/// </summary>
-		/// <param name="paths"></param>
-		private void ConsoleGet(params string[] paths)
+		/// <param name="path"></param>
+		private string ConsoleGet(string path)
 		{
-			paths.ForEach(p => Get(p));
+			string output;
+			Get(path, out output);
+			return output;
 		}
 
 		#endregion
