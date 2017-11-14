@@ -133,9 +133,32 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			try
 			{
 				string url = GetRequestUrl(localUrl);
-				return IsHttpsUrl(url)
-					? Request(url, s => m_HttpsClient.Get(s))
-					: Request(url, s => m_HttpClient.Get(s));
+
+				if (IsHttpsUrl(url))
+				{
+					HttpsClientRequest request = new HttpsClientRequest
+					{
+						KeepAlive = m_HttpsClient.KeepAlive
+					};
+
+					request.Url.Parse(url);
+					request.Header.SetHeaderValue("Accept", Accept);
+					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+
+					return Request(url, s => Dispatch(request));
+				}
+				else
+				{
+					HttpClientRequest request = new HttpClientRequest
+					{
+						KeepAlive = m_HttpClient.KeepAlive
+					};
+
+					request.Url.Parse(url);
+					request.Header.SetHeaderValue("Accept", Accept);
+
+					return Request(url, s => Dispatch(request));
+				}
 			}
 			finally
 			{
@@ -156,9 +179,38 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			try
 			{
 				string url = GetRequestUrl(localUrl);
-				return IsHttpsUrl(url)
-					? Request(url, s => m_HttpsClient.Post(s, data))
-					: Request(url, s => m_HttpClient.Post(s, data));
+
+				if (IsHttpsUrl(url))
+				{
+					HttpsClientRequest request = new HttpsClientRequest
+					{
+						ContentSource = Crestron.SimplSharp.Net.Https.ContentSource.ContentNone,
+						ContentBytes = data,
+						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
+						KeepAlive = m_HttpsClient.KeepAlive
+					};
+
+					request.Url.Parse(url);
+					request.Header.SetHeaderValue("Accept", Accept);
+					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+
+					return Request(url, s => Dispatch(request));
+				}
+				else
+				{
+					HttpClientRequest request = new HttpClientRequest
+					{
+						KeepAlive = m_HttpClient.KeepAlive,
+						ContentBytes = data,
+						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post
+					};
+
+					request.Url.Parse(url);
+					request.Header.SetHeaderValue("Accept", Accept);
+					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
+
+					return Request(url, s => Dispatch(request));
+				}
 			}
 			finally
 			{
