@@ -65,7 +65,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// </summary>
 		/// <param name="localAddress"></param>
 		/// <returns></returns>
-		protected string GetRequestUrl(string localAddress)
+		private string GetRequestUrl(string localAddress)
 		{
 			string output = GetAddressWithProtocol();
 
@@ -80,7 +80,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			return string.Format("{0}{1}", output, localAddress);
 		}
 
-		protected string GetAddressWithProtocol()
+		private string GetAddressWithProtocol()
 		{
 			string output = Address;
 
