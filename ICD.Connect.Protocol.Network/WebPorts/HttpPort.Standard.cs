@@ -10,9 +10,9 @@ using ICD.Common.Utils;
 namespace ICD.Connect.Protocol.Network.WebPorts
 {
 	public sealed partial class HttpPort
-    {
+	{
 		private readonly HttpClient m_Client;
-	    private readonly HttpClientHandler m_ClientHandler;
+		private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
 		private string m_Username;
@@ -94,29 +94,29 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 		#endregion
 
-	    /// <summary>
-	    /// Constructor.
-	    /// </summary>
-	    public HttpPort()
-	    {
-		    m_LastRequestSucceeded = true;
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public HttpPort()
+		{
+			m_LastRequestSucceeded = true;
 
-		    m_ClientHandler = new HttpClientHandler
-		    {
-			    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-		    };
+			m_ClientHandler = new HttpClientHandler
+			{
+				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+			};
 
-		    m_Client = new HttpClient(m_ClientHandler)
-		    {
-			    Timeout = TimeSpan.FromSeconds(2)
-		    };
+			m_Client = new HttpClient(m_ClientHandler)
+			{
+				Timeout = TimeSpan.FromSeconds(2)
+			};
 
-		    m_ClientBusySection = new SafeCriticalSection();
+			m_ClientBusySection = new SafeCriticalSection();
 
-		    UpdateCachedOnlineStatus();
-	    }
+			UpdateCachedOnlineStatus();
+		}
 
-	    #region Methods
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -227,7 +227,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					return response.Content.ReadAsStringAsync().Result;
 				}
 
-				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri, response.StatusCode);
+				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri,
+				                response.StatusCode);
 				SetLastRequestSucceeded(false);
 				return null;
 			}
@@ -245,7 +246,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			string auth = string.Format("{0}:{1}", username, password);
 			byte[] byteArray = Encoding.ASCII.GetBytes(auth);
-			m_Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+			m_Client.DefaultRequestHeaders.Authorization =
+				new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 		}
 
 		#endregion
