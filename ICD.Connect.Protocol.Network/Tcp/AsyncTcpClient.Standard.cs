@@ -1,5 +1,6 @@
 ﻿#if STANDARD
 using System;
+using System.Linq;
 using System.Net.Sockets;
 using ICD.Common.Utils;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} failed to connect to host {1}:{2}", this, Address, Port);
+				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port, e.Message);
 			}
 			finally
 			{
@@ -106,7 +107,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private void TcpClientReceiveHandler(Task<int> task)
 		{
 			if (task.IsFaulted)
-				Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2}", this, Address, Port);
+			{
+				string message = task.Exception.InnerExceptions.First().Message;
+				Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2} - {3}", this, Address, Port, message);
+				UpdateIsConnectedState();
+				return;
+			}
 
 			int bytesRead = task.Result;
 			if (bytesRead <= 0)
