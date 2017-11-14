@@ -12,6 +12,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	public sealed partial class HttpPort
     {
 		private readonly HttpClient m_Client;
+	    private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
 		private string m_Username;
@@ -93,24 +94,29 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 		#endregion
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public HttpPort()
-		{
-			m_LastRequestSucceeded = true;
-			
-			m_Client = new HttpClient
-			{
-				Timeout = TimeSpan.FromSeconds(2)
-			};
+	    /// <summary>
+	    /// Constructor.
+	    /// </summary>
+	    public HttpPort()
+	    {
+		    m_LastRequestSucceeded = true;
 
-			m_ClientBusySection = new SafeCriticalSection();
+		    m_ClientHandler = new HttpClientHandler
+		    {
+			    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+		    };
 
-			UpdateCachedOnlineStatus();
-		}
+		    m_Client = new HttpClient(m_ClientHandler)
+		    {
+			    Timeout = TimeSpan.FromSeconds(2)
+		    };
 
-		#region Methods
+		    m_ClientBusySection = new SafeCriticalSection();
+
+		    UpdateCachedOnlineStatus();
+	    }
+
+	    #region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -121,6 +127,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			m_Client.CancelPendingRequests();
 			m_Client.Dispose();
+
+			m_ClientHandler.Dispose();
 		}
 
 		/// <summary>
