@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -112,32 +111,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		protected override bool GetIsOnlineStatus()
 		{
 			return m_LastRequestSucceeded;
-		}
-
-		/// <summary>
-		/// Common logic for sending a request to the port.
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="requestMethod"></param>
-		/// <returns></returns>
-		private string Request(string content, Func<string, string> requestMethod)
-		{
-			string output;
-
-			try
-			{
-				PrintTx(content);
-				output = requestMethod(content);
-				SetLastRequestSucceeded(true);
-			}
-			catch (Exception)
-			{
-				SetLastRequestSucceeded(false);
-				throw;
-			}
-
-			PrintRx(output);
-			return output;
 		}
 
 		#endregion

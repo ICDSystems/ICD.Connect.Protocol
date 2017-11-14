@@ -137,17 +137,27 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="localUrl"></param>
 		public string Get(string localUrl)
 		{
+			string output;
+			bool success;
+
 			m_ClientBusySection.Enter();
 
 			try
 			{
 				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
-				return Request(localUrl, s => m_Client.GetStringAsync(uri).Result);
+				PrintTx(uri.AbsolutePath);
+
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				success = Dispatch(request, out output);
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(success);
+			PrintRx(output);
+			return output;
 		}
 
 		/// <summary>
@@ -158,18 +168,31 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		public string Post(string localUrl, byte[] data)
 		{
+			string output;
+			bool success;
+
 			m_ClientBusySection.Enter();
 
 			try
 			{
 				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
-				HttpContent content = new ByteArrayContent(data);
-				return Request(localUrl, s => m_Client.PostAsync(uri, content).Result.Content.ReadAsStringAsync().Result);
+				PrintTx(uri.AbsolutePath);
+
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri)
+				{
+					Content = new ByteArrayContent(data)
+				};
+
+				success = Dispatch(request, out output);
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(success);
+			PrintRx(output);
+			return output;
 		}
 
 		/// <summary>
@@ -180,12 +203,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		public string DispatchSoap(string action, string content)
 		{
+			PrintTx(action);
+
+			Accept = SOAP_ACCEPT;
+
+			string output;
+			bool success;
+
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				Accept = SOAP_ACCEPT;
-
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, GetAddressWithProtocol())
 				{
 					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
@@ -193,21 +221,28 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				request.Headers.Add(SOAP_ACTION_HEADER, action);
 
-				return Request(content, s => Dispatch(request));
+				success = Dispatch(request, out output);
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(success);
+			PrintRx(output);
+			return output;
 		}
 
 		/// <summary>
 		/// Dispatches the request and returns the result.
 		/// </summary>
 		/// <param name="request"></param>
+		/// <param name="result"></param>
 		/// <returns></returns>
-		private string Dispatch(HttpRequestMessage request)
+		private bool Dispatch(HttpRequestMessage request, out string result)
 		{
+			result = null;
+
 			m_ClientBusySection.Enter();
 
 			try
@@ -217,20 +252,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.RequestUri);
-					SetLastRequestSucceeded(false);
-					return null;
+					return false;
 				}
 
+				result = response.Content.ReadAsStringAsync().Result;
+
 				if ((int)response.StatusCode < 300)
-				{
-					SetLastRequestSucceeded(true);
-					return response.Content.ReadAsStringAsync().Result;
-				}
+					return true;
 
 				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri,
 				                response.StatusCode);
-				SetLastRequestSucceeded(false);
-				return null;
+				return false;
 			}
 			finally
 			{
