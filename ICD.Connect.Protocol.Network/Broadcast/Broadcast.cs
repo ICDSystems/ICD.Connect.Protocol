@@ -79,7 +79,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		#endregion
 	}
 
-	public class Broadcast<T> : Broadcast
+	public sealed class Broadcast<T> : Broadcast
 	{
 		public new T Data { get { return (T)base.Data; } }
 

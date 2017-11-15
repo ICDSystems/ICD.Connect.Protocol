@@ -9,7 +9,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	/// <summary>
 	/// ComPortPlus provides a bridge between S+ ComPorts and the S#/Pro libraries.
 	/// </summary>
-	public sealed class ComPortPlus : AbstractComPort<ComPortPlusSettings>, IComPort
+	public sealed class ComPortPlus : AbstractComPort<ComPortPlusSettings>
 	{
 		public event EventHandler<StringEventArgs> OnComSpecToChange;
 		public event EventHandler<StringEventArgs> OnDataToSend;

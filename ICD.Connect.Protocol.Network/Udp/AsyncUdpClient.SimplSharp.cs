@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
-using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 
