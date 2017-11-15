@@ -164,14 +164,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 
 			// Spawn a new listening thread
-			m_Clients[clientId].GetStream().ReadAsync(buffer, 0, 16384).ContinueWith(a => TcpClientReceiveHandler(a, clientId));
-			//if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
-			//return;
-
-			//Logger.AddEntry(eSeverity.Error, "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
-			//clientId, GetHostnameForClientId(clientId), socketError);
-
-			//RemoveClient(clientId);
+			m_Clients[clientId].GetStream()
+			                   .ReadAsync(buffer, 0, 16384)
+			                   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
 		}
 
 		/// <summary>

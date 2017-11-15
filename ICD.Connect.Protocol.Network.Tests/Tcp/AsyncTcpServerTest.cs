@@ -1,4 +1,9 @@
-﻿using ICD.Connect.Protocol.Network.Tcp;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Tcp;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Network.Tests.Tcp
@@ -9,7 +14,36 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 		[Test]
 		public void DataReceivedEventTest()
 		{
-			Assert.Inconclusive();
+			List<TcpReceiveEventArgs> feedback = new List<TcpReceiveEventArgs>();
+
+			AsyncTcpServer server = new AsyncTcpServer
+			{
+				AddressToAcceptConnectionFrom = "localhost",
+				Port = 12345,
+				MaxNumberOfClients = 1
+			};
+			server.OnDataReceived += (sender, args) => feedback.Add(args);
+
+			AsyncTcpClient client = new AsyncTcpClient
+			{
+				Address = "localhost",
+				Port = 12345
+			};
+
+			server.Start();
+			client.Connect();
+
+			Assert.IsTrue(ThreadingUtils.Wait(() => client.IsConnected && server.GetClients().Any(), 500));
+
+			uint clientId = server.GetClients().First();
+
+			Assert.AreEqual(0, feedback.Count);
+
+			client.Send("test");
+
+			Assert.IsTrue(ThreadingUtils.Wait(() => feedback.Count == 1, 500));
+			Assert.AreEqual(clientId, feedback[0].ClientId);
+			Assert.AreEqual("test", feedback[0].Data);
 		}
 
 		[Test]
