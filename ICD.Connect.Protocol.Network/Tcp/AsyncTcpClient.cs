@@ -152,10 +152,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 		#endregion
 
-		#region TCPClient Callbacks
-
-		#endregion
-
 		#region Settings
 
 		/// <summary>

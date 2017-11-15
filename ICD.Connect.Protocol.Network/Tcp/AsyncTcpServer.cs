@@ -205,8 +205,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			try
 			{
 				m_Connections[clientId] = GetHostnameForClientId(clientId);
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Notice, "Client {0} ({1}) connected", clientId, m_Connections[clientId]);
+				Logger.AddEntry(eSeverity.Notice, "Client {0} ({1}) connected", clientId, m_Connections[clientId]);
 			}
 			finally
 			{
@@ -227,8 +226,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				if (!m_Connections.ContainsKey(clientId))
 					return;
 
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Notice, "Client {0} ({1}) disconnected", clientId, m_Connections[clientId]);
+				Logger.AddEntry(eSeverity.Notice, "Client {0} ({1}) disconnected", clientId, m_Connections[clientId]);
 				m_Connections.Remove(clientId);
 			}
 			finally

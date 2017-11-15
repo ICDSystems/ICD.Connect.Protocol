@@ -131,7 +131,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				RemoveClient(clientId);
 			}
-				// Client connected
+			// Client connected
 			else if (!ContainsClient(clientId))
 			{
 				AddClient(clientId);
@@ -145,8 +145,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, e, "Exception in OnSocketStateChange callback - {0}", e.Message);
+				Logger.AddEntry(eSeverity.Error, e, "Exception in OnSocketStateChange callback - {0}", e.Message);
 			}
 		}
 

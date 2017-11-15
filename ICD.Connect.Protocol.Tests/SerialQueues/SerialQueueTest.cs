@@ -84,9 +84,7 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			// Queue some Tx
 			queue.Enqueue("Ping\n");
 
-			ThreadingUtils.Sleep(200);
-
-			Assert.AreEqual(1, responses.Count);
+			Assert.IsTrue(ThreadingUtils.Wait(() => responses.Count == 1, 200));
 		}
 
 		[Test, UsedImplicitly]
