@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			Will = 0xFB,
 			Do = 0xFD,
-			Dont = 0XFE,
+			Dont = 0xFE,
 			Wont = 0xFC
 		}
 
