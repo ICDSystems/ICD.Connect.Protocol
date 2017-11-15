@@ -69,10 +69,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				if (value < 0 || value > MAX_NUMBER_OF_CLIENTS_SUPPORTED)
 				{
-					ServiceProvider.TryGetService<ILoggerService>()
-					               .AddEntry(eSeverity.Warning,
-					                         "{0} - {1} is invalid for max number of clients. Clamping between 0 and {2}",
-					                         this, value, MAX_NUMBER_OF_CLIENTS_SUPPORTED);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - {1} is invalid for max number of clients. Clamping between 0 and {2}",
+					                this, value, MAX_NUMBER_OF_CLIENTS_SUPPORTED);
 				}
 
 				m_MaxNumberOfClients = MathUtils.Clamp(value, 0, MAX_NUMBER_OF_CLIENTS_SUPPORTED);
