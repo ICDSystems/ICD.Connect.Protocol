@@ -192,7 +192,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
 			yield return new GenericConsoleCommand<string>("SetUsername", "Sets the username for requests", s => Username = s);
 			yield return new GenericConsoleCommand<string>("SetPassword", "Sets the password for requests", s => Password = s);
-			
+
 			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
 		}
 

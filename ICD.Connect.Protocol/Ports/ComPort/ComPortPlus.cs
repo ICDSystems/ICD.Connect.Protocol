@@ -1,6 +1,6 @@
 ﻿using System;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Utils;
 
@@ -113,13 +113,15 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <returns></returns>
 		[PublicAPI]
 		public void SetComPortSpec(ushort baudRate, ushort numberOfDataBits, ushort parityType, ushort numberOfStopBits,
-								   ushort protocolType, ushort hardwareHandShake, ushort softwareHandshake, ushort reportCtsChanges)
+		                           ushort protocolType, ushort hardwareHandShake, ushort softwareHandshake,
+		                           ushort reportCtsChanges)
 		{
 			bool report = reportCtsChanges != 0;
 
 			SetComPortSpec((eComBaudRates)baudRate, (eComDataBits)numberOfDataBits, (eComParityType)parityType,
-						   (eComStopBits)numberOfStopBits, (eComProtocolType)protocolType, (eComHardwareHandshakeType)hardwareHandShake,
-						   (eComSoftwareHandshakeType)softwareHandshake, report);
+			               (eComStopBits)numberOfStopBits, (eComProtocolType)protocolType,
+			               (eComHardwareHandshakeType)hardwareHandShake,
+			               (eComSoftwareHandshakeType)softwareHandshake, report);
 		}
 
 		/// <summary>
@@ -141,11 +143,12 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <returns></returns>
 		[PublicAPI]
 		public override void SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
-											eComStopBits numberOfStopBits, eComProtocolType protocolType, eComHardwareHandshakeType hardwareHandShake,
-											eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges)
+		                                    eComStopBits numberOfStopBits, eComProtocolType protocolType,
+		                                    eComHardwareHandshakeType hardwareHandShake,
+		                                    eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges)
 		{
 			string comSpec = ComSpecUtils.AssembleComSpec(PortIndex, baudRate, numberOfDataBits, parityType, numberOfStopBits,
-														  protocolType, hardwareHandShake, softwareHandshake, reportCtsChanges);
+			                                              protocolType, hardwareHandShake, softwareHandshake, reportCtsChanges);
 
 			OnComSpecToChange.Raise(this, new StringEventArgs(comSpec));
 		}

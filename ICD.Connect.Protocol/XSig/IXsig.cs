@@ -14,9 +14,9 @@ namespace ICD.Connect.Protocol.XSig
 		/// </summary>
 		ushort Index { get; }
 
-	    SigInfo ToSigInfo();
+		SigInfo ToSigInfo();
 
-	    SigInfo ToSigInfo(ushort smartObjectId);
+		SigInfo ToSigInfo(ushort smartObjectId);
 	}
 
 	public interface IXSig<T> : IXSig

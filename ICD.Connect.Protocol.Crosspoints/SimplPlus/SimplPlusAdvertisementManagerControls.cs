@@ -53,4 +53,5 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		#endregion
 	}
 }
+
 #endif

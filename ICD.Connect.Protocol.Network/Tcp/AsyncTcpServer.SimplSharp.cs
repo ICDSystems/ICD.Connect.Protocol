@@ -225,9 +225,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				return;
 
 			ServiceProvider.TryGetService<ILoggerService>()
-					.AddEntry(eSeverity.Error,
-							"AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
-							clientId, GetHostnameForClientId(clientId), socketError);
+			               .AddEntry(eSeverity.Error,
+			                         "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
+			                         clientId, GetHostnameForClientId(clientId), socketError);
 
 			RemoveClient(clientId);
 		}

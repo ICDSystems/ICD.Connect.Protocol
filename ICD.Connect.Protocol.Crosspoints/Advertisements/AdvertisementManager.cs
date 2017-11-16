@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
-using ICD.Connect.Protocol.Network.Udp;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
+using ICD.Connect.Protocol.Network.Udp;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 
@@ -135,7 +135,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 				return;
 
 			// Loop over the addressest to advertise to
-			foreach (var address in GetAdvertisementAddresses())
+			foreach (KeyValuePair<string, eAdvertisementType> address in GetAdvertisementAddresses())
 			{
 				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, address.Value);
 				string serial = advertisement.Serialize();
@@ -416,24 +416,19 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			CrosspointInfo[] equipment = new CrosspointInfo[1];
 
 			CrosspointInfo crosspointInfo = new CrosspointInfo(crosspoint.Id, crosspoint.Name, GetHostInfo());
-			
+
 			if (sender == m_ControlManager)
-			{
 				controls[0] = crosspointInfo;
-			}
 			else if (sender == m_EquipmentManager)
-			{
 				equipment[0] = crosspointInfo;
-			}
 			else
-			{
 				return;
-			}
 
 			// Loop over the addressest to advertise to
-			foreach (var address in GetAdvertisementAddresses())
+			foreach (KeyValuePair<string, eAdvertisementType> address in GetAdvertisementAddresses())
 			{
-				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, eAdvertisementType.CrosspointRemove);
+				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment,
+				                                                eAdvertisementType.CrosspointRemove);
 				string serial = advertisement.Serialize();
 
 				// Loop over the ports for the different program slots

@@ -56,7 +56,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		private void SystemOnEquipmentCrosspointManagerCreated(object sender, EventArgs eventArgs)
 		{
-			var system = sender as CrosspointSystem;
+			CrosspointSystem system = sender as CrosspointSystem;
 
 			if (system == null)
 				return;
@@ -68,10 +68,10 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			equipmentCrosspointManager.OnCrosspointRegistered += EquipmentCrosspointManagerOnCrosspointRegistered;
 			equipmentCrosspointManager.OnCrosspointUnregistered += EquipmentCrosspointManagerOnCrosspointUnregistered;
 		}
-		
+
 		private void SystemOnControlCrosspointManagerCreated(object sender, EventArgs eventArgs)
 		{
-			var system = sender as CrosspointSystem;
+			CrosspointSystem system = sender as CrosspointSystem;
 
 			if (system == null)
 				return;
@@ -127,7 +127,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		#region Console
 
 		public string ConsoleName { get { return "Xp3SimplPlus"; } }
-		public string ConsoleHelp { get { return "The SimplPlus Wrappers around XP3 Crosspoints"; }}
+		public string ConsoleHelp { get { return "The SimplPlus Wrappers around XP3 Crosspoints"; } }
 
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
@@ -162,7 +162,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 				                             builder.AddRow(index, item.CrosspointSymbolInstanceName,
 				                                            item.Crosspoint != null ? item.Crosspoint.GetType().ToString() : "",
 				                                            item.Crosspoint != null ? item.Crosspoint.Name : "",
-															item.Crosspoint != null ? item.Crosspoint.Id.ToString() : ""));
+				                                            item.Crosspoint != null ? item.Crosspoint.Id.ToString() : ""));
 			}
 			finally
 			{
@@ -189,7 +189,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		}
 
 		#endregion
-
 	}
 }
+
 #endif

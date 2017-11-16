@@ -58,7 +58,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public DigitalXSig(bool value, ushort index)
 		{
-			if(index >= (1 << 12))
+			if (index >= (1 << 12))
 				throw new ArgumentException("Index must be between 0 and 4095");
 
 			m_Data = new byte[2];
@@ -114,34 +114,34 @@ namespace ICD.Connect.Protocol.XSig
 			return builder.ToString();
 		}
 
-        /// <summary>
-        /// Convert XSig to SigInfo
-        /// Uses SmartObjectId of 0
-        /// </summary>
-        /// <returns>SigInfo for the XSig</returns>
-        public SigInfo ToSigInfo()
-        {
-            return ToSigInfo(0);
-        }
+		/// <summary>
+		/// Convert XSig to SigInfo
+		/// Uses SmartObjectId of 0
+		/// </summary>
+		/// <returns>SigInfo for the XSig</returns>
+		public SigInfo ToSigInfo()
+		{
+			return ToSigInfo(0);
+		}
 
-        /// <summary>
-        /// Convert XSig to SigInfo
-        /// Using the given SmartObjectId
-        /// </summary>
-        /// <param name="smartObjectId">SmartObjectId</param>
-        /// <returns>SigInfo for the XSig</returns>
-        public SigInfo ToSigInfo(ushort smartObjectId)
-        {
-            return new SigInfo(Index, smartObjectId, Value);
-        }
+		/// <summary>
+		/// Convert XSig to SigInfo
+		/// Using the given SmartObjectId
+		/// </summary>
+		/// <param name="smartObjectId">SmartObjectId</param>
+		/// <returns>SigInfo for the XSig</returns>
+		public SigInfo ToSigInfo(ushort smartObjectId)
+		{
+			return new SigInfo(Index, smartObjectId, Value);
+		}
 
 		#region Private Methods
 
 		private void SetFixedBits()
 		{
 			m_Data[0] = m_Data[0]
-					.SetBitOn(7)
-					.SetBitOff(6);
+				.SetBitOn(7)
+				.SetBitOff(6);
 			m_Data[1] = m_Data[1].SetBitOff(7);
 		}
 
@@ -154,11 +154,11 @@ namespace ICD.Connect.Protocol.XSig
 			byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0].SetBitOff(7);
 			m_Data[0] = m_Data[0]
-					.SetBit(0, iBytes[0].GetBit(7))
-					.SetBit(1, iBytes[1].GetBit(0))
-					.SetBit(2, iBytes[1].GetBit(1))
-					.SetBit(3, iBytes[1].GetBit(2))
-					.SetBit(4, iBytes[1].GetBit(3));
+				.SetBit(0, iBytes[0].GetBit(7))
+				.SetBit(1, iBytes[1].GetBit(0))
+				.SetBit(2, iBytes[1].GetBit(1))
+				.SetBit(3, iBytes[1].GetBit(2))
+				.SetBit(4, iBytes[1].GetBit(3));
 		}
 
 		/// <summary>
@@ -169,7 +169,7 @@ namespace ICD.Connect.Protocol.XSig
 		{
 			byte[] index = new byte[2];
 			index[0] = m_Data[1].SetBit(7, m_Data[0].GetBit(0));
-			index[1] = ((byte) (m_Data[0] >> 1))
+			index[1] = ((byte)(m_Data[0] >> 1))
 				.SetBitOff(7)
 				.SetBitOff(6)
 				.SetBitOff(5)

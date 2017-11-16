@@ -84,8 +84,8 @@ namespace ICD.Connect.Protocol.SerialBuffers
 						}
 
 						if (!DigitalXSig.IsDigital(m_RxData) &&
-							!AnalogXSig.IsAnalog(m_RxData) &&
-							!SerialXSig.IsSerial(m_RxData))
+						    !AnalogXSig.IsAnalog(m_RxData) &&
+						    !SerialXSig.IsSerial(m_RxData))
 							continue;
 
 						string serial = StringUtils.ToString(m_RxData);

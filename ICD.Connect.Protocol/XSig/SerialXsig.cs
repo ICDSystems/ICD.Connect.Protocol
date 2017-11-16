@@ -79,7 +79,7 @@ namespace ICD.Connect.Protocol.XSig
 				return false;
 
 			// Last byte is 1111 1111
-			if (array[array.Length -1] != 0xFF)
+			if (array[array.Length - 1] != 0xFF)
 				return false;
 
 			// Leads with 11001### 0...
@@ -122,26 +122,26 @@ namespace ICD.Connect.Protocol.XSig
 			return true;
 		}
 
-        /// <summary>
-        /// Convert XSig to SigInfo
-        /// Uses SmartObjectId of 0
-        /// </summary>
-        /// <returns>SigInfo for the XSig</returns>
-        public SigInfo ToSigInfo()
-        {
-            return ToSigInfo(0);
-        }
+		/// <summary>
+		/// Convert XSig to SigInfo
+		/// Uses SmartObjectId of 0
+		/// </summary>
+		/// <returns>SigInfo for the XSig</returns>
+		public SigInfo ToSigInfo()
+		{
+			return ToSigInfo(0);
+		}
 
-        /// <summary>
-        /// Convert XSig to SigInfo
-        /// Using the given SmartObjectId
-        /// </summary>
-        /// <param name="smartObjectId">SmartObjectId</param>
-        /// <returns>SigInfo for the XSig</returns>
-        public SigInfo ToSigInfo(ushort smartObjectId)
-        {
-            return new SigInfo(Index, smartObjectId, Value);
-        }
+		/// <summary>
+		/// Convert XSig to SigInfo
+		/// Using the given SmartObjectId
+		/// </summary>
+		/// <param name="smartObjectId">SmartObjectId</param>
+		/// <returns>SigInfo for the XSig</returns>
+		public SigInfo ToSigInfo(ushort smartObjectId)
+		{
+			return new SigInfo(Index, smartObjectId, Value);
+		}
 
 		public override string ToString()
 		{
@@ -158,11 +158,11 @@ namespace ICD.Connect.Protocol.XSig
 		private void SetFixedBits()
 		{
 			m_Data[0] = m_Data[0]
-					.SetBitOn(7)
-					.SetBitOn(6)
-					.SetBitOff(5)
-					.SetBitOff(4)
-					.SetBitOn(3);
+				.SetBitOn(7)
+				.SetBitOn(6)
+				.SetBitOff(5)
+				.SetBitOff(4)
+				.SetBitOn(3);
 			m_Data[1] = m_Data[1].SetBitOff(7);
 			m_Data[m_Data.Length - 1] = 0xFF;
 		}
@@ -193,12 +193,12 @@ namespace ICD.Connect.Protocol.XSig
 		{
 			byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0]
-					.SetBitOff(7);
+				.SetBitOff(7);
 
 			m_Data[0] = m_Data[0]
-					.SetBit(0, iBytes[0].GetBit(7))
-					.SetBit(1, iBytes[1].GetBit(0))
-					.SetBit(2, iBytes[1].GetBit(1));
+				.SetBit(0, iBytes[0].GetBit(7))
+				.SetBit(1, iBytes[1].GetBit(0))
+				.SetBit(2, iBytes[1].GetBit(1));
 		}
 
 		/// <summary>
@@ -214,7 +214,7 @@ namespace ICD.Connect.Protocol.XSig
 
 			index[1] = index[1]
 				.SetBit(0, m_Data[0].GetBit(1))
-					.SetBit(1, m_Data[0].GetBit(2));
+				.SetBit(1, m_Data[0].GetBit(2));
 
 			return BitConverter.ToUInt16(index, 0);
 		}

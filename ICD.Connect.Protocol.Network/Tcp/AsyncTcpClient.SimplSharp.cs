@@ -181,8 +181,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			if (socketError != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 			{
 				Logger.AddEntry(eSeverity.Error, "{0} failed to ReceiveDataAsync from host {1}:{2}", this,
-						tcpClient.AddressClientConnectedTo,
-						tcpClient.PortNumber);
+				                tcpClient.AddressClientConnectedTo,
+				                tcpClient.PortNumber);
 			}
 
 			UpdateIsConnectedState();

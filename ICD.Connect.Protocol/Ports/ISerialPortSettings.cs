@@ -1,6 +1,6 @@
 ﻿namespace ICD.Connect.Protocol.Ports
 {
-    public interface ISerialPortSettings : IPortSettings
-    {
-    }
+	public interface ISerialPortSettings : IPortSettings
+	{
+	}
 }

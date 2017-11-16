@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 using Newtonsoft.Json;
@@ -301,7 +301,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			int equipment = GetEquipmentForMessage();
 
 			IcdConsole.PrintLine("{0} {1} sending Ping - Controls={2}, Equipment={3}", GetType().Name, Id,
-			                          StringUtils.ArrayFormat(controls), equipment);
+			                     StringUtils.ArrayFormat(controls), equipment);
 
 			CrosspointData ping = CrosspointData.Ping(controls, equipment, key);
 
@@ -323,7 +323,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			int equipment = ping.EquipmentId;
 
 			IcdConsole.PrintLine("{0} {1} sending Pong - Controls={2}, Equipment={3}", GetType().Name, Id,
-			                          StringUtils.ArrayFormat(controls), equipment);
+			                     StringUtils.ArrayFormat(controls), equipment);
 
 			CrosspointData pong = CrosspointData.Pong(controls, equipment, key);
 
@@ -342,7 +342,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		private void ReceivePong(CrosspointData pong)
 		{
 			IcdConsole.PrintLine("{0} {1} received Pong - Controls={2}, Equipment={3}", GetType().Name, Id,
-			                          StringUtils.ArrayFormat(pong.GetControlIds()), pong.EquipmentId);
+			                     StringUtils.ArrayFormat(pong.GetControlIds()), pong.EquipmentId);
 
 			string key = JsonConvert.DeserializeObject<string>(pong.GetJson().First());
 			DateTime pingTime;
@@ -371,7 +371,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		private void ReceivePing(CrosspointData ping)
 		{
 			IcdConsole.PrintLine("{0} {1} received Ping - Controls={2}, Equipment={3}", GetType().Name, Id,
-			                          StringUtils.ArrayFormat(ping.GetControlIds()), ping.EquipmentId);
+			                     StringUtils.ArrayFormat(ping.GetControlIds()), ping.EquipmentId);
 
 			Pong(ping);
 		}

@@ -17,6 +17,5 @@ namespace ICD.Connect.Protocol.Extensions
 		{
 			return factory.GetOriginatorById<IPort>(id);
 		}
-
 	}
 }

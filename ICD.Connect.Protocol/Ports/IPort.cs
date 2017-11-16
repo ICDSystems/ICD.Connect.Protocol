@@ -8,16 +8,16 @@ namespace ICD.Connect.Protocol.Ports
 	/// </summary>
 	public interface IPort : IDeviceBase
 	{
-        /// <summary>
-        /// When enabled prints the received data to the console.
-        /// </summary>
-        [PublicAPI]
-        bool DebugRx { get; set; }
+		/// <summary>
+		/// When enabled prints the received data to the console.
+		/// </summary>
+		[PublicAPI]
+		bool DebugRx { get; set; }
 
-        /// <summary>
-        /// When enabled prints the transmitted data to the console.
-        /// </summary>
-        [PublicAPI]
-        bool DebugTx { get; set; }
+		/// <summary>
+		/// When enabled prints the transmitted data to the console.
+		/// </summary>
+		[PublicAPI]
+		bool DebugTx { get; set; }
 	}
 }

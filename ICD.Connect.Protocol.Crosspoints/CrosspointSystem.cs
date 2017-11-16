@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.Advertisements;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 
@@ -124,7 +124,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 				if (m_ControlCrosspointManager != null)
 				{
 					throw new InvalidOperationException(string.Format("{0} {1} already contains a {2}", GetType().Name, m_Id,
-																	  typeof(ControlCrosspointManager).Name));
+					                                                  typeof(ControlCrosspointManager).Name));
 				}
 
 				m_ControlCrosspointManager = new ControlCrosspointManager(Id);
@@ -172,7 +172,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 				if (m_EquipmentCrosspointManager != null)
 				{
 					throw new InvalidOperationException(string.Format("{0} {1} already contains a {2}", GetType().Name, m_Id,
-																	  typeof(EquipmentCrosspointManager).Name));
+					                                                  typeof(EquipmentCrosspointManager).Name));
 				}
 
 				m_EquipmentCrosspointManager = new EquipmentCrosspointManager(Id);

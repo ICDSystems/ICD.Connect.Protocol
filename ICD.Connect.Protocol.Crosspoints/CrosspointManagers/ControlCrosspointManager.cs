@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API.Commands;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Network.Tcp;
+using ICD.Connect.API.Commands;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
+using ICD.Connect.Protocol.Network.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
@@ -92,7 +92,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <returns>False if connection failed.</returns>
 		[PublicAPI]
 		public eCrosspointStatus ConnectCrosspoint(int crosspointId, int equipmentId)
-		{			
+		{
 			m_ControlClientMapSection.Enter();
 
 			try
@@ -122,7 +122,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				if (!client.IsConnected)
 				{
 					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - Client failed to connect.",
-									 crosspointId, equipmentId);
+					                 crosspointId, equipmentId);
 					return eCrosspointStatus.ConnectFailed;
 				}
 
@@ -365,7 +365,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="client"></param>
 		/// <param name="data"></param>
 		private void BufferManagerOnClientCompletedSerial(TcpClientPoolBufferManager sender, AsyncTcpClient client,
-														  string data)
+		                                                  string data)
 		{
 			CrosspointData crosspointData = CrosspointData.Deserialize(data);
 
@@ -382,7 +382,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 						RemoveControlFromDictionaries(controlId);
 
 						ControlCrosspoint crosspoint = GetCrosspoint(controlId) as ControlCrosspoint;
-						if(crosspoint != null)
+						if (crosspoint != null)
 							crosspoint.Status = eCrosspointStatus.ConnectionClosedRemote;
 					}
 					break;

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
@@ -111,7 +111,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					    (data.MessageType == CrosspointData.eMessageType.EquipmentConnect ||
 					     data.MessageType == CrosspointData.eMessageType.Message))
 					{
-						var newSigs = data.GetSigs().ToArray();
+						SigInfo[] newSigs = data.GetSigs().ToArray();
 						m_SigCache.RemoveRange(newSigs);
 						data.AddSigs(m_SigCache);
 						m_SigsWaitingToBeCleared = false;
@@ -119,9 +119,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 						m_SigCache.AddHighClearRemoveLow(newSigs);
 					}
 					else
-					{
 						m_SigCache.AddHighClearRemoveLow(data.GetSigs());
-					}
 				}
 			}
 			finally

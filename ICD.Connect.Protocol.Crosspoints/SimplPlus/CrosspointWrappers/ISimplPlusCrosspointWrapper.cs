@@ -5,7 +5,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 {
 	public interface ISimplPlusCrosspointWrapper
 	{
-
 		#region Properties
 
 		int SystemId { get; }

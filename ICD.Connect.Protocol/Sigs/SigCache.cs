@@ -59,9 +59,9 @@ namespace ICD.Connect.Protocol.Sigs
 			public static bool operator ==(SigKey x, SigKey y)
 			{
 				bool output = x.m_Type == y.m_Type &&
-							  x.m_Number == y.m_Number &&
-							  x.m_Name == y.m_Name &&
-							  x.m_SmartObject == y.m_SmartObject;
+				              x.m_Number == y.m_Number &&
+				              x.m_Name == y.m_Name &&
+				              x.m_SmartObject == y.m_SmartObject;
 
 				return output;
 			}
@@ -75,7 +75,7 @@ namespace ICD.Connect.Protocol.Sigs
 		}
 
 		// The internal collection
-		private readonly Dictionary<SigKey, SigInfo> m_KeyToSig; 
+		private readonly Dictionary<SigKey, SigInfo> m_KeyToSig;
 
 		#region Properties
 
@@ -173,10 +173,8 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public void RemoveRange(IEnumerable<SigInfo> sigs)
 		{
-			foreach (var s in sigs)
-			{
+			foreach (SigInfo s in sigs)
 				Remove(s);
-			}
 		}
 
 		#endregion

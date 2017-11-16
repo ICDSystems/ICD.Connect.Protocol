@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Services;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Udp;
@@ -238,7 +238,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			catch (JsonReaderException e)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
-					.AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
+				               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
 				return;
 			}
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Protocol.Crosspoints
 {
@@ -34,7 +34,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <summary>
 		/// Event called when a crosspoint system is removed
 		/// </summary>
-		public event EventHandler<CrosspointSystemEventArgs> OnSystemRemoved; 
+		public event EventHandler<CrosspointSystemEventArgs> OnSystemRemoved;
 
 		/// <summary>
 		/// Constructor.

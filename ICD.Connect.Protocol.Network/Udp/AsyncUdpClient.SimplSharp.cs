@@ -12,7 +12,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 	{
 		private UDPServer m_UdpClient;
 
-#region Methods
+		#region Methods
 
 		/// <summary>
 		/// Connects to the end point.
@@ -113,9 +113,9 @@ namespace ICD.Connect.Protocol.Network.Udp
 			return true;
 		}
 
-#endregion
+		#endregion
 
-#region Private Methods
+		#region Private Methods
 
 		/// <summary>
 		/// Handles Receiving Data from the Active TCP Connection
@@ -142,7 +142,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			UpdateIsConnectedState();
 		}
 
-#endregion
+		#endregion
 	}
 }
 

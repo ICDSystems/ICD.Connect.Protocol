@@ -5,7 +5,6 @@ using ICD.Common.Logging.Console.Loggers;
 using ICD.Common.Services;
 using ICD.Common.Services.Logging;
 
-
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
 	public static class SimplPlusStaticCore
@@ -41,4 +40,5 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		}
 	}
 }
+
 #endif

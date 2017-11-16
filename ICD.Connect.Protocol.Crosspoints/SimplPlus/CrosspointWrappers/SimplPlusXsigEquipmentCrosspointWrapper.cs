@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using System.Linq;
+#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using Crestron.SimplSharp;
@@ -31,9 +32,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		private readonly SafeCriticalSection m_SendSection;
 		private readonly SafeCriticalSection m_ReceiveSection;
-		
-		#endregion
 
+		#endregion
 
 		#region Properties
 
@@ -54,7 +54,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		public event EventHandler OnCrosspointChanged;
 
 		#endregion
-
 
 		#region SPlusMethods
 
@@ -224,15 +223,15 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
 			m_Crosspoint.OnControlCrosspointCountChanged += CrosspointOnControlCrosspointCountChanged;
 
-			var statusCallback = CrosspointStatusCallback;
+			DelStatusUpdate statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
 				statusCallback((ushort)m_Crosspoint.Status);
 
-			var connectionsCallback = ControlCrosspointsConnectedCallback;
+			DelStatusUpdate connectionsCallback = ControlCrosspointsConnectedCallback;
 			if (connectionsCallback != null)
 				connectionsCallback((ushort)m_Crosspoint.ControlCrosspointsCount);
 
-			var crosspointChangedEvent = OnCrosspointChanged;
+			EventHandler crosspointChangedEvent = OnCrosspointChanged;
 			if (crosspointChangedEvent != null)
 				crosspointChangedEvent(this, EventArgs.Empty);
 		}
@@ -243,15 +242,15 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			m_Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
 			m_Crosspoint.OnControlCrosspointCountChanged -= CrosspointOnControlCrosspointCountChanged;
 
-			var statusCallback = CrosspointStatusCallback;
+			DelStatusUpdate statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
 				statusCallback(0);
 
-			var connectedControlsCallback = ControlCrosspointsConnectedCallback;
+			DelStatusUpdate connectedControlsCallback = ControlCrosspointsConnectedCallback;
 			if (connectedControlsCallback != null)
 				connectedControlsCallback(0);
 
-			var crosspointChangedEvent = OnCrosspointChanged;
+			EventHandler crosspointChangedEvent = OnCrosspointChanged;
 			if (crosspointChangedEvent != null)
 				crosspointChangedEvent(this, EventArgs.Empty);
 		}
@@ -326,4 +325,5 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		}
 	}
 }
+
 #endif

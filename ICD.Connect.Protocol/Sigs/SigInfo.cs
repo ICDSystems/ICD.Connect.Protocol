@@ -231,12 +231,12 @@ namespace ICD.Connect.Protocol.Sigs
 		public static bool operator ==(SigInfo x, SigInfo y)
 		{
 			bool output = x.m_Type == y.m_Type &&
-						  x.m_Number == y.m_Number &&
-						  x.m_Name == y.m_Name &&
-						  x.m_SmartObject == y.m_SmartObject &&
-						  x.m_BoolValue == y.m_BoolValue &&
-						  x.m_UshortValue == y.m_UshortValue &&
-						  x.m_StringValue == y.m_StringValue;
+			              x.m_Number == y.m_Number &&
+			              x.m_Name == y.m_Name &&
+			              x.m_SmartObject == y.m_SmartObject &&
+			              x.m_BoolValue == y.m_BoolValue &&
+			              x.m_UshortValue == y.m_UshortValue &&
+			              x.m_StringValue == y.m_StringValue;
 
 			return output;
 		}

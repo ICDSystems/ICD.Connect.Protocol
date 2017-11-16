@@ -71,19 +71,19 @@ namespace ICD.Connect.Protocol.Ports
 
 		#region Console
 
-	    /// <summary>
-	    /// Calls the delegate for each console status item.
-	    /// </summary>
-	    /// <param name="addRow"></param>
-	    public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-	    {
-	        base.BuildConsoleStatus(addRow);
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
 
-	        addRow("Debug Rx", DebugRx);
-	        addRow("Debug Tx", DebugTx);
-	    }
+			addRow("Debug Rx", DebugRx);
+			addRow("Debug Tx", DebugTx);
+		}
 
-	    /// <summary>
+		/// <summary>
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>

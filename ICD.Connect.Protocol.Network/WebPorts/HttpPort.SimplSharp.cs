@@ -260,7 +260,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					{
 						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
 						Url = new UrlParser(Address),
-						Header = { ContentType = SOAP_CONTENT_TYPE },
+						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
@@ -273,7 +273,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					{
 						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post,
 						Url = new UrlParser(Address),
-						Header = { ContentType = SOAP_CONTENT_TYPE },
+						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
@@ -329,7 +329,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				}
 
 				result = response.ContentString;
-				
+
 				if (response.Code < 300)
 					return true;
 

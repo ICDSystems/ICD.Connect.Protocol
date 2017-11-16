@@ -1,6 +1,6 @@
 ﻿using System;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Services.Logging;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;
 
@@ -10,8 +10,8 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 		where T : IDigitalInputPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnStateChanged;
-	    private bool m_State;
-	
+		private bool m_State;
+
 		#region Properties
 
 		/// <summary>
@@ -32,6 +32,7 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 				OnStateChanged.Raise(this, new BoolEventArgs(m_State));
 			}
 		}
+
 		#endregion
 
 		/// <summary>

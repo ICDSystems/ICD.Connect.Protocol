@@ -35,11 +35,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <summary>
 		/// The type of advertisement this is
 		/// </summary>
-		public eAdvertisementType AdvertisementType { get { return m_AdvertisementType; }}
+		public eAdvertisementType AdvertisementType { get { return m_AdvertisementType; } }
 
 		#endregion
 
-		public Advertisement(HostInfo source, IEnumerable<CrosspointInfo> controls, IEnumerable<CrosspointInfo> equipment, eAdvertisementType advertisementType)
+		public Advertisement(HostInfo source, IEnumerable<CrosspointInfo> controls, IEnumerable<CrosspointInfo> equipment,
+		                     eAdvertisementType advertisementType)
 		{
 			m_Source = source;
 			m_Controls = controls.ToArray();
@@ -88,14 +89,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 	/// Integer values added to make sure future updates don't completely break compatability between versions with JSON serialization.
 	/// </summary>
 	public enum eAdvertisementType
-		{
-			Localhost = 0,
-			Multicast = 1,
-			Broadcast = 2,
-			Directed = 3,
-			DirectedRemove = 4,
-			Mesh = 5,
-			MeshRemove = 6,
-			CrosspointRemove = 7
-		}
+	{
+		Localhost = 0,
+		Multicast = 1,
+		Broadcast = 2,
+		Directed = 3,
+		DirectedRemove = 4,
+		Mesh = 5,
+		MeshRemove = 6,
+		CrosspointRemove = 7
+	}
 }

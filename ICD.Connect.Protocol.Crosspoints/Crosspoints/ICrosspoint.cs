@@ -1,6 +1,6 @@
 ﻿using System;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Properties;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.EventArguments;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints

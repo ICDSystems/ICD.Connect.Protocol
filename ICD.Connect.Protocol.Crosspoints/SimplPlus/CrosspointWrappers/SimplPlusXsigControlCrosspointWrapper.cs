@@ -1,4 +1,4 @@
-﻿using ICD.Common.Utils.Extensions;
+﻿using System.Linq;
 #if SIMPLSHARP
 using System;
 using System.Collections.Generic;
@@ -42,15 +42,15 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#region Properties
 
-		public int SystemId { get { return m_SystemId; }}
+		public int SystemId { get { return m_SystemId; } }
 
-		public int CrosspointId { get { return m_CrosspointId; }}
-		
-		public string CrosspointName { get { return m_CrosspointName; }}
+		public int CrosspointId { get { return m_CrosspointId; } }
+
+		public string CrosspointName { get { return m_CrosspointName; } }
 
 		public string CrosspointSymbolInstanceName { get { return m_CrosspointSymbolInstanceName; } }
 
-		public ICrosspoint Crosspoint { get { return m_Crosspoint; }}
+		public ICrosspoint Crosspoint { get { return m_Crosspoint; } }
 
 		#endregion
 
@@ -231,11 +231,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			m_Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
 			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
 
-			var statusCallback = CrosspointStatusCallback;
+			DelStatusUpdate statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
 				statusCallback((ushort)m_Crosspoint.Status);
 
-			var crosspointChangedEvent = OnCrosspointChanged;
+			EventHandler crosspointChangedEvent = OnCrosspointChanged;
 			if (crosspointChangedEvent != null)
 				crosspointChangedEvent(this, EventArgs.Empty);
 		}
@@ -245,11 +245,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			m_Crosspoint.OnSendOutputData -= CrosspointOnSendOutputData;
 			m_Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
 
-			var statusCallback = CrosspointStatusCallback;
+			DelStatusUpdate statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
 				statusCallback(0);
 
-			var crosspointChangedEvent = OnCrosspointChanged;
+			EventHandler crosspointChangedEvent = OnCrosspointChanged;
 			if (crosspointChangedEvent != null)
 				crosspointChangedEvent(this, EventArgs.Empty);
 		}
@@ -301,7 +301,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		{
 			DelStatusUpdate callback = CrosspointStatusCallback;
 			if (callback != null)
-				callback((ushort) args.Data);
+				callback((ushort)args.Data);
 		}
 
 		/// <summary>
@@ -317,4 +317,5 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		}
 	}
 }
+
 #endif

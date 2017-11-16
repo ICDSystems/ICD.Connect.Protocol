@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.EventArguments;
-using ICD.Connect.API.Nodes;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
@@ -100,7 +100,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				if (!m_ControlCrosspoints.Add(controlId))
 					return;
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
-				if(ControlCrosspointsCount > 0)
+				if (ControlCrosspointsCount > 0)
 					Status = eCrosspointStatus.Connected;
 
 				connect = CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
@@ -128,7 +128,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				if (!m_ControlCrosspoints.Remove(controlId))
 					return;
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
-				if(ControlCrosspointsCount <= 0)
+				if (ControlCrosspointsCount <= 0)
 					Status = eCrosspointStatus.Idle;
 
 				disconnect = CrosspointData.EquipmentDisconnect(controlId, Id);
