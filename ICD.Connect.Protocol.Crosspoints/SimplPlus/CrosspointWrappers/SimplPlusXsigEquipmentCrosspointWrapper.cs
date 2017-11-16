@@ -157,10 +157,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				IEnumerable<IXSig> sigs = XSigParser.ParseMultiple(xsig.ToString());
+				IEnumerable<SigInfo> sigs = XSigParser.ParseMultiple(xsig.ToString()).Select(s => s.ToSigInfo());
 				CrosspointData data = new CrosspointData();
-				foreach(var sig in sigs)
-                    data.AddSig(sig.ToSigInfo());
+				data.AddSigs(sigs);
 				m_Crosspoint.SendInputData(data);
 			}
 			finally
