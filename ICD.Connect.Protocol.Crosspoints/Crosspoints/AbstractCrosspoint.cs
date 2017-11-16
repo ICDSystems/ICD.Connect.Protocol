@@ -385,8 +385,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			try
 			{
-				DateTime now = IcdEnvironment.GetLocalTime();
-				m_PingTimes.RemoveAll(kvp => (now - kvp.Value).TotalSeconds > PING_TIMEOUT_SECONDS);
+				//todo: clean up this to work properly
+                //DateTime now = IcdEnvironment.GetLocalTime();
+				//m_PingTimes.RemoveAll(kvp => (now - kvp.Value).TotalSeconds > PING_TIMEOUT_SECONDS);
+                m_PingTimes.Clear();
 			}
 			finally
 			{

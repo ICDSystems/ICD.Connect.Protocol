@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.XSig
 {
@@ -120,6 +121,27 @@ namespace ICD.Connect.Protocol.XSig
 
 			return true;
 		}
+
+        /// <summary>
+        /// Convert XSig to SigInfo
+        /// Uses SmartObjectId of 0
+        /// </summary>
+        /// <returns>SigInfo for the XSig</returns>
+        public SigInfo ToSigInfo()
+        {
+            return ToSigInfo(0);
+        }
+
+        /// <summary>
+        /// Convert XSig to SigInfo
+        /// Using the given SmartObjectId
+        /// </summary>
+        /// <param name="smartObjectId">SmartObjectId</param>
+        /// <returns>SigInfo for the XSig</returns>
+        public SigInfo ToSigInfo(ushort smartObjectId)
+        {
+            return new SigInfo(Index, smartObjectId, Value);
+        }
 
 		public override string ToString()
 		{

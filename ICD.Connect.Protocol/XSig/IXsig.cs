@@ -1,4 +1,6 @@
-﻿namespace ICD.Connect.Protocol.XSig
+﻿using ICD.Connect.Protocol.Sigs;
+
+namespace ICD.Connect.Protocol.XSig
 {
 	public interface IXSig
 	{
@@ -11,6 +13,10 @@
 		/// Gets the signal index.
 		/// </summary>
 		ushort Index { get; }
+
+	    SigInfo ToSigInfo();
+
+	    SigInfo ToSigInfo(ushort smartObjectId);
 	}
 
 	public interface IXSig<T> : IXSig

@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Utils.Extensions;
+#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using Crestron.SimplSharp;
@@ -154,9 +155,10 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				IEnumerable<SigInfo> sigs = XSig.ParseMultiple(xsig.ToString());
+				IEnumerable<IXSig> sigs = XSigParser.ParseMultiple(xsig.ToString());
 				CrosspointData data = new CrosspointData();
-				data.AddSigs(sigs);
+				foreach (var sig in sigs)
+                    data.AddSig(sig.ToSigInfo());
 				m_Crosspoint.SendInputData(data);
 			}
 			finally
