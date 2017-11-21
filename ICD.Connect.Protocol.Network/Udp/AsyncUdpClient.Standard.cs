@@ -41,7 +41,16 @@ namespace ICD.Connect.Protocol.Network.Udp
 			if (m_UdpClient != null)
 			{
 				if (m_ConnectedAddress != null)
-					m_UdpClient.DropMulticastGroup(m_ConnectedAddress);
+				{
+					try
+					{
+						m_UdpClient.DropMulticastGroup(m_ConnectedAddress);
+					}
+					// Tried to drop an invalid address
+					catch (SocketException)
+					{
+					}
+				}
 				m_UdpClient.Dispose();
 			}
 			m_UdpClient = null;
