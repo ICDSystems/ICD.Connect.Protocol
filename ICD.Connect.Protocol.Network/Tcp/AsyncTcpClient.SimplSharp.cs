@@ -42,9 +42,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} failed to connect to host {1}:{2}", this,
+				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this,
 				                m_TcpClient.AddressClientConnectedTo,
-				                m_TcpClient.PortNumber);
+				                m_TcpClient.PortNumber,
+				                e.Message);
 			}
 			finally
 			{
