@@ -10,6 +10,7 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 		where T : IDigitalInputPortSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnStateChanged;
+
 		private bool m_State;
 
 		#region Properties
@@ -41,12 +42,9 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnStateChanged = null;
+
 			base.DisposeFinal(disposing);
 		}
-
-		#region Methods
-
-		#endregion
 
 		#region Console
 
@@ -57,6 +55,7 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
+
 			addRow("State", State);
 		}
 
