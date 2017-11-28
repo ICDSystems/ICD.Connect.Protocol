@@ -9,6 +9,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Core;
 #if SIMPLSHARP
+using Crestron.SimplSharp;
 using Crestron.SimplSharp.Ssh;
 using Crestron.SimplSharp.Ssh.Common;
 #else
@@ -119,14 +120,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 					DisposeClient();
 					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
 				}
-#if !SIMPLSHARP
 				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SocketException e)
 				{
 					DisposeClient();
 					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
 				}
-#endif
 
 				// ShellStream can only be instantiated when the client is connected.
 				if (m_SshClient == null || !m_SshClient.IsConnected)
