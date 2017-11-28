@@ -129,8 +129,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="tcpClient"></param>
 		private void TcpClientConnectCallback(Task<TcpClient> tcpClient)
 		{
-			uint clientId = (uint)IdUtils.GetNewId(m_Clients.Keys.Cast<int>());
-
+			uint clientId = (uint)IdUtils.GetNewId(m_Clients.Keys.Select(i => (int)i));
+		    if (tcpClient.Status == TaskStatus.Faulted)
+		    {
+		        return;
+		    }
 			m_Clients[clientId] = tcpClient.Result;
 			m_ClientBuffers[clientId] = new byte[16384];
 			AddClient(clientId);
