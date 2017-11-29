@@ -11,6 +11,7 @@ using ICD.Common.Services.Logging;
 using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Tcp
@@ -137,7 +138,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			m_Clients[clientId] = tcpClient.Result;
 			m_ClientBuffers[clientId] = new byte[16384];
 			AddClient(clientId);
-
+			OnSocketStateChange.Raise(this, new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
 			m_Clients[clientId].GetStream()
 			                   .ReadAsync(m_ClientBuffers[clientId], 0, 16384)
 			                   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
