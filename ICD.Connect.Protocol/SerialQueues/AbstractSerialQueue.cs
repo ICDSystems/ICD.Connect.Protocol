@@ -269,16 +269,19 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				StartTimeoutTimer();
 
-				if (Port == null)
-					return false;
-
 				CurrentCommand = m_CommandQueue[0];
 				m_CommandQueue.RemoveAt(0);
 				IsCommandInProgress = true;
 
 				try
 				{
-					return Port.Send(CurrentCommand.Serialize());
+					if (Port != null)
+						return Port.Send(CurrentCommand.Serialize());
+
+					ServiceProvider.GetService<ILoggerService>()
+					               .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null", GetType().Name);
+					Clear();
+					return false;
 				}
 				catch (ObjectDisposedException)
 				{
@@ -329,7 +332,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			catch (Exception e)
 			{
 				ServiceProvider.GetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, e, "Failed to execute callback - {0}", e.Message);
+				               .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
 			}
 
 			CommandFinished();
