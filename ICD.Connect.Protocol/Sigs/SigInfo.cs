@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
+using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.XSig;
 using Newtonsoft.Json;
 
@@ -279,12 +280,7 @@ namespace ICD.Connect.Protocol.Sigs
 		[PublicAPI]
 		public string Serialize()
 		{
-			StringBuilder builder = new StringBuilder();
-
-			using (JsonTextWriter writer = new JsonTextWriter(new IcdStringWriter(builder).WrappedStringWriter))
-				Serialize(writer);
-
-			return builder.ToString();
+			return JsonUtils.Serialize(Serialize);
 		}
 
 		/// <summary>
@@ -348,8 +344,7 @@ namespace ICD.Connect.Protocol.Sigs
 		[PublicAPI]
 		public static SigInfo Deserialize(string json)
 		{
-			using (JsonTextReader reader = new JsonTextReader(new IcdStringReader(json).WrappedStringReader))
-				return Deserialize(reader);
+			return JsonUtils.Deserialize(r => Deserialize(r), json);
 		}
 
 		/// <summary>

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Attributes.Rpc;
-using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Data;
 using Newtonsoft.Json;
@@ -201,23 +199,18 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <returns></returns>
 		public string Serialize()
 		{
-			StringBuilder builder = new StringBuilder();
+			return JsonUtils.Serialize(Serialize);
+		}
 
-			using (IcdStringWriter writer = new IcdStringWriter(builder))
-			{
-				using (JsonWriter jsonWriter = new JsonTextWriter(writer.WrappedStringWriter))
-				{
-					jsonWriter.WriteStartObject();
+		public void Serialize(JsonWriter writer)
+		{
+			writer.WriteStartObject();
 
-					WriteProcedureType(jsonWriter);
-					WriteKey(jsonWriter);
-					WriteParameters(jsonWriter);
+			WriteProcedureType(writer);
+			WriteKey(writer);
+			WriteParameters(writer);
 
-					jsonWriter.WriteEndObject();
-
-					return builder.ToString();
-				}
-			}
+			writer.WriteEndObject();
 		}
 
 		/// <summary>
