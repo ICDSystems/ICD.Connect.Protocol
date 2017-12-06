@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.XSig;
 using Newtonsoft.Json;
