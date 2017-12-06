@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ICD.Common.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -19,14 +20,21 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			Disconnect();
 
-			m_ConnectedAddress = Address == ACCEPT_ALL ? IPAddress.Any : IPAddress.Parse(Address);
+			try
+			{
+				m_ConnectedAddress = Address == ACCEPT_ALL ? IPAddress.Any : IPAddress.Parse(Address);
 
-			m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
-			m_UdpClient.JoinMulticastGroup(m_ConnectedAddress);
+				m_UdpClient = new UdpClient(Port) { EnableBroadcast = true };
+				m_UdpClient.JoinMulticastGroup(m_ConnectedAddress);
 
-			// Spawn new listening thread
-			m_ListeningRequested = true;
-			m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
+				// Spawn new listening thread
+				m_ListeningRequested = true;
+				m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.Message);
+			}
 
 			UpdateIsConnectedState();
 		}
