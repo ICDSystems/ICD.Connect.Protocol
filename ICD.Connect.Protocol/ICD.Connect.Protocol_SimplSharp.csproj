@@ -70,8 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventArguments\XSigEventArgs.cs" />
-    <Compile Include="Heartbeat\Heartbeat.cs" />
-    <Compile Include="Heartbeat\IConnectable.cs" />
     <Compile Include="Ports\AbstractPortSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />

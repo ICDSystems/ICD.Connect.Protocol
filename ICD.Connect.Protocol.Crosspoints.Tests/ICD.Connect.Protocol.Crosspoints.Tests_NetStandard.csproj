@@ -9,9 +9,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;STANDARD</DefineConstants>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>TRACE;STANDARD</DefineConstants>
   </PropertyGroup>
   
