@@ -261,6 +261,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
+				if (data.MessageType == CrosspointData.eMessageType.Ping || data.MessageType == CrosspointData.eMessageType.Pong)
+					return;
+
 				foreach (SigInfo sig in data.GetSigs())
 				{
 					//Only pass along SmartObject of 0
