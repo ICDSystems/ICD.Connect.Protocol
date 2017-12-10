@@ -19,6 +19,17 @@ namespace ICD.Connect.Protocol.XSig
 		public byte[] Data { get { return m_Data.ToArray(); } }
 
 		/// <summary>
+		/// Gets the signal data in xsig formatted string
+		/// </summary>
+		public string DataXSig
+		{
+			get
+			{
+				return new string(m_Data.Select(b => (char)b).ToArray());
+			}
+		}
+
+		/// <summary>
 		/// Gets the serial value.
 		/// </summary>
 		public string Value { get { return GetValue(); } }

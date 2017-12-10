@@ -10,6 +10,11 @@ namespace ICD.Connect.Protocol.XSig
 		byte[] Data { get; }
 
 		/// <summary>
+		/// Gets the signal data in xsig formatted string
+		/// </summary>
+		string DataXSig { get; }
+
+		/// <summary>
 		/// Gets the signal index.
 		/// </summary>
 		ushort Index { get; }
