@@ -10,6 +10,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.Sigs;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
@@ -132,10 +133,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				case CrosspointData.eMessageType.Ping:
 					ReceivePing(data);
+					return;
 					break;
 
 				case CrosspointData.eMessageType.Pong:
 					ReceivePong(data);
+					return;
 					break;
 			}
 
