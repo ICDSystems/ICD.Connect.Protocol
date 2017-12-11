@@ -258,13 +258,13 @@ namespace ICD.Connect.Protocol.Sigs
 			switch (m_Type)
 			{
 				case eSigType.Digital:
-					return new DigitalXSig(m_BoolValue, (ushort)(m_Number - 1)).DataXSig;
+					return new DigitalXSig(m_BoolValue, (ushort)(m_Number)).DataXSig;
 
 				case eSigType.Analog:
-					return new AnalogXSig(m_UshortValue, (ushort)(m_Number - 1)).DataXSig;
+					return new AnalogXSig(m_UshortValue, (ushort)(m_Number)).DataXSig;
 
 				case eSigType.Serial:
-					return new SerialXSig(m_StringValue, (ushort)(m_Number - 1)).DataXSig;
+					return new SerialXSig(m_StringValue, (ushort)(m_Number)).DataXSig;
 
 				default:
 					throw new ArgumentOutOfRangeException();

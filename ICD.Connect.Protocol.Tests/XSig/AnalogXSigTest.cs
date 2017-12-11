@@ -11,7 +11,7 @@ namespace ICD.Connect.Protocol.Tests.XSig
     [TestFixture]
     public sealed class AnalogXSigTest
     {
-        [TestCase((ushort)233, (ushort) 9, "\xC0\x09\x01\x69")]
+        [TestCase((ushort)233, (ushort) 10, "\xC0\x09\x01\x69")]
         public void AnalogDataTest(ushort value, ushort index, string expected)
         {
             AnalogXSig sig = new AnalogXSig(value, index);

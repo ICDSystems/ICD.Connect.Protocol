@@ -7,22 +7,22 @@ namespace ICD.Connect.Protocol.Tests.XSig
 	[TestFixture]
     public sealed class DigitalXSigTest
     {
-	    [TestCase(true, (ushort)10, "\x80\x0A")]
-	    [TestCase(false, (ushort)14, "\xA0\x0E")]
+	    [TestCase(true, (ushort)11, "\x80\x0A")]
+	    [TestCase(false, (ushort)15, "\xA0\x0E")]
 		public void DataTest(bool value, ushort index, string expected)
 	    {
 		    DigitalXSig sig = new DigitalXSig(value, index);
 			Assert.AreEqual(StringUtils.ToBytes(expected), sig.Data);
 	    }
 
-		[TestCase(true, (ushort)10)]
+		[TestCase(true, (ushort)11)]
 		public void ValueTest(bool value, ushort index)
 		{
 			DigitalXSig sig = new DigitalXSig(value, index);
 			Assert.AreEqual(value, sig.Value);
 		}
 
-	    [TestCase(true, (ushort)10)]
+	    [TestCase(true, (ushort)11)]
 		public void Index(bool value, ushort index)
 	    {
 		    DigitalXSig sig = new DigitalXSig(value, index);
