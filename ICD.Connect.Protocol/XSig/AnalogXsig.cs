@@ -246,10 +246,10 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBit(1, m_Data[0].GetBit(2));
 
             // Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
-            ushort index_numeric = BitConverter.ToUInt16(index, 0);
-            index_numeric++;
+            ushort indexNumeric = BitConverter.ToUInt16(index, 0);
+            indexNumeric++;
 
-            return index_numeric;
+            return indexNumeric;
 		}
 
 		#endregion
