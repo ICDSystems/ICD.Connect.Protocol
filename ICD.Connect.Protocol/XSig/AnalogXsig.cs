@@ -220,6 +220,8 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
+            // Subtract 1 from index to match Crestron's weird Simpl XSIG (SIMPL 1 = XSIG 0)
+            index--;
 			// 1 1 a a 0 # # #    0 # # # # # # #
 			byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0].SetBitOff(7);
@@ -243,7 +245,11 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBit(0, m_Data[0].GetBit(1))
 				.SetBit(1, m_Data[0].GetBit(2));
 
-			return BitConverter.ToUInt16(index, 0);
+            // Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
+            ushort index_numeric = BitConverter.ToUInt16(index, 0);
+            index_numeric++;
+
+            return index_numeric;
 		}
 
 		#endregion
