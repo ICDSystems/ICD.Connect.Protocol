@@ -288,6 +288,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			{
 				// ObjectDisposedException meesage is kinda worthless on its own
 				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1} {2}", this, e.GetType().Name, e.Message);
+				
+				// Stream is broken so clean it up
+				DisposeStream();
+
 				return false;
 			}
 			finally
