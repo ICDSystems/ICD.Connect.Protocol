@@ -269,7 +269,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			{
 				if (m_SshStream == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0}.Send - Unable to write to stream.", GetType().Name);
+					Logger.AddEntry(eSeverity.Error, "{0} unable to write to stream - stream is null", this);
 					return false;
 				}
 
@@ -281,12 +281,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			// Thrown when we lose connection.
 			catch (SshConnectionException e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0}.Send - Failed writing to stream - {1}", GetType().Name, e.Message);
+				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1}", this, e.Message);
 				return false;
 			}
 			catch (ObjectDisposedException e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0}.Send - Failed writing to stream - {1}", GetType().Name, e.Message);
+				// ObjectDisposedException meesage is kinda worthless on its own
+				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1} {2}", this, e.GetType().Name, e.Message);
 				return false;
 			}
 			finally
@@ -419,7 +420,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="args"></param>
 		private void SshStreamOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.AddEntry(eSeverity.Error, args.Exception, "SSH Stream Error - {0}", args.Exception.Message);
+			Logger.AddEntry(eSeverity.Error, args.Exception, "{0} SSH Stream Error - {1}", this, args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 
@@ -470,7 +471,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="args"></param>
 		private void SshClientOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.AddEntry(eSeverity.Error, args.Exception, "SSH Client Error - {0}", args.Exception.Message);
+			Logger.AddEntry(eSeverity.Error, args.Exception, "{0} SSH Client Error - {1}", this, args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 
