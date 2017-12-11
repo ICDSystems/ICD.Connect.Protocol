@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Tests.XSig
 		    Assert.AreEqual(value, sig.Value);
 	    }
 
-	    [TestCase("\x80\x0A", (ushort)10)]
+	    [TestCase("\x80\x0A", (ushort)11)]
 	    public void IndexFromData(string data, ushort index)
 	    {
 		    DigitalXSig sig = new DigitalXSig(StringUtils.ToBytes(data));
