@@ -64,9 +64,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public SerialXSig(string value, ushort index)
 		{
-			if (index >= (1 << 10))
-				throw new ArgumentException("Index must be between 0 and 1023");
-			value = value ?? "";
+		    if (index > (1 << 10) || index < 1)
+		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
+
+            value = value ?? "";
 
 			m_Data = new byte[value.Length + 3];
 

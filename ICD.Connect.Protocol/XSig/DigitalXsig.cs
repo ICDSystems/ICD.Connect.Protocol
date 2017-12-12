@@ -69,10 +69,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public DigitalXSig(bool value, ushort index)
 		{
-			if (index >= (1 << 12))
-				throw new ArgumentException("Index must be between 0 and 4095");
+		    if (index > (1 << 12) || index < 1)
+		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 4096", index));
 
-			m_Data = new byte[2];
+            m_Data = new byte[2];
 
 			SetFixedBits();
 			SetIndex(index);

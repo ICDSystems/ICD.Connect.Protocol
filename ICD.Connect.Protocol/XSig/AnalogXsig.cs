@@ -71,8 +71,8 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public AnalogXSig(ushort value, ushort index)
 		{
-			if (index >= (1 << 10))
-				throw new ArgumentException("index must be between 0 and 1023");
+			if (index > (1 << 10) || index < 1)
+				throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
 
 			m_Data = new byte[4];
 
