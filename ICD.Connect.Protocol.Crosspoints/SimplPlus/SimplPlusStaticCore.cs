@@ -26,7 +26,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			logger.AddLogger(new IcdErrorLogger());
 			logger.SeverityLevel = eSeverity.Warning;
 
-			ServiceProvider.AddService<ILoggerService>(logger);
+			ServiceProvider.TryAddService<ILoggerService>(logger);
 
 			// Create XP3 instance.
 			Xp3Core = new Xp3();
