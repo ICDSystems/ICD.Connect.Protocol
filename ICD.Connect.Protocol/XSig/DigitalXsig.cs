@@ -69,10 +69,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public DigitalXSig(bool value, ushort index)
 		{
-			if (index >= (1 << 12))
-				throw new ArgumentException("Index must be between 0 and 4095");
+		    if (index > (1 << 12) || index < 1)
+		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 4096", index));
 
-			m_Data = new byte[2];
+            m_Data = new byte[2];
 
 			SetFixedBits();
 			SetIndex(index);
@@ -162,7 +162,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
-			byte[] iBytes = BitConverter.GetBytes(index);
+            // Subtract 1 from index to match Crestron's weird Simpl XSIG (SIMPL 1 = XSIG 0)
+            index--;
+
+            byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0].SetBitOff(7);
 			m_Data[0] = m_Data[0]
 				.SetBit(0, iBytes[0].GetBit(7))
@@ -185,8 +188,13 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBitOff(6)
 				.SetBitOff(5)
 				.SetBitOff(4);
-			return BitConverter.ToUInt16(index, 0);
-		}
+
+            // Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
+            ushort indexNumeric = BitConverter.ToUInt16(index, 0);
+            indexNumeric++;
+
+            return indexNumeric;
+        }
 
 		private bool GetValue()
 		{
