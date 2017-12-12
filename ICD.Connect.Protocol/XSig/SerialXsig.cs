@@ -64,9 +64,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public SerialXSig(string value, ushort index)
 		{
-			if (index >= (1 << 10))
-				throw new ArgumentException("Index must be between 0 and 1023");
-			value = value ?? "";
+		    if (index > (1 << 10) || index < 1)
+		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
+
+            value = value ?? "";
 
 			m_Data = new byte[value.Length + 3];
 
@@ -202,6 +203,9 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
+			// Subtract 1 from index to match Crestron's weird Simpl XSIG (SIMPL 1 = XSIG 0)
+			index--;
+
 			byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0]
 				.SetBitOff(7);
@@ -227,7 +231,11 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBit(0, m_Data[0].GetBit(1))
 				.SetBit(1, m_Data[0].GetBit(2));
 
-			return BitConverter.ToUInt16(index, 0);
+			// Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
+			ushort indexNumeric = BitConverter.ToUInt16(index, 0);
+			indexNumeric++;
+
+			return indexNumeric;
 		}
 
 		#endregion

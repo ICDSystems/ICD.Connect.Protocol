@@ -71,8 +71,8 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public AnalogXSig(ushort value, ushort index)
 		{
-			if (index >= (1 << 10))
-				throw new ArgumentException("index must be between 0 and 1023");
+			if (index > (1 << 10) || index < 1)
+				throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
 
 			m_Data = new byte[4];
 
@@ -246,10 +246,10 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBit(1, m_Data[0].GetBit(2));
 
             // Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
-            ushort index_numeric = BitConverter.ToUInt16(index, 0);
-            index_numeric++;
+            ushort indexNumeric = BitConverter.ToUInt16(index, 0);
+            indexNumeric++;
 
-            return index_numeric;
+            return indexNumeric;
 		}
 
 		#endregion
