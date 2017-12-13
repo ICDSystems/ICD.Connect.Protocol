@@ -33,7 +33,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 				m_ListeningRequested = true;
 				SocketErrorCodes error = m_UdpClient.ReceiveDataAsync(UdpClientReceiveHandler);
 
-				if (error != SocketErrorCodes.SOCKET_OK)
+				if (error != SocketErrorCodes.SOCKET_OK &&
+					error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
 					                this, address, port, error);
