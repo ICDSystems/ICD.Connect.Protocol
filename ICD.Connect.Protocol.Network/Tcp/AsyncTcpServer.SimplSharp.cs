@@ -206,8 +206,16 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
 
+				// Buffer is null if there is no client with the given id connected
+				if (buffer == null)
+				{
+					RemoveClient(clientId);
+					return;
+				}
+
 				OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, bytesReceived));
 
+				// Would this ever happen?
 				if (!ClientConnected(clientId))
 				{
 					RemoveClient(clientId);
