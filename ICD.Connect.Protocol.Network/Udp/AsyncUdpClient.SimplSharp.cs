@@ -21,18 +21,30 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			Disconnect();
 
+			string address = Address;
+			ushort port = Port;
+
 			try
 			{
-				m_UdpClient = new UDPServer(Address, Port, BufferSize);
+				m_UdpClient = new UDPServer(address, port, BufferSize);
 				m_UdpClient.EnableUDPServer();
 
 				// Spawn new listening thread
 				m_ListeningRequested = true;
-				m_UdpClient.ReceiveDataAsync(UdpClientReceiveHandler);
+				SocketErrorCodes error = m_UdpClient.ReceiveDataAsync(UdpClientReceiveHandler);
+
+				if (error != SocketErrorCodes.SOCKET_OK)
+				{
+					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
+					                this, address, port, error);
+					Disconnect();
+				}
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.Message);
+				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
+				                this, address, port, e.Message);
+				Disconnect();
 			}
 
 			UpdateIsConnectedState();
