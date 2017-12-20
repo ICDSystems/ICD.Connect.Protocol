@@ -73,13 +73,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				case SocketStatus.SOCKET_STATUS_BROKEN_REMOTELY:
 				case SocketStatus.SOCKET_STATUS_BROKEN_LOCALLY:
 				case SocketStatus.SOCKET_STATUS_SOCKET_NOT_EXIST:
+                case SocketStatus.SOCKET_STATUS_WAITING:
+                case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
+                case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
 					return false;
 
-				// I'm not 100% on these
-				case SocketStatus.SOCKET_STATUS_WAITING:
 				case SocketStatus.SOCKET_STATUS_CONNECTED:
-				case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
-				case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
 					return true;
 
 				default:
