@@ -112,6 +112,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				try
 				{
 					m_SshClient = new SshClient(m_ConnectionInfo);
+
+				    // Added keepalive based on Biamp SSH implementation
+                    m_SshClient.KeepAliveInterval = new TimeSpan(0, 0, 30);
+                    
+                    // Added Subscribe here, mainly to catch HostKeyReceived events, to help initial connections
+                    Subscribe(m_SshClient);
 					m_SshClient.Connect();
 				}
 				// Catches when we attempt to connect to an invalid/offline endpoint.
@@ -161,7 +167,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 				// Subscribe to the SSH Client outside of critical sections. We only subscribe to events to
 				// determine if the port loses connection, in which case a deadlock could happen.
-				Subscribe(m_SshClient);
+				// DREWS NOTE:  I moved this up into the critical section, because I think we need to respond to HostKeyReceived events.
+                //              (Based on looking at Biamp Module SSH implementation)
+                //              I'm not sure how this would cause a deadlock?
+                // Subscribe(m_SshClient);
 
 				UpdateIsConnectedState();
 			}
@@ -213,13 +222,17 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 			Unsubscribe(m_SshClient);
 			m_SshClient.Disconnect();
+
+            //Disposing the client, let's dispose the stream too?
+            DisposeStream();
+
+            //Disposing the client in a different thread, because we've seen it lock up before?
 			ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
 
 			m_SshClient = null;
 
 			UpdateIsConnectedState();
 		}
-
 		/// <summary>
 		/// Dispose the shell stream.
 		/// </summary>
@@ -465,7 +478,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="hostKeyEventArgs"></param>
 		private void SshClientOnHostKeyReceived(object sender, HostKeyEventArgs hostKeyEventArgs)
 		{
-			UpdateIsConnectedState();
+		    // Added this based on Biamp SSH Transport code
+            // This could be what's causing disconnects early in the code
+            hostKeyEventArgs.CanTrust = true;
+
+            // Removed this - shouldn't need to update connected state yet.
+			// UpdateIsConnectedState();
 		}
 
 		/// <summary>
