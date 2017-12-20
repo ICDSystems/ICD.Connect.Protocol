@@ -54,7 +54,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 
         public void StartMonitoring()
         {
-            ThreadingUtils.SafeInvoke(() => m_Timer.Reset(0));
+            ThreadingUtils.SafeInvoke(TimerCallback);
             m_MonitoringActive = true;
         }
 
@@ -74,8 +74,6 @@ namespace ICD.Connect.Protocol.Heartbeat
             {
                 HandleDisconnected();
             }
-
-
         }
 
         public void Dispose()
@@ -121,6 +119,8 @@ namespace ICD.Connect.Protocol.Heartbeat
             {
                 m_Connecting = true;
 
+                m_Instance.Connect();
+
                 if (m_ConnectAttempts < m_RampIntervalMs.Length)
                 {
                     Logger.AddEntry(eSeverity.Warning,
@@ -129,16 +129,15 @@ namespace ICD.Connect.Protocol.Heartbeat
                                         : "{0} lost connection. Attempting to reconnect. Attempted {1} times.",
                                     m_Instance,
                                     m_ConnectAttempts + 1);
-                    m_Timer.Reset(m_RampIntervalMs[m_ConnectAttempts], m_RampIntervalMs[m_ConnectAttempts]);
+                    m_Timer.Reset(m_RampIntervalMs[m_ConnectAttempts]);
                     m_ConnectAttempts++;
                 }
                 else
                 {
                     Logger.AddEntry(eSeverity.Error, "{0} lost connection. Attempting to reconnect. Attempted {1} times.", m_Instance, m_ConnectAttempts + 1);
-                    m_Timer.Reset(m_MaxIntervalMs, m_MaxIntervalMs);
+                    m_Timer.Reset(m_MaxIntervalMs);
+                    m_ConnectAttempts++;
                 }
-
-                m_Instance.Connect();
             }
             finally
             {
