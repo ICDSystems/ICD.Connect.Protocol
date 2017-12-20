@@ -213,7 +213,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 			Unsubscribe(m_SshClient);
 			m_SshClient.Disconnect();
-			m_SshClient.Dispose();
+			ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
 
 			m_SshClient = null;
 
