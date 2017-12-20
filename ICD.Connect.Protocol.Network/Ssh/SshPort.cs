@@ -401,7 +401,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		private void Unsubscribe(ShellStream sshStream)
 		{
 			sshStream.DataReceived -= DataReceived;
-			sshStream.ErrorOccurred += SshStreamOnErrorOccurred;
+			sshStream.ErrorOccurred -= SshStreamOnErrorOccurred;
 		}
 
 		/// <summary>
