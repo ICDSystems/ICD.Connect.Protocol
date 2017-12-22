@@ -48,24 +48,38 @@ namespace ICD.Connect.Protocol.Heartbeat
             m_MaxIntervalMs = maxIntervalMs;
             m_RampIntervalMs = rampIntervalMs.ToArray();
 
-            instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
+            
             m_Timer = SafeTimer.Stopped(TimerCallback);
         }
 
         public void StartMonitoring()
         {
-            ThreadingUtils.SafeInvoke(TimerCallback);
             m_MonitoringActive = true;
+
+            // Subscribe to state change events
+            m_Instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
+
+            // Check the connection now, but in a new thread
+            // This will start the timer if we are currently disconnected
+            ThreadingUtils.SafeInvoke(TimerCallback);
         }
 
         public void StopMonitoring()
         {
-            m_Timer.Stop();
             m_MonitoringActive = false;
+
+            // Unsubscribe from events
+            if (m_Instance != null)
+                m_Instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
+            
+            m_Timer.Stop();
         }
 
         private void TimerCallback()
         {
+            if (m_Instance == null)
+                return;
+
             if (m_Instance.IsConnected)
             {
                 HandleConnected();
@@ -78,10 +92,8 @@ namespace ICD.Connect.Protocol.Heartbeat
 
         public void Dispose()
         {
+            StopMonitoring();
             m_Timer.Dispose();
-
-            m_Instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
-            m_Instance.Disconnect();
 
             m_Instance = null;
         }
