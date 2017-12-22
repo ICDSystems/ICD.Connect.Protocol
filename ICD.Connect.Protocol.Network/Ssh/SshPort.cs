@@ -83,100 +83,104 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 		#region Methods
 
-		/// <summary>
-		/// Connect via SSH
-		/// </summary>
-		public override void Connect()
-		{
-			Disconnect();
+	    /// <summary>
+	    /// Connect via SSH
+	    /// </summary>
+	    public override void Connect()
+	    {
+	        Disconnect();
 
-			m_SshSection.Enter();
+	        m_SshSection.Enter();
 
-			try
-			{
-				if (Address == null)
-				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Address is null", this);
-					return;
-				}
+	        try
+	        {
+	            if (Address == null)
+	            {
+	                Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Address is null", this);
+	                return;
+	            }
 
-				if (Username == null)
-				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Username is null", this);
-					return;
-				}
+	            if (Username == null)
+	            {
+	                Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Username is null", this);
+	                return;
+	            }
 
-				m_ConnectionInfo = new KeyboardInteractiveConnectionInfo(Address, Port, Username);
-				Subscribe(m_ConnectionInfo);
+	            m_ConnectionInfo = new KeyboardInteractiveConnectionInfo(Address, Port, Username);
+	            Subscribe(m_ConnectionInfo);
 
-				try
-				{
-					m_SshClient = new SshClient(m_ConnectionInfo);
+	            try
+	            {
+	                m_SshClient = new SshClient(m_ConnectionInfo);
 
-				    // Added keepalive based on Biamp SSH implementation
-                    m_SshClient.KeepAliveInterval = new TimeSpan(0, 0, 30);
-                    
-                    // Added Subscribe here, mainly to catch HostKeyReceived events, to help initial connections
-                    Subscribe(m_SshClient);
-					m_SshClient.Connect();
-				}
-				// Catches when we attempt to connect to an invalid/offline endpoint.
-				catch (SshException e)
-				{
-					DisposeClient();
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
-				}
-				// Catches when we attempt to connect to an invalid/offline endpoint.
-				catch (SocketException e)
-				{
-					DisposeClient();
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
-				}
+	                // Added keepalive based on Biamp SSH implementation
+	                m_SshClient.KeepAliveInterval = new TimeSpan(0, 0, 30);
 
-				// ShellStream can only be instantiated when the client is connected.
-				if (m_SshClient == null || !m_SshClient.IsConnected)
-					return;
+	                // Added Subscribe here, mainly to catch HostKeyReceived events, to help initial connections
+	                Subscribe(m_SshClient);
+	                m_SshClient.Connect();
+	            }
+	                // Catches when we attempt to connect to an invalid/offline endpoint.
+	            catch (SshException e)
+	            {
+	                // Potential fix for "Message type 80 is not valid" - the Crestron SSH implementation should be ignoring this.
+	                if (!e.Message.Contains("Message type 80 is not valid"))
+	                {
+	                    DisposeClient();
+	                    Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
+	                }
+	            }
+	                // Catches when we attempt to connect to an invalid/offline endpoint.
+	            catch (SocketException e)
+	            {
+	                DisposeClient();
+	                Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
+	            }
 
-				int failCount = 0;
+	            // ShellStream can only be instantiated when the client is connected.
+	            if (m_SshClient == null || !m_SshClient.IsConnected)
+	                return;
 
-				while (failCount < 5)
-				{
-					try
-					{
-						m_SshStream = m_SshClient.CreateShellStream("Crestron SSH Session", 80, 120, 800, 600, 16384);
-						Subscribe(m_SshStream);
-					}
-					catch (SshException e)
-					{
-						failCount++;
-						DisposeStream();
+	            int failCount = 0;
 
-						// Potential fix for "Message type 80 is not valid" - the Crestron SSH implementation should be ignoring this.
-						if (e.Message.Contains("Message type 80 is not valid"))
-							continue;
+	            while (failCount < 5)
+	            {
+	                try
+	                {
+	                    m_SshStream = m_SshClient.CreateShellStream("Crestron SSH Session", 80, 120, 800, 600, 16384);
+	                    Subscribe(m_SshStream);
+	                }
+	                catch (SshException e)
+	                {
+	                    failCount++;
+	                    DisposeStream();
 
-						Logger.AddEntry(eSeverity.Error, "{0} failed to create shell stream - {1}", this, e.Message);
-					}
+	                    // Potential fix for "Message type 80 is not valid" - the Crestron SSH implementation should be ignoring this.
+	                    if (e.Message.Contains("Message type 80 is not valid"))
+	                        continue;
 
-					break;
-				}
-			}
-			finally
-			{
-				m_SshSection.Leave();
+	                    Logger.AddEntry(eSeverity.Error, "{0} failed to create shell stream - {1}", this, e.Message);
+	                }
 
-				// Subscribe to the SSH Client outside of critical sections. We only subscribe to events to
-				// determine if the port loses connection, in which case a deadlock could happen.
-				// DREWS NOTE:  I moved this up into the critical section, because I think we need to respond to HostKeyReceived events.
-                //              (Based on looking at Biamp Module SSH implementation)
-                //              I'm not sure how this would cause a deadlock?
-                // Subscribe(m_SshClient);
+	                break;
+	            }
+	        }
+	        finally
+	        {
+	            m_SshSection.Leave();
 
-				UpdateIsConnectedState();
-			}
-		}
+	            // Subscribe to the SSH Client outside of critical sections. We only subscribe to events to
+	            // determine if the port loses connection, in which case a deadlock could happen.
+	            // DREWS NOTE:  I moved this up into the critical section, because I think we need to respond to HostKeyReceived events.
+	            //              (Based on looking at Biamp Module SSH implementation)
+	            //              I'm not sure how this would cause a deadlock?
+	            // Subscribe(m_SshClient);
 
-		/// <summary>
+	            UpdateIsConnectedState();
+	        }
+	    }
+
+	    /// <summary>
 		/// SSH Disconnect
 		/// </summary>
 		public override void Disconnect()
