@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Services;
 using ICD.Common.Services.Logging;
@@ -12,7 +13,7 @@ namespace ICD.Connect.Protocol.Heartbeat
     {
         private const long MAX_INTERVAL_MS_DEFAULT = 60 * 1000;
 
-        private static readonly long[] RAMP_MS_DEFAULT =
+        private static readonly long[] s_RampMsDefault =
         {
             5 * 1000,
             5 * 1000,
@@ -36,19 +37,27 @@ namespace ICD.Connect.Protocol.Heartbeat
             get { return ServiceProvider.GetService<ILoggerService>(); }
         }
 
-        public Heartbeat(IConnectable instance) : this(instance, MAX_INTERVAL_MS_DEFAULT, RAMP_MS_DEFAULT) { }
+	    public Heartbeat(IConnectable instance)
+		    : this(instance, MAX_INTERVAL_MS_DEFAULT, s_RampMsDefault)
+	    {
+	    }
 
-        public Heartbeat(IConnectable instance, long maxIntervalMs) : this(instance, maxIntervalMs, RAMP_MS_DEFAULT) { }
+	    public Heartbeat(IConnectable instance, long maxIntervalMs)
+			: this(instance, maxIntervalMs, s_RampMsDefault)
+	    {
+	    }
 
-        public Heartbeat(IConnectable instance, long[] rampIntervalMs) : this(instance, MAX_INTERVAL_MS_DEFAULT, rampIntervalMs) { }
+	    public Heartbeat(IConnectable instance, IEnumerable<long> rampIntervalMs)
+		    : this(instance, MAX_INTERVAL_MS_DEFAULT, rampIntervalMs)
+	    {
+	    }
 
-        public Heartbeat(IConnectable instance, long maxIntervalMs, long[] rampIntervalMs)
+        public Heartbeat(IConnectable instance, long maxIntervalMs, IEnumerable<long> rampIntervalMs)
         {
             m_Instance = instance;
             m_MaxIntervalMs = maxIntervalMs;
             m_RampIntervalMs = rampIntervalMs.ToArray();
 
-            
             m_Timer = SafeTimer.Stopped(TimerCallback);
         }
 
