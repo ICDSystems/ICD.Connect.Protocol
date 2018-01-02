@@ -12,16 +12,18 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 	public abstract class RecurringBroadcast : IDisposable, IConsoleNode
 	{
+		private const long DEFAULT_INTERVAL = 30 * 1000;
+
 		/// <summary>
 		/// How often to broadcast the available crosspoints.
 		/// </summary>
-		private readonly long m_BroadcastInterval = 30 * 1000;
+		private readonly long m_BroadcastInterval;
 
 		private readonly SafeTimer m_BroadcastTimer;
 
-		public BroadcastHandler SendBroadcastData { get; set; }
-
 		#region Properties
+
+		public BroadcastHandler SendBroadcastData { get; set; }
 
 		/// <summary>
 		/// Gets the name of the node.
@@ -38,10 +40,15 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		protected RecurringBroadcast() : this(30 * 1000)
+		protected RecurringBroadcast()
+			: this(DEFAULT_INTERVAL)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="broadcastInterval"></param>
 		protected RecurringBroadcast(long broadcastInterval)
 		{
 			m_BroadcastInterval = broadcastInterval;
