@@ -578,8 +578,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 		private string PrintAddresses()
 		{
+			IEnumerable<string> addresses =
+				GetAdvertisementAddresses().Select(kvp => string.Format("{0} ({1})", kvp.Key, kvp.Value));
+
 			return string.Format("Addresses: {0}{1}Ports: {2}",
-			                     StringUtils.ArrayFormat(GetAdvertisementAddresses()),
+			                     StringUtils.ArrayFormat(addresses),
 			                     IcdEnvironment.NewLine,
 			                     StringUtils.ArrayRangeFormat(GetAdvertisementPorts()));
 		}
