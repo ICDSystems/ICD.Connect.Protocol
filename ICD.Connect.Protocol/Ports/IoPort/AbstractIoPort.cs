@@ -179,6 +179,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		event EventHandler<BoolEventArgs> IDigitalInputPort.OnStateChanged
 		{
 			add { OnDigitalInChanged += value; }
+// ReSharper disable once DelegateSubtraction
 			remove { OnDigitalInChanged -= value; }
 		}
 
