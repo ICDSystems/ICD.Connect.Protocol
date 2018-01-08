@@ -491,7 +491,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		private string PrintConnections()
 		{
-			TableBuilder builder = new TableBuilder("Control", "Equipment", "Equipment Host");
+			TableBuilder builder = new TableBuilder("Control", "Equipment", "Equipment Host", "Connected");
 
 			IControlCrosspoint[] controls = GetCrosspoints().ToArray();
 
@@ -505,10 +505,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					if (!TryGetEquipmentInfoForControl(control.Id, out equipmentInfo))
 						continue;
 
+					AsyncTcpClient client;
+					if (!m_ControlClientMap.TryGetValue(control.Id, out client))
+						continue;
+
 					string controlLabel = string.Format("{0} ({1})", control.Id, control.Name);
 					string equipmentLabel = string.Format("{0} ({1})", equipmentInfo.Id, equipmentInfo.Name);
 
-					builder.AddRow(controlLabel, equipmentLabel, equipmentInfo.Host);
+					builder.AddRow(controlLabel, equipmentLabel, equipmentInfo.Host, client.IsConnected);
 				}
 			}
 			finally
