@@ -81,6 +81,19 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			}
 		}
 
+
+		/// <summary>
+		/// When enabled prints the sent sigs to the console.
+		/// </summary>
+		[PublicAPI]
+		public bool DebugInput { get; set; }
+
+		/// <summary>
+		/// When enabled prints the received sigs to the console.
+		/// </summary>
+		[PublicAPI]
+		public bool DebugOutput { get; set; }
+
 		#endregion
 
 		/// <summary>
@@ -140,6 +153,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					break;
 			}
 
+			PrintOutput(data);
+
 			CrosspointDataReceived handler = OnSendOutputData;
 			if (handler != null)
 				handler(this, data);
@@ -162,6 +177,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				data.AddControlIds(GetControlsForMessage());
 			if (data.EquipmentId == 0)
 				data.EquipmentId = GetEquipmentForMessage();
+
+			PrintInput(data);
 
 			CrosspointDataReceived handler = OnSendInputData;
 			if (handler != null)
@@ -255,6 +272,36 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// When input debugging is enabled, prints the data to the console.
+		/// </summary>
+		/// <param name="data"></param>
+		private void PrintInput(CrosspointData data)
+		{
+			if (DebugInput)
+				PrintData("Input", data);
+		}
+
+		/// <summary>
+		/// When output debugging is enabled, prints the data to the console.
+		/// </summary>
+		/// <param name="data"></param>
+		private void PrintOutput(CrosspointData data)
+		{
+			if (DebugOutput)
+				PrintData("Output", data);
+		}
+
+		/// <summary>
+		/// Prints the given data to the console.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		private void PrintData(string context, CrosspointData data)
+		{
+			IcdConsole.PrintLine("{0} {1} - {2}", this, context, data);
+		}
 
 		/// <summary>
 		/// Gets the source control or the destination controls for a message originating from this crosspoint.
@@ -423,6 +470,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			addRow("Id", m_Id);
 			addRow("Name", m_Name);
 			addRow("Status", m_Status);
+			addRow("Debug Input", DebugInput);
+			addRow("Debug Output", DebugOutput);
 		}
 
 		/// <summary>
@@ -431,6 +480,28 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			yield return new ConsoleCommand("EnableDebug",
+			                                "Starts printing both input and output sigs to console",
+			                                () =>
+			                                {
+				                                DebugOutput = true;
+				                                DebugInput = true;
+			                                });
+
+			yield return new ConsoleCommand("DisableDebug",
+			                                "Stops printing both input and output sigs to console",
+			                                () =>
+			                                {
+				                                DebugOutput = false;
+				                                DebugInput = false;
+			                                });
+
+			yield return new ConsoleCommand("ToggleDebugInput", "When enabled prints input sigs to console",
+			                                () => DebugInput = !DebugInput);
+			yield return new ConsoleCommand("ToggleDebugOutput", "When enabled prints output sigs to console",
+			                                () => DebugOutput = !DebugOutput);
+
+
 			yield return new ConsoleCommand("Ping", "Sends a ping to the connected crosspoint/s", () => Ping());
 			yield return new ConsoleCommand("PrintSigs", "Prints the cached sigs", () => PrintSigs());
 		}
