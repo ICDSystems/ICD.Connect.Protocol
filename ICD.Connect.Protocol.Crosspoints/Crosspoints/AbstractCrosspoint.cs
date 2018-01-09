@@ -114,6 +114,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			OnSendOutputData = null;
 			OnSendInputData = null;
+			OnStatusChanged = null;
 		}
 
 		/// <summary>
@@ -421,6 +422,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			addRow("Id", m_Id);
 			addRow("Name", m_Name);
+			addRow("Status", m_Status);
 		}
 
 		/// <summary>
