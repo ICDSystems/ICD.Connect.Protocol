@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Services;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
@@ -78,6 +80,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 				m_Status = value;
 
+				Logger.AddEntry(eSeverity.Informational, "{0} status changed to {1}", this, m_Status);
+
 				OnStatusChanged.Raise(this, new CrosspointStatusEventArgs(m_Status));
 			}
 		}
@@ -93,6 +97,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// </summary>
 		[PublicAPI]
 		public bool DebugOutput { get; set; }
+
+		/// <summary>
+		/// Gets the logger for this crosspoint.
+		/// </summary>
+		protected ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#endregion
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -19,6 +20,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		private readonly SafeCriticalSection m_SigCacheSection;
 		private readonly SafeCriticalSection m_InitializeSection;
 		private bool m_SigsWaitingToBeCleared;
+		private int m_EquipmentCrosspoint;
 
 		#region Properties
 
@@ -38,7 +40,19 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// Gets the id of the equipment crosspoint that this control is currently
 		/// communicating with.
 		/// </summary>
-		public int EquipmentCrosspoint { get; private set; }
+		public int EquipmentCrosspoint
+		{
+			get { return m_EquipmentCrosspoint; }
+			private set
+			{
+				if (value == m_EquipmentCrosspoint)
+					return;
+
+				m_EquipmentCrosspoint = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} connected equipment changed to {1}", this, m_EquipmentCrosspoint);
+			}
+		}
 
 		#endregion
 
