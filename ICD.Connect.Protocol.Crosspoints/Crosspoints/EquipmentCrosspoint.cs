@@ -99,6 +99,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				if (!m_ControlCrosspoints.Add(controlId))
 					return;
+
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
 				if (ControlCrosspointsCount > 0)
 					Status = eCrosspointStatus.Connected;

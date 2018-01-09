@@ -17,6 +17,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		// We cache changed sigs for the clear operation.
 		private readonly SigCache m_SigCache;
 		private readonly SafeCriticalSection m_SigCacheSection;
+		private readonly SafeCriticalSection m_InitializeSection;
 		private bool m_SigsWaitingToBeCleared;
 
 		#region Properties
@@ -51,6 +52,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
+			m_InitializeSection = new SafeCriticalSection();
 			m_SigsWaitingToBeCleared = false;
 
 			EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
@@ -138,32 +140,41 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns>True if the initialization, including connection, was successful. False if already initialized with the equipment.</returns>
 		public bool Initialize(int equipmentId)
 		{
-			if (equipmentId == EquipmentCrosspoint)
-				return false;
+			m_InitializeSection.Enter();
 
-			// If we are currently initialized, or we specifically want to deninit, attempt to deinit from the previous equipment.
-			if (EquipmentCrosspoint != Xp3Utils.NULL_EQUIPMENT || equipmentId == Xp3Utils.NULL_EQUIPMENT)
+			try
 			{
-				bool deinit = Deinitialize(equipmentId == Xp3Utils.NULL_EQUIPMENT);
+				if (equipmentId == EquipmentCrosspoint)
+					return false;
 
-				// If deinit failed, or equipment id is null equipment (i.e. we just wanted to deinit) return the value.
-				if (deinit == false || equipmentId == Xp3Utils.NULL_EQUIPMENT)
-					return deinit;
+				// If we are currently initialized, or we specifically want to deninit, attempt to deinit from the previous equipment.
+				if (EquipmentCrosspoint != Xp3Utils.NULL_EQUIPMENT || equipmentId == Xp3Utils.NULL_EQUIPMENT)
+				{
+					bool deinit = Deinitialize(equipmentId == Xp3Utils.NULL_EQUIPMENT);
+
+					// If deinit failed, or equipment id is null equipment (i.e. we just wanted to deinit) return the value.
+					if (deinit == false || equipmentId == Xp3Utils.NULL_EQUIPMENT)
+						return deinit;
+				}
+
+				// Attempt to connect, return false if connection failed.
+				ControlRequestConnectCallback callback = RequestConnectCallback;
+				if (callback == null)
+					return false;
+
+				eCrosspointStatus connectStatus = RequestConnectCallback(this, equipmentId);
+				if (connectStatus != eCrosspointStatus.Connected)
+					ClearSigs();
+
+				Status = connectStatus;
+				EquipmentCrosspoint = connectStatus == eCrosspointStatus.Connected ? equipmentId : Xp3Utils.NULL_EQUIPMENT;
+
+				return connectStatus == eCrosspointStatus.Connected;
 			}
-
-			// Attempt to connect, return false if connection failed.
-			ControlRequestConnectCallback callback = RequestConnectCallback;
-			if (callback == null)
-				return false;
-
-			eCrosspointStatus connectStatus = RequestConnectCallback(this, equipmentId);
-			if (connectStatus != eCrosspointStatus.Connected)
-				ClearSigs();
-
-			Status = connectStatus;
-			EquipmentCrosspoint = connectStatus == eCrosspointStatus.Connected ? equipmentId : Xp3Utils.NULL_EQUIPMENT;
-
-			return connectStatus == eCrosspointStatus.Connected;
+			finally
+			{
+				m_InitializeSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -172,18 +183,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public bool Deinitialize()
 		{
-			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
-				return false;
-
-			ControlRequestDisconnectCallback callback = RequestDisconnectCallback;
-			if (callback != null)
-				Status = callback(this);
-
-			ClearSigs();
-
-			EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
-
-			return true;
+			return Deinitialize(true);
 		}
 
 		#endregion
@@ -196,21 +196,31 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		private bool Deinitialize(bool clearSigsOnDisconnect)
 		{
-			if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
-				return false;
+			m_InitializeSection.Enter();
 
-			ControlRequestDisconnectCallback callback = RequestDisconnectCallback;
-			if (callback != null)
-				Status = callback(this);
+			try
+			{
+				// Allow the manager to determine disconnect before we decide to bail out.
+				// This allows disconnection if the crosspoint has become desynchronized for some reason.
+				ControlRequestDisconnectCallback callback = RequestDisconnectCallback;
+				if (callback != null)
+					Status = callback(this);
+				else if (EquipmentCrosspoint == Xp3Utils.NULL_EQUIPMENT)
+					return false;
 
-			if (clearSigsOnDisconnect)
-				ClearSigs();
-			else
-				m_SigsWaitingToBeCleared = true;
+				if (clearSigsOnDisconnect)
+					ClearSigs();
+				else
+					m_SigsWaitingToBeCleared = true;
 
-			EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
-
-			return true;
+				// Successful disconnect
+				EquipmentCrosspoint = Xp3Utils.NULL_EQUIPMENT;
+				return true;
+			}
+			finally
+			{
+				m_InitializeSection.Leave();
+			}
 		}
 
 		/// <summary>
