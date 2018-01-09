@@ -432,6 +432,28 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
 			yield return new ConsoleCommand("Ping", "Sends a ping to the connected crosspoint/s", () => Ping());
+			yield return new ConsoleCommand("PrintSigs", "Prints the cached sigs", () => PrintSigs());
+		}
+
+		protected abstract string PrintSigs();
+
+		protected string PrintSigs(SigCache cache)
+		{
+			if (cache == null)
+				throw new ArgumentNullException("cache");
+
+			TableBuilder builder = new TableBuilder("Type", "Smart Object", "Number", "Name", "Value");
+
+			IEnumerable<SigInfo> sigs =
+				cache.OrderBy(s => s.SmartObject)
+				     .ThenBy(s => s.Type)
+				     .ThenBy(s => s.Number)
+				     .ThenBy(s => s.Name);
+
+			foreach (SigInfo sig in sigs)
+				builder.AddRow(sig.Type, sig.SmartObject, sig.Number, StringUtils.ToRepresentation(sig.Name), sig.GetValue());
+
+			return builder.ToString();
 		}
 
 		#endregion

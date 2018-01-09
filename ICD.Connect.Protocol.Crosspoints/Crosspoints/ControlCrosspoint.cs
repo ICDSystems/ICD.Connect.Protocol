@@ -282,6 +282,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			return base.GetConsoleCommands();
 		}
 
+		protected override string PrintSigs()
+		{
+			return PrintSigs(m_SigCache);
+		}
+
 		#endregion
 	}
 }

@@ -189,6 +189,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			addRow("Connected Equipment", StringUtils.ArrayFormat(ControlCrosspoints));
 		}
 
+		protected override string PrintSigs()
+		{
+			return PrintSigs(m_SigCache);
+		}
+
 		#endregion
 	}
 }
