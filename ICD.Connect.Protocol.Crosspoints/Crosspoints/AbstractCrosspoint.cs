@@ -77,10 +77,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					return;
 
 				m_Status = value;
+
 				OnStatusChanged.Raise(this, new CrosspointStatusEventArgs(m_Status));
 			}
 		}
-
 
 		/// <summary>
 		/// When enabled prints the sent sigs to the console.
