@@ -314,6 +314,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <param name="data"></param>
 		private void PrintData(string context, CrosspointData data)
 		{
+			IcdConsole.PrintLine("{0} {1} - {2}", this, context, data);
 			foreach (SigInfo sig in data.GetSigs())
 				IcdConsole.PrintLine("{0} {1} - {2}", this, context, sig);
 		}
