@@ -191,9 +191,16 @@ namespace ICD.Connect.Protocol.Sigs
 			ReprBuilder builder = new ReprBuilder(this);
 
 			builder.AppendProperty("Type", m_Type);
-			builder.AppendProperty("Number", m_Number);
-			builder.AppendProperty("Name", m_Name);
-			builder.AppendProperty("SmartObject", m_SmartObject);
+
+			if (m_Number != 0)
+				builder.AppendProperty("Number", m_Number);
+
+			if (m_Name != null)
+				builder.AppendProperty("Name", m_Name);
+
+			if (m_SmartObject != 0)
+				builder.AppendProperty("SmartObject", m_SmartObject);
+
 			builder.AppendProperty("Value", this.GetValue());
 
 			return builder.ToString();
