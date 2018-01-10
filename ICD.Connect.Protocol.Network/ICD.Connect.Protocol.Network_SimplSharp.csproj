@@ -94,6 +94,7 @@
     <Compile Include="Tcp\AsyncTcpServer.Standard.cs" />
     <Compile Include="Tcp\TcpClientPool.cs" />
     <Compile Include="Tcp\TcpClientPoolBufferManager.cs" />
+    <Compile Include="Tcp\TcpReceiveEventArgs.cs" />
     <Compile Include="Tcp\TcpServerBufferManager.cs" />
     <Compile Include="Tcp\TelnetControl.cs" />
     <Compile Include="Udp\AsyncUdpClient.cs" />
