@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
@@ -99,6 +100,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				if (!m_ControlCrosspoints.Add(controlId))
 					return;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} added connected control {1}", this, controlId);
+
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
 				if (ControlCrosspointsCount > 0)
 					Status = eCrosspointStatus.Connected;
@@ -127,6 +131,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			{
 				if (!m_ControlCrosspoints.Remove(controlId))
 					return;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} removed connected control {1}", this, controlId);
+
 				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
 				if (ControlCrosspointsCount <= 0)
 					Status = eCrosspointStatus.Idle;
@@ -186,6 +193,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			base.BuildConsoleStatus(addRow);
 
 			addRow("Connected Equipment", StringUtils.ArrayFormat(ControlCrosspoints));
+		}
+
+		protected override string PrintSigs()
+		{
+			return PrintSigs(m_SigCache);
 		}
 
 		#endregion

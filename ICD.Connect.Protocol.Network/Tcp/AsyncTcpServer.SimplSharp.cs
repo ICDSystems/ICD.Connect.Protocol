@@ -224,7 +224,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "Exception occurred while processing received data");
+				Logger.AddEntry(eSeverity.Error, e, "AsyncTcpServer Exception occurred while processing received data");
 			}
 
 			// Spawn a new listening thread
@@ -232,10 +232,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				return;
 
-			ServiceProvider.TryGetService<ILoggerService>()
-			               .AddEntry(eSeverity.Error,
-			                         "AsyncTcpServer[ClientId({0}) RemoteClient({1})] failed to ReceiveDataAsync: {2}",
-			                         clientId, GetHostnameForClientId(clientId), socketError);
+			Logger.AddEntry(eSeverity.Error,
+							"AsyncTcpServer ClientId {0} hostname {1} failed to ReceiveDataAsync: {2}",
+							clientId, GetHostnameForClientId(clientId), socketError);
 
 			RemoveClient(clientId);
 		}

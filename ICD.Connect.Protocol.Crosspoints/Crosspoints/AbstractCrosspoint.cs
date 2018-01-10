@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Services;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
@@ -58,7 +60,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <summary>
 		/// Gets the name of the node.
 		/// </summary>
-		public string ConsoleName { get { return GetType().Name; } }
+		public string ConsoleName { get { return Name ?? GetType().Name; } }
 
 		/// <summary>
 		/// Gets the help information for the node.
@@ -77,9 +79,29 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					return;
 
 				m_Status = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} status changed to {1}", this, m_Status);
+
 				OnStatusChanged.Raise(this, new CrosspointStatusEventArgs(m_Status));
 			}
 		}
+
+		/// <summary>
+		/// When enabled prints the sent sigs to the console.
+		/// </summary>
+		[PublicAPI]
+		public bool DebugInput { get; set; }
+
+		/// <summary>
+		/// When enabled prints the received sigs to the console.
+		/// </summary>
+		[PublicAPI]
+		public bool DebugOutput { get; set; }
+
+		/// <summary>
+		/// Gets the logger for this crosspoint.
+		/// </summary>
+		protected ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#endregion
 
@@ -114,6 +136,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			OnSendOutputData = null;
 			OnSendInputData = null;
+			OnStatusChanged = null;
 		}
 
 		/// <summary>
@@ -139,6 +162,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 					break;
 			}
 
+			PrintOutput(data);
+
 			CrosspointDataReceived handler = OnSendOutputData;
 			if (handler != null)
 				handler(this, data);
@@ -161,6 +186,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				data.AddControlIds(GetControlsForMessage());
 			if (data.EquipmentId == 0)
 				data.EquipmentId = GetEquipmentForMessage();
+
+			PrintInput(data);
 
 			CrosspointDataReceived handler = OnSendInputData;
 			if (handler != null)
@@ -248,12 +275,49 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return string.Format("{0}(Id={1}, Name={2})", GetType().Name, Id, StringUtils.ToRepresentation(Name));
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Id", Id);
+			builder.AppendProperty("Name", Name);
+
+			return builder.ToString();
 		}
 
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// When input debugging is enabled, prints the data to the console.
+		/// </summary>
+		/// <param name="data"></param>
+		private void PrintInput(CrosspointData data)
+		{
+			if (DebugInput)
+				PrintData("Input", data);
+		}
+
+		/// <summary>
+		/// When output debugging is enabled, prints the data to the console.
+		/// </summary>
+		/// <param name="data"></param>
+		private void PrintOutput(CrosspointData data)
+		{
+			if (DebugOutput)
+				PrintData("Output", data);
+		}
+
+		/// <summary>
+		/// Prints the given data to the console.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		private void PrintData(string context, CrosspointData data)
+		{
+			IcdConsole.PrintLine("{0} {1} - {2}", this, context, data);
+			foreach (SigInfo sig in data.GetSigs())
+				IcdConsole.PrintLine("{0} {1} - {2}", this, context, sig);
+		}
 
 		/// <summary>
 		/// Gets the source control or the destination controls for a message originating from this crosspoint.
@@ -421,6 +485,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			addRow("Id", m_Id);
 			addRow("Name", m_Name);
+			addRow("Status", m_Status);
+			addRow("Debug Input", DebugInput);
+			addRow("Debug Output", DebugOutput);
 		}
 
 		/// <summary>
@@ -429,7 +496,51 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			yield return new ConsoleCommand("EnableDebug",
+			                                "Starts printing both input and output sigs to console",
+			                                () =>
+			                                {
+				                                DebugOutput = true;
+				                                DebugInput = true;
+			                                });
+
+			yield return new ConsoleCommand("DisableDebug",
+			                                "Stops printing both input and output sigs to console",
+			                                () =>
+			                                {
+				                                DebugOutput = false;
+				                                DebugInput = false;
+			                                });
+
+			yield return new ConsoleCommand("ToggleDebugInput", "When enabled prints input sigs to console",
+			                                () => DebugInput = !DebugInput);
+			yield return new ConsoleCommand("ToggleDebugOutput", "When enabled prints output sigs to console",
+			                                () => DebugOutput = !DebugOutput);
+
+
 			yield return new ConsoleCommand("Ping", "Sends a ping to the connected crosspoint/s", () => Ping());
+			yield return new ConsoleCommand("PrintSigs", "Prints the cached sigs", () => PrintSigs());
+		}
+
+		protected abstract string PrintSigs();
+
+		protected string PrintSigs(SigCache cache)
+		{
+			if (cache == null)
+				throw new ArgumentNullException("cache");
+
+			TableBuilder builder = new TableBuilder("Type", "Smart Object", "Number", "Name", "Value");
+
+			IEnumerable<SigInfo> sigs =
+				cache.OrderBy(s => s.SmartObject)
+				     .ThenBy(s => s.Type)
+				     .ThenBy(s => s.Number)
+				     .ThenBy(s => s.Name);
+
+			foreach (SigInfo sig in sigs)
+				builder.AddRow(sig.Type, sig.SmartObject, sig.Number, StringUtils.ToRepresentation(sig.Name), sig.GetValue());
+
+			return builder.ToString();
 		}
 
 		#endregion
