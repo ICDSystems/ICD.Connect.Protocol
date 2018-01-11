@@ -1,5 +1,4 @@
 ﻿using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using NUnit.Framework;
