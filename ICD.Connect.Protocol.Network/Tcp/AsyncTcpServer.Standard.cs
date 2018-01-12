@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using ICD.Common.Services.Logging;
 using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Settings;
 
