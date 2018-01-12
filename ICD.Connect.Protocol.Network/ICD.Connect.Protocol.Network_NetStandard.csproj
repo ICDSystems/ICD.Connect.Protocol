@@ -33,6 +33,7 @@
     <None Remove="ICD.Connect.Protocol.Network_SimplSharp.suo" />
     <None Remove="ICD.Connect.Protocol.projectinfo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
+    <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
 
   <ItemGroup>
