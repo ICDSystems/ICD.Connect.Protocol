@@ -1,7 +1,6 @@
 ﻿#if SIMPLSHARP
 using System;
 using Crestron.SimplSharp.CrestronSockets;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Services;
 using ICD.Common.Services.Logging;
