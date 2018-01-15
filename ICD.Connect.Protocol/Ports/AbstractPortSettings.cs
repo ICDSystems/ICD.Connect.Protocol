@@ -1,5 +1,4 @@
 ﻿using ICD.Connect.Devices;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports
 {
@@ -8,7 +7,7 @@ namespace ICD.Connect.Protocol.Ports
 	/// </summary>
 	public abstract class AbstractPortSettings : AbstractDeviceBaseSettings, IPortSettings
 	{
-		public const string PORT_ELEMENT = "Port";
+		private const string PORT_ELEMENT = "Port";
 
 		/// <summary>
 		/// Gets the xml element.
