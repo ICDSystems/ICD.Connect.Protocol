@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
 {

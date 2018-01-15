@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using ICD.Common.Utils;
 using System.Threading.Tasks;
 using ICD.Connect.API.Nodes;
-using ICD.Common.Services.Logging;
+using ICD.Common.Utils.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {

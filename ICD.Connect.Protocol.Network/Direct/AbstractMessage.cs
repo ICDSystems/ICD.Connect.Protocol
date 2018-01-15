@@ -1,6 +1,6 @@
 ﻿using System;
-using ICD.Common.Services;
-using ICD.Common.Services.Logging;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;

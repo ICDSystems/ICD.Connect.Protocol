@@ -1,8 +1,8 @@
 ﻿using System;
+using ICD.Common.Utils.Services.Logging;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 
 namespace ICD.Connect.Protocol.Network.WebPorts

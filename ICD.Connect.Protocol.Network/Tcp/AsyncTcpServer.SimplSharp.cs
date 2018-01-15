@@ -1,9 +1,9 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
+#if SIMPLSHARP
 using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Properties;
-using ICD.Common.Services;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.EventArguments;

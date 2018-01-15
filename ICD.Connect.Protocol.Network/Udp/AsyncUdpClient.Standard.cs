@@ -4,7 +4,7 @@ using ICD.Common.Utils;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using ICD.Common.Services.Logging;
+using ICD.Common.Utils.Services.Logging;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {

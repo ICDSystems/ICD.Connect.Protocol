@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Settings;
+﻿using ICD.Connect.Devices;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports
 {
