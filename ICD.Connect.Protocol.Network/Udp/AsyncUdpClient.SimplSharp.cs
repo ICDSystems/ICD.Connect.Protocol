@@ -34,8 +34,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 				SocketErrorCodes error = m_UdpClient.ReceiveDataAsync(UdpClientReceiveHandler);
 
 				if (error != SocketErrorCodes.SOCKET_OK &&
-					error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
-					error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
+				    error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
+				    error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
 					                this, address, port, error);
@@ -87,11 +87,11 @@ namespace ICD.Connect.Protocol.Network.Udp
 				case SocketStatus.SOCKET_STATUS_BROKEN_REMOTELY:
 				case SocketStatus.SOCKET_STATUS_BROKEN_LOCALLY:
 				case SocketStatus.SOCKET_STATUS_SOCKET_NOT_EXIST:
-                case SocketStatus.SOCKET_STATUS_WAITING:
-                case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
-                case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
+				case SocketStatus.SOCKET_STATUS_WAITING:
+				case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
+				case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
 					return false;
-                case SocketStatus.SOCKET_STATUS_CONNECTED:
+				case SocketStatus.SOCKET_STATUS_CONNECTED:
 					return true;
 
 				default:

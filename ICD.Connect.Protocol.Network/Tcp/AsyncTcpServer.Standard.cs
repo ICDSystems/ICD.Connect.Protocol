@@ -1,4 +1,5 @@
-﻿#if STANDARD
+﻿
+#if STANDARD
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using System;

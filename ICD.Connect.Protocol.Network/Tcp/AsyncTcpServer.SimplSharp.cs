@@ -232,8 +232,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				return;
 
 			Logger.AddEntry(eSeverity.Error,
-							"AsyncTcpServer ClientId {0} hostname {1} failed to ReceiveDataAsync: {2}",
-							clientId, GetHostnameForClientId(clientId), socketError);
+			                "AsyncTcpServer ClientId {0} hostname {1} failed to ReceiveDataAsync: {2}",
+			                clientId, GetHostnameForClientId(clientId), socketError);
 
 			RemoveClient(clientId);
 		}

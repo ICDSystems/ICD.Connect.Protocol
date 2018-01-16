@@ -21,13 +21,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Gets the signal data in xsig formatted string
 		/// </summary>
-		public string DataXSig
-		{
-			get
-			{
-				return new string(m_Data.Select(b => (char)b).ToArray());
-			}
-		}
+		public string DataXSig { get { return new string(m_Data.Select(b => (char)b).ToArray()); } }
 
 		/// <summary>
 		/// Gets the serial value.
@@ -64,10 +58,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public SerialXSig(string value, ushort index)
 		{
-		    if (index > (1 << 10) || index < 1)
-		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
+			if (index > (1 << 10) || index < 1)
+				throw new ArgumentException(String.Format("index of {0}, must be between 1 and 1024", index));
 
-            value = value ?? "";
+			value = value ?? "";
 
 			m_Data = new byte[value.Length + 3];
 

@@ -26,13 +26,7 @@ namespace ICD.Connect.Protocol.XSig
 		/// <summary>
 		/// Gets the signal data in xsig formatted string
 		/// </summary>
-		public string DataXSig
-		{
-			get
-			{
-				return new string(m_Data.Select(b => (char)b).ToArray());
-			}
-		}
+		public string DataXSig { get { return new string(m_Data.Select(b => (char)b).ToArray()); } }
 
 		/// <summary>
 		/// Gets the high/low signal value.
@@ -69,10 +63,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		public DigitalXSig(bool value, ushort index)
 		{
-		    if (index > (1 << 12) || index < 1)
-		        throw new ArgumentException(String.Format("index of {0}, must be between 1 and 4096", index));
+			if (index > (1 << 12) || index < 1)
+				throw new ArgumentException(String.Format("index of {0}, must be between 1 and 4096", index));
 
-            m_Data = new byte[2];
+			m_Data = new byte[2];
 
 			SetFixedBits();
 			SetIndex(index);
@@ -162,10 +156,10 @@ namespace ICD.Connect.Protocol.XSig
 		/// <param name="index"></param>
 		private void SetIndex(ushort index)
 		{
-            // Subtract 1 from index to match Crestron's weird Simpl XSIG (SIMPL 1 = XSIG 0)
-            index--;
+			// Subtract 1 from index to match Crestron's weird Simpl XSIG (SIMPL 1 = XSIG 0)
+			index--;
 
-            byte[] iBytes = BitConverter.GetBytes(index);
+			byte[] iBytes = BitConverter.GetBytes(index);
 			m_Data[1] = iBytes[0].SetBitOff(7);
 			m_Data[0] = m_Data[0]
 				.SetBit(0, iBytes[0].GetBit(7))
@@ -189,12 +183,12 @@ namespace ICD.Connect.Protocol.XSig
 				.SetBitOff(5)
 				.SetBitOff(4);
 
-            // Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
-            ushort indexNumeric = BitConverter.ToUInt16(index, 0);
-            indexNumeric++;
+			// Add 1 to index to match Crestron's weird Simpl XSIG (Simpl 1 = XSIG 0)
+			ushort indexNumeric = BitConverter.ToUInt16(index, 0);
+			indexNumeric++;
 
-            return indexNumeric;
-        }
+			return indexNumeric;
+		}
 
 		private bool GetValue()
 		{
