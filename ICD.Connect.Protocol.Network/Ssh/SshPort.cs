@@ -293,7 +293,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				}
 
 				PrintTx(data);
-				m_SshStream.Write(data);
+
+				// Use bytes instead of string because data is truncated in .Net Standard
+				byte[] buffer = StringUtils.ToBytes(data);
+				m_SshStream.Write(buffer, 0, buffer.Length);
 
 				return true;
 			}
