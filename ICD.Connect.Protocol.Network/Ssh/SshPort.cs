@@ -297,7 +297,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 				return true;
 			}
-				// Thrown when we lose connection.
+			// Thrown when we lose connection.
 			catch (SshConnectionException e)
 			{
 				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1}", this, e.Message);
@@ -305,7 +305,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			}
 			catch (ObjectDisposedException e)
 			{
-				// ObjectDisposedException meesage is kinda worthless on its own
+				// ObjectDisposedException message is kinda worthless on its own
 				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1} {2}", this, e.GetType().Name, e.Message);
 
 				// Stream is broken so clean it up
