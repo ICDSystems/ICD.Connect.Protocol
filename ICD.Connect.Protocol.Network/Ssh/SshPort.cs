@@ -294,11 +294,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 				PrintTx(data);
 
-				// Use bytes instead of string because data is truncated in .Net Standard
-				byte[] buffer = StringUtils.ToBytes(data);
-				m_SshStream.Write(buffer, 0, buffer.Length);
-				m_SshStream.Flush();
-
+				m_SshStream.Write(data);
 				return true;
 			}
 			// Thrown when we lose connection.
