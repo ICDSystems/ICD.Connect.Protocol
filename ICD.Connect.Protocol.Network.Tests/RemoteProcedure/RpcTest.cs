@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using ICD.Common.Properties;
-using ICD.Common.Utils.Attributes.Rpc;
+﻿using ICD.Common.Properties;
+using ICD.Connect.Protocol.Network.Attributes.Rpc;
 using ICD.Connect.Protocol.Network.RemoteProcedure;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace ICD.Connect.Protocol.Network.Tests.RemoteProcedure
 {

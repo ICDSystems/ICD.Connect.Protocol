@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Attributes.Rpc;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Data;
+using ICD.Connect.Protocol.Network.Attributes.Rpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #if SIMPLSHARP
