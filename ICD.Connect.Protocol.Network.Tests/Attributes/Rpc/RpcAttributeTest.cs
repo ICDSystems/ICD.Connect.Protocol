@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace ICD.Connect.Protocol.Network.Tests.Attributes.Rpc
 {
 	[TestFixture]
-    public sealed class RpcAttributeTest : AbstractIcdAttributeTest
+    public sealed class RpcAttributeTest : AbstractIcdAttributeTest<RpcAttribute>
     {
 		private sealed class TestClass
 		{
