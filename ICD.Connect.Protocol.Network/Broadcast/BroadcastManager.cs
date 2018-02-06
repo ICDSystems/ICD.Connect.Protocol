@@ -140,6 +140,9 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		private void Broadcast(object data)
 		{
+			if (data == null)
+				return;
+
 			BroadcastData broadcastData = new BroadcastData(GetHostInfo(), data);
 			string serial = broadcastData.Serialize();
 
