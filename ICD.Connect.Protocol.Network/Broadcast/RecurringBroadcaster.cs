@@ -8,11 +8,13 @@ using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
-	public delegate void BroadcastHandler(object data);
+	public delegate void BroadcastCallback(object data);
 
-	public abstract class RecurringBroadcast : IDisposable, IConsoleNode
+	public abstract class RecurringBroadcaster : IDisposable, IConsoleNode
 	{
 		private const long DEFAULT_INTERVAL = 30 * 1000;
+
+		public event EventHandler OnBroadcasting;
 
 		/// <summary>
 		/// How often to broadcast the available crosspoints.
@@ -23,7 +25,12 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		#region Properties
 
-		public BroadcastHandler SendBroadcastData { get; set; }
+		protected abstract object BroadcastData { get; }
+
+		/// <summary>
+		/// Called to send the broadcast.
+		/// </summary>
+		public BroadcastCallback SendBroadcastData { get; set; }
 
 		/// <summary>
 		/// Gets the name of the node.
@@ -40,7 +47,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		protected RecurringBroadcast()
+		protected RecurringBroadcaster()
 			: this(DEFAULT_INTERVAL)
 		{
 		}
@@ -49,7 +56,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// Constructor.
 		/// </summary>
 		/// <param name="broadcastInterval"></param>
-		protected RecurringBroadcast(long broadcastInterval)
+		protected RecurringBroadcaster(long broadcastInterval)
 		{
 			m_BroadcastInterval = broadcastInterval;
 			m_BroadcastTimer = new SafeTimer(Broadcast, m_BroadcastInterval, m_BroadcastInterval);
@@ -62,12 +69,21 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public virtual void Dispose()
 		{
+			OnBroadcasting = null;
+
 			m_BroadcastTimer.Dispose();
 		}
 
-		protected abstract void Broadcast();
+		private void Broadcast()
+		{
+			OnBroadcasting.Raise(this);
 
-		internal abstract void HandleIncomingBroadcast(Broadcast broadcast);
+			BroadcastCallback callback = SendBroadcastData;
+			if (callback != null)
+				callback(BroadcastData);
+		}
+
+		protected internal abstract void HandleIncomingBroadcast(BroadcastData broadcastData);
 
 		#endregion
 
@@ -107,45 +123,51 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 	/// The AdvertisementManager is responsible for broadcasting the local crosspoints,
 	/// and discovering remote crosspoints.
 	/// </summary>
-	public sealed class RecurringBroadcast<T> : RecurringBroadcast
+	public sealed class RecurringBroadcaster<T> : RecurringBroadcaster
 	{
 		/// <summary>
-		/// Raised when crosspoints are discovered.
+		/// Raised when a broadcast is received.
 		/// </summary>
 		public event EventHandler<BroadcastEventArgs<T>> OnBroadcastReceived;
 
-		public event EventHandler OnBroadcasting;
-
 		private T m_BroadcastData;
 
-		public RecurringBroadcast()
+		protected override object BroadcastData { get { return m_BroadcastData; } }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public RecurringBroadcaster()
 		{
 		}
 
-		public RecurringBroadcast(long broadcastInterval) : base(broadcastInterval)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="broadcastInterval"></param>
+		public RecurringBroadcaster(long broadcastInterval)
+			: base(broadcastInterval)
 		{
 		}
 
 		#region Methods
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public override void Dispose()
 		{
+			OnBroadcastReceived = null;
+			
 			base.Dispose();
-			StopBroadcasting();
+
+			m_BroadcastData = default(T);
 		}
 
-		protected override void Broadcast()
+		protected internal override void HandleIncomingBroadcast(BroadcastData broadcastData)
 		{
-			OnBroadcasting.Raise(this);
-			BroadcastHandler handler = SendBroadcastData;
-			if (handler != null)
-				handler.Invoke(m_BroadcastData);
-		}
-
-		internal override void HandleIncomingBroadcast(Broadcast broadcast)
-		{
-			if (broadcast.Data is T)
-				OnBroadcastReceived.Raise(this, new BroadcastEventArgs<T>(new Broadcast<T>(broadcast)));
+			if (broadcastData.Data is T)
+				OnBroadcastReceived.Raise(this, new BroadcastEventArgs<T>(new BroadcastData<T>(broadcastData)));
 			else
 				throw new InvalidOperationException(string.Format("Broadcast does not have data of type {0}", typeof(T)));
 		}
@@ -153,26 +175,18 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
+
 			addRow("Broadcast Data", m_BroadcastData);
 		}
 
 		/// <summary>
-		/// Update the data that will be broadcasted
+		/// Update the data that will be broadcast.
 		/// </summary>
 		/// <param name="info"></param>
 		[PublicAPI]
 		public void UpdateData(T info)
 		{
 			m_BroadcastData = info;
-		}
-
-		/// <summary>
-		/// Stops advertising equipment crosspoints for remote discovery.
-		/// </summary>
-		[PublicAPI]
-		public void StopBroadcasting()
-		{
-			m_BroadcastData = default(T);
 		}
 
 		#endregion

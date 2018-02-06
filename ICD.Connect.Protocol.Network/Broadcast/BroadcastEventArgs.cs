@@ -2,9 +2,10 @@
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
-	public sealed class BroadcastEventArgs<T> : GenericEventArgs<Broadcast<T>>
+	public sealed class BroadcastEventArgs<T> : GenericEventArgs<BroadcastData<T>>
 	{
-		public BroadcastEventArgs(Broadcast<T> data) : base(data)
+		public BroadcastEventArgs(BroadcastData<T> data)
+			: base(data)
 		{
 		}
 	}

@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace ICD.Connect.Protocol.Network.Direct
 {
 	[Serializable]
-	public class AbstractMessage : ISerialData
+	public abstract class AbstractMessage : ISerialData
 	{
 		public const char DELIMITER = (char)0xff;
 		public string Type { get { return GetType().AssemblyQualifiedName; } }

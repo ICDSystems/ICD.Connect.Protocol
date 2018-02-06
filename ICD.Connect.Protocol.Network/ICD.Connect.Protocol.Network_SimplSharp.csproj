@@ -70,9 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\Rpc\RpcAttribute.cs" />
-    <Compile Include="Broadcast\Broadcast.cs" />
+    <Compile Include="Broadcast\BroadcastData.cs" />
     <Compile Include="Broadcast\BroadcastEventArgs.cs" />
-    <Compile Include="Broadcast\RecurringBroadcast.cs" />
+    <Compile Include="Broadcast\RecurringBroadcaster.cs" />
     <Compile Include="Broadcast\BroadcastManager.cs" />
     <Compile Include="Direct\AbstractMessage.cs" />
     <Compile Include="Direct\AbstractMessageHandler.cs" />

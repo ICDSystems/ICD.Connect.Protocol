@@ -27,17 +27,24 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		private readonly int m_SystemId;
 
-		private readonly Dictionary<Type, RecurringBroadcast> m_Broadcasts;
+		private readonly Dictionary<Type, RecurringBroadcaster> m_Broadcasters;
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public BroadcastManager()
 			: this(0)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public BroadcastManager(int systemId)
 		{
-			m_Broadcasts = new Dictionary<Type, RecurringBroadcast>();
+			m_Broadcasters = new Dictionary<Type, RecurringBroadcaster>();
 			m_SystemId = systemId;
+
 			m_UdpClient = new AsyncUdpClient
 			{
 				Address = NetworkUtils.MULTICAST_ADDRESS,
@@ -55,10 +62,30 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_UdpClient.Connect();
 		}
 
-		public void RegisterBroadcast<T>(RecurringBroadcast<T> manager)
+		public void Dispose()
 		{
-			manager.SendBroadcastData = Broadcast;
-			m_Broadcasts.Add(typeof(T), manager);
+			Unsubscribe(m_UdpClient);
+			m_UdpClient.Dispose();
+
+			Unsubscribe(m_Buffer);
+			foreach (KeyValuePair<Type, RecurringBroadcaster> broadcast in m_Broadcasters)
+			{
+				if (broadcast.Value != null)
+					broadcast.Value.Dispose();
+			}
+		}
+
+		#region Methods
+
+		/// <summary>
+		/// Registers the recurring broadcaster with the manager.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="broadcaster"></param>
+		public void RegisterBroadcaster<T>(RecurringBroadcaster<T> broadcaster)
+		{
+			broadcaster.SendBroadcastData = Broadcast;
+			m_Broadcasters.Add(typeof(T), broadcaster);
 		}
 
 		/// <summary>
@@ -93,29 +120,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		/// <summary>
-		/// Broadcast data to the network.
-		/// </summary>
-		private void Broadcast(object data)
-		{
-			// Don't bother advertising if we don't have any crosspoints.
-			if (data == null)
-				return;
-
-			Broadcast broadcast = new Broadcast(GetHostInfo(), data);
-			string serial = broadcast.Serialize();
-
-			// Loop over the ports for the different program slots
-			string[] addresses = GetAdvertisementAddresses().ToArray();
-			ushort[] ports = GetAdvertisementPorts().ToArray();
-
-			foreach (string address in addresses)
-			{
-				foreach (ushort port in ports)
-					m_UdpClient.SendToAddress(serial, address, port);
-			}
-		}
-
-		/// <summary>
 		/// Gets the address of the advertisement manager.
 		/// </summary>
 		/// <returns></returns>
@@ -128,16 +132,24 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			return new HostInfo(address, port);
 		}
 
-		public void Dispose()
-		{
-			Unsubscribe(m_UdpClient);
-			m_UdpClient.Dispose();
+		#endregion
 
-			Unsubscribe(m_Buffer);
-			foreach (KeyValuePair<Type, RecurringBroadcast> broadcast in m_Broadcasts)
+		/// <summary>
+		/// Broadcast data to the network.
+		/// </summary>
+		private void Broadcast(object data)
+		{
+			BroadcastData broadcastData = new BroadcastData(GetHostInfo(), data);
+			string serial = broadcastData.Serialize();
+
+			// Loop over the ports for the different program slots
+			string[] addresses = GetAdvertisementAddresses().ToArray();
+			ushort[] ports = GetAdvertisementPorts().ToArray();
+
+			foreach (string address in addresses)
 			{
-				if (broadcast.Value != null)
-					broadcast.Value.Dispose();
+				foreach (ushort port in ports)
+					m_UdpClient.SendToAddress(serial, address, port);
 			}
 		}
 
@@ -229,11 +241,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <param name="args"></param>
 		private void BufferOnCompletedSerial(object sender, StringEventArgs args)
 		{
-			Broadcast broadcast;
+			BroadcastData broadcastData;
 
 			try
 			{
-				broadcast = Network.Broadcast.Broadcast.Deserialize(args.Data);
+				broadcastData = BroadcastData.Deserialize(args.Data);
 			}
 			catch (JsonReaderException e)
 			{
@@ -243,11 +255,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			}
 
 			// Broadcast back to the place we got this advertisement from
-			AddBroadcastAddress(broadcast.Source.Address);
+			AddBroadcastAddress(broadcastData.Source.Address);
 
-			Type type = Type.GetType(broadcast.Type);
-			if (type != null && m_Broadcasts.ContainsKey(type))
-				m_Broadcasts[type].HandleIncomingBroadcast(broadcast);
+			Type type = Type.GetType(broadcastData.Type);
+			if (type != null && m_Broadcasters.ContainsKey(type))
+				m_Broadcasters[type].HandleIncomingBroadcast(broadcastData);
 		}
 
 		#endregion
@@ -263,12 +275,12 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			return m_Broadcasts.Values.Cast<IConsoleNodeBase>();
+			return m_Broadcasters.Values.Cast<IConsoleNodeBase>();
 		}
 
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
-			addRow("Broadcasts", m_Broadcasts.Values.Count);
+			addRow("Broadcasts", m_Broadcasters.Values.Count);
 			addRow("Address list", GetAdvertisementAddresses().Count());
 		}
 

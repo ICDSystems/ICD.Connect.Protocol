@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
-	public class Broadcast : ISerialData
+	public class BroadcastData : ISerialData
 	{
 		#region Properties
 
@@ -33,7 +33,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="data"></param>
-		public Broadcast(HostInfo source, object data)
+		public BroadcastData(HostInfo source, object data)
 		{
 			Source = source;
 			Data = data;
@@ -46,21 +46,21 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		/// <param name="str"></param>
 		/// <returns></returns>
-		public static Broadcast Deserialize(string str)
+		public static BroadcastData Deserialize(string str)
 		{
-			JObject o = JObject.Parse(str);
-			Type type = System.Type.GetType(o.SelectToken("Type").ToString());
-			HostInfo source = JsonConvert.DeserializeObject<HostInfo>(o.SelectToken("Source").ToString());
-			JToken obj = o.SelectToken("Data");
+			JObject root = JObject.Parse(str);
+			Type type = System.Type.GetType(root.SelectToken("Type").ToString()) ?? typeof(string);
+			HostInfo source = JsonConvert.DeserializeObject<HostInfo>(root.SelectToken("Source").ToString());
+			JToken obj = root.SelectToken("Data");
+
 			object data;
 
-			if (type == null)
-				type = typeof(string);
-			if (!(obj is JValue))
-				data = JsonConvert.DeserializeObject(obj.ToString(), type);
-			else
+			if (obj is JValue)
 				data = Convert.ChangeType(obj.ToString(), type, CultureInfo.InvariantCulture);
-			return new Broadcast(source, data);
+			else
+				data = JsonConvert.DeserializeObject(obj.ToString(), type);
+			
+			return new BroadcastData(source, data);
 		}
 
 		/// <summary>
@@ -79,16 +79,25 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		#endregion
 	}
 
-	public sealed class Broadcast<T> : Broadcast
+	public sealed class BroadcastData<T> : BroadcastData
 	{
 		public new T Data { get { return (T)base.Data; } }
 
-		public Broadcast(HostInfo source, T data)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="data"></param>
+		public BroadcastData(HostInfo source, T data)
 			: base(source, data)
 		{
 		}
 
-		public Broadcast(Broadcast b)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="b"></param>
+		public BroadcastData(BroadcastData b)
 			: base(b.Source, b.Data)
 		{
 		}
