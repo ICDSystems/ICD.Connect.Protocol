@@ -25,7 +25,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			{
 				m_ConnectedAddress = Address == ACCEPT_ALL ? IPAddress.Any : IPAddress.Parse(Address);
 
-				m_UdpClient = new UdpClient(Port) { EnableBroadcast = true };
+				m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
 				m_UdpClient.JoinMulticastGroup(m_ConnectedAddress);
 
 				// Spawn new listening thread
@@ -96,7 +96,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-				m_UdpClient.Client.Send(bytes, bytes.Length, SocketFlags.Broadcast);
+			m_UdpClient.Client.Send(bytes, bytes.Length, SocketFlags.Broadcast);
 			PrintTx(data);
 
 			return true;
