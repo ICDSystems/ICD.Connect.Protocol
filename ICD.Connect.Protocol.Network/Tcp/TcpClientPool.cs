@@ -254,6 +254,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				// Instantiate the new client
 				output = new AsyncTcpClient
 				{
+					Name = GetType().Name,
 					Address = address,
 					Port = port
 				};
