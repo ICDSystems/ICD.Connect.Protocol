@@ -77,6 +77,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 		}
 
+		/// <summary>
+		/// Assigns a name to the server for use with logging.
+		/// </summary>
+		public string Name { get; set; }
+
 		#endregion
 
 		#region Constructors
@@ -154,6 +159,23 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			return m_ConnectionLock.Execute(() => m_Connections.Keys.Order().ToArray());
 		}
 
+		/// <summary>
+		/// Gets the string representation.
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+
+			if (!string.IsNullOrEmpty(Name))
+				builder.AppendProperty("Name", Name);
+
+			if (Port != 0)
+				builder.AppendProperty("Port", Port);
+
+			return builder.ToString();
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -204,7 +226,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			try
 			{
 				m_Connections[clientId] = GetHostnameForClientId(clientId);
-				Logger.AddEntry(eSeverity.Notice, "Client {0} ({1}) connected", clientId, m_Connections[clientId]);
+				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) connected", this, clientId, m_Connections[clientId]);
 			}
 			finally
 			{
@@ -225,7 +247,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				if (!m_Connections.ContainsKey(clientId))
 					return;
 
-				Logger.AddEntry(eSeverity.Notice, "Client {0} ({1}) disconnected", clientId, m_Connections[clientId]);
+				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) disconnected", this, clientId, m_Connections[clientId]);
 				m_Connections.Remove(clientId);
 			}
 			finally

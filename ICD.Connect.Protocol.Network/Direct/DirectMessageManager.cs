@@ -54,7 +54,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_SystemId = systemId;
 
-			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(systemId), 64);
+			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(systemId), 64)
+			{
+				Name = GetType().Name
+			};
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
 			Subscribe(m_ServerBuffer);

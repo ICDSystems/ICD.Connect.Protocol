@@ -1,5 +1,4 @@
-﻿using ICD.Common.Utils.Services;
-using ICD.Common.Utils.Services.Logging;
+﻿using ICD.Common.Utils.Services.Logging;
 #if SIMPLSHARP
 using System;
 using Crestron.SimplSharp.CrestronSockets;
@@ -27,10 +26,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
 			m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
 
-			ServiceProvider.TryGetService<ILoggerService>()
-			               .AddEntry(eSeverity.Notice,
-			                         string.Format("AsyncTcpServer Listening on Port {0} with Max # of Connections {1}", Port,
-			                                       MaxNumberOfClients));
+			Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
+			                                                MaxNumberOfClients));
 		}
 
 		/// <summary>
@@ -47,9 +44,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				m_TcpListener.Stop();
 				m_TcpListener.DisconnectAll();
 
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Notice,
-				                         string.Format("AsyncTcpServer No Longer Listening on Port {0}", m_TcpListener.PortNumber));
+				Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
 			}
 			m_TcpListener = null;
 
@@ -144,7 +139,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "Exception in OnSocketStateChange callback - {0}", e.Message);
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
 			}
 		}
 
@@ -223,7 +218,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "AsyncTcpServer Exception occurred while processing received data");
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception occurred while processing received data", this);
 			}
 
 			// Spawn a new listening thread
@@ -232,8 +227,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				return;
 
 			Logger.AddEntry(eSeverity.Error,
-			                "AsyncTcpServer ClientId {0} hostname {1} failed to ReceiveDataAsync: {2}",
-			                clientId, GetHostnameForClientId(clientId), socketError);
+			                "{0} - ClientId {1} hostname {2} failed to ReceiveDataAsync: {3}",
+			                this, clientId, GetHostnameForClientId(clientId), socketError);
 
 			RemoveClient(clientId);
 		}

@@ -35,8 +35,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			m_TcpListener.Start();
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
-			Logger.AddEntry(eSeverity.Notice, "AsyncTcpServer Listening on Port {0} with Max # of Connections {1}", Port,
-			                MaxNumberOfClients);
+			Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
+			                                                MaxNumberOfClients));
 		}
 
 		/// <summary>
@@ -53,9 +53,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				IPEndPoint endpoint = m_TcpListener.LocalEndpoint as IPEndPoint;
 				if (endpoint == null)
-					Logger.AddEntry(eSeverity.Notice, "AsyncTcpServer no longer listening");
+					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening", this);
 				else
-					Logger.AddEntry(eSeverity.Notice, "AsyncTcpServer no longer listening on Port {0}", endpoint.Port);
+					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, endpoint.Port);
 			}
 
 			m_TcpListener = null;
@@ -86,7 +86,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			if (!ClientConnected(clientId))
 			{
-				string message = string.Format("{0} unable to send data to unconnected client {1}", GetType().Name, clientId);
+				string message = string.Format("{0} - Unable to send data to unconnected client {1}", this, clientId);
 				throw new InvalidOperationException(message);
 			}
 

@@ -102,6 +102,10 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 				return;
 
 			m_Server = server;
+
+			if (m_Server != null)
+				m_Server.Name = m_Server.Name ?? GetType().Name;
+
 			m_BufferManager.SetServer(m_Server);
 		}
 
