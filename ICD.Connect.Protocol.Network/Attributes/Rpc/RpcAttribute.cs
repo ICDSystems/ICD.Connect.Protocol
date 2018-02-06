@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp.Reflection;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 #if SIMPLSHARP
-
+using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
