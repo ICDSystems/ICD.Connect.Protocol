@@ -74,7 +74,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_BroadcastTimer.Dispose();
 		}
 
-		private void Broadcast()
+		public void Broadcast()
 		{
 			OnBroadcasting.Raise(this);
 
