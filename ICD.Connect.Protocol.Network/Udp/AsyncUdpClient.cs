@@ -86,6 +86,14 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 		#region Private Methods
 
+		protected override void BuildStringRepresentationProperties(Action<string, object> addPropertyAndValue)
+		{
+			base.BuildStringRepresentationProperties(addPropertyAndValue);
+
+			addPropertyAndValue("Address", Address);
+			addPropertyAndValue("Port", Port);
+		}
+
 		/// <summary>
 		/// Handle Ethernet events
 		/// </summary>

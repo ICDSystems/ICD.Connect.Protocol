@@ -47,6 +47,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 			m_UdpClient = new AsyncUdpClient
 			{
+				Name = GetType().Name,
 				Address = NetworkUtils.MULTICAST_ADDRESS,
 				Port = NetworkUtils.GetBroadcastPortForSystem(m_SystemId),
 			};
