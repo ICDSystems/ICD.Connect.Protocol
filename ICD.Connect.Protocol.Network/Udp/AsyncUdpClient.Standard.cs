@@ -108,8 +108,25 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// <param name="task"></param>
 		private void UdpClientReceiveHandler(Task<UdpReceiveResult> task)
 		{
-			UdpReceiveResult result = task.Result;
-			if (result.Buffer.Length <= 0)
+			UdpReceiveResult result;
+
+			try
+			{
+				result = task.Result;
+			}
+			catch (AggregateException ae)
+			{
+				ae.Handle(e =>
+				          {
+					          // Connection forcibly closed
+					          if (e is SocketException)
+						          return true;
+
+					          return false;
+				          });
+			}
+
+			if (result.Buffer == null || result.Buffer.Length <= 0)
 				return;
 
 			string data = StringUtils.ToString(result.Buffer);
