@@ -85,8 +85,25 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <param name="broadcaster"></param>
 		public void RegisterBroadcaster<T>(RecurringBroadcaster<T> broadcaster)
 		{
+			if (broadcaster == null)
+				throw new ArgumentNullException("broadcaster");
+
 			broadcaster.SendBroadcastData = Broadcast;
 			m_Broadcasters.Add(typeof(T), broadcaster);
+		}
+
+		/// <summary>
+		/// Deregisters the recurring broadcaster with the manager.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="broadcaster"></param>
+		public void DeregisterBroadcaster<T>(RecurringBroadcaster<T> broadcaster)
+		{
+			if (broadcaster == null)
+				throw new ArgumentNullException("broadcaster");
+
+			broadcaster.SendBroadcastData = null;
+			m_Broadcasters.Remove(typeof(T));
 		}
 
 		/// <summary>
