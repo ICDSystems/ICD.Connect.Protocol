@@ -78,7 +78,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)
 			};
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

@@ -78,7 +78,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			if (port != null)
 				output.Port = (ushort)port;
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 

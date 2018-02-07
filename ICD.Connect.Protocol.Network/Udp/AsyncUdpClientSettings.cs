@@ -62,7 +62,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 				BufferSize = bufferSize
 			};
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

@@ -67,7 +67,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				BufferSize = bufferSize
 			};
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}
