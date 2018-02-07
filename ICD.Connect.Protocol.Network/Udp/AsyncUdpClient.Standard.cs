@@ -64,7 +64,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			m_UdpClient.SendAsync(bytes, bytes.Length, ipAddress, port).Wait();
+			m_UdpClient.Send(bytes, bytes.Length, ipAddress, port);
 			PrintTx(data);
 
 			return true;
@@ -77,7 +77,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			m_UdpClient.Client.Send(bytes, bytes.Length, SocketFlags.Broadcast);
+			m_UdpClient.Send(bytes, bytes.Length);
 			PrintTx(data);
 
 			return true;
