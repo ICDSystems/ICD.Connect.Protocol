@@ -3,6 +3,7 @@
 using ICD.Common.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -159,7 +160,30 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			byte[] buffer = m_ClientBuffers[clientId];
 
-			OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, task.Result));
+			int length = 0;
+
+			try
+			{
+				length = task.Result;
+			}
+			catch (AggregateException ae)
+			{
+				ae.Handle(e =>
+				          {
+							  // Aborted by local software
+					          if (e is IOException)
+						          return true;
+
+							  // Aborted by remote host
+					          if (e is SocketException)
+						          return true;
+
+					          return false;
+				          });
+			}
+
+			if (length > 0)
+				OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, length));
 
 			if (!ClientConnected(clientId))
 			{
