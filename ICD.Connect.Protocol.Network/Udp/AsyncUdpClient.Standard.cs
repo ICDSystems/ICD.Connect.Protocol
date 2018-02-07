@@ -1,8 +1,6 @@
-﻿
-#if !SIMPLSHARP
+﻿#if !SIMPLSHARP
 using System;
 using ICD.Common.Utils;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using ICD.Common.Utils.Services.Logging;
@@ -12,7 +10,6 @@ namespace ICD.Connect.Protocol.Network.Udp
 	public sealed partial class AsyncUdpClient
 	{
 		private UdpClient m_UdpClient;
-		private IPAddress m_ConnectedAddress;
 
 		/// <summary>
 		/// Connects to the end point.
@@ -23,10 +20,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 			try
 			{
-				m_ConnectedAddress = Address == ACCEPT_ALL ? IPAddress.Any : IPAddress.Parse(Address);
-
 				m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
-				m_UdpClient.JoinMulticastGroup(m_ConnectedAddress);
 
 				// Spawn new listening thread
 				m_ListeningRequested = true;
@@ -48,20 +42,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			m_ListeningRequested = false;
 
 			if (m_UdpClient != null)
-			{
-				if (m_ConnectedAddress != null)
-				{
-					try
-					{
-						m_UdpClient.DropMulticastGroup(m_ConnectedAddress);
-					}
-					// Tried to drop an invalid address
-					catch (SocketException)
-					{
-					}
-				}
 				m_UdpClient.Dispose();
-			}
 			m_UdpClient = null;
 
 			UpdateIsConnectedState();
