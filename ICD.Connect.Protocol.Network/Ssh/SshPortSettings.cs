@@ -1,5 +1,4 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
@@ -9,6 +8,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 	/// <summary>
 	/// Provides a temporary store for SSH port settings.
 	/// </summary>
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class SshPortSettings : AbstractSerialPortSettings
 	{
 		private const string FACTORY_NAME = "SSH";
@@ -56,30 +56,22 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static SshPortSettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			string address = XmlUtils.ReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			string username = XmlUtils.ReadChildElementContentAsString(xml, USERNAME_ELEMENT);
-			string password = XmlUtils.ReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
-			int? port = XmlUtils.TryReadChildElementContentAsInt(xml, HOST_PORT_ELEMENT);
+			base.ParseXml(xml);
 
-			SshPortSettings output = new SshPortSettings
-			{
-				Address = address,
-				Username = username,
-				Password = password
-			};
+			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			string username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
+			string password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
+			ushort? port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT);
 
-			if (port != null)
-				output.Port = (ushort)port;
-
-			output.ParseXml(xml);
-			return output;
+			Address = address;
+			Username = username;
+			Password = password;
+			Port = port ?? 0;
 		}
 
 		#endregion

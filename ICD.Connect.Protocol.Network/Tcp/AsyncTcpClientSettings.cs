@@ -1,11 +1,11 @@
 using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class AsyncTcpClientSettings : AbstractSerialPortSettings
 	{
 		private const string FACTORY_NAME = "TCP";
@@ -48,27 +48,21 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static AsyncTcpClientSettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
+			base.ParseXml(xml);
+
 			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
 			ushort port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
 			ushort bufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ??
 			                    AsyncTcpClient.DEFAULT_BUFFER_SIZE;
 
-			AsyncTcpClientSettings output = new AsyncTcpClientSettings
-			{
-				Address = address,
-				Port = port,
-				BufferSize = bufferSize
-			};
-
-			output.ParseXml(xml);
-			return output;
+			Address = address;
+			Port = port;
+			BufferSize = bufferSize;
 		}
 	}
 }

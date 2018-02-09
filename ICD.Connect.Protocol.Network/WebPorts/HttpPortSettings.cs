@@ -1,5 +1,4 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
@@ -9,6 +8,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	/// <summary>
 	/// Settings for a HttpPort.
 	/// </summary>
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class HttpPortSettings : AbstractPortSettings
 	{
 		private const string FACTORY_NAME = "HTTP";
@@ -37,8 +37,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 		#endregion
 
-		#region Methods
-
 		/// <summary>
 		/// Writes property elements to xml.
 		/// </summary>
@@ -47,39 +45,24 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.WriteElements(writer);
 
-			if (!string.IsNullOrEmpty(Address))
-				writer.WriteElementString(ADDRESS_ELEMENT, Address);
-
-			if (!string.IsNullOrEmpty(Username))
-				writer.WriteElementString(USERNAME_ELEMENT, Username);
-
-			if (!string.IsNullOrEmpty(Password))
-				writer.WriteElementString(PASSWORD_ELEMENT, Password);
-
-			if (!string.IsNullOrEmpty(Accept))
-				writer.WriteElementString(ACCEPT_ELEMENT, Accept);
+			writer.WriteElementString(ADDRESS_ELEMENT, Address);
+			writer.WriteElementString(USERNAME_ELEMENT, Username);
+			writer.WriteElementString(PASSWORD_ELEMENT, Password);
+			writer.WriteElementString(ACCEPT_ELEMENT, Accept);
 		}
 
-		#endregion
-
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static HttpPortSettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			HttpPortSettings output = new HttpPortSettings
-			{
-				Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT),
-				Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT),
-				Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT),
-				Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT)
-			};
+			base.ParseXml(xml);
 
-			output.ParseXml(xml);
-			return output;
+			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
+			Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
+			Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT);
 		}
 	}
 }
