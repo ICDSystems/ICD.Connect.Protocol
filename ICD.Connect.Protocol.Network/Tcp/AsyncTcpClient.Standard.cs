@@ -65,23 +65,23 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			return m_TcpClient != null && m_TcpClient.Client.Connected;
 		}
 
-        /// <summary>
-        /// Disconnects and clears the existing TCP Client instance.
-        /// </summary>
-        private void DisposeTcpClient()
-        {
-            if (m_TcpClient == null)
-                return;
+		/// <summary>
+		/// Disconnects and clears the existing TCP Client instance.
+		/// </summary>
+		private void DisposeTcpClient()
+		{
+			if (m_Stream != null)
+				m_Stream.Dispose();
+			m_Stream = null;
 
-            m_Stream.Dispose();
-            m_TcpClient.Dispose();
+			if (m_TcpClient != null)
+				m_TcpClient.Dispose();
+			m_TcpClient = null;
 
-            m_TcpClient = null;
+			UpdateIsConnectedState();
+		}
 
-            UpdateIsConnectedState();
-        }
-
-        /// <summary>
+		/// <summary>
         /// Sends a Byte for Byte string (ISO-8859-1)
         /// </summary>
         /// <param name="data"></param>
