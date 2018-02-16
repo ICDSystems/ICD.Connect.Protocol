@@ -3,7 +3,7 @@
 namespace ICD.Connect.Protocol.Network.Direct
 {
 	public abstract class AbstractMessageHandler<T> : IMessageHandler, IDisposable
-		where T : AbstractMessage
+		where T : AbstractMessage, new()
 	{
 		/// <summary>
 		/// Handles the message receieved

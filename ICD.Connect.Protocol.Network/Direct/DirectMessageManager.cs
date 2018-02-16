@@ -101,12 +101,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <typeparam name="TMessage"></typeparam>
 		/// <param name="handler"></param>
 		public void RegisterMessageHandler<TMessage>(AbstractMessageHandler<TMessage> handler)
-			where TMessage : AbstractMessage
+			where TMessage : AbstractMessage, new()
 		{
 			m_MessageHandlersSection.Execute(() => m_MessageHandlers[typeof(TMessage)] = handler);
-
-			if (ReflectionUtils.HasPublicParameterlessConstructor(typeof(TMessage)))
-				JsonUtils.CacheType(typeof(TMessage));
+			JsonUtils.CacheType<TMessage>();
 		}
 
 		/// <summary>
