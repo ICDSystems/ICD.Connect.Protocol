@@ -1,10 +1,10 @@
-﻿using ICD.Common.Utils.Services.Logging;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
 using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 
@@ -59,7 +59,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		public void Send(string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
-			m_TcpListener.SendDataAsync(byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+			
+			foreach (uint clientId in GetClients())
+				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
 		}
 
 		/// <summary>
