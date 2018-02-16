@@ -95,8 +95,8 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data">data to send</param>
 		public bool Send(string data)
 		{
-            if (data == null)
-                throw new ArgumentNullException("data");
+			if (data == null)
+				throw new ArgumentNullException("data");
 			if (IsDisposed)
 				throw new ObjectDisposedException(GetType().Name, string.Format("{0} is disposed", this));
 
