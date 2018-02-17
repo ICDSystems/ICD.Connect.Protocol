@@ -34,9 +34,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 			try
 			{
 				JObject obj = JObject.Parse(serial);
+
 				Type type = System.Type.GetType(obj.SelectToken("Type").ToString());
 				if (type == null)
 					return null;
+
 				return JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) as AbstractMessage;
 			}
 			catch (JsonSerializationException e)
