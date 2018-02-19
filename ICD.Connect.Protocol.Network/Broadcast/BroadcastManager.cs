@@ -5,10 +5,12 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Json;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Broadcast.Broadcasters;
 using ICD.Connect.Protocol.Network.Udp;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
@@ -27,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		private readonly int m_SystemId;
 
-		private readonly Dictionary<Type, RecurringBroadcaster> m_Broadcasters;
+		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
 
 		/// <summary>
 		/// Constructor.
@@ -42,7 +44,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public BroadcastManager(int systemId)
 		{
-			m_Broadcasters = new Dictionary<Type, RecurringBroadcaster>();
+			m_Broadcasters = new Dictionary<Type, IBroadcaster>();
 			m_SystemId = systemId;
 
 			m_UdpClient = new AsyncUdpClient
@@ -69,7 +71,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_UdpClient.Dispose();
 
 			Unsubscribe(m_Buffer);
-			foreach (KeyValuePair<Type, RecurringBroadcaster> broadcast in m_Broadcasters)
+			foreach (KeyValuePair<Type, IBroadcaster> broadcast in m_Broadcasters)
 			{
 				if (broadcast.Value != null)
 					broadcast.Value.Dispose();
@@ -83,7 +85,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="broadcaster"></param>
-		public void RegisterBroadcaster<T>(RecurringBroadcaster<T> broadcaster)
+		public void RegisterBroadcaster<T>(IBroadcaster broadcaster)
 		{
 			if (broadcaster == null)
 				throw new ArgumentNullException("broadcaster");
@@ -97,7 +99,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="broadcaster"></param>
-		public void DeregisterBroadcaster<T>(RecurringBroadcaster<T> broadcaster)
+		public void DeregisterBroadcaster<T>(IBroadcaster broadcaster)
 		{
 			if (broadcaster == null)
 				throw new ArgumentNullException("broadcaster");

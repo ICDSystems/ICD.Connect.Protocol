@@ -39,6 +39,15 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			Data = data;
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="b"></param>
+		public BroadcastData(BroadcastData b)
+			: this(b.Source, b.Data)
+		{
+		}
+
 		#region Methods
 
 		/// <summary>
@@ -77,29 +86,5 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		#endregion
-	}
-
-	public sealed class BroadcastData<T> : BroadcastData
-	{
-		public new T Data { get { return (T)base.Data; } }
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="source"></param>
-		/// <param name="data"></param>
-		public BroadcastData(HostInfo source, T data)
-			: base(source, data)
-		{
-		}
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="b"></param>
-		public BroadcastData(BroadcastData b)
-			: base(b.Source, b.Data)
-		{
-		}
 	}
 }
