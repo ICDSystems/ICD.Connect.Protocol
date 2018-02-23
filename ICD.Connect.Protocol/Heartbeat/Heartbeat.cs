@@ -53,7 +53,6 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_Instance = instance;
 			m_MaxIntervalMs = maxIntervalMs;
 			m_RampIntervalMs = rampIntervalMs.ToArray();
-
 			m_Timer = SafeTimer.Stopped(TimerCallback);
 		}
 
@@ -62,7 +61,8 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_MonitoringActive = true;
 
 			// Subscribe to state change events
-			m_Instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
+			if (m_Instance != null)
+				m_Instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
 
 			// Check the connection now, but in a new thread
 			// This will start the timer if we are currently disconnected
@@ -106,7 +106,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 
 			if (eventArgs.Data)
 			{
-				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", m_Instance);
+				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", sender);
 				HandleConnected();
 			}
 			else
@@ -122,6 +122,9 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private void HandleDisconnected()
 		{
 			if (m_Connecting)
+				return;
+
+			if (m_Instance == null)
 				return;
 
 			try
