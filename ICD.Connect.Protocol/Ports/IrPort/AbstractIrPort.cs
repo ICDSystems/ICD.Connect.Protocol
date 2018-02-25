@@ -92,6 +92,8 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 			yield return new GenericConsoleCommand<ushort>("SetBetweenTime",
 			                                               "Sets the number of milliseconds between each command",
 			                                               u => BetweenTime = u);
+			yield return new GenericConsoleCommand<string>("Press", "Press <COMMAND>", p => Press(p));
+			yield return new ConsoleCommand("Release", "Releases the current command", () => Release());
 			yield return new GenericConsoleCommand<string>("PressAndRelease",
 			                                               "Presses and releases the given command",
 			                                               a => PressAndRelease(a));
