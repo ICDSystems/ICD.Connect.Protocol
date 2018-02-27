@@ -155,6 +155,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="data"></param>
 		public void Enqueue(ISerialData data)
 		{
+			if (data == null)
+				return;
+
 			m_CommandLock.Enter();
 
 			try
@@ -189,6 +192,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void Enqueue<T>(T data, Func<T, T, bool> comparer)
 			where T : ISerialData
 		{
+			if(data == null)
+				return;
+
 			m_CommandLock.Enter();
 
 			try
@@ -220,6 +226,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 		public void EnqueuePriority(ISerialData data)
 		{
+			if (data == null)
+				return;
+
 			m_CommandLock.Enter();
 
 			try
