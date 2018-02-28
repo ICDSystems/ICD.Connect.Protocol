@@ -74,8 +74,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			if (!ClientConnected(clientId))
 			{
-				string message = string.Format("{0} unable to send data to unconnected client {1}", GetType().Name, clientId);
-				throw new InvalidOperationException(message);
+				Logger.AddEntry(eSeverity.Notice, "{0} unable to send data to unconnected client {1}", GetType().Name, clientId);
+				RemoveClient(clientId);
+				return;
 			}
 
 			byte[] byteData = StringUtils.ToBytes(data);
