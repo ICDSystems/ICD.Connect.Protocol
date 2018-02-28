@@ -156,7 +156,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void Enqueue(ISerialData data)
 		{
 			if (data == null)
-				return;
+				throw new ArgumentNullException("data");
 
 			m_CommandLock.Enter();
 
@@ -193,7 +193,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			where T : ISerialData
 		{
 			if(data == null)
-				return;
+				throw new ArgumentNullException("data");
 
 			m_CommandLock.Enter();
 
@@ -227,7 +227,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void EnqueuePriority(ISerialData data)
 		{
 			if (data == null)
-				return;
+				throw new ArgumentNullException("data");
 
 			m_CommandLock.Enter();
 
