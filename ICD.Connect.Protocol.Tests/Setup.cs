@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ICD.Connect.Protocol.Tests
 {
 	[SetUpFixture]
-    public sealed class Setup
+	public sealed class Setup
 	{
 		private LoggingCore m_Logger;
 
@@ -24,7 +24,7 @@ namespace ICD.Connect.Protocol.Tests
 		[OneTimeTearDown]
 		public void Deinit()
 		{
-			ServiceProvider.RemoveService<ILoggerService>(m_Logger);
+			ServiceProvider.RemoveAllServices();
 		}
 	}
 }

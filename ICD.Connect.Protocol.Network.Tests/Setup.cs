@@ -24,7 +24,7 @@ namespace ICD.Connect.Protocol.Network.Tests
 		[OneTimeTearDown]
 		public void Deinit()
 		{
-			ServiceProvider.RemoveService<ILoggerService>(m_Logger);
+			ServiceProvider.RemoveAllServices();
 		}
 	}
 }
