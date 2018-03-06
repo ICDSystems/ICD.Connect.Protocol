@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Crestron.SimplSharp.CrestronLogger;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
