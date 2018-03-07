@@ -95,6 +95,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				PrintTx(data);
 				return true;
 			}
+			catch (SocketException e)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} - {1}", this, e.Message);
+				return false;
+			}
 			finally
 			{
 				UpdateIsConnectedState();
