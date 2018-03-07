@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Tests.SerialBuffers
 			buffer.OnCompletedSerial += (sender, e) => receivedEvents.Add(e);
 
 			buffer.Enqueue("Some");
-			buffer.Enqueue(" multiline");
+			buffer.Enqueue(" multiline\n");
 			buffer.Enqueue("\ntest data");
 			buffer.Enqueue(".\n");
 

@@ -129,6 +129,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 						data = data.Substring(index + 1);
 
 						string output = m_RxData.Pop();
+						if (string.IsNullOrEmpty(output))
+							continue;
+
 						OnCompletedSerial.Raise(this, new StringEventArgs(output));
 					}
 				}
