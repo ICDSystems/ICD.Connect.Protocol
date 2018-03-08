@@ -4,7 +4,7 @@ using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Protocol.Network.Broadcast.Broadcasters
 {
-	public abstract class AbstractRecurringBroadcaster : AbstractBroadcaster, IConsoleNode
+	public abstract class AbstractRecurringBroadcaster : AbstractBroadcaster
 	{
 		private const long DEFAULT_INTERVAL = 30 * 1000;
 
