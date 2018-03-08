@@ -54,15 +54,25 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_MaxIntervalMs = maxIntervalMs;
 			m_RampIntervalMs = rampIntervalMs.ToArray();
 			m_Timer = SafeTimer.Stopped(TimerCallback);
+
+			Subscribe(m_Instance);
 		}
+
+		public void Dispose()
+		{
+			Unsubscribe(m_Instance);
+
+			StopMonitoring();
+			m_Timer.Dispose();
+
+			m_Instance = null;
+		}
+
+		#region Methods
 
 		public void StartMonitoring()
 		{
 			m_MonitoringActive = true;
-
-			// Subscribe to state change events
-			if (m_Instance != null)
-				m_Instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
 
 			// Check the connection now, but in a new thread
 			// This will start the timer if we are currently disconnected
@@ -73,12 +83,10 @@ namespace ICD.Connect.Protocol.Heartbeat
 		{
 			m_MonitoringActive = false;
 
-			// Unsubscribe from events
-			if (m_Instance != null)
-				m_Instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
-
 			m_Timer.Stop();
 		}
+
+		#endregion
 
 		private void TimerCallback()
 		{
@@ -91,12 +99,30 @@ namespace ICD.Connect.Protocol.Heartbeat
 				HandleDisconnected();
 		}
 
-		public void Dispose()
-		{
-			StopMonitoring();
-			m_Timer.Dispose();
+		#region Instance Callbacks
 
-			m_Instance = null;
+		/// <summary>
+		/// Subscribe to the instance events.
+		/// </summary>
+		/// <param name="instance"></param>
+		private void Subscribe(IConnectable instance)
+		{
+			if (instance == null)
+				return;
+
+			instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the instance events.
+		/// </summary>
+		/// <param name="instance"></param>
+		private void Unsubscribe(IConnectable instance)
+		{
+			if (instance == null)
+				return;
+
+			instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
 		}
 
 		private void InstanceOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
@@ -157,5 +183,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 				m_Connecting = false;
 			}
 		}
+
+		#endregion
 	}
 }
