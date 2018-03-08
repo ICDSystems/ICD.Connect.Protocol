@@ -5,6 +5,7 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class MockComPortSettings : AbstractComPortSettings
 	{
 		private const string FACTORY_NAME = "MockComPort";
@@ -20,23 +21,6 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(MockComPort); } }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static MockComPortSettings FromXml(string xml)
-		{
-			MockComPortSettings output = new MockComPortSettings();
-			ParseXml(output, xml);
-			return output;
-		}
 
 		#endregion
 	}

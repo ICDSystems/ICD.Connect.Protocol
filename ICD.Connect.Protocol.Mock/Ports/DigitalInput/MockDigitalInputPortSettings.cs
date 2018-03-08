@@ -5,6 +5,7 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Mock.Ports.DigitalInput
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class MockDigitalInputPortSettings : AbstractDigitalInputPortSettings
 	{
 		private const string FACTORY_NAME = "MockDigitalInputPort";
@@ -20,23 +21,6 @@ namespace ICD.Connect.Protocol.Mock.Ports.DigitalInput
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(MockDigitalInputPort); } }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static MockDigitalInputPortSettings FromXml(string xml)
-		{
-			MockDigitalInputPortSettings output = new MockDigitalInputPortSettings();
-			ParseXml(output, xml);
-			return output;
-		}
 
 		#endregion
 	}

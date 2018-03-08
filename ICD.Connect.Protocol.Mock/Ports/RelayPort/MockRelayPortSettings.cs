@@ -5,6 +5,7 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Mock.Ports.RelayPort
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class MockRelayPortSettings : AbstractRelayPortSettings
 	{
 		private const string FACTORY_NAME = "MockRelayPort";
@@ -20,23 +21,6 @@ namespace ICD.Connect.Protocol.Mock.Ports.RelayPort
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(MockRelayPort); } }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static MockRelayPortSettings FromXml(string xml)
-		{
-			MockRelayPortSettings output = new MockRelayPortSettings();
-			ParseXml(output, xml);
-			return output;
-		}
 
 		#endregion
 	}

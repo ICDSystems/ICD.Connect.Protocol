@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Logging.Console;
 using ICD.Common.Logging.Console.Loggers;
-using ICD.Common.Services;
-using ICD.Common.Services.Logging;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Crosspoints.Tests
