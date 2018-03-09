@@ -33,21 +33,41 @@ namespace ICD.Connect.Protocol.Heartbeat
 
 		public ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="instance"></param>
 		public Heartbeat(IConnectable instance)
-			: this(instance, MAX_INTERVAL_MS_DEFAULT, s_RampMsDefault)
+			: this(instance, MAX_INTERVAL_MS_DEFAULT)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="maxIntervalMs"></param>
 		public Heartbeat(IConnectable instance, long maxIntervalMs)
 			: this(instance, maxIntervalMs, s_RampMsDefault)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="rampIntervalMs"></param>
 		public Heartbeat(IConnectable instance, IEnumerable<long> rampIntervalMs)
 			: this(instance, MAX_INTERVAL_MS_DEFAULT, rampIntervalMs)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="maxIntervalMs"></param>
+		/// <param name="rampIntervalMs"></param>
 		public Heartbeat(IConnectable instance, long maxIntervalMs, IEnumerable<long> rampIntervalMs)
 		{
 			m_Instance = instance;
