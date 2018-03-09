@@ -205,11 +205,11 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		public void Serialize(JsonWriter writer)
 		{
 			writer.WriteStartObject();
-
-			WriteProcedureType(writer);
-			WriteKey(writer);
-			WriteParameters(writer);
-
+			{
+				WriteProcedureType(writer);
+				WriteKey(writer);
+				WriteParameters(writer);
+			}
 			writer.WriteEndObject();
 		}
 
