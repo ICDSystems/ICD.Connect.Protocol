@@ -192,7 +192,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void Enqueue<T>(T data, Func<T, T, bool> comparer)
 			where T : ISerialData
 		{
-			if(data == null)
+// ReSharper disable once CompareNonConstrainedGenericWithNull
+			if (data == null)
 				throw new ArgumentNullException("data");
 
 			m_CommandLock.Enter();
