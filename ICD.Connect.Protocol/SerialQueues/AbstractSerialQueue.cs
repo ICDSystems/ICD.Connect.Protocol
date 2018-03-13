@@ -397,7 +397,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			// Clear the command queue if we lose connection.
 			if (!args.Data)
+			{
+				m_Buffer.Clear();
 				Clear();
+			}
 		}
 
 		/// <summary>
