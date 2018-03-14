@@ -9,15 +9,15 @@ namespace ICD.Connect.Protocol.Ports
 	public interface IPort : IDeviceBase
 	{
 		/// <summary>
-		/// When enabled prints the received data to the console.
+		/// Sets the type of debug message to print for received data to the console.
 		/// </summary>
 		[PublicAPI]
-		bool DebugRx { get; set; }
+		eDebugMode DebugRx { get; set; }
 
 		/// <summary>
-		/// When enabled prints the transmitted data to the console.
+		/// Sets the type of debug message  to print for transmitted data to the console.
 		/// </summary>
 		[PublicAPI]
-		bool DebugTx { get; set; }
+		eDebugMode DebugTx { get; set; }
 	}
 }

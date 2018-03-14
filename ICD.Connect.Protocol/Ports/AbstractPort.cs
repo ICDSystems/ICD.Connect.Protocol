@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Json;
+using ICD.Common.Utils.Xml;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -19,13 +22,13 @@ namespace ICD.Connect.Protocol.Ports
 		/// When enabled prints the received data to the console.
 		/// </summary>
 		[PublicAPI]
-		public bool DebugRx { get; set; }
+		public eDebugMode DebugRx { get; set; }
 
 		/// <summary>
 		/// When enabled prints the transmitted data to the console.
 		/// </summary>
 		[PublicAPI]
-		public bool DebugTx { get; set; }
+		public eDebugMode DebugTx { get; set; }
 
 		#endregion
 
@@ -38,8 +41,28 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		protected void PrintRx(string data)
 		{
-			if (DebugRx)
-				PrintData(data, "RX");
+			switch (DebugRx)
+			{
+				case eDebugMode.Off:
+					break;
+				case eDebugMode.Ascii:
+					PrintData(data, "RX(Ascii)");
+					break;
+				case eDebugMode.Hex:
+					PrintData(StringUtils.ToHexLiteral(data), "RX(Hex)");
+					break;
+				case eDebugMode.MixedAsciiHex:
+					PrintData(StringUtils.ToMixedReadableHexLiteral(data), "RX(Mixed)");
+					break;
+				case eDebugMode.Xml:
+					PrintData(XmlUtils.Format(data), "RX(Xml)");
+					break;
+				case eDebugMode.Json:
+					PrintData(JsonUtils.Format(data), "RX(Json)");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		/// <summary>
@@ -49,8 +72,28 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		protected void PrintTx(string data)
 		{
-			if (DebugTx)
-				PrintData(data, "TX");
+			switch (DebugTx)
+			{
+				case eDebugMode.Off:
+					break;
+				case eDebugMode.Ascii:
+					PrintData(data, "TX(Ascii)");
+					break;
+				case eDebugMode.Hex:
+					PrintData(StringUtils.ToHexLiteral(data), "TX(Hex)");
+					break;
+				case eDebugMode.MixedAsciiHex:
+					PrintData(StringUtils.ToMixedReadableHexLiteral(data), "TX(Mixed)");
+					break;
+				case eDebugMode.Xml:
+					PrintData(XmlUtils.Format(data), "TX(Xml)");
+					break;
+				case eDebugMode.Json:
+					PrintData(JsonUtils.Format(data), "TX(Json)");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		/// <summary>
@@ -92,26 +135,30 @@ namespace ICD.Connect.Protocol.Ports
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("EnableDebug",
-			                                "Starts printing both TX and RX data to console",
-			                                () =>
-			                                {
-				                                DebugTx = true;
-				                                DebugRx = true;
-			                                });
+			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
+											() =>
+											{
+												SetTxDebugMode(eDebugMode.Ascii);
+												SetRxDebugMode(eDebugMode.Ascii);
+											});
 
-			yield return new ConsoleCommand("DisableDebug",
-			                                "Stops printing both TX and RX data to console",
-			                                () =>
-			                                {
-				                                DebugTx = false;
-				                                DebugRx = false;
-			                                });
+			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",
+											() =>
+											{
+												SetTxDebugMode(eDebugMode.Off);
+												SetRxDebugMode(eDebugMode.Off);
+											});
 
-			yield return new ConsoleCommand("ToggleDebugTx", "When enabled prints TX data to console",
-			                                () => DebugTx = !DebugTx);
-			yield return new ConsoleCommand("ToggleDebugRx", "When enabled prints RX data to console",
-			                                () => DebugRx = !DebugRx);
+			yield return new EnumConsoleCommand<eDebugMode>("DebugMode",
+															p =>
+															{
+																SetTxDebugMode(p);
+																SetRxDebugMode(p);
+															});
+
+
+			yield return new EnumConsoleCommand<eDebugMode>("DebugModeTx", p => SetTxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("DebugModeRx", p => SetRxDebugMode(p));
 		}
 
 		/// <summary>
@@ -121,6 +168,16 @@ namespace ICD.Connect.Protocol.Ports
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		private void SetTxDebugMode(eDebugMode mode)
+		{
+			DebugTx = mode;
+		}
+
+		private void SetRxDebugMode(eDebugMode mode)
+		{
+			DebugRx = mode;
 		}
 
 		#endregion

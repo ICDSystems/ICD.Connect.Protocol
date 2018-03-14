@@ -81,6 +81,7 @@
     <Compile Include="Ports\ComPort\AbstractComPort.cs" />
     <Compile Include="Ports\ComPort\AbstractComPortSettings.cs" />
     <Compile Include="Ports\ComPort\IComPortSettings.cs" />
+    <Compile Include="Ports\eDebugMode.cs" />
     <Compile Include="Ports\DigitalInput\AbstractDigitalInputPort.cs" />
     <Compile Include="Ports\DigitalInput\AbstractDigitalInputPortSettings.cs" />
     <Compile Include="Ports\DigitalInput\IDigitalInputPort.cs" />
