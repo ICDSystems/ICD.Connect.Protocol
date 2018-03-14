@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Crosspoints
 {
-	public class CrosspointSystemEventArgs : EventArgs
+	public sealed class CrosspointSystemEventArgs : EventArgs
 	{
 		public CrosspointSystem System { get; private set; }
 

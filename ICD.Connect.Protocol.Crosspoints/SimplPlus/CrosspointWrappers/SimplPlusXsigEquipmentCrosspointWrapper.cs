@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using ICD.Connect.Protocol.SerialBuffers;
+﻿using ICD.Connect.Protocol.SerialBuffers;
 #if SIMPLSHARP
 using System;
-using System.Collections.Generic;
 using Crestron.SimplSharp;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;

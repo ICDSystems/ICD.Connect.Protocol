@@ -1,5 +1,4 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
