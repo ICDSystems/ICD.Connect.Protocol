@@ -1,9 +1,9 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
+#if SIMPLSHARP
 using ICD.Connect.API;
 using ICD.Common.Logging.Console;
 using ICD.Common.Logging.Console.Loggers;
-using ICD.Common.Services;
-using ICD.Common.Services.Logging;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
