@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Protocol.SerialBuffers;
 #if SIMPLSHARP
 using System;
 using System.Collections.Generic;
@@ -15,7 +17,15 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 {
 	public sealed class SimplPlusXSigControlCrosspointWrapper : ISimplPlusCrosspointWrapper
 	{
+		#region Events
+
+		public event EventHandler OnCrosspointChanged;
+
+		#endregion
+
 		#region Fields
+
+		private readonly XSigSerialBuffer m_Buffer;
 
 		private int m_SystemId;
 
@@ -34,12 +44,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#endregion
 
-		#region Events
-
-		public event EventHandler OnCrosspointChanged;
-
-		#endregion
-
 		#region Properties
 
 		public int SystemId { get { return m_SystemId; } }
@@ -53,6 +57,22 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 		public ICrosspoint Crosspoint { get { return m_Crosspoint; } }
 
 		#endregion
+
+		/// <summary>
+		/// Default constructor for S+.
+		/// </summary>
+		[UsedImplicitly]
+		public SimplPlusXSigControlCrosspointWrapper()
+		{
+			m_SendSection = new SafeCriticalSection();
+			m_ReceiveSection = new SafeCriticalSection();
+			m_CrosspointSymbolInstanceName = "";
+
+			m_Buffer = new XSigSerialBuffer();
+			m_Buffer.OnCompletedSerial += BufferOnCompletedSerial;
+
+			SimplPlusStaticCore.WrapperManager.RegisterSPlusCrosspointWrapper(this);
+		}
 
 		#region SPlusMethods
 
@@ -144,28 +164,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			m_Crosspoint.Deinitialize();
 		}
 
-		[PublicAPI]
-		public void SendXSig(SimplSharpString xsig)
-		{
-			//Don't do things without a crosspoint
-			if (m_Crosspoint == null)
-				return;
-
-			m_SendSection.Enter();
-
-			try
-			{
-				IEnumerable<SigInfo> sigs = XSigParser.ParseMultiple(xsig.ToString()).Select(s => s.ToSigInfo());
-				CrosspointData data = new CrosspointData();
-				data.AddSigs(sigs);
-				m_Crosspoint.SendInputData(data);
-			}
-			finally
-			{
-				m_SendSection.Leave();
-			}
-		}
-
 		/// <summary>
 		/// When true, the crosspoint manager will attempt to reconnect when a connection is dropped.
 		/// </summary>
@@ -177,6 +175,34 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 				return;
 
 			m_Manager.AutoReconnect = autoReconnect != 0;
+		}
+
+		[PublicAPI]
+		public void SendXSig(SimplSharpString xsig)
+		{
+			//Don't do things without a crosspoint
+			if (m_Crosspoint == null)
+				return;
+
+			m_SendSection.Enter();
+
+			try
+			{
+				m_Buffer.Enqueue(xsig.ToString());
+			}
+			finally
+			{
+				m_SendSection.Leave();
+			}
+		}
+
+		private void BufferOnCompletedSerial(object sender, StringEventArgs stringEventArgs)
+		{
+			SigInfo sig = XSigParser.Parse(stringEventArgs.Data).ToSigInfo();
+			CrosspointData data = new CrosspointData();
+			data.AddSig(sig);
+
+			m_Crosspoint.SendInputData(data);
 		}
 
 		#endregion
@@ -305,18 +331,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			DelStatusUpdate callback = CrosspointStatusCallback;
 			if (callback != null)
 				callback((ushort)args.Data);
-		}
-
-		/// <summary>
-		/// Default constructor for S+.
-		/// </summary>
-		[UsedImplicitly]
-		public SimplPlusXSigControlCrosspointWrapper()
-		{
-			m_SendSection = new SafeCriticalSection();
-			m_ReceiveSection = new SafeCriticalSection();
-			m_CrosspointSymbolInstanceName = "";
-			SimplPlusStaticCore.WrapperManager.RegisterSPlusCrosspointWrapper(this);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using ICD.Connect.Protocol.SerialBuffers;
 #if SIMPLSHARP
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,15 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 {
 	public sealed class SimplPlusXSigEquipmentCrosspointWrapper : ISimplPlusCrosspointWrapper
 	{
+		#region Events
+
+		public event EventHandler OnCrosspointChanged;
+
+		#endregion
+
 		#region Fields
+
+		private readonly XSigSerialBuffer m_Buffer;
 
 		private int m_SystemId;
 
@@ -49,11 +58,21 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 		#endregion
 
-		#region Events
+		/// <summary>
+		/// Default constructor for S+.
+		/// </summary>
+		[UsedImplicitly]
+		public SimplPlusXSigEquipmentCrosspointWrapper()
+		{
+			m_SendSection = new SafeCriticalSection();
+			m_ReceiveSection = new SafeCriticalSection();
+			m_CrosspointSymbolInstanceName = "";
 
-		public event EventHandler OnCrosspointChanged;
+			m_Buffer = new XSigSerialBuffer();
+			m_Buffer.OnCompletedSerial += BufferOnCompletedSerial;
 
-		#endregion
+			SimplPlusStaticCore.WrapperManager.RegisterSPlusCrosspointWrapper(this);
+		}
 
 		#region SPlusMethods
 
@@ -156,15 +175,21 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 
 			try
 			{
-				IEnumerable<SigInfo> sigs = XSigParser.ParseMultiple(xsig.ToString()).Select(s => s.ToSigInfo());
-				CrosspointData data = new CrosspointData();
-				data.AddSigs(sigs);
-				m_Crosspoint.SendInputData(data);
+				m_Buffer.Enqueue(xsig.ToString());
 			}
 			finally
 			{
 				m_SendSection.Leave();
 			}
+		}
+
+		private void BufferOnCompletedSerial(object sender, StringEventArgs stringEventArgs)
+		{
+			SigInfo sig = XSigParser.Parse(stringEventArgs.Data).ToSigInfo();
+			CrosspointData data = new CrosspointData();
+			data.AddSig(sig);
+
+			m_Crosspoint.SendInputData(data);
 		}
 
 		#endregion
@@ -313,18 +338,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers
 			DelStatusUpdate callback = ControlCrosspointsConnectedCallback;
 			if (callback != null)
 				callback((ushort)args.Data);
-		}
-
-		/// <summary>
-		/// Default constructor for S+.
-		/// </summary>
-		[UsedImplicitly]
-		public SimplPlusXSigEquipmentCrosspointWrapper()
-		{
-			m_SendSection = new SafeCriticalSection();
-			m_ReceiveSection = new SafeCriticalSection();
-			m_CrosspointSymbolInstanceName = "";
-			SimplPlusStaticCore.WrapperManager.RegisterSPlusCrosspointWrapper(this);
 		}
 	}
 }
