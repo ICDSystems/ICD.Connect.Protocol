@@ -21,18 +21,16 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 								  feedback.Add(args);
 
 								  // Simulate some process time
-								  ThreadingUtils.Sleep(10 * 1000);
+								  ThreadingUtils.Sleep(100);
 							  };
 
 			for (int i = 0; i < 20; i++)
 			{
-				ThreadingUtils.Sleep(100);
-
 				bounce.Enqueue(true);
 				bounce.Enqueue(false);
 			}
 
-			ThreadingUtils.Sleep(100 * 1000);
+			ThreadingUtils.Sleep(1 * 1000);
 
 			Assert.AreEqual(2, feedback.Count);
 			Assert.AreEqual(true, feedback[0].Data);
