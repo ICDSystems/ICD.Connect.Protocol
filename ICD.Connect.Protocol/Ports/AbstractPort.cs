@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Json;
-using ICD.Common.Utils.Xml;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Ports
 {
@@ -41,28 +38,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		protected void PrintRx(string data)
 		{
-			switch (DebugRx)
-			{
-				case eDebugMode.Off:
-					break;
-				case eDebugMode.Ascii:
-					PrintData(data, "RX(Ascii)");
-					break;
-				case eDebugMode.Hex:
-					PrintData(StringUtils.ToHexLiteral(data), "RX(Hex)");
-					break;
-				case eDebugMode.MixedAsciiHex:
-					PrintData(StringUtils.ToMixedReadableHexLiteral(data), "RX(Mixed)");
-					break;
-				case eDebugMode.Xml:
-					PrintData(XmlUtils.Format(data), "RX(Xml)");
-					break;
-				case eDebugMode.Json:
-					PrintData(JsonUtils.Format(data), "RX(Json)");
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			DebugUtils.PrintRx(this, DebugRx, data);
 		}
 
 		/// <summary>
@@ -72,42 +48,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		protected void PrintTx(string data)
 		{
-			switch (DebugTx)
-			{
-				case eDebugMode.Off:
-					break;
-				case eDebugMode.Ascii:
-					PrintData(data, "TX(Ascii)");
-					break;
-				case eDebugMode.Hex:
-					PrintData(StringUtils.ToHexLiteral(data), "TX(Hex)");
-					break;
-				case eDebugMode.MixedAsciiHex:
-					PrintData(StringUtils.ToMixedReadableHexLiteral(data), "TX(Mixed)");
-					break;
-				case eDebugMode.Xml:
-					PrintData(XmlUtils.Format(data), "TX(Xml)");
-					break;
-				case eDebugMode.Json:
-					PrintData(JsonUtils.Format(data), "TX(Json)");
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-		/// <summary>
-		/// Formats and prints the data to the console.
-		/// </summary>
-		/// <param name="data"></param>
-		/// <param name="context"></param>
-		private void PrintData(string data, string context)
-		{
-			data = data.Replace("\n", "\\n");
-			data = data.Replace("\r", "\\r");
-
-			IcdConsole.Print("{0} {1} - {2}", this, context, data);
-			IcdConsole.PrintLine(string.Empty);
+			DebugUtils.PrintTx(this, DebugTx, data);
 		}
 
 		#endregion

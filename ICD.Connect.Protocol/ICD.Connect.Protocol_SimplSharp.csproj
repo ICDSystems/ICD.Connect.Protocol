@@ -133,6 +133,7 @@
     <Compile Include="Sigs\SigCache.cs" />
     <Compile Include="Sigs\SigInfo.cs" />
     <Compile Include="EventArguments\SocketStateEventArgs.cs" />
+    <Compile Include="Utils\DebugUtils.cs" />
     <Compile Include="XSig\AnalogXSig.cs" />
     <Compile Include="XSig\DigitalXSig.cs" />
     <Compile Include="XSig\IXSig.cs" />
