@@ -54,8 +54,19 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// </summary>
 		public void Clear()
 		{
-			m_ParseSection.Execute(() => m_RxData.Clear());
-			m_QueueSection.Execute(() => m_Queue.Clear());
+			m_ParseSection.Enter();
+			m_QueueSection.Enter();
+
+			try
+			{
+				m_RxData.Clear();
+				m_Queue.Clear();
+			}
+			finally
+			{
+				m_ParseSection.Leave();
+				m_QueueSection.Leave();
+			}
 		}
 
 		#endregion
