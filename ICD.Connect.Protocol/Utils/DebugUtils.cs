@@ -10,48 +10,79 @@ namespace ICD.Connect.Protocol.Utils
 	{
 		/// <summary>
 		/// Formats and prints the received data to the console.
-		/// Does nothing if DebugRx is false.
+		/// Does nothing if mode is off.
 		/// </summary>
 		/// <param name="instance"></param>
 		/// <param name="mode"></param>
 		/// <param name="data"></param>
 		public static void PrintRx(object instance, eDebugMode mode, string data)
 		{
-			PrintData(instance, data, "RX", mode);
+			PrintRx(instance, mode, null, data);
+		}
+
+		/// <summary>
+		/// Formats and prints the received data to the console.
+		/// Does nothing if mode is off.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="mode"></param>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		public static void PrintRx(object instance, eDebugMode mode, string context, string data)
+		{
+			PrintData(instance, context, data, "RX", mode);
 		}
 
 		/// <summary>
 		/// Formats and prints the transmitted data to the console.
-		/// Does nothing if DebugTx is false.
+		/// Does nothing if mode is off.
 		/// </summary>
 		/// <param name="instance"></param>
 		/// <param name="mode"></param>
 		/// <param name="data"></param>
 		public static void PrintTx(object instance, eDebugMode mode, string data)
 		{
-			PrintData(instance, data, "TX", mode);
+			PrintTx(instance, mode, null, data);
+		}
+
+		/// <summary>
+		/// Formats and prints the transmitted data to the console.
+		/// Does nothing if mode is off.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="mode"></param>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		public static void PrintTx(object instance, eDebugMode mode, string context, string data)
+		{
+			PrintData(instance, context, data, "TX", mode);
 		}
 
 		/// <summary>
 		/// Formats and prints the data to the console.
 		/// </summary>
 		/// <param name="instance"></param>
-		/// <param name="data"></param>
 		/// <param name="context"></param>
+		/// <param name="data"></param>
+		/// <param name="direction"></param>
 		/// <param name="mode"></param>
-		private static void PrintData(object instance, string data, string context, eDebugMode mode)
+		private static void PrintData(object instance, string context, string data, string direction, eDebugMode mode)
 		{
 			if (mode == eDebugMode.Off)
 				return;
 
 			string modeString = GetModeString(mode);
+			
+			// Pad context for readability
+			context = context == null ? string.Empty : context + " - ";
 
 			// Massage the data
 			data = FormatData(data, mode);
 			data = data.Replace("\n", "\\n");
 			data = data.Replace("\r", "\\r");
 
-			IcdConsole.Print("{0} {1}({2}) - {3}", instance, context, data, modeString);
+			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
+			IcdConsole.Print("{0} {1}{2}({3}) - {4}", instance, context, direction, data, modeString);
 			IcdConsole.PrintLine(string.Empty);
 		}
 
