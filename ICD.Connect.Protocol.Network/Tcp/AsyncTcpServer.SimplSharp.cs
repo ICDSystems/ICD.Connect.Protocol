@@ -59,9 +59,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		public void Send(string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
-			
+
 			foreach (uint clientId in GetClients())
+			{
+				PrintTx(clientId, data);
 				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+			}
 		}
 
 		/// <summary>
@@ -80,6 +83,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 
 			byte[] byteData = StringUtils.ToBytes(data);
+
+			PrintTx(clientId, data);
 			m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
 		}
 
@@ -210,7 +215,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 					return;
 				}
 
-				OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, bytesReceived));
+				TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, bytesReceived);
+				PrintRx(clientId, eventArgs.Data);
+
+				OnDataReceived.Raise(null, eventArgs);
 
 				// Would this ever happen?
 				if (!ClientConnected(clientId))

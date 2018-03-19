@@ -1,5 +1,4 @@
-﻿
-#if STANDARD
+﻿#if STANDARD
 using ICD.Common.Utils;
 using System;
 using System.Collections.Generic;
@@ -73,8 +72,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
-			foreach (TcpClient client in m_Clients.Values.Where(c => c.Connected))
-					client.Client.Send(byteData, 0, byteData.Length, SocketFlags.None);
+			foreach (KeyValuePair<uint, TcpClient> kvp in m_Clients.Where(kvp => kvp.Value.Connected))
+			{
+				PrintTx(kvp.Key, data);
+				kvp.Value.Client.Send(byteData, 0, byteData.Length, SocketFlags.None);
+			}
 		}
 
 		/// <summary>
@@ -93,6 +95,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			byte[] byteData = StringUtils.ToBytes(data);
 
+			PrintTx(clientId, data);
 			m_Clients[clientId].Client.Send(byteData, 0, byteData.Length, SocketFlags.None);
 		}
 
@@ -183,7 +186,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 
 			if (length > 0)
-				OnDataReceived.Raise(null, new TcpReceiveEventArgs(clientId, buffer, length));
+			{
+				TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, length);
+
+				PrintRx(clientId, eventArgs.Data);
+				OnDataReceived.Raise(null, eventArgs);
+			}
 
 			if (!ClientConnected(clientId))
 			{
