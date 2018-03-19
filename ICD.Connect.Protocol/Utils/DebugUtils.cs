@@ -80,7 +80,7 @@ namespace ICD.Connect.Protocol.Utils
 			data = FormatData(data, mode);
 
 			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-			IcdConsole.Print("{0} {1}{2}({3}) - {4}", instance, context, direction, data, modeString);
+			IcdConsole.Print("{0} {1}{2}({3}) - {4}", instance, context, direction, modeString, data);
 			IcdConsole.PrintLine(string.Empty);
 		}
 
