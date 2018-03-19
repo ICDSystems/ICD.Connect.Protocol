@@ -6,11 +6,15 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
-	public sealed partial class AsyncTcpServer : IDisposable
+	public sealed partial class AsyncTcpServer : IConsoleNode, IDisposable
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
 		private const int DEFAULT_MAX_NUMBER_OF_CLIENTS = 1;
@@ -81,6 +85,18 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// Assigns a name to the server for use with logging.
 		/// </summary>
 		public string Name { get; set; }
+
+		/// <summary>
+		/// When enabled prints the received data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugRx { get; set; }
+
+		/// <summary>
+		/// When enabled prints the transmitted data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugTx { get; set; }
 
 		#endregion
 
@@ -181,6 +197,28 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		#region Private Methods
 
 		/// <summary>
+		/// Formats and prints the received data to the console.
+		/// </summary>
+		/// <param name="clientId"></param>
+		/// <param name="data"></param>
+		private void PrintRx(uint clientId, string data)
+		{
+			string context = string.Format("ClientId:{0}", clientId);
+			DebugUtils.PrintRx(this, DebugRx, context, data);
+		}
+
+		/// <summary>
+		/// Formats and prints the transmitted data to the console.
+		/// </summary>
+		/// <param name="clientId"></param>
+		/// <param name="data"></param>
+		private void PrintTx(uint clientId, string data)
+		{
+			string context = string.Format("ClientId:{0}", clientId);
+			DebugUtils.PrintTx(this, DebugTx, context, data);
+		}
+
+		/// <summary>
 		/// Handles an ethernet event
 		/// </summary>
 		/// <param name="adapter"></param>
@@ -264,6 +302,85 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private bool ContainsClient(uint clientId)
 		{
 			return m_ConnectionLock.Execute(() => m_Connections.ContainsKey(clientId));
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the name of the node.
+		/// </summary>
+		public string ConsoleName { get { return "TcpServer"; } }
+
+		/// <summary>
+		/// Gets the help information for the node.
+		/// </summary>
+		public string ConsoleHelp { get { return null; } }
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			yield break;
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			addRow("Name", Name);
+			addRow("Port", Port);
+			addRow("Max Clients", MaxNumberOfClients);
+			addRow("Active", Active);
+			addRow("Debug Rx", DebugRx);
+			addRow("Debug Tx", DebugTx);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
+									() =>
+									{
+										SetTxDebugMode(eDebugMode.Ascii);
+										SetRxDebugMode(eDebugMode.Ascii);
+									});
+
+			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",
+											() =>
+											{
+												SetTxDebugMode(eDebugMode.Off);
+												SetRxDebugMode(eDebugMode.Off);
+											});
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugMode",
+															p =>
+															{
+																SetTxDebugMode(p);
+																SetRxDebugMode(p);
+															});
+
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+		}
+
+		private void SetTxDebugMode(eDebugMode mode)
+		{
+			DebugTx = mode;
+		}
+
+		private void SetRxDebugMode(eDebugMode mode)
+		{
+			DebugRx = mode;
 		}
 
 		#endregion
