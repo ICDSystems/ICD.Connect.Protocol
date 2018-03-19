@@ -33,7 +33,6 @@ namespace ICD.Connect.Protocol.Ports
 
 		/// <summary>
 		/// Formats and prints the received data to the console.
-		/// Does nothing if DebugRx is false.
 		/// </summary>
 		/// <param name="data"></param>
 		protected void PrintRx(string data)
@@ -43,7 +42,6 @@ namespace ICD.Connect.Protocol.Ports
 
 		/// <summary>
 		/// Formats and prints the transmitted data to the console.
-		/// Does nothing if DebugTx is false.
 		/// </summary>
 		/// <param name="data"></param>
 		protected void PrintTx(string data)

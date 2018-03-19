@@ -33,6 +33,29 @@ namespace ICD.Connect.Protocol.Utils
 		}
 
 		/// <summary>
+		/// Formats and prints the data to the console.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="data"></param>
+		/// <param name="context"></param>
+		/// <param name="mode"></param>
+		private static void PrintData(object instance, string data, string context, eDebugMode mode)
+		{
+			if (mode == eDebugMode.Off)
+				return;
+
+			string modeString = GetModeString(mode);
+
+			// Massage the data
+			data = FormatData(data, mode);
+			data = data.Replace("\n", "\\n");
+			data = data.Replace("\r", "\\r");
+
+			IcdConsole.Print("{0} {1}({2}) - {3}", instance, context, data, modeString);
+			IcdConsole.PrintLine(string.Empty);
+		}
+
+		/// <summary>
 		/// Formats the data based on the given debug mode.
 		/// </summary>
 		/// <param name="data"></param>
@@ -85,26 +108,6 @@ namespace ICD.Connect.Protocol.Utils
 				default:
 					throw new ArgumentOutOfRangeException("mode");
 			}
-		}
-
-		/// <summary>
-		/// Formats and prints the data to the console.
-		/// </summary>
-		/// <param name="instance"></param>
-		/// <param name="data"></param>
-		/// <param name="context"></param>
-		/// <param name="mode"></param>
-		private static void PrintData(object instance, string data, string context, eDebugMode mode)
-		{
-			string modeString = GetModeString(mode);
-
-			// Massage the data
-			data = FormatData(data, mode);
-			data = data.Replace("\n", "\\n");
-			data = data.Replace("\r", "\\r");
-
-			IcdConsole.Print("{0} {1}({2}) - {3}", instance, context, data, modeString);
-			IcdConsole.PrintLine(string.Empty);
 		}
 	}
 }
