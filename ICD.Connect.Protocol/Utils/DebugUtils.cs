@@ -78,8 +78,6 @@ namespace ICD.Connect.Protocol.Utils
 
 			// Massage the data
 			data = FormatData(data, mode);
-			data = data.Replace("\n", "\\n");
-			data = data.Replace("\r", "\\r");
 
 			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
 			IcdConsole.Print("{0} {1}{2}({3}) - {4}", instance, context, direction, data, modeString);
@@ -97,7 +95,11 @@ namespace ICD.Connect.Protocol.Utils
 			switch (mode)
 			{
 				case eDebugMode.Off:
+					return null;
+
 				case eDebugMode.Ascii:
+					data = data.Replace("\n", "\\n");
+					data = data.Replace("\r", "\\r");
 					return data;
 
 				case eDebugMode.Hex:
