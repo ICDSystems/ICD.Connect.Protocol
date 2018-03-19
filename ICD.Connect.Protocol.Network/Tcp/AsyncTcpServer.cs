@@ -347,6 +347,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			yield return new ConsoleCommand("Stop", "Stops the server", () => Stop());
+			yield return new ConsoleCommand("Start", "Starts the server", () => Start());
+
 			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
 									() =>
 									{
