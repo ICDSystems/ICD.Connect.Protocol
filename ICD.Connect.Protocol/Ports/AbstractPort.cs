@@ -88,7 +88,7 @@ namespace ICD.Connect.Protocol.Ports
 												SetRxDebugMode(eDebugMode.Off);
 											});
 
-			yield return new EnumConsoleCommand<eDebugMode>("DebugMode",
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugMode",
 															p =>
 															{
 																SetTxDebugMode(p);
@@ -96,8 +96,8 @@ namespace ICD.Connect.Protocol.Ports
 															});
 
 
-			yield return new EnumConsoleCommand<eDebugMode>("DebugModeTx", p => SetTxDebugMode(p));
-			yield return new EnumConsoleCommand<eDebugMode>("DebugModeRx", p => SetRxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
 		}
 
 		/// <summary>
