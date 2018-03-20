@@ -1,10 +1,10 @@
-﻿
-#if STANDARD
+﻿#if STANDARD
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 
@@ -263,6 +263,21 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri,
 				                response.StatusCode);
+				return false;
+			}
+			catch (AggregateException ae)
+			{
+				ae.Handle(x =>
+				          {
+					          if (x is TaskCanceledException)
+					          {
+						          Logger.AddEntry(eSeverity.Error, "{0} {1} request timed out", this, request.RequestUri);
+								  return true;
+					          }
+
+					          return false;
+				          });
+				
 				return false;
 			}
 			finally
