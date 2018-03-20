@@ -43,6 +43,20 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				m_Stream = m_TcpClient.GetStream();
 				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
 			}
+			catch (AggregateException ae)
+			{
+				ae.Handle(x =>
+				          {
+					          if (x is SocketException)
+					          {
+						          Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port,
+						                          x.Message);
+						          return true;
+					          }
+
+					          return false;
+				          });
+			}
 			catch (Exception e)
 			{
 				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port, e.Message);
