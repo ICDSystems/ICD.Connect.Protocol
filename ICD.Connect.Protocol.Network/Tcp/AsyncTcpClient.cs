@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
@@ -27,7 +26,27 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		public string Address
 		{
 			get { return m_Address; }
-			set { m_Address = IcdEnvironment.NetworkAddresses.Contains(value) ? "127.0.0.1" : value; }
+			set
+			{
+				if (value == null)
+				{
+					m_Address = null;
+				}
+				else
+				{
+					Uri uri = null;
+
+					try
+					{
+						uri = new Uri(value);
+					}
+					catch (Exception)
+					{
+					}
+
+					m_Address = uri == null ? value : uri.Host;
+				}
+			}
 		}
 
 		/// <summary>
