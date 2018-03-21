@@ -106,10 +106,19 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			m_UdpClient.SendData(bytes, bytes.Length, ipAddress, port);
-			PrintTx(data);
+			try
+			{
+				m_UdpClient.SendData(bytes, bytes.Length, ipAddress, port);
+				PrintTx(data);
+				return true;
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
+								this, ipAddress, port, e.Message);
+			}
 
-			return true;
+			return false;
 		}
 
 		/// <summary>
@@ -119,10 +128,19 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			PrintTx(data);
-			m_UdpClient.SendData(bytes, bytes.Length);
+			try
+			{
+				m_UdpClient.SendData(bytes, bytes.Length);
+				PrintTx(data);
+				return true;
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
+				                this, m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
+			}
 
-			return true;
+			return false;
 		}
 
 		#endregion
