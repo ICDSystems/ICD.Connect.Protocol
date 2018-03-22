@@ -31,6 +31,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
 
 		/// <summary>
+		/// Returns true if the broadcast manager is actively broadcasting or listening for broadcasts.
+		/// </summary>
+		public bool Active { get; private set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public BroadcastManager()
@@ -60,8 +65,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 			m_Buffer = new JsonSerialBuffer();
 			Subscribe(m_Buffer);
-
-			m_UdpClient.Connect();
 		}
 
 		public void Dispose()
@@ -78,6 +81,32 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Starts broadcasting and listening for broadcasts.
+		/// </summary>
+		public void Start()
+		{
+			if (Active)
+				return;
+
+			m_UdpClient.Connect();
+
+			Active = true;
+		}
+
+		/// <summary>
+		/// Stops broadcasting and listening for broadcasts.
+		/// </summary>
+		public void Stop()
+		{
+			if (!Active)
+				return;
+
+			m_UdpClient.Disconnect();
+
+			Active = false;
+		}
 
 		/// <summary>
 		/// Registers the recurring broadcaster with the manager.
@@ -158,6 +187,9 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		private void Broadcast(object data)
 		{
+			if (!Active)
+				return;
+
 			if (data == null)
 				return;
 
@@ -213,6 +245,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private void Subscribe(AsyncUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
+			udpClient.OnConnectedStateChanged += UdpClientOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -222,6 +255,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private void Unsubscribe(AsyncUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
+			udpClient.OnConnectedStateChanged -= UdpClientOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -231,7 +265,18 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <param name="args"></param>
 		private void UdpClientOnSerialDataReceived(object sender, StringEventArgs args)
 		{
-			m_Buffer.Enqueue(args.Data);
+			if (Active)
+				m_Buffer.Enqueue(args.Data);
+		}
+
+		/// <summary>
+		/// Called when the UDP Client connects/disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="boolEventArgs"></param>
+		private void UdpClientOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			m_Buffer.Clear();
 		}
 
 		#endregion
@@ -269,11 +314,16 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			{
 				broadcastData = BroadcastData.Deserialize(args.Data);
 			}
-			catch (JsonReaderException e)
+			catch (Exception e)
 			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
-				return;
+				if (e is JsonReaderException || e is JsonSerializationException)
+				{
+					ServiceProvider.TryGetService<ILoggerService>()
+					               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
+					return;
+				}
+
+				throw;
 			}
 
 			// Broadcast back to the place we got this advertisement from
