@@ -31,6 +31,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
 
 		/// <summary>
+		/// Returns true if the broadcast manager is actively broadcasting or listening for broadcasts.
+		/// </summary>
+		public bool Active { get; private set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public BroadcastManager()
@@ -60,8 +65,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 			m_Buffer = new JsonSerialBuffer();
 			Subscribe(m_Buffer);
-
-			m_UdpClient.Connect();
 		}
 
 		public void Dispose()
@@ -78,6 +81,32 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Starts broadcasting and listening for broadcasts.
+		/// </summary>
+		public void Start()
+		{
+			if (Active)
+				return;
+
+			m_UdpClient.Connect();
+
+			Active = true;
+		}
+
+		/// <summary>
+		/// Stops broadcasting and listening for broadcasts.
+		/// </summary>
+		public void Stop()
+		{
+			if (!Active)
+				return;
+
+			m_UdpClient.Disconnect();
+
+			Active = false;
+		}
 
 		/// <summary>
 		/// Registers the recurring broadcaster with the manager.
@@ -158,6 +187,9 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		private void Broadcast(object data)
 		{
+			if (!Active)
+				return;
+
 			if (data == null)
 				return;
 
