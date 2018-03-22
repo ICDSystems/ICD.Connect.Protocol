@@ -269,11 +269,16 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			{
 				broadcastData = BroadcastData.Deserialize(args.Data);
 			}
-			catch (JsonReaderException e)
+			catch (Exception e)
 			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
-				return;
+				if (e is JsonReaderException || e is JsonSerializationException)
+				{
+					ServiceProvider.TryGetService<ILoggerService>()
+					               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
+					return;
+				}
+
+				throw;
 			}
 
 			// Broadcast back to the place we got this advertisement from
