@@ -245,6 +245,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private void Subscribe(AsyncUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
+			udpClient.OnConnectedStateChanged += UdpClientOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -254,6 +255,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private void Unsubscribe(AsyncUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
+			udpClient.OnConnectedStateChanged -= UdpClientOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -263,7 +265,18 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <param name="args"></param>
 		private void UdpClientOnSerialDataReceived(object sender, StringEventArgs args)
 		{
-			m_Buffer.Enqueue(args.Data);
+			if (Active)
+				m_Buffer.Enqueue(args.Data);
+		}
+
+		/// <summary>
+		/// Called when the UDP Client connects/disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="boolEventArgs"></param>
+		private void UdpClientOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			m_Buffer.Clear();
 		}
 
 		#endregion
