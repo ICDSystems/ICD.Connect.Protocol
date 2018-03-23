@@ -17,11 +17,18 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 
 		private T m_MostRecentValue;
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public FeedbackDebounce()
 			: this(EqualityComparer<T>.Default)
 		{
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="equalityComparer"></param>
 		public FeedbackDebounce(IEqualityComparer<T> equalityComparer)
 		{
 			m_QueueSection = new SafeCriticalSection();
@@ -44,7 +51,8 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 
 		private void ProcessQueue()
 		{
-			m_ProcessSection.Enter();
+			if (!m_ProcessSection.TryEnter())
+				return;
 
 			try
 			{
@@ -52,7 +60,11 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 				if (!CollapseQueue(out newValue))
 					return;
 
+				m_MostRecentValue = newValue;
+
 				OnValue.Raise(this, new GenericEventArgs<T>(newValue));
+
+				ProcessQueue();
 			}
 			finally
 			{
@@ -60,6 +72,11 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 			}
 		}
 
+		/// <summary>
+		/// Returns true if there is a difference between the last raised value and the most recent enqueued value.
+		/// </summary>
+		/// <param name="newValue"></param>
+		/// <returns></returns>
 		private bool CollapseQueue(out T newValue)
 		{
 			newValue = default(T);
@@ -68,29 +85,19 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 			{
 				m_QueueSection.Enter();
 
-				if (m_FeedbackQueue.Count == 0 ||
-				    m_EqualityComparer.Equals(m_FeedbackQueue[m_FeedbackQueue.Count - 1], m_MostRecentValue))
-				{
-					m_FeedbackQueue.Clear();
+				// No new items to process
+				if (m_FeedbackQueue.Count == 0)
 					return false;
-				}
 
-				int index = -1;
+				T lastValue = m_FeedbackQueue[m_FeedbackQueue.Count - 1];
+				bool equals = m_EqualityComparer.Equals(lastValue, m_MostRecentValue);
 
-				for (int i = m_FeedbackQueue.Count - 1; i >= 0; i--)
-				{
-					if (!m_EqualityComparer.Equals(m_FeedbackQueue[i], m_MostRecentValue))
-						continue;
-					index = i;
-					break;
-				}
+				// Latest value is different to the last raised value
+				if (!equals)
+					newValue = lastValue;
 
-				newValue = m_FeedbackQueue[index + 1];
-				m_MostRecentValue = newValue;
-
-				m_FeedbackQueue.RemoveRange(0, index + 1);
-
-				return true;
+				m_FeedbackQueue.Clear();
+				return !equals;
 			}
 			finally
 			{
