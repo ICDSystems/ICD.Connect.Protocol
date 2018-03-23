@@ -75,26 +75,25 @@ namespace ICD.Connect.Protocol.Ports
 				yield return command;
 
 			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
-											() =>
-											{
-												SetTxDebugMode(eDebugMode.Ascii);
-												SetRxDebugMode(eDebugMode.Ascii);
-											});
+			                                () =>
+			                                {
+				                                SetTxDebugMode(eDebugMode.Ascii);
+				                                SetRxDebugMode(eDebugMode.Ascii);
+			                                });
 
 			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",
-											() =>
-											{
-												SetTxDebugMode(eDebugMode.Off);
-												SetRxDebugMode(eDebugMode.Off);
-											});
+			                                () =>
+			                                {
+				                                SetTxDebugMode(eDebugMode.Off);
+				                                SetRxDebugMode(eDebugMode.Off);
+			                                });
 
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugMode",
-															p =>
-															{
-																SetTxDebugMode(p);
-																SetRxDebugMode(p);
-															});
-
+			                                                p =>
+			                                                {
+				                                                SetTxDebugMode(p);
+				                                                SetRxDebugMode(p);
+			                                                });
 
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));

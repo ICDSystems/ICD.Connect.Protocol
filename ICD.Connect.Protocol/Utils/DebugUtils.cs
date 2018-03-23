@@ -72,7 +72,7 @@ namespace ICD.Connect.Protocol.Utils
 				return;
 
 			string modeString = GetModeString(mode);
-			
+
 			// Pad context for readability
 			context = context == null ? string.Empty : context + " - ";
 
@@ -134,7 +134,7 @@ namespace ICD.Connect.Protocol.Utils
 				case eDebugMode.Xml:
 				case eDebugMode.Json:
 					return mode.ToString().ToUpper();
-					
+
 				case eDebugMode.MixedAsciiHex:
 					return "Mixed";
 
