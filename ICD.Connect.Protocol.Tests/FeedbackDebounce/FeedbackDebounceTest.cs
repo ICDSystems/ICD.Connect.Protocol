@@ -56,8 +56,14 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 			}
 
 			Assert.AreEqual(2, feedback.Count, 1);
+
 			Assert.AreEqual(true, feedback[0].Data);
-			Assert.AreEqual(false, feedback[1].Data);
+
+			if (feedback.Count > 1)
+				Assert.AreEqual(false, feedback[1].Data);
+
+			if (feedback.Count > 2)
+				Assert.AreEqual(true, feedback[2].Data);
 		}
 	}
 }
