@@ -128,7 +128,6 @@ namespace ICD.Connect.Protocol.Network.Udp
 				{
 					UpdateIsConnectedState();
 				}
-				
 			}
 
 			UpdateIsConnectedState();
