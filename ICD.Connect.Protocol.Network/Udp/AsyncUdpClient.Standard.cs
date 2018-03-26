@@ -119,7 +119,16 @@ namespace ICD.Connect.Protocol.Network.Udp
 			{
 				if (!m_UdpClient.Client.Connected)
 					Connect();
-				m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
+
+				try
+				{
+					m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
+				}
+				catch (SocketException)
+				{
+					UpdateIsConnectedState();
+				}
+				
 			}
 
 			UpdateIsConnectedState();
