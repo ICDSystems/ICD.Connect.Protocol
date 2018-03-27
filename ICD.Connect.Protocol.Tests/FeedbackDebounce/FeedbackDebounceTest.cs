@@ -10,6 +10,28 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 	public sealed class FeedbackDebounceTest
 	{
 		[Test]
+		public static void DebounceSimpleTest()
+		{
+			List<GenericEventArgs<bool>> feedback = new List<GenericEventArgs<bool>>();
+
+			FeedbackDebounce<bool> bounce = new FeedbackDebounce<bool>();
+
+			bounce.OnValue += (sender, args) => { feedback.Add(args); };
+
+			bounce.Enqueue(true);
+			bounce.Enqueue(true);
+			ThreadingUtils.Wait(() => feedback.Count > 0, 1000);
+
+			bounce.Enqueue(false);
+			bounce.Enqueue(false);
+			ThreadingUtils.Wait(() => feedback.Count > 1, 1000);
+
+			Assert.AreEqual(2, feedback.Count);
+			Assert.AreEqual(true, feedback[0].Data);
+			Assert.AreEqual(false, feedback[1].Data);
+		}
+
+		[Test]
 		public static void DebounceTest()
 		{
 			List<GenericEventArgs<bool>> feedback = new List<GenericEventArgs<bool>>();
@@ -24,17 +46,24 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 								  ThreadingUtils.Sleep(100);
 							  };
 
-			for (int i = 0; i < 20; i++)
+			bool toggle = false;
+
+			for (int index = 0; index < 20; index++)
 			{
-				bounce.Enqueue(true);
-				bounce.Enqueue(false);
+				toggle = !toggle;
+				bounce.Enqueue(toggle);
+				ThreadingUtils.Sleep(10);
 			}
 
-			ThreadingUtils.Sleep(1 * 1000);
+			Assert.AreEqual(2, feedback.Count, 1);
 
-			Assert.AreEqual(2, feedback.Count);
 			Assert.AreEqual(true, feedback[0].Data);
-			Assert.AreEqual(false, feedback[1].Data);
+
+			if (feedback.Count > 1)
+				Assert.AreEqual(false, feedback[1].Data);
+
+			if (feedback.Count > 2)
+				Assert.AreEqual(true, feedback[2].Data);
 		}
 	}
 }
