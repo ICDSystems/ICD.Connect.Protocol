@@ -112,8 +112,10 @@ namespace ICD.Connect.Protocol.Network.Udp
 				return;
 
 			string data = StringUtils.ToString(result.Buffer);
+			HostInfo hostInfo = new HostInfo(result.RemoteEndPoint.Address.ToString(),
+			                                 (ushort)result.RemoteEndPoint.Port);
 
-			PrintRx(data);
+			PrintRx(hostInfo.ToString(), data);
 			Receive(data);
 
 			if (m_ListeningRequested)

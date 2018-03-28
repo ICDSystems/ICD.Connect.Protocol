@@ -160,7 +160,10 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 			string data = StringUtils.ToString(udpClient.IncomingDataBuffer.Take(bytesReceived));
 
-			PrintRx(data);
+			HostInfo host = new HostInfo(udpClient.IPAddressLastMessageReceivedFrom,
+			                             (ushort)udpClient.IPPortLastMessageReceivedFrom);
+
+			PrintRx(host.ToString(), data);
 			Receive(data);
 
 			SocketErrorCodes socketError = udpClient.ReceiveDataAsync(UdpClientReceiveHandler);
