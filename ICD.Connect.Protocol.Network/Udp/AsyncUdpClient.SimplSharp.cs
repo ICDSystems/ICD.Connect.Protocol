@@ -1,10 +1,11 @@
-﻿using ICD.Common.Utils.Services.Logging;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
 using System;
 using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -109,7 +110,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			try
 			{
 				m_UdpClient.SendData(bytes, bytes.Length, ipAddress, port);
-				PrintTx(data);
+				PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
 				return true;
 			}
 			catch (Exception e)

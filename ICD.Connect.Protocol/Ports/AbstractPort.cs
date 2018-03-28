@@ -41,12 +41,32 @@ namespace ICD.Connect.Protocol.Ports
 		}
 
 		/// <summary>
+		/// Formats and prints the received data to the console.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		protected void PrintRx(string context, string data)
+		{
+			DebugUtils.PrintRx(this, DebugRx, context, data);
+		}
+
+		/// <summary>
 		/// Formats and prints the transmitted data to the console.
 		/// </summary>
 		/// <param name="data"></param>
 		protected void PrintTx(string data)
 		{
 			DebugUtils.PrintTx(this, DebugTx, data);
+		}
+
+		/// <summary>
+		/// Formats and prints the transmitted data to the console.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="data"></param>
+		protected void PrintTx(string context, string data)
+		{
+			DebugUtils.PrintTx(this, DebugTx, context, data);
 		}
 
 		#endregion

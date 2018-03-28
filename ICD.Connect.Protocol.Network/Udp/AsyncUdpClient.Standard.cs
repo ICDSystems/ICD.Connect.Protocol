@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
@@ -65,7 +66,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			byte[] bytes = StringUtils.ToBytes(data);
 
 			m_UdpClient.Send(bytes, bytes.Length, ipAddress, port);
-			PrintTx(data);
+			PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
 
 			return true;
 		}
