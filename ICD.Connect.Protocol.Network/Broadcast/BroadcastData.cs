@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
-	public class BroadcastData : ISerialData
+	public sealed class BroadcastData : ISerialData
 	{
 		#region Properties
 
