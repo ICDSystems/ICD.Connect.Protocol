@@ -150,7 +150,7 @@ namespace ICD.Connect.Protocol.Ports
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "Port data received exception - {0}", e.Message);
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception handling received data - {1}", this, e.Message);
 			}
 		}
 
