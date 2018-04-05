@@ -1,5 +1,6 @@
 ﻿using ICD.Common.Logging.Console;
 using ICD.Common.Logging.Console.Loggers;
+using ICD.Common.Permissions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using NUnit.Framework;
@@ -19,6 +20,7 @@ namespace ICD.Connect.Protocol.Network.Tests
 			m_Logger.SeverityLevel = eSeverity.Debug;
 
 			ServiceProvider.AddService<ILoggerService>(m_Logger);
+			ServiceProvider.AddService(new PermissionsManager());
 		}
 
 		[OneTimeTearDown]
