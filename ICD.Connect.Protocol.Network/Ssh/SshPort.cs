@@ -499,7 +499,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="args"></param>
 		private void SshClientOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.AddEntry(eSeverity.Error, args.Exception, "{0} SSH Client Error - {1}", this, args.Exception.Message);
+			Logger.AddEntry(eSeverity.Error, "{0} - Internal Error - {1}", this, args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 
