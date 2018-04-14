@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Json;
+using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Tcp;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
@@ -11,9 +10,9 @@ using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Network.Direct
 {
-	public delegate void ClientBufferCallback(AbstractMessage response);
+	public delegate void ClientBufferCallback(IReply response);
 
-	public delegate void MessageResponseCallback<TResponse>(TResponse response) where TResponse : AbstractMessage;
+	public delegate void MessageResponseCallback<TResponse>(TResponse response) where TResponse : IReply;
 
 	public sealed class DirectMessageManager : IDisposable
 	{
@@ -58,6 +57,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				Name = GetType().Name
 			};
+			Subscribe(m_Server);
+
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
 			Subscribe(m_ServerBuffer);
@@ -77,16 +78,21 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		public void Dispose()
 		{
+			Unsubscribe(m_Server);
 			Unsubscribe(m_ServerBuffer);
-			m_ServerBuffer.Dispose();
-
 			Unsubscribe(m_ClientBuffers);
+
+			m_ServerBuffer.Dispose();
 			m_ClientBuffers.Dispose();
 
 			m_MessageCallbacks.Clear();
 
-			foreach (IDisposable handler in m_MessageHandlers.Values.OfType<IDisposable>())
+			foreach (IMessageHandler handler in m_MessageHandlers.Values)
+			{
+				Unsubscribe(handler);
 				handler.Dispose();
+			}
+
 			m_MessageHandlers.Clear();
 
 			m_Server.Dispose();
@@ -99,12 +105,29 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Adds the given message handler to the manager.
 		/// </summary>
 		/// <typeparam name="TMessage"></typeparam>
+		/// <typeparam name="TReply"></typeparam>
 		/// <param name="handler"></param>
-		public void RegisterMessageHandler<TMessage>(AbstractMessageHandler<TMessage> handler)
-			where TMessage : AbstractMessage, new()
+		public void RegisterMessageHandler<TMessage, TReply>(IMessageHandler<TMessage, TReply> handler)
+			where TMessage : IMessage
+			where TReply : IReply
 		{
-			m_MessageHandlersSection.Execute(() => m_MessageHandlers[typeof(TMessage)] = handler);
-			JsonUtils.CacheType<TMessage>();
+			if (handler == null)
+				throw new ArgumentNullException("handler");
+
+			m_MessageHandlersSection.Enter();
+
+			try
+			{
+				if (m_MessageHandlers.ContainsKey(typeof(TMessage)))
+					throw new InvalidOperationException("Message handler already registered for type");
+
+				m_MessageHandlers[typeof(TMessage)] = handler;
+				Subscribe(handler);
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -123,22 +146,56 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="type"></param>
 		public void UnregisterMessageHandler(Type type)
 		{
-			m_MessageHandlersSection.Execute(() => m_MessageHandlers.Remove(type));
+			if (type == null)
+				throw new ArgumentNullException("handler");
+
+			m_MessageHandlersSection.Enter();
+
+			try
+			{
+				IMessageHandler handler;
+				if (!m_MessageHandlers.TryGetValue(type, out handler))
+					return;
+
+				Unsubscribe(handler);
+
+				m_MessageHandlers.Remove(type);
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
+		}
+
+		public IMessageHandler GetMessageHandler<T>()
+		{
+			return GetMessageHandler(typeof(T));
+		}
+
+		private IMessageHandler GetMessageHandler(Type type)
+		{
+			if (type == null)
+				throw new ArgumentNullException("handler");
+
+			m_MessageHandlersSection.Enter();
+
+			try
+			{
+				IMessageHandler handler;
+				if (m_MessageHandlers.TryGetValue(type, out handler))
+					return handler;
+
+				throw new KeyNotFoundException();
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 		}
 
 		public HostInfo GetHostInfo()
 		{
 			return NetworkUtils.GetLocalHostInfo(m_SystemId);
-		}
-
-		public void Respond(uint clientId, Guid originalMessageId, AbstractMessage response)
-		{
-			if (clientId <= 0 || response == null || !m_Server.ClientConnected(clientId))
-				return;
-
-			response.MessageId = originalMessageId;
-			response.MessageFrom = GetHostInfo();
-			m_Server.Send(clientId, response.Serialize());
 		}
 
 		#endregion
@@ -150,8 +207,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
-		public void Send(HostInfo sendTo, AbstractMessage message)
+		public void Send(HostInfo sendTo, IMessage message)
 		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
 			message.MessageId = Guid.NewGuid();
 			message.MessageFrom = GetHostInfo();
 			string data = message.Serialize();
@@ -167,9 +227,15 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
 		/// <param name="callback"></param>
-		public void Send<TResponse>(HostInfo sendTo, AbstractMessage message, MessageResponseCallback<TResponse> callback)
-			where TResponse : AbstractMessage
+		public void Send<TResponse>(HostInfo sendTo, IMessage message, MessageResponseCallback<TResponse> callback)
+			where TResponse : IReply
 		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
+			if (callback == null)
+				throw new ArgumentNullException("callback");
+
 			Guid messageId = Guid.NewGuid();
 
 			message.MessageId = messageId;
@@ -177,8 +243,54 @@ namespace ICD.Connect.Protocol.Network.Direct
 			string data = message.Serialize();
 
 			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
-			m_MessageCallbacks.Add(messageId, response => callback(response as TResponse));
+			m_MessageCallbacks.Add(messageId, response => callback((TResponse)response));
 			client.Send(data);
+		}
+
+		#endregion
+
+		#region Server Callbacks
+
+		/// <summary>
+		/// Subscribe to the server events.
+		/// </summary>
+		/// <param name="server"></param>
+		private void Subscribe(AsyncTcpServer server)
+		{
+			server.OnSocketStateChange += ServerOnOnSocketStateChange;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the server events.
+		/// </summary>
+		/// <param name="server"></param>
+		private void Unsubscribe(AsyncTcpServer server)
+		{
+			server.OnSocketStateChange -= ServerOnOnSocketStateChange;
+		}
+
+		/// <summary>
+		/// Called when a client connects/disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void ServerOnOnSocketStateChange(object sender, SocketStateEventArgs eventArgs)
+		{
+			if (m_Server.ClientConnected(eventArgs.ClientId))
+				return;
+
+			m_MessageHandlersSection.Enter();
+
+			try
+			{
+				// Inform the handlers of a client disconnect.
+				foreach (IMessageHandler handler in m_MessageHandlers.Values)
+					handler.HandleClientDisconnect(eventArgs.ClientId);
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 		}
 
 		#endregion
@@ -221,7 +333,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (!m_MessageHandlers.ContainsKey(type))
 				return;
 
-			AbstractMessage response = m_MessageHandlers[type].HandleMessage(msg);
+			IReply response = m_MessageHandlers[type].HandleMessage(msg);
 			if (response == null || !m_Server.ClientConnected(clientId))
 				return;
 
@@ -261,17 +373,61 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private void ClientPoolBufferOnClientCompletedSerial(TcpClientPoolBufferManager sender, AsyncTcpClient client,
 		                                                     string data)
 		{
-			AbstractMessage message = AbstractMessage.Deserialize(data);
-			ClientBufferCallback callback = null;
+			IReply message = AbstractMessage.Deserialize(data) as IReply;
+			if (message == null)
+				return;
 
+			// Handle registered callbacks
 			if (m_MessageCallbacks.ContainsKey(message.MessageId))
 			{
-				callback = m_MessageCallbacks[message.MessageId];
+				ClientBufferCallback callback = m_MessageCallbacks[message.MessageId];
 				m_MessageCallbacks.Remove(message.MessageId);
+
+				callback(message);
 			}
 
-			if (callback != null)
-				callback(message);
+			// Message handlers
+			Type type = message.GetType();
+			if (!m_MessageHandlers.ContainsKey(type))
+				return;
+
+			IReply response = m_MessageHandlers[type].HandleMessage(message);
+			if (response == null)
+				return;
+
+			// Send the reply back to the server
+			response.MessageId = message.MessageId;
+			response.MessageFrom = GetHostInfo();
+			client.Send(response.Serialize());
+		}
+
+		#endregion
+
+		#region Handler Callbacks
+
+		private void Subscribe(IMessageHandler handler)
+		{
+			handler.OnAsyncReply += HandlerOnAsyncReply;
+		}
+
+		private void Unsubscribe(IMessageHandler handler)
+		{
+			handler.OnAsyncReply -= HandlerOnAsyncReply;
+		}
+
+		private void HandlerOnAsyncReply(IMessageHandler sender, IReply reply)
+		{
+			if (reply == null)
+				throw new ArgumentNullException("reply");
+
+			if (reply.ClientId <= 0)
+				throw new InvalidOperationException("Unable to send message to unknown client");
+
+			if (!m_Server.ClientConnected(reply.ClientId))
+				throw new InvalidOperationException("Unable to send message to disconnected client");
+
+			reply.MessageFrom = GetHostInfo();
+			m_Server.Send(reply.ClientId, reply.Serialize());
 		}
 
 		#endregion
