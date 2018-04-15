@@ -80,8 +80,10 @@
     <Compile Include="Direct\AbstractMessage.cs" />
     <Compile Include="Direct\AbstractMessageHandler.cs" />
     <Compile Include="Direct\DirectMessageManager.cs" />
+    <Compile Include="Direct\IMessage.cs" />
     <Compile Include="Direct\IMessageHandler.cs" />
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Direct\IReply.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteProcedure\ClientSerialRpcController.cs" />
