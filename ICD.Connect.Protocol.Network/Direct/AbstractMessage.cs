@@ -1,7 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +8,7 @@ using Newtonsoft.Json.Linq;
 namespace ICD.Connect.Protocol.Network.Direct
 {
 	[Serializable]
-	public abstract class AbstractMessage : ISerialData
+	public abstract class AbstractMessage : IMessage
 	{
 		public const char DELIMITER = (char)0xff;
 
