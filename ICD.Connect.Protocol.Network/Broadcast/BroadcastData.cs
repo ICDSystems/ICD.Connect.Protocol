@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Globalization;
 using ICD.Connect.Protocol.Data;
+using ICD.Connect.Protocol.Network.Broadcast.Converters;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
+	[JsonConverter(typeof(BroadcastDataConverter))]
 	public sealed class BroadcastData : ISerialData
 	{
 		#region Properties
@@ -14,75 +14,59 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <summary>
 		/// The type of the data being advertised. Used for deserialization.
 		/// </summary>
-		public string Type { get { return Data.GetType().AssemblyQualifiedName; } }
+		public Type Type { get; set; }
 
 		/// <summary>
 		/// The source of this advertisement.
 		/// </summary>
-		public HostInfo Source { get; private set; }
+		public HostInfo Source { get; set; }
 
 		/// <summary>
 		/// The data that is being advertised.
 		/// </summary>
-		public object Data { get; private set; }
+		public object Data { get; set; }
 
 		#endregion
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="source"></param>
-		/// <param name="data"></param>
-		public BroadcastData(HostInfo source, object data)
+		public BroadcastData()
 		{
-			Source = source;
-			Data = data;
 		}
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="b"></param>
-		public BroadcastData(BroadcastData b)
-			: this(b.Source, b.Data)
+		/// <param name="broadcastData"></param>
+		public BroadcastData(BroadcastData broadcastData)
+			: this()
 		{
+			Type = broadcastData.Type;
+			Source = broadcastData.Source;
+			Data = broadcastData.Data;
 		}
 
 		#region Methods
 
-		/// <summary>
-		/// Deserializes the advertisement from a JSON string.
-		/// </summary>
-		/// <param name="str"></param>
-		/// <returns></returns>
-		public static BroadcastData Deserialize(string str)
+		public void SetData<T>(object data)
 		{
-			JObject root = JObject.Parse(str);
-			Type type = System.Type.GetType(root.SelectToken("Type").ToString()) ?? typeof(string);
-			HostInfo source = JsonConvert.DeserializeObject<HostInfo>(root.SelectToken("Source").ToString());
-			JToken obj = root.SelectToken("Data");
+			SetData(typeof(T), data);
+		}
 
-			object data;
-
-			if (obj is JValue)
-				data = Convert.ChangeType(obj.ToString(), type, CultureInfo.InvariantCulture);
-			else
-				data = JsonConvert.DeserializeObject(obj.ToString(), type);
-			
-			return new BroadcastData(source, data);
+		public void SetData(Type type, object data)
+		{
+			Type = data == null ? type : data.GetType();
+			Data = data;
 		}
 
 		/// <summary>
-		/// Serializes the advertisement to a JSON string.
+		/// Serialize this instance to a string.
 		/// </summary>
 		/// <returns></returns>
 		public string Serialize()
 		{
-			return JsonConvert.SerializeObject(this, Formatting.None,
-			                                   new JsonSerializerSettings
-			                                   {
-				                                   DefaultValueHandling = DefaultValueHandling.Ignore
-			                                   });
+			return JsonConvert.SerializeObject(this);
 		}
 
 		#endregion
