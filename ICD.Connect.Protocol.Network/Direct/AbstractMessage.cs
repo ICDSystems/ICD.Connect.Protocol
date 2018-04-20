@@ -40,10 +40,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 				return JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) as AbstractMessage;
 			}
-			catch (JsonSerializationException e)
+			catch (Exception e)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "AbstractMessage failed to deserialize: {0}", e.Message);
+				               .AddEntry(eSeverity.Error, e, "AbstractMessage failed to deserialize - {0}", e.Message);
 				return null;
 			}
 		}
