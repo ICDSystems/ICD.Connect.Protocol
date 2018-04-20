@@ -373,6 +373,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private void ClientPoolBufferOnClientCompletedSerial(TcpClientPoolBufferManager sender, AsyncTcpClient client,
 		                                                     string data)
 		{
+			if (client == null)
+				throw new ArgumentNullException("client");
+
 			IReply message = AbstractMessage.Deserialize(data) as IReply;
 			if (message == null)
 				return;
