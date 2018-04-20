@@ -35,7 +35,16 @@ namespace ICD.Connect.Protocol.Ports
 		[PublicAPI, JsonIgnore]
 		public string AddressOrLocalhost
 		{
-			get { return IcdEnvironment.NetworkAddresses.Contains(m_Address) ? "127.0.0.1" : m_Address; }
+			get { return IsLocalHost ? "127.0.0.1" : m_Address; }
+		}
+
+		/// <summary>
+		/// Returns true if the address represents the localhost.
+		/// </summary>
+		[PublicAPI, JsonIgnore]
+		public bool IsLocalHost
+		{
+			get { return IcdEnvironment.NetworkAddresses.Contains(m_Address); }
 		}
 
 		#endregion
