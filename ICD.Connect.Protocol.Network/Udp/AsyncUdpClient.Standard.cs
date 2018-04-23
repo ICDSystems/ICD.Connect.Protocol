@@ -104,8 +104,16 @@ namespace ICD.Connect.Protocol.Network.Udp
 					          if (e is SocketException)
 						          return true;
 
+							  // We stopped the connection
+							  if (e is ObjectDisposedException)
+								  return true;
+
 					          return false;
 				          });
+			}
+			finally
+			{
+				UpdateIsConnectedState();
 			}
 
 			if (result.Buffer == null || result.Buffer.Length <= 0)
