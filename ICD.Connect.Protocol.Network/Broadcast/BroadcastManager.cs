@@ -159,6 +159,29 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		/// <summary>
+		/// Multicast does not work between subnets, so we can manually set known addresses to be advertised to.
+		/// </summary>
+		/// <param name="addresses"></param>
+		[PublicAPI]
+		public void SetBroadcastAddresses(IEnumerable<string> addresses)
+		{
+			if (addresses == null)
+				throw new ArgumentNullException("addresses");
+
+			m_AddressesSection.Enter();
+
+			try
+			{
+				m_Addresses.Clear();
+				m_Addresses.AddRange(addresses);
+			}
+			finally
+			{
+				m_AddressesSection.Leave();
+			}
+		}
+
+		/// <summary>
 		/// Removes manually added advertisement addresses.
 		/// </summary>
 		/// <param name="address"></param>
