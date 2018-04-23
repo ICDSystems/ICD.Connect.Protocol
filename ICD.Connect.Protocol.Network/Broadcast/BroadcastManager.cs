@@ -226,7 +226,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			List<string> output = new List<string> {NetworkUtils.LOCALHOST_ADDRESS, NetworkUtils.MULTICAST_ADDRESS};
 
 			// Broadcast to program specified addresses
-			string[] addresses = m_AddressesSection.Execute(() => m_Addresses.ToArray());
+			string[] addresses = m_AddressesSection.Execute(() => m_Addresses.ToArray(m_Addresses.Count));
 			output.AddRange(addresses);
 
 			return output;
