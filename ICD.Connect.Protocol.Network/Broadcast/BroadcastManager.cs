@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -358,15 +359,32 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
-			addRow("Broadcasts", m_Broadcasters.Values.Count);
-			addRow("Address list", GetAdvertisementAddresses().Count());
+			addRow("System ID", m_SystemId);
+			addRow("Active", Active);
+			addRow("Addresses", StringUtils.ArrayFormat(GetAdvertisementAddresses().Order()));
+			addRow("Host Info", GetHostInfo());
 		}
 
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			yield return new ConsoleCommand("Start", "Resumes broadcasting and accepting broadcasts", () => Start());
+			yield return new ConsoleCommand("Stop", "Stops broadcasting and accepting broadcasts", () => Stop());
+
 			yield return
 				new GenericConsoleCommand<string>("AddAddress", "Adds an address to the broadcast list", a => AddBroadcastAddress(a))
 				;
+
+			yield return new ConsoleCommand("PrintBroadcasters", "Prints a table of the registered broadcasters", () => PrintBroadcasters());
+		}
+
+		private string PrintBroadcasters()
+		{
+			TableBuilder builder = new TableBuilder("Type", "Broadcaster");
+
+			foreach (var kvp in m_Broadcasters.OrderBy(k => k.Key.Name))
+				builder.AddRow(kvp.Key.Name, kvp.Value);
+
+			return builder.ToString();
 		}
 
 		#endregion

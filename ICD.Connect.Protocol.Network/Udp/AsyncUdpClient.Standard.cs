@@ -21,7 +21,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 			try
 			{
-				m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
+				m_UdpClient = new UdpClient(Port) { EnableBroadcast = true };
 
 				// Spawn new listening thread
 				m_ListeningRequested = true;
@@ -99,13 +99,21 @@ namespace ICD.Connect.Protocol.Network.Udp
 			catch (AggregateException ae)
 			{
 				ae.Handle(e =>
-				          {
-					          // Connection forcibly closed
-					          if (e is SocketException)
-						          return true;
+						  {
+							  // Connection forcibly closed
+							  if (e is SocketException)
+								  return true;
 
-					          return false;
-				          });
+							  // We stopped the connection
+							  if (e is ObjectDisposedException)
+								  return true;
+
+							  return false;
+						  });
+			}
+			finally
+			{
+				UpdateIsConnectedState();
 			}
 
 			if (result.Buffer == null || result.Buffer.Length <= 0)
@@ -113,7 +121,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 			string data = StringUtils.ToString(result.Buffer);
 			HostInfo hostInfo = new HostInfo(result.RemoteEndPoint.Address.ToString(),
-			                                 (ushort)result.RemoteEndPoint.Port);
+											 (ushort)result.RemoteEndPoint.Port);
 
 			PrintRx(hostInfo.ToString(), data);
 			Receive(data);
