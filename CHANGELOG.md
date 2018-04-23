@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+ - Adding an explicit BroadcastData JSON converter
  - Additional console commands for handling the BroadcastManager
 
 ### Changed

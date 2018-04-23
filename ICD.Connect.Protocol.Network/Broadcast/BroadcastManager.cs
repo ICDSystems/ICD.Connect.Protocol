@@ -194,7 +194,13 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			if (data == null)
 				return;
 
-			BroadcastData broadcastData = new BroadcastData(GetHostInfo(), data);
+			BroadcastData broadcastData =
+				new BroadcastData
+				{
+					Source = GetHostInfo()
+				};
+			broadcastData.SetData<object>(data);
+
 			string serial = broadcastData.Serialize();
 
 			// Loop over the ports for the different program slots
@@ -313,7 +319,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 			try
 			{
-				broadcastData = BroadcastData.Deserialize(args.Data);
+				broadcastData = JsonConvert.DeserializeObject<BroadcastData>(args.Data);
 			}
 			catch (Exception e)
 			{
@@ -330,7 +336,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			// Broadcast back to the place we got this advertisement from
 			AddBroadcastAddress(broadcastData.Source.Address);
 
-			Type type = Type.GetType(broadcastData.Type);
+			Type type = broadcastData.Type;
 			if (type != null && m_Broadcasters.ContainsKey(type))
 				m_Broadcasters[type].HandleIncomingBroadcast(broadcastData);
 		}

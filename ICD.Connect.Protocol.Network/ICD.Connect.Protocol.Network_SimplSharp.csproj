@@ -77,6 +77,7 @@
     <Compile Include="Broadcast\Broadcasters\RecurringBroadcaster.cs" />
     <Compile Include="Broadcast\BroadcastEventArgs.cs" />
     <Compile Include="Broadcast\BroadcastManager.cs" />
+    <Compile Include="Broadcast\Converters\BroadcastDataConverter.cs" />
     <Compile Include="Direct\AbstractMessage.cs" />
     <Compile Include="Direct\AbstractMessageHandler.cs" />
     <Compile Include="Direct\DirectMessageManager.cs" />
