@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		/// <param name="message"></param>
 		/// <returns>Returns an AbstractMessage as a reply, or null for no reply</returns>
-		protected abstract TReply HandleMessage(TMessage message);
+		public abstract TReply HandleMessage(TMessage message);
 
 		/// <summary>
 		/// Called to inform the message handler of a client disconnect.

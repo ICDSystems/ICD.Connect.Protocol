@@ -29,5 +29,12 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 	public interface IMessageHandler<TMessage, TReply> : IMessageHandler
 	{
+		/// <summary>
+		/// Interprets the incoming message. Returns a reply or null if there is no reply.
+		/// </summary>
+		/// <param name="message"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		TReply HandleMessage(TMessage message);
 	}
 }
