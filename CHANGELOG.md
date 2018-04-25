@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - Fixed appearances of broadcasters in console
- - Message managers can now be registers without knowing message type
+ - Message managers can now be registered without knowing message type
 
 ## [4.1.0] - 2018-04-23
 ### Added
