@@ -377,7 +377,12 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			return m_Broadcasters.Values.Cast<IConsoleNodeBase>();
+			IEnumerable<IConsoleNodeBase> broadcasters =
+				m_Broadcasters.OrderBy(kvp => kvp.Key.Name)
+				              .Select(kvp => kvp.Value)
+				              .OfType<IConsoleNodeBase>();
+
+			yield return ConsoleNodeGroup.IndexNodeMap("Broadcasters", "", broadcasters);
 		}
 
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
