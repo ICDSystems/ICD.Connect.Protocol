@@ -26,6 +26,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 		}
 
 		/// <summary>
+		/// Gets the message type for this handler;
+		/// </summary>
+		public Type MessageType { get { return typeof(TMessage); } }
+
+		/// <summary>
 		/// Interprets the incoming message. Returns a reply or null if there is no reply.
 		/// </summary>
 		/// <param name="message"></param>

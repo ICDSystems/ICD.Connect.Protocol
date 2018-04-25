@@ -104,12 +104,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <summary>
 		/// Adds the given message handler to the manager.
 		/// </summary>
-		/// <typeparam name="TMessage"></typeparam>
-		/// <typeparam name="TReply"></typeparam>
 		/// <param name="handler"></param>
-		public void RegisterMessageHandler<TMessage, TReply>(IMessageHandler<TMessage, TReply> handler)
-			where TMessage : IMessage
-			where TReply : IReply
+		public void RegisterMessageHandler(IMessageHandler handler)
 		{
 			if (handler == null)
 				throw new ArgumentNullException("handler");
@@ -118,10 +114,12 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			try
 			{
-				if (m_MessageHandlers.ContainsKey(typeof(TMessage)))
+				Type messageType = handler.MessageType;
+
+				if (m_MessageHandlers.ContainsKey(messageType))
 					throw new InvalidOperationException("Message handler already registered for type");
 
-				m_MessageHandlers[typeof(TMessage)] = handler;
+				m_MessageHandlers[messageType] = handler;
 				Subscribe(handler);
 			}
 			finally
