@@ -13,6 +13,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 		event ReplyCallback OnAsyncReply;
 
 		/// <summary>
+		/// Gets the message type for this handler;
+		/// </summary>
+		Type MessageType { get; }
+
+		/// <summary>
 		/// Interprets the incoming message. Returns a reply or null if there is no reply.
 		/// </summary>
 		/// <param name="message"></param>
