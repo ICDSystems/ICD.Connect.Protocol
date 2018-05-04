@@ -64,6 +64,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="reply"></param>
 		protected void RaiseReply(TReply reply)
 		{
+// ReSharper disable once CompareNonConstrainedGenericWithNull
 			if (reply == null)
 				throw new ArgumentNullException("reply");
 
