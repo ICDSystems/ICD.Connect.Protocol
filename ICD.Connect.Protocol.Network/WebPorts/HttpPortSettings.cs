@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
@@ -8,21 +7,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	/// <summary>
 	/// Settings for a HttpPort.
 	/// </summary>
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("HTTP", typeof(HttpPort))]
 	public sealed class HttpPortSettings : AbstractPortSettings
 	{
-		private const string FACTORY_NAME = "HTTP";
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(HttpPort); } }
-
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string USERNAME_ELEMENT = "Username";
 		private const string PASSWORD_ELEMENT = "Password";
@@ -31,8 +18,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		#region Properties
 
 		public string Address { get; set; }
+
 		public string Username { get; set; }
+
 		public string Password { get; set; }
+
 		public string Accept { get; set; }
 
 		#endregion

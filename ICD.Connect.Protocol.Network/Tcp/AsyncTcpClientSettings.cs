@@ -1,15 +1,12 @@
-using System;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("TCP", typeof(AsyncTcpClient))]
 	public sealed class AsyncTcpClientSettings : AbstractSerialPortSettings
 	{
-		private const string FACTORY_NAME = "TCP";
-
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string HOST_PORT_ELEMENT = "Port";
 		private const string BUFFER_SIZE_ELEMENT = "BufferSize";
@@ -18,18 +15,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(AsyncTcpClient); } }
-
 		public string Address { get; set; }
+
 		public ushort Port { get; set; }
+
 		public ushort BufferSize { get { return m_BufferSize; } set { m_BufferSize = value; } }
 
 		#endregion
@@ -55,14 +44,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			base.ParseXml(xml);
 
-			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			ushort port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
-			ushort bufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ??
-			                    AsyncTcpClient.DEFAULT_BUFFER_SIZE;
-
-			Address = address;
-			Port = port;
-			BufferSize = bufferSize;
+			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
+			BufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ??
+			             AsyncTcpClient.DEFAULT_BUFFER_SIZE;
 		}
 	}
 }

@@ -1,25 +1,12 @@
-using System;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Udp
 {
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("UDP", typeof(AsyncUdpClient))]
 	public sealed class AsyncUdpClientSettings : AbstractSerialPortSettings
 	{
-		private const string FACTORY_NAME = "UDP";
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(AsyncUdpClient); } }
-
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string HOST_PORT_ELEMENT = "Port";
 		private const string BUFFER_SIZE_ELEMENT = "BufferSize";
@@ -51,13 +38,10 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			base.ParseXml(xml);
 
-			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			ushort port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
-			ushort bufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ?? 0;
-
-			Address = address;
-			Port = port;
-			BufferSize = bufferSize;
+			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
+			BufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ??
+			             AsyncUdpClient.DEFAULT_BUFFER_SIZE;
 		}
 	}
 }

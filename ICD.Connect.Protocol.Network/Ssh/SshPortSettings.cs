@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
@@ -8,11 +7,9 @@ namespace ICD.Connect.Protocol.Network.Ssh
 	/// <summary>
 	/// Provides a temporary store for SSH port settings.
 	/// </summary>
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("SSH", typeof(SshPort))]
 	public sealed class SshPortSettings : AbstractSerialPortSettings
 	{
-		private const string FACTORY_NAME = "SSH";
-
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string HOST_PORT_ELEMENT = "Port";
 		private const string USERNAME_ELEMENT = "Username";
@@ -23,19 +20,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		#region Properties
 
 		public string Address { get; set; }
+
 		public string Username { get; set; }
+
 		public string Password { get; set; }
+
 		public ushort Port { get { return m_Port; } set { m_Port = value; } }
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(SshPort); } }
 
 		#endregion
 
@@ -63,15 +53,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		{
 			base.ParseXml(xml);
 
-			string address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			string username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
-			string password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
-			ushort? port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT);
-
-			Address = address;
-			Username = username;
-			Password = password;
-			Port = port ?? 0;
+			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
+			Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
+			Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
+			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? SshPort.DEFAULT_PORT;
 		}
 
 		#endregion
