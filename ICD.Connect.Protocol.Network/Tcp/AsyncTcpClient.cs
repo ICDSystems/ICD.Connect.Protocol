@@ -179,7 +179,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			settings.Address = Address;
 			settings.Port = Port;
-			settings.BufferSize = BufferSize;
 		}
 
 		/// <summary>
@@ -205,7 +204,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			Address = settings.Address;
 			Port = settings.Port;
-			BufferSize = settings.BufferSize;
 		}
 
 		#endregion

@@ -9,17 +9,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 	{
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string HOST_PORT_ELEMENT = "Port";
-		private const string BUFFER_SIZE_ELEMENT = "BufferSize";
-
-		private ushort m_BufferSize = AsyncTcpClient.DEFAULT_BUFFER_SIZE;
 
 		#region Properties
 
 		public string Address { get; set; }
 
 		public ushort Port { get; set; }
-
-		public ushort BufferSize { get { return m_BufferSize; } set { m_BufferSize = value; } }
 
 		#endregion
 
@@ -33,7 +28,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			writer.WriteElementString(ADDRESS_ELEMENT, Address);
 			writer.WriteElementString(HOST_PORT_ELEMENT, IcdXmlConvert.ToString(Port));
-			writer.WriteElementString(BUFFER_SIZE_ELEMENT, IcdXmlConvert.ToString(BufferSize));
 		}
 
 		/// <summary>
@@ -46,8 +40,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
 			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, HOST_PORT_ELEMENT) ?? 0;
-			BufferSize = XmlUtils.TryReadChildElementContentAsUShort(xml, BUFFER_SIZE_ELEMENT) ??
-			             AsyncTcpClient.DEFAULT_BUFFER_SIZE;
 		}
 	}
 }
