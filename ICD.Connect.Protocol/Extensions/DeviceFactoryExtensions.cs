@@ -1,6 +1,6 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Extensions
 {
