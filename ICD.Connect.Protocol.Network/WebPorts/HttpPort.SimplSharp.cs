@@ -16,11 +16,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		#region Properties
 
 		/// <summary>
-		/// The server address.
-		/// </summary>
-		public string Address { get; set; }
-
-		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
 		public string Accept

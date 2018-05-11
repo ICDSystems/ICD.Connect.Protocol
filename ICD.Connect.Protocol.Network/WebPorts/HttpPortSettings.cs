@@ -13,7 +13,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private const string ADDRESS_ELEMENT = "Address";
 		private const string USERNAME_ELEMENT = "Username";
 		private const string PASSWORD_ELEMENT = "Password";
-		private const string ACCEPT_ELEMENT = "Accept";
 
 		#region Properties
 
@@ -22,8 +21,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		public string Username { get; set; }
 
 		public string Password { get; set; }
-
-		public string Accept { get; set; }
 
 		#endregion
 
@@ -38,7 +35,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			writer.WriteElementString(ADDRESS_ELEMENT, Address);
 			writer.WriteElementString(USERNAME_ELEMENT, Username);
 			writer.WriteElementString(PASSWORD_ELEMENT, Password);
-			writer.WriteElementString(ACCEPT_ELEMENT, Accept);
 		}
 
 		/// <summary>
@@ -52,7 +48,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
-			Accept = XmlUtils.TryReadChildElementContentAsString(xml, ACCEPT_ELEMENT);
 		}
 	}
 }

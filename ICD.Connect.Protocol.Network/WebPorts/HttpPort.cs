@@ -22,6 +22,15 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 		private bool m_LastRequestSucceeded;
 
+		#region Properties
+
+		/// <summary>
+		/// The server address.
+		/// </summary>
+		public string Address { get; set; }
+
+		#endregion
+
 		#region Methods
 
 		/// <summary>
@@ -127,7 +136,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			base.CopySettingsFinal(settings);
 
 			settings.Address = Address;
-			settings.Accept = Accept;
 			settings.Password = Password;
 			settings.Username = Username;
 		}
@@ -139,7 +147,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ClearSettingsFinal();
 
-			Accept = DEFAULT_ACCEPT;
 			Address = null;
 			Password = null;
 			Username = null;
@@ -157,7 +164,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			Address = settings.Address;
 			Password = settings.Password;
 			Username = settings.Username;
-			Accept = settings.Accept ?? DEFAULT_ACCEPT;
 		}
 
 		#endregion
