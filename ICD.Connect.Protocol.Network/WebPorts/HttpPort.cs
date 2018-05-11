@@ -14,8 +14,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	/// </summary>
 	public sealed partial class HttpPort : AbstractPort<HttpPortSettings>, IWebPort
 	{
-		private const string DEFAULT_ACCEPT = "text/html";
-
 		private const string SOAP_ACCEPT = "application/xml";
 		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
 		private const string SOAP_ACTION_HEADER = "SOAPAction";
