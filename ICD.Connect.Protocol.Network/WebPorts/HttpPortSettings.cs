@@ -1,4 +1,5 @@
 ﻿using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
@@ -8,19 +9,49 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	/// Settings for a HttpPort.
 	/// </summary>
 	[KrangSettings("HTTP", typeof(HttpPort))]
-	public sealed class HttpPortSettings : AbstractPortSettings
+	public sealed class HttpPortSettings : AbstractPortSettings, IUriSettings
 	{
-		private const string ADDRESS_ELEMENT = "Address";
-		private const string USERNAME_ELEMENT = "Username";
-		private const string PASSWORD_ELEMENT = "Password";
-
 		#region Properties
 
-		public string Address { get; set; }
+		/// <summary>
+		/// Gets/sets the configurable username.
+		/// </summary>
+		public string UserName { get; set; }
 
-		public string Username { get; set; }
-
+		/// <summary>
+		/// Gets/sets the configurable password.
+		/// </summary>
 		public string Password { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable network address.
+		/// </summary>
+		public string NetworkAddress { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable network port.
+		/// </summary>
+		public ushort NetworkPort { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable URI scheme.
+		/// </summary>
+		public string UriScheme { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable URI path.
+		/// </summary>
+		public string UriPath { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable URI query.
+		/// </summary>
+		public string UriQuery { get; set; }
+
+		/// <summary>
+		/// Gets/sets the configurable URI fragment.
+		/// </summary>
+		public string UriFragment { get; set; }
 
 		#endregion
 
@@ -32,9 +63,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(ADDRESS_ELEMENT, Address);
-			writer.WriteElementString(USERNAME_ELEMENT, Username);
-			writer.WriteElementString(PASSWORD_ELEMENT, Password);
+			UriSettingsParsing.WriteElements(writer, this);
 		}
 
 		/// <summary>
@@ -45,9 +74,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ParseXml(xml);
 
-			Address = XmlUtils.TryReadChildElementContentAsString(xml, ADDRESS_ELEMENT);
-			Username = XmlUtils.TryReadChildElementContentAsString(xml, USERNAME_ELEMENT);
-			Password = XmlUtils.TryReadChildElementContentAsString(xml, PASSWORD_ELEMENT);
+			UriSettingsParsing.ParseXml(xml, this);
 		}
 	}
 }

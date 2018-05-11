@@ -332,10 +332,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Address = Address;
+			settings.NetworkAddress = Address;
 			settings.Password = Password;
-			settings.Port = Port;
-			settings.Username = Username;
+			settings.NetworkPort = Port;
+			settings.UserName = Username;
 		}
 
 		/// <summary>
@@ -360,10 +360,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.Address;
+			Address = settings.NetworkAddress;
 			Password = settings.Password;
-			Port = settings.Port;
-			Username = settings.Username;
+			Port = settings.NetworkPort;
+			Username = settings.UserName;
 		}
 
 		#endregion

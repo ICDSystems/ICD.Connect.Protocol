@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
@@ -133,9 +134,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Address = Address;
+			settings.SetUriFromAddress(Address);
 			settings.Password = Password;
-			settings.Username = Username;
+			settings.UserName = Username;
 		}
 
 		/// <summary>
@@ -159,9 +160,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.Address;
+			Address = settings.GetAddressFromUri();
 			Password = settings.Password;
-			Username = settings.Username;
+			Username = settings.UserName;
 		}
 
 		#endregion
