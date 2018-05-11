@@ -12,6 +12,6 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		string NetworkPort { get; set; }
+		ushort NetworkPort { get; set; }
 	}
 }
