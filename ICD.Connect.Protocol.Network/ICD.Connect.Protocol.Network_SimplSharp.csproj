@@ -90,8 +90,10 @@
     <Compile Include="RemoteProcedure\ClientSerialRpcController.cs" />
     <Compile Include="RemoteProcedure\Rpc.cs" />
     <Compile Include="RemoteProcedure\ServerSerialRpcController.cs" />
+    <Compile Include="Settings\UriSettingsParsing.cs" />
     <Compile Include="Settings\INetworkSettings.cs" />
     <Compile Include="Settings\IUriSettings.cs" />
+    <Compile Include="Settings\NetworkSettingsParsing.cs" />
     <Compile Include="Ssh\SshPort.cs" />
     <Compile Include="Ssh\SshPortSettings.cs" />
     <Compile Include="Tcp\AsyncTcpClient.cs" />
