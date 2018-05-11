@@ -335,7 +335,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			settings.NetworkAddress = Address;
 			settings.Password = Password;
 			settings.NetworkPort = Port;
-			settings.UserName = Username;
+			settings.Username = Username;
 		}
 
 		/// <summary>
@@ -363,7 +363,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			Address = settings.NetworkAddress;
 			Password = settings.Password;
 			Port = settings.NetworkPort;
-			Username = settings.UserName;
+			Username = settings.Username;
 		}
 
 		#endregion

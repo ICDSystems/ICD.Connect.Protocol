@@ -47,7 +47,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 				Port = extends.NetworkPort,
 				Query = extends.UriQuery,
 				Scheme = extends.UriScheme,
-				UserName = extends.UserName
+				UserName = extends.Username
 			};
 
 			return builder.ToString();
@@ -71,7 +71,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			extends.NetworkPort = (ushort)uri.Port;
 			extends.UriQuery = uri.Query;
 			extends.UriScheme = uri.Scheme;
-			extends.UserName = uri.GetUserName();
+			extends.Username = uri.GetUserName();
 		}
 	}
 }

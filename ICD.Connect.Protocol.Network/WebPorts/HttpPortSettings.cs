@@ -16,7 +16,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <summary>
 		/// Gets/sets the configurable username.
 		/// </summary>
-		public string UserName { get; set; }
+		public string Username { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable password.

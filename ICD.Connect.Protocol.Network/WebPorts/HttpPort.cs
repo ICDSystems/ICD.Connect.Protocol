@@ -136,7 +136,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			settings.SetUriFromAddress(Address);
 			settings.Password = Password;
-			settings.UserName = Username;
+			settings.Username = Username;
 		}
 
 		/// <summary>
@@ -162,7 +162,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			Address = settings.GetAddressFromUri();
 			Password = settings.Password;
-			Username = settings.UserName;
+			Username = settings.Username;
 		}
 
 		#endregion
