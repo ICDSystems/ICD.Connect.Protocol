@@ -1,28 +1,11 @@
-﻿using ICD.Connect.Settings;
-
-namespace ICD.Connect.Protocol.Network.Settings
+﻿namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface IUriSettings : ISettings
+	public interface IUriSettings : INetworkSettings
 	{
 		/// <summary>
 		/// Gets/sets the configurable URI scheme.
 		/// </summary>
 		string UriScheme { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable URI user info.
-		/// </summary>
-		string UriUserInfo { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable URI host.
-		/// </summary>
-		string UriHost { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable URI port.
-		/// </summary>
-		ushort UriPort { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable URI path.
