@@ -1,8 +1,6 @@
-﻿using ICD.Connect.Settings;
-
-namespace ICD.Connect.Protocol.Settings
+﻿namespace ICD.Connect.Protocol.Settings
 {
-	public interface IIrDriverSettings : ISettings
+	public interface IIrDriverProperties
 	{
 		/// <summary>
 		/// Gets/sets the configurable path to the IR driver.

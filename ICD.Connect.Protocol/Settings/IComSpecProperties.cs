@@ -1,9 +1,8 @@
 ﻿using ICD.Connect.Protocol.Ports.ComPort;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Settings
 {
-	public interface IComSpecSettings : ISettings
+	public interface IComSpecProperties
 	{
 		/// <summary>
 		/// Gets/sets the configurable baud rate.

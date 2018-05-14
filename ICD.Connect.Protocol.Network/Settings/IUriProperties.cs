@@ -4,7 +4,7 @@ using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface IUriSettings : INetworkSettings
+	public interface IUriProperties : INetworkProperties
 	{
 		/// <summary>
 		/// Gets/sets the configurable URI scheme.
@@ -27,14 +27,14 @@ namespace ICD.Connect.Protocol.Network.Settings
 		string UriFragment { get; set; }
 	}
 
-	public static class UriSettingsExtensions
+	public static class UriPropertiesExtensions
 	{
 		/// <summary>
 		/// Builds an address string from the available URI information.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static string GetAddressFromUri(this IUriSettings extends)
+		public static string GetAddressFromUri(this IUriProperties extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -58,7 +58,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <param name="address"></param>
-		public static void SetUriFromAddress(this IUriSettings extends, string address)
+		public static void SetUriFromAddress(this IUriProperties extends, string address)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");

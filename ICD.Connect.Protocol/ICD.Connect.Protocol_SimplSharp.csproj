@@ -97,10 +97,12 @@
     <Compile Include="SerialBuffers\BoundedSerialBuffer.cs" />
     <Compile Include="SerialBuffers\MultiDelimiterSerialBuffer.cs" />
     <Compile Include="SerialBuffers\XSigSerialBuffer.cs" />
-    <Compile Include="Settings\ComSpecSettingsParsing.cs" />
-    <Compile Include="Settings\IComSpecSettings.cs" />
-    <Compile Include="Settings\IIrDriverSettings.cs" />
-    <Compile Include="Settings\IrDriverSettingsParsing.cs" />
+    <Compile Include="Settings\AbstractComSpecProperties.cs" />
+    <Compile Include="Settings\ComSpecProperties.cs" />
+    <Compile Include="Settings\IComSpecProperties.cs" />
+    <Compile Include="Settings\IIrDriverProperties.cs" />
+    <Compile Include="Settings\AbstractIrDriverProperties.cs" />
+    <Compile Include="Settings\IrDriverProperties.cs" />
     <Compile Include="Utils\ComSpecUtils.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
     <Compile Include="Data\AbstractSerialData.cs" />

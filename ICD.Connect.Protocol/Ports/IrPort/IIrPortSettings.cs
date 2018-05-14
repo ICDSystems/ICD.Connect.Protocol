@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
-	public interface IIrPortSettings : IPortSettings, IIrDriverSettings
+	public interface IIrPortSettings : IPortSettings, IIrDriverProperties
 	{
 	}
 }

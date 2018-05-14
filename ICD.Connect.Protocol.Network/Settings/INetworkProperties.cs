@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface INetworkSettings : IUsernamePasswordSettings
+	public interface INetworkProperties : IUsernamePasswordProperties
 	{
 		/// <summary>
 		/// Gets/sets the configurable network address.

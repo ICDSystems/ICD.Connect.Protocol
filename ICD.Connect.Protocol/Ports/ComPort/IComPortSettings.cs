@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
-	public interface IComPortSettings : ISerialPortSettings, IComSpecSettings
+	public interface IComPortSettings : ISerialPortSettings, IComSpecProperties
 	{
 	}
 }
