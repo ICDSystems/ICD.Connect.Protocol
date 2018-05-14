@@ -16,7 +16,14 @@ namespace ICD.Connect.Protocol.Ports
 	public abstract class AbstractSerialPort<T> : AbstractPort<T>, ISerialPort
 		where T : ISerialPortSettings, new()
 	{
+		/// <summary>
+		/// Raised when data is received from the port.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
+
+		/// <summary>
+		/// Raised when the port connection status changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 
 		private bool m_IsConnected;
@@ -71,6 +78,9 @@ namespace ICD.Connect.Protocol.Ports
 			return GetIsConnectedState();
 		}
 
+		/// <summary>
+		/// Queries the connection state of the port and updates the IsConnected property.
+		/// </summary>
 		protected void UpdateIsConnectedState()
 		{
 			IsConnected = GetIsConnectedState();
@@ -97,6 +107,7 @@ namespace ICD.Connect.Protocol.Ports
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
+
 			if (IsDisposed)
 				throw new ObjectDisposedException(GetType().Name, string.Format("{0} is disposed", this));
 
@@ -120,13 +131,13 @@ namespace ICD.Connect.Protocol.Ports
 			{
 				if (!IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - Port is not connected. Attempting to reconnect.", this);
+					Log(eSeverity.Notice, "Port is not connected. Attempting to reconnect.");
 					Connect();
 				}
 
 				if (!IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} - Port is not connected. Reconnection failed.", this);
+					Log(eSeverity.Error, "Port is not connected. Reconnection failed.");
 					return false;
 				}
 

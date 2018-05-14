@@ -8,9 +8,19 @@ namespace ICD.Connect.Protocol.Ports
 	/// </summary>
 	public interface ISerialPort : IPort
 	{
+		/// <summary>
+		/// Raised when data is received from the port.
+		/// </summary>
 		event EventHandler<StringEventArgs> OnSerialDataReceived;
+
+		/// <summary>
+		/// Raised when the port connection status changes.
+		/// </summary>
 		event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 
+		/// <summary>
+		/// Gets the current connection status of the port.
+		/// </summary>
 		bool IsConnected { get; }
 
 		/// <summary>
@@ -23,6 +33,11 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		void Disconnect();
 
+		/// <summary>
+		/// Sends the data to the port.
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns></returns>
 		bool Send(string data);
 
 		void Receive(string data);
