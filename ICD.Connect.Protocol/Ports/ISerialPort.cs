@@ -39,5 +39,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		/// <returns></returns>
 		bool Send(string data);
+
+		void Receive(string data);
 	}
 }

@@ -153,7 +153,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// Raises the OnSerialDataReceived event.
 		/// </summary>
 		/// <param name="data"></param>
-		protected void Receive(string data)
+		public virtual void Receive(string data)
 		{
 			try
 			{
