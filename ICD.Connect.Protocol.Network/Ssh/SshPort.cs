@@ -333,9 +333,9 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			base.CopySettingsFinal(settings);
 
 			settings.NetworkAddress = Address;
-			settings.Password = Password;
+			settings.NetworkPassword = Password;
 			settings.NetworkPort = Port;
-			settings.Username = Username;
+			settings.NetworkUsername = Username;
 		}
 
 		/// <summary>
@@ -361,9 +361,9 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			base.ApplySettingsFinal(settings, factory);
 
 			Address = settings.NetworkAddress;
-			Password = settings.Password;
+			Password = settings.NetworkPassword;
 			Port = settings.NetworkPort;
-			Username = settings.Username;
+			Username = settings.NetworkUsername;
 		}
 
 		#endregion

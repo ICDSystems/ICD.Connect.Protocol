@@ -5,8 +5,10 @@ namespace ICD.Connect.Protocol.Settings
 {
 	public abstract class AbstractIrDriverProperties : IIrDriverProperties
 	{
-		public const ushort DEFAULT_PULSE_TIME = 100;
-		public const ushort DEFAULT_BETWEEN_TIME = 750;
+		private const ushort DEFAULT_PULSE_TIME = 100;
+		private const ushort DEFAULT_BETWEEN_TIME = 750;
+
+		private const string ELEMENT = "IR";
 
 		private const string DRIVER_ELEMENT = "Driver";
 		private const string PULSETIME_ELEMENT = "PulseTime";
@@ -36,6 +38,17 @@ namespace ICD.Connect.Protocol.Settings
 		/// </summary>
 		protected AbstractIrDriverProperties()
 		{
+			Clear();
+		}
+
+		#region Properties
+
+		/// <summary>
+		/// Clears the configured properties.
+		/// </summary>
+		public void Clear()
+		{
+			IrDriverPath = null;
 			IrPulseTime = DEFAULT_PULSE_TIME;
 			IrBetweenTime = DEFAULT_BETWEEN_TIME;
 		}
@@ -49,9 +62,13 @@ namespace ICD.Connect.Protocol.Settings
 			if (writer == null)
 				throw new ArgumentNullException("writer");
 
-			writer.WriteElementString(DRIVER_ELEMENT, IrDriverPath);
-			writer.WriteElementString(PULSETIME_ELEMENT, IcdXmlConvert.ToString(IrPulseTime));
-			writer.WriteElementString(BETWEENTIME_ELEMENT, IcdXmlConvert.ToString(IrBetweenTime));
+			writer.WriteStartElement(ELEMENT);
+			{
+				writer.WriteElementString(DRIVER_ELEMENT, IrDriverPath);
+				writer.WriteElementString(PULSETIME_ELEMENT, IcdXmlConvert.ToString(IrPulseTime));
+				writer.WriteElementString(BETWEENTIME_ELEMENT, IcdXmlConvert.ToString(IrBetweenTime));
+			}
+			writer.WriteEndElement();
 		}
 
 		/// <summary>
@@ -60,10 +77,18 @@ namespace ICD.Connect.Protocol.Settings
 		/// <param name="xml"></param>
 		public void ParseXml(string xml)
 		{
-			IrDriverPath = XmlUtils.TryReadChildElementContentAsString(xml, DRIVER_ELEMENT);
-			IrPulseTime = XmlUtils.TryReadChildElementContentAsUShort(xml, PULSETIME_ELEMENT) ?? DEFAULT_PULSE_TIME;
-			IrBetweenTime = XmlUtils.TryReadChildElementContentAsUShort(xml, BETWEENTIME_ELEMENT) ??
+			Clear();
+
+			string ir;
+			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out ir))
+				return;
+
+			IrDriverPath = XmlUtils.TryReadChildElementContentAsString(ir, DRIVER_ELEMENT);
+			IrPulseTime = XmlUtils.TryReadChildElementContentAsUShort(ir, PULSETIME_ELEMENT) ?? DEFAULT_PULSE_TIME;
+			IrBetweenTime = XmlUtils.TryReadChildElementContentAsUShort(ir, BETWEENTIME_ELEMENT) ??
 			                DEFAULT_BETWEEN_TIME;
 		}
+
+		#endregion
 	}
 }

@@ -18,12 +18,20 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <summary>
 		/// Gets/sets the configurable username.
 		/// </summary>
-		public string Username { get { return m_NetworkProperties.Username; } set { m_NetworkProperties.Username = value; } }
+		public string NetworkUsername
+		{
+			get { return m_NetworkProperties.NetworkUsername; }
+			set { m_NetworkProperties.NetworkUsername = value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the configurable password.
 		/// </summary>
-		public string Password { get { return m_NetworkProperties.Password; } set { m_NetworkProperties.Password = value; } }
+		public string NetworkPassword
+		{
+			get { return m_NetworkProperties.NetworkPassword; }
+			set { m_NetworkProperties.NetworkPassword = value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the configurable network address.

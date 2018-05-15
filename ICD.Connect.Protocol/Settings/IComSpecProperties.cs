@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Protocol.Ports.ComPort;
+﻿using System;
+using ICD.Connect.Protocol.Ports.ComPort;
 
 namespace ICD.Connect.Protocol.Settings
 {
@@ -43,5 +44,31 @@ namespace ICD.Connect.Protocol.Settings
 		/// Gets/sets the configurable report CTS changes state.
 		/// </summary>
 		bool ComSpecReportCtsChanges { get; set; }
+	}
+
+	public static class ComSpecPropertiesExtensions
+	{
+		/// <summary>
+		/// Copies the configured properties from the given ComSpec Properties instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		public static void Copy(this IComSpecProperties extends, IComSpecProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			extends.ComSpecBaudRate = other.ComSpecBaudRate;
+			extends.ComSpecNumberOfDataBits = other.ComSpecNumberOfDataBits;
+			extends.ComSpecParityType = other.ComSpecParityType;
+			extends.ComSpecNumberOfStopBits = other.ComSpecNumberOfStopBits;
+			extends.ComSpecProtocolType = other.ComSpecProtocolType;
+			extends.ComSpecHardwareHandShake = other.ComSpecHardwareHandShake;
+			extends.ComSpecSoftwareHandshake = other.ComSpecSoftwareHandshake;
+			extends.ComSpecReportCtsChanges = other.ComSpecReportCtsChanges;
+		}
 	}
 }

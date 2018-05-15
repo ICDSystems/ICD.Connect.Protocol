@@ -92,6 +92,8 @@
     <Compile Include="RemoteProcedure\ServerSerialRpcController.cs" />
     <Compile Include="Settings\AbstractNetworkProperties.cs" />
     <Compile Include="Settings\AbstractUriProperties.cs" />
+    <Compile Include="Settings\INetworkSettings.cs" />
+    <Compile Include="Settings\IUriSettings.cs" />
     <Compile Include="Settings\UriProperties.cs" />
     <Compile Include="Settings\INetworkProperties.cs" />
     <Compile Include="Settings\IUriProperties.cs" />
