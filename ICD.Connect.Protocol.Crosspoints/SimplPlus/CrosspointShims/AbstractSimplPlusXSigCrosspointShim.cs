@@ -194,7 +194,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 			Manager = system.GetOrCreateControlCrosspointManager();
 
-			Crosspoint = new ControlCrosspoint(CrosspointId, CrosspointName);
+			Crosspoint = CreateCrosspoint(CrosspointId, CrosspointName);
 
 			Manager.RegisterCrosspoint(Crosspoint);
 
@@ -277,6 +277,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected abstract void RegisterCrosspoint();
 		protected abstract void UnregisterCrosspoint();
+		protected abstract ICrosspoint CreateCrosspoint(int id, string name);
 
 		protected void CrosspointOnSendOutputData(ICrosspoint sender, CrosspointData data)
 		{

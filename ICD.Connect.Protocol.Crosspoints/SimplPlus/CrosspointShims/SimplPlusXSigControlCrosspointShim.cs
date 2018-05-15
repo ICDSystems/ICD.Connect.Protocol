@@ -129,6 +129,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 				crosspointChangedCallback();
 		}
 
+		protected override ICrosspoint CreateCrosspoint(int id, string name)
+		{
+			return new ControlCrosspoint(CrosspointId, CrosspointName);
+		}
+
 		#endregion
 	}
 }

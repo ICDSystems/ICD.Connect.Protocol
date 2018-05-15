@@ -116,6 +116,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 				crosspointChangedCallback();
 		}
 
+		protected override ICrosspoint CreateCrosspoint(int id, string name)
+		{
+			return new EquipmentCrosspoint(id, name);
+		}
+
 		private void CrosspointOnControlCrosspointCountChanged(object sender, IntEventArgs args)
 		{
 			SPlusStatusUpdateCallback callback = CrosspointStatusCallback;
