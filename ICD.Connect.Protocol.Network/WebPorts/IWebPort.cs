@@ -1,4 +1,5 @@
-﻿using ICD.Common.Properties;
+﻿using System.Text;
+using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 
@@ -44,6 +45,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		[PublicAPI]
 		bool Post(string localUrl, byte[] data, out string response);
+
+		/// <summary>
+		/// Sends a POST request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="data"></param>
+		/// <param name="encoding"></param>
+		/// <param name="response"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		bool Post(string localUrl, string data, Encoding encoding, out string response);
 
 		/// <summary>
 		/// Sends a SOAP request to the server.
