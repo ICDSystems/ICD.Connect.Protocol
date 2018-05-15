@@ -15,9 +15,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 	/// Crosspoint managers are responsible for a collection of child crosspoints.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public abstract class AbstractCrosspointManager<T> : IDisposable, ICrosspointManager, IConsoleNode
+	public abstract class AbstractCrosspointManager<T> : ICrosspointManager<T>
 		where T : class, ICrosspoint
 	{
+		#region Events
+
 		/// <summary>
 		/// Raised when a crosspoint is registered with the manager.
 		/// </summary>
@@ -28,13 +30,18 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		public event CrosspointManagerCrosspointCallback OnCrosspointUnregistered;
 
+		#endregion
+
+		#region Private Members
+
 		private readonly Dictionary<int, T> m_Crosspoints;
 		private readonly SafeCriticalSection m_CrosspointsSection;
 		private readonly RemoteCrosspointTracker m_RemoteCrosspoints;
-
 		private readonly int m_SystemId;
 
-		#region Properties
+		#endregion
+
+		#region Public Properties
 
 		/// <summary>
 		/// When enabled the crosspoint manager will print timing information for messages.
@@ -78,8 +85,6 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			m_SystemId = systemId;
 		}
 
-		#region Methods
-
 		/// <summary>
 		/// Release resources.
 		/// </summary>
@@ -92,6 +97,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			ClearCrosspoints();
 		}
+
+		#region Public Methods
 
 		/// <summary>
 		/// Unregisters all of the registered crosspoints.
@@ -122,6 +129,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		public IEnumerable<T> GetCrosspoints()
 		{
 			return m_CrosspointsSection.Execute(() => m_Crosspoints.OrderValuesByKey().ToArray());
+		}
+		IEnumerable<ICrosspoint> ICrosspointManager.GetCrosspoints()
+		{
+			return GetCrosspoints().Cast<ICrosspoint>();
 		}
 
 		/// <summary>
@@ -198,6 +209,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			if (handler != null)
 				handler(this, crosspoint);
 		}
+		void ICrosspointManager.RegisterCrosspoint(ICrosspoint crosspoint)
+		{
+			RegisterCrosspoint((T)crosspoint);
+		}
 
 		/// <summary>
 		/// Removes the crosspoint from the manager.
@@ -227,6 +242,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			if (handler != null)
 				handler(this, crosspoint);
 		}
+		void ICrosspointManager.UnregisterCrosspoint(ICrosspoint crosspoint)
+		{
+			UnregisterCrosspoint((T)crosspoint);
+		}
 
 		/// <summary>
 		/// Gets the address of the crosspoint manager.
@@ -242,14 +261,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		#endregion
 
-		/// <summary>
-		/// Gets the available crosspoints.
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<ICrosspoint> ICrosspointManager.GetCrosspoints()
-		{
-			return GetCrosspoints().Cast<ICrosspoint>();
-		}
+		
 
 		#region Crosspoint Callbacks
 

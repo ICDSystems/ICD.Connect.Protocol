@@ -1,5 +1,4 @@
-﻿#if SIMPLSHARP
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -7,27 +6,25 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
-using ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointWrappers;
+using ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
-	public sealed class SimplPlusCrosspointWrapperManager : IConsoleNode
+	public sealed class SimplPlusCrosspointShimManager : IConsoleNode
 	{
-		private readonly List<ISimplPlusCrosspointWrapper> m_CrosspointWrappers;
+		private readonly List<ISimplPlusCrosspointShim> m_CrosspointShims;
 
-		private readonly SafeCriticalSection m_CrosspointWrapperssCriticalSection;
+		private readonly SafeCriticalSection m_CrosspointShimsCriticalSection;
 
-		//private Dictionary<int, > 
-
-		public void RegisterSPlusCrosspointWrapper(ISimplPlusCrosspointWrapper crosspointWrapper)
+		public void RegisterSPlusCrosspointShim(ISimplPlusCrosspointShim crosspointShim)
 		{
-			m_CrosspointWrapperssCriticalSection.Execute(() => m_CrosspointWrappers.Add(crosspointWrapper));
+			m_CrosspointShimsCriticalSection.Execute(() => m_CrosspointShims.Add(crosspointShim));
 		}
 
-		internal SimplPlusCrosspointWrapperManager()
+		internal SimplPlusCrosspointShimManager()
 		{
-			m_CrosspointWrappers = new List<ISimplPlusCrosspointWrapper>();
-			m_CrosspointWrapperssCriticalSection = new SafeCriticalSection();
+			m_CrosspointShims = new List<ISimplPlusCrosspointShim>();
+			m_CrosspointShimsCriticalSection = new SafeCriticalSection();
 		}
 
 		public void RegisterXp3(Xp3 xp3)
@@ -127,7 +124,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		#region Console
 
 		public string ConsoleName { get { return "Xp3SimplPlus"; } }
-		public string ConsoleHelp { get { return "The SimplPlus Wrappers around XP3 Crosspoints"; } }
+		public string ConsoleHelp { get { return "The SimplPlus Shims around XP3 Crosspoints"; } }
 
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
@@ -136,28 +133,28 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
-			addRow("Wrapper Count", m_CrosspointWrappers.Count);
+			addRow("Shim Count", m_CrosspointShims.Count);
 		}
 
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			yield return new ConsoleCommand("Print", "Prints the list of crosspoint wrappers/s", () => PrintWrappers());
+			yield return new ConsoleCommand("Print", "Prints the list of crosspoint shims", () => PrintShims());
 			yield return
-				new GenericConsoleCommand<int>("GetInfo", "Gets info about the specified wrapper", index => PrintWrapper(index));
+				new GenericConsoleCommand<int>("GetInfo", "Gets info about the specified shim", index => PrintShim(index));
 		}
 
 		/// <summary>
 		/// Prints the table of active connections to the console.
 		/// </summary>
-		private void PrintWrappers()
+		private void PrintShims()
 		{
 			TableBuilder builder = new TableBuilder("Index", "Simpl Instance", "CrosspointType", "CrosspointName", "CrosspointID");
 
-			m_CrosspointWrapperssCriticalSection.Enter();
+			m_CrosspointShimsCriticalSection.Enter();
 
 			try
 			{
-				m_CrosspointWrappers.ForEach(
+				m_CrosspointShims.ForEach(
 				                             (item, index) =>
 				                             builder.AddRow(index, item.CrosspointSymbolInstanceName,
 				                                            item.Crosspoint != null ? item.Crosspoint.GetType().ToString() : "",
@@ -166,30 +163,28 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			}
 			finally
 			{
-				m_CrosspointWrapperssCriticalSection.Leave();
+				m_CrosspointShimsCriticalSection.Leave();
 			}
 
 			IcdConsole.ConsoleCommandResponseLine(builder.ToString());
 		}
 
-		private void PrintWrapper(int index)
+		private void PrintShim(int index)
 		{
-			m_CrosspointWrapperssCriticalSection.Enter();
+			m_CrosspointShimsCriticalSection.Enter();
 
 			try
 			{
-				IcdConsole.ConsoleCommandResponseLine(m_CrosspointWrappers.Count > index
-					                                      ? m_CrosspointWrappers[index].GetWrapperInfo()
+				IcdConsole.ConsoleCommandResponseLine(m_CrosspointShims.Count > index
+					                                      ? m_CrosspointShims[index].GetShimInfo()
 					                                      : "Invalid Index");
 			}
 			finally
 			{
-				m_CrosspointWrapperssCriticalSection.Leave();
+				m_CrosspointShimsCriticalSection.Leave();
 			}
 		}
 
 		#endregion
 	}
 }
-
-#endif
