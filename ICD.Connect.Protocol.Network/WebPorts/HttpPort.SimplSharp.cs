@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Network.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
@@ -25,32 +26,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			{
 				m_HttpClient.Accept = value;
 				m_HttpsClient.Accept = value;
-			}
-		}
-
-		/// <summary>
-		/// Username for the server.
-		/// </summary>
-		public string Username
-		{
-			get { return m_HttpClient.UserName; }
-			set
-			{
-				m_HttpClient.UserName = value;
-				m_HttpsClient.UserName = value;
-			}
-		}
-
-		/// <summary>
-		/// Password for the server.
-		/// </summary>
-		public string Password
-		{
-			get { return m_HttpClient.Password; }
-			set
-			{
-				m_HttpClient.Password = value;
-				m_HttpsClient.Password = value;
 			}
 		}
 
@@ -133,7 +108,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				string url = GetRequestUrl(localUrl);
 				PrintTx(url);
 
-				if (IsHttpsUrl(url))
+				if (UseHttps())
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
@@ -187,7 +162,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				string url = GetRequestUrl(localUrl);
 				PrintTx(url);
 
-				if (IsHttpsUrl(url))
+				if (UseHttps())
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
@@ -249,12 +224,15 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				if (IsHttpsUrl(Address))
+				string url = m_UriProperties.GetAddressFromUri();
+				UrlParser urlParser = new UrlParser(url);
+
+				if (UseHttps())
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
 						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
-						Url = new UrlParser(Address),
+						Url = urlParser,
 						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
 					};
@@ -267,7 +245,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					HttpClientRequest request = new HttpClientRequest
 					{
 						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post,
-						Url = new UrlParser(Address),
+						Url = urlParser,
 						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
 					};
@@ -289,16 +267,12 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		#endregion
 
 		/// <summary>
-		/// Returns true if the given address is a https url.
+		/// Returns true if the configured URI scheme is https.
 		/// </summary>
-		/// <param name="url"></param>
 		/// <returns></returns>
-		private static bool IsHttpsUrl(string url)
+		private bool UseHttps()
 		{
-			if (url == null)
-				throw new ArgumentNullException("url");
-
-			return url.ToLower().StartsWith("https://");
+			return string.Equals(m_UriProperties.UriScheme, "https", StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>

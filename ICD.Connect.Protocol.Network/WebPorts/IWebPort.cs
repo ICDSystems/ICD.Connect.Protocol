@@ -1,4 +1,5 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
@@ -9,28 +10,16 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 	public interface IWebPort : IPort
 	{
 		/// <summary>
-		/// The server address.
+		/// Gets the URI configuration for the web port.
 		/// </summary>
 		[PublicAPI]
-		string Address { get; set; }
+		UriProperties UriProperties { get; }
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
 		[PublicAPI]
 		string Accept { get; set; }
-
-		/// <summary>
-		/// Username for the server.
-		/// </summary>
-		[PublicAPI]
-		string Username { get; set; }
-
-		/// <summary>
-		/// Password for the server.
-		/// </summary>
-		[PublicAPI]
-		string Password { get; set; }
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.

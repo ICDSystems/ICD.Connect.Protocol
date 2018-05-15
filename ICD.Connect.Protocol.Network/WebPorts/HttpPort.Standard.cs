@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Network.Settings;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
 {
@@ -15,9 +16,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private readonly HttpClient m_Client;
 		private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
-
-		private string m_Username;
-		private string m_Password;
 
 		#region Properties
 
@@ -36,40 +34,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				m_Client.DefaultRequestHeaders.Accept.Clear();
 				if (value != null)
 					m_Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(value));
-			}
-		}
-
-		/// <summary>
-		/// Username for the server.
-		/// </summary>
-		public string Username
-		{
-			get { return m_Username; }
-			set
-			{
-				if (value == m_Username)
-					return;
-
-				m_Username = value;
-
-				SetAuth(m_Username, m_Password);
-			}
-		}
-
-		/// <summary>
-		/// Password for the server.
-		/// </summary>
-		public string Password
-		{
-			get { return m_Password; }
-			set
-			{
-				if (value == m_Password)
-					return;
-
-				m_Password = value;
-
-				SetAuth(m_Username, m_Password);
 			}
 		}
 
@@ -140,7 +104,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
+				Uri uri = new Uri(m_UriProperties.GetUri(), localUrl);
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
@@ -171,7 +135,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
+				Uri uri = new Uri(m_UriProperties.GetUri(), localUrl);
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri)
@@ -210,7 +174,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, GetAddressWithProtocol())
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, m_UriProperties.GetUri())
 				{
 					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
 				};
@@ -278,18 +242,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			{
 				m_ClientBusySection.Leave();
 			}
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		private void SetAuth(string username, string password)
-		{
-			string auth = string.Format("{0}:{1}", username, password);
-			byte[] byteArray = Encoding.ASCII.GetBytes(auth);
-			m_Client.DefaultRequestHeaders.Authorization =
-				new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 		}
 
 		#endregion

@@ -19,14 +19,16 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
 		private const string SOAP_ACTION_HEADER = "SOAPAction";
 
+		private readonly UriProperties m_UriProperties = new UriProperties();
+
 		private bool m_LastRequestSucceeded;
 
 		#region Properties
 
 		/// <summary>
-		/// The server address.
+		/// Gets the configured URI properties.
 		/// </summary>
-		public string Address { get; set; }
+		public UriProperties UriProperties { get { return m_UriProperties; } }
 
 		#endregion
 
@@ -75,32 +77,19 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		private string GetRequestUrl(string localAddress)
 		{
-			string output = GetAddressWithProtocol();
+			IcdUriBuilder builder = new IcdUriBuilder
+			{
+				Fragment = m_UriProperties.UriFragment,
+				Host = m_UriProperties.UriHost,
+				Password = m_UriProperties.UriPassword,
+				Path = localAddress,
+				Port = m_UriProperties.UriPort,
+				Query = m_UriProperties.UriQuery,
+				Scheme = m_UriProperties.UriScheme,
+				UserName = m_UriProperties.UriUsername
+			};
 
-			if (string.IsNullOrEmpty(localAddress))
-				return output;
-
-			// Avoid doubling up the trailing slash
-			if (localAddress.StartsWith("/"))
-				localAddress = localAddress.Substring(1);
-
-			// Append the local address to the base address
-			return string.Format("{0}{1}", output, localAddress);
-		}
-
-		private string GetAddressWithProtocol()
-		{
-			string output = Address;
-
-			// Ensure the address starts with a protocol
-			if (!output.Contains("://"))
-				output = string.Format("http://{0}", output);
-
-			// Ensure the address ends with a trailing slash
-			if (!output.EndsWith("/"))
-				output = string.Format("{0}/", output);
-
-			return output;
+			return builder.ToString();
 		}
 
 		/// <summary>
@@ -134,9 +123,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.SetUriFromAddress(Address);
-			settings.Password = Password;
-			settings.Username = Username;
+			settings.Copy(m_UriProperties);
 		}
 
 		/// <summary>
@@ -146,9 +133,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ClearSettingsFinal();
 
-			Address = null;
-			Password = null;
-			Username = null;
+			m_UriProperties.Clear();
 		}
 
 		/// <summary>
@@ -160,9 +145,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.GetAddressFromUri();
-			Password = settings.Password;
-			Username = settings.Username;
+			m_UriProperties.Copy(settings.UriProperties);
 		}
 
 		#endregion
@@ -177,10 +160,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Address", Address);
+			addRow("URI", m_UriProperties.GetAddressFromUri());
 			addRow("Accept", Accept);
-			addRow("Username", Username);
-			addRow("Password", StringUtils.PasswordFormat(Password));
 			addRow("Busy", Busy);
 		}
 
@@ -193,11 +174,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<string>("SetAddress", "Sets the address for requests", s => Address = s);
 			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
-			yield return new GenericConsoleCommand<string>("SetUsername", "Sets the username for requests", s => Username = s);
-			yield return new GenericConsoleCommand<string>("SetPassword", "Sets the password for requests", s => Password = s);
-
 			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
 		}
 
