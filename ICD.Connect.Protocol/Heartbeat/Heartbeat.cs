@@ -130,7 +130,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 			if (instance == null)
 				return;
 
-			instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
+			instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -142,7 +142,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 			if (instance == null)
 				return;
 
-			instance.OnConnectedStateChanged += InstanceOnConnectedStateChanged;
+			instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
 		}
 
 		private void InstanceOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)

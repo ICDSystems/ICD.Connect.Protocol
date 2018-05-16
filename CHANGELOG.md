@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.0.1] - 2018-05-09
+### Changed
+ - Fixed subscription bug in Heartbeat
+
 ## [5.0.0] - 2018-04-25
 ### Changed
  - Fixed appearances of broadcasters in console
