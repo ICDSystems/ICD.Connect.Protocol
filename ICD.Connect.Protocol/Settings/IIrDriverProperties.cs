@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Protocol.Settings
 {
@@ -7,6 +8,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Gets/sets the configurable path to the IR driver.
 		/// </summary>
+		[PathSettingsProperty("IRDrivers", ".ir")]
 		string IrDriverPath { get; set; }
 
 		/// <summary>
