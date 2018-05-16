@@ -13,12 +13,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	{
 		private readonly UriProperties m_UriProperties;
 
-		#region Properties
-
-		public UriProperties UriProperties { get; set; }
-
-		#endregion
-
 		#region URI
 
 		/// <summary>

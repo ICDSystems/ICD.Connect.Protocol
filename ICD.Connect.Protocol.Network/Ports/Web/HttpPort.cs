@@ -145,7 +145,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			m_UriProperties.Copy(settings.UriProperties);
+			m_UriProperties.Copy(settings);
 		}
 
 		#endregion
