@@ -23,7 +23,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 	/// <summary>
 	/// Port for communication with an SSH device.
 	/// </summary>
-	public sealed class SshPort : AbstractSerialPort<SshPortSettings>
+	public sealed class SshPort : AbstractNetworkPort<SshPortSettings>
 	{
 		public const ushort DEFAULT_PORT = 22;
 
@@ -51,13 +51,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// Gets/sets the port.
 		/// </summary>
 		[PublicAPI]
-		public ushort Port { get; set; }
+		public override ushort Port { get; set; }
 
 		/// <summary>
 		/// Gets/sets the address.
 		/// </summary>
 		[PublicAPI]
-		public string Address { get; set; }
+		public override string Address { get; set; }
 
 		#endregion
 
@@ -443,7 +443,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="args"></param>
 		private void SshStreamOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.AddEntry(eSeverity.Error, args.Exception, "{0} SSH Stream Error - {1}", this, args.Exception.Message);
+			Log(eSeverity.Error, args.Exception, "SSH Stream Error - {0}", args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 

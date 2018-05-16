@@ -143,9 +143,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Address = Address;
-			settings.Port = Port;
-			settings.BufferSize = BufferSize;
+			settings.NetworkAddress = Address;
+			settings.NetworkPort = Port;
 		}
 
 		/// <summary>
@@ -169,9 +168,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.Address;
-			Port = settings.Port;
-			BufferSize = settings.BufferSize;
+			Address = settings.NetworkAddress;
+			Port = settings.NetworkPort;
 		}
 
 		#endregion

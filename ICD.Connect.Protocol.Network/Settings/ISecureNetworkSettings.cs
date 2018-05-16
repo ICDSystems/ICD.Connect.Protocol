@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface IUriSettings : ISettings, IUriProperties
+	public interface ISecureNetworkSettings : ISettings, ISecureNetworkProperties
 	{
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Settings;
-using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Ssh
@@ -9,25 +9,25 @@ namespace ICD.Connect.Protocol.Network.Ssh
 	/// Provides a temporary store for SSH port settings.
 	/// </summary>
 	[KrangSettings("SSH", typeof(SshPort))]
-	public sealed class SshPortSettings : AbstractSerialPortSettings, INetworkProperties
+	public sealed class SshPortSettings : AbstractSecureNetworkPortSettings
 	{
-		private readonly NetworkProperties m_NetworkProperties;
+		private readonly SecureNetworkProperties m_NetworkProperties;
 
 		#region Properties
 
 		/// <summary>
-		/// Gets/sets the configurable username.
+		/// Gets/sets the configurable network username.
 		/// </summary>
-		public string NetworkUsername
+		public override string NetworkUsername
 		{
 			get { return m_NetworkProperties.NetworkUsername; }
 			set { m_NetworkProperties.NetworkUsername = value; }
 		}
 
 		/// <summary>
-		/// Gets/sets the configurable password.
+		/// Gets/sets the configurable network password.
 		/// </summary>
-		public string NetworkPassword
+		public override string NetworkPassword
 		{
 			get { return m_NetworkProperties.NetworkPassword; }
 			set { m_NetworkProperties.NetworkPassword = value; }
@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <summary>
 		/// Gets/sets the configurable network address.
 		/// </summary>
-		public string NetworkAddress
+		public override string NetworkAddress
 		{
 			get { return m_NetworkProperties.NetworkAddress; }
 			set { m_NetworkProperties.NetworkAddress = value; }
@@ -45,7 +45,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		public ushort NetworkPort
+		public override ushort NetworkPort
 		{
 			get { return m_NetworkProperties.NetworkPort; }
 			set { m_NetworkProperties.NetworkPort = value; }
@@ -58,24 +58,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		public SshPortSettings()
 		{
-			m_NetworkProperties = new NetworkProperties
+			m_NetworkProperties = new SecureNetworkProperties
 			{
 				NetworkPort = SshPort.DEFAULT_PORT
 			};
 		}
 
-		#region Method
-
-		/// <summary>
-		/// Writes property elements to xml.
-		/// </summary>
-		/// <param name="writer"></param>
-		protected override void WriteElements(IcdXmlTextWriter writer)
-		{
-			base.WriteElements(writer);
-
-			m_NetworkProperties.WriteElements(writer);
-		}
+		#region Methods
 
 		/// <summary>
 		/// Updates the settings from xml.
@@ -85,9 +74,29 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		{
 			base.ParseXml(xml);
 
-			m_NetworkProperties.ParseXml(xml);
-
 			NetworkPort = NetworkPort == 0 ? SshPort.DEFAULT_PORT : NetworkPort;
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Override to serialize the network configuration to XML.
+		/// </summary>
+		/// <param name="writer"></param>
+		protected override void WriteNetworkElements(IcdXmlTextWriter writer)
+		{
+			m_NetworkProperties.WriteElements(writer);
+		}
+
+		/// <summary>
+		/// Override to deserialize the network configuration from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		protected override void ParseNetworkElements(string xml)
+		{
+			m_NetworkProperties.ParseXml(xml);
 		}
 
 		#endregion

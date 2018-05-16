@@ -15,16 +15,6 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// Gets/sets the configurable network port.
 		/// </summary>
 		ushort NetworkPort { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable network username.
-		/// </summary>
-		string NetworkUsername { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable network password.
-		/// </summary>
-		string NetworkPassword { get; set; }
 	}
 
 	public static class NetworkPropertiesExtensions
@@ -42,8 +32,6 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (other == null)
 				throw new ArgumentNullException("other");
 
-			extends.NetworkAddress = other.NetworkAddress;
-			extends.NetworkPort = other.NetworkPort;
 			extends.NetworkAddress = other.NetworkAddress;
 			extends.NetworkPort = other.NetworkPort;
 		}

@@ -9,9 +9,9 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
-	public sealed partial class AsyncTcpClient : AbstractSerialPort<AsyncTcpClientSettings>
+	public sealed partial class AsyncTcpClient : AbstractNetworkPort<AsyncTcpClientSettings>
 	{
-		public const ushort DEFAULT_BUFFER_SIZE = 16384;
+		private const ushort DEFAULT_BUFFER_SIZE = 16384;
 
 		private readonly SafeMutex m_SocketMutex;
 
@@ -23,7 +23,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// Get or set the hostname of the remote TCP server.
 		/// </summary>
 		[PublicAPI]
-		public string Address
+		public override string Address
 		{
 			get { return m_Address; }
 			set
@@ -53,7 +53,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// Get or set the port of the remote TCP server.
 		/// </summary>
 		[PublicAPI]
-		public ushort Port { get; set; }
+		public override ushort Port { get; set; }
 
 		/// <summary>
 		/// Get or set the receive buffer size.
@@ -106,7 +106,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to obtain SocketMutex for disconnect", this);
+				Log(eSeverity.Error, "Failed to obtain SocketMutex for disconnect");
 				return;
 			}
 
@@ -116,8 +116,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} failed to disconnect from host {1}:{2}", this,
-				                Address, Port);
+				Log(eSeverity.Error, e, "Failed to disconnect from host {0}:{1}", Address, Port);
 			}
 			finally
 			{
@@ -177,8 +176,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Address = Address;
-			settings.Port = Port;
+			settings.NetworkAddress = Address;
+			settings.NetworkPort = Port;
 		}
 
 		/// <summary>
@@ -202,8 +201,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.Address;
-			Port = settings.Port;
+			Address = settings.NetworkAddress;
+			Port = settings.NetworkPort;
 		}
 
 		#endregion

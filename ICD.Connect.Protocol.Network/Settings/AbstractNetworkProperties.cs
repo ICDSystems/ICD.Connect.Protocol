@@ -9,8 +9,6 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 		private const string NETWORK_ADDRESS_ELEMENT = "Address";
 		private const string NETWORK_PORT_ELEMENT = "Port";
-		private const string NETWORK_USERNAME_ELEMENT = "Username";
-		private const string NETWORK_PASSWORD_ELEMENT = "Password";
 
 		#region Properties
 
@@ -24,37 +22,17 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		public ushort NetworkPort { get; set; }
 
-		/// <summary>
-		/// Gets/sets the configurable network username.
-		/// </summary>
-		public string NetworkUsername { get; set; }
-
-		/// <summary>
-		/// Gets/sets the configurable network password.
-		/// </summary>
-		public string NetworkPassword { get; set; }
-
 		#endregion
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractNetworkProperties()
-		{
-			Clear();
-		}
 
 		#region Methods
 
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public void Clear()
+		public virtual void Clear()
 		{
 			NetworkAddress = null;
 			NetworkPort = 0;
-			NetworkUsername = null;
-			NetworkPassword = null;
 		}
 
 		/// <summary>
@@ -68,12 +46,19 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			writer.WriteStartElement(ELEMENT);
 			{
-				writer.WriteElementString(NETWORK_ADDRESS_ELEMENT, NetworkAddress);
-				writer.WriteElementString(NETWORK_PORT_ELEMENT, IcdXmlConvert.ToString(NetworkPort));
-				writer.WriteElementString(NETWORK_USERNAME_ELEMENT, NetworkUsername);
-				writer.WriteElementString(NETWORK_PASSWORD_ELEMENT, NetworkPassword);
+				WriteInnerElements(writer);
 			}
 			writer.WriteEndElement();
+		}
+
+		/// <summary>
+		/// Override to write additional elements to XML.
+		/// </summary>
+		/// <param name="writer"></param>
+		protected virtual void WriteInnerElements(IcdXmlTextWriter writer)
+		{
+			writer.WriteElementString(NETWORK_ADDRESS_ELEMENT, NetworkAddress);
+			writer.WriteElementString(NETWORK_PORT_ELEMENT, IcdXmlConvert.ToString(NetworkPort));
 		}
 
 		/// <summary>
@@ -85,13 +70,18 @@ namespace ICD.Connect.Protocol.Network.Settings
 			Clear();
 
 			string networking;
-			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out networking))
-				return;
+			if (XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out networking))
+				ParseInnerXml(networking);
+		}
 
-			NetworkAddress = XmlUtils.TryReadChildElementContentAsString(networking, NETWORK_ADDRESS_ELEMENT);
-			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(networking, NETWORK_PORT_ELEMENT) ?? 0;
-			NetworkUsername = XmlUtils.TryReadChildElementContentAsString(networking, NETWORK_USERNAME_ELEMENT);
-			NetworkPassword = XmlUtils.TryReadChildElementContentAsString(networking, NETWORK_PASSWORD_ELEMENT);
+		/// <summary>
+		/// Override to parse additional elements from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		protected virtual void ParseInnerXml(string xml)
+		{
+			NetworkAddress = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_ADDRESS_ELEMENT);
+			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(xml, NETWORK_PORT_ELEMENT) ?? 0;
 		}
 
 		#endregion
