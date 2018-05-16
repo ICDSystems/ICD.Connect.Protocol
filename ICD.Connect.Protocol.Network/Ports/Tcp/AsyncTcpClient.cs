@@ -7,7 +7,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class AsyncTcpClient : AbstractNetworkPort<AsyncTcpClientSettings>
 	{

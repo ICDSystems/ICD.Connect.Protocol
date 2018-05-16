@@ -1,9 +1,8 @@
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	[KrangSettings("TCP", typeof(AsyncTcpClient))]
 	public sealed class AsyncTcpClientSettings : AbstractNetworkPortSettings

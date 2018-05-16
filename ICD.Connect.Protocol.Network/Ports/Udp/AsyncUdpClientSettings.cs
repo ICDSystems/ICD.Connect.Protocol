@@ -1,9 +1,8 @@
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.Network.Udp
+namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
 	[KrangSettings("UDP", typeof(AsyncUdpClient))]
 	public sealed class AsyncUdpClientSettings : AbstractNetworkPortSettings

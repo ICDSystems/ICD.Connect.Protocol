@@ -4,7 +4,7 @@ using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public static class TelnetControl
 	{

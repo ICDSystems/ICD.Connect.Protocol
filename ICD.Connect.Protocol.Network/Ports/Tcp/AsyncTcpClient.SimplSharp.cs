@@ -1,11 +1,11 @@
-﻿using ICD.Common.Utils.Services.Logging;
-#if SIMPLSHARP
-using System;
+﻿using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+#if SIMPLSHARP
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class AsyncTcpClient
 	{

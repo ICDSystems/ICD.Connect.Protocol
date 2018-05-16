@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed class TcpReceiveEventArgs : EventArgs
 	{

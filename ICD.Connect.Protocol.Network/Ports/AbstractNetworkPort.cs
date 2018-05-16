@@ -1,7 +1,6 @@
-﻿using ICD.Connect.Protocol.Network.Ports;
-using ICD.Connect.Protocol.Ports;
+﻿using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.Network
+namespace ICD.Connect.Protocol.Network.Ports
 {
 	public abstract class AbstractNetworkPort<TSettings> : AbstractSerialPort<TSettings>, INetworkPort
 		where TSettings : INetworkPortSettings, new()

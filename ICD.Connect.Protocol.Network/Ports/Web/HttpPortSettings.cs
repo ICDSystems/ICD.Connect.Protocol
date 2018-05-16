@@ -3,7 +3,7 @@ using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.Network.WebPorts
+namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	/// <summary>
 	/// Settings for a HttpPort.

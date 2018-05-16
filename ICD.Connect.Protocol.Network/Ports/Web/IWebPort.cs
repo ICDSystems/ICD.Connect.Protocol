@@ -3,7 +3,7 @@ using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.Network.WebPorts
+namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	/// <summary>
 	/// Interface for web communication (i.e http, https)

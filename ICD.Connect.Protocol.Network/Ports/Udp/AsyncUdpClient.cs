@@ -8,7 +8,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol.Network.Udp
+namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
 	public sealed partial class AsyncUdpClient : AbstractSerialPort<AsyncUdpClientSettings>
 	{

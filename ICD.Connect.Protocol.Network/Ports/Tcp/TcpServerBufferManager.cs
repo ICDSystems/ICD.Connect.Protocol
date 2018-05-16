@@ -8,7 +8,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialBuffers;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	/// <summary>
 	/// The TcpServerBufferManager is reponsible for creating buffers for each new

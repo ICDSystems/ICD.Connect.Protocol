@@ -1,9 +1,8 @@
 ﻿using ICD.Common.Utils.Xml;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.Network.Ssh
+namespace ICD.Connect.Protocol.Network.Ports.Ssh
 {
 	/// <summary>
 	/// Provides a temporary store for SSH port settings.

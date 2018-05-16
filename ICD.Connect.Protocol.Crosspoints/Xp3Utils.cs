@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Network.Tcp;
+using ICD.Connect.Protocol.Network.Ports.Tcp;
 
 namespace ICD.Connect.Protocol.Crosspoints
 {

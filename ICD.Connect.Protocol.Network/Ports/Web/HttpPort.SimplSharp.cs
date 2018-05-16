@@ -1,12 +1,12 @@
 ﻿using System;
-using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.Network.Settings;
-#if SIMPLSHARP
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Network.Settings;
+#if SIMPLSHARP
 
-namespace ICD.Connect.Protocol.Network.WebPorts
+namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{

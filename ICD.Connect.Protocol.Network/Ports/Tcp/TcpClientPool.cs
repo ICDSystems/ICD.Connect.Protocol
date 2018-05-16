@@ -8,7 +8,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	/// <summary>
 	/// The TcpClientPool provides a way to share existing TCP clients.
