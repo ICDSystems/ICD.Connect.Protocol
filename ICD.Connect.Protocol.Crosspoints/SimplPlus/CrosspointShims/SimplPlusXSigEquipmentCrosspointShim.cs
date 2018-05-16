@@ -5,30 +5,17 @@ using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
-	public sealed class SimplPlusXSigEquipmentCrosspointShim : AbstractSimplPlusXSigCrosspointShim
+	public sealed class SimplPlusXSigEquipmentCrosspointShim : AbstractSimplPlusXSigCrosspointShim<IEquipmentCrosspoint>
 	{
 		#region Private Members
 
 		private EquipmentCrosspointManager m_Manager;
-		private EquipmentCrosspoint m_Crosspoint;
 
 		#endregion
 
 		#region Public Properties
 
-		public override ICrosspoint Crosspoint
-		{
-			get
-			{
-				return m_Crosspoint;
-			}
-			protected set
-			{
-				EquipmentCrosspoint crosspoint = value as EquipmentCrosspoint;
-				if (crosspoint != null)
-					m_Crosspoint = crosspoint;
-			}
-		}
+		public override IEquipmentCrosspoint Crosspoint { get; protected set; }
 
 		protected override ICrosspointManager Manager
 		{
@@ -58,20 +45,20 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		public void DisconnectFromControl(int controlId)
 		{
 			//Don't do things without a crosspoint
-			if (m_Crosspoint == null)
+			if (Crosspoint == null)
 				return;
 
-			m_Crosspoint.Deinitialize(controlId);
+			Crosspoint.Deinitialize(controlId);
 		}
 
 		[PublicAPI("S+")]
 		public override void Disconnect()
 		{
 			//Don't do things without a crosspoint
-			if (m_Crosspoint == null)
+			if (Crosspoint == null)
 				return;
 
-			m_Crosspoint.Deinitialize();
+			Crosspoint.Deinitialize();
 		}
 
 		#endregion
@@ -80,17 +67,17 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void RegisterCrosspoint()
 		{
-			m_Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
-			m_Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
-			m_Crosspoint.OnControlCrosspointCountChanged += CrosspointOnControlCrosspointCountChanged;
+			Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
+			Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
+			Crosspoint.OnControlCrosspointCountChanged += CrosspointOnControlCrosspointCountChanged;
 
 			SPlusStatusUpdateCallback statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
-				statusCallback((ushort)m_Crosspoint.Status);
+				statusCallback((ushort)Crosspoint.Status);
 
 			SPlusStatusUpdateCallback connectionsCallback = CrosspointStatusCallback;
 			if (connectionsCallback != null)
-				connectionsCallback((ushort)m_Crosspoint.ControlCrosspointsCount);
+				connectionsCallback((ushort)Crosspoint.ControlCrosspointsCount);
 
 			SPlusCrosspointChangedCallback crosspointChangedCallback = CrosspointChangedCallback;
 			if (crosspointChangedCallback != null)
@@ -99,9 +86,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void UnregisterCrosspoint()
 		{
-			m_Crosspoint.OnSendOutputData -= CrosspointOnSendOutputData;
-			m_Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
-			m_Crosspoint.OnControlCrosspointCountChanged -= CrosspointOnControlCrosspointCountChanged;
+			Crosspoint.OnSendOutputData -= CrosspointOnSendOutputData;
+			Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
+			Crosspoint.OnControlCrosspointCountChanged -= CrosspointOnControlCrosspointCountChanged;
 
 			SPlusStatusUpdateCallback statusCallback = CrosspointStatusCallback;
 			if (statusCallback != null)
@@ -116,7 +103,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 				crosspointChangedCallback();
 		}
 
-		protected override ICrosspoint CreateCrosspoint(int id, string name)
+		protected override IEquipmentCrosspoint CreateCrosspoint(int id, string name)
 		{
 			return new EquipmentCrosspoint(id, name);
 		}

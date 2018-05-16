@@ -28,4 +28,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		string GetShimInfo();
 	}
+
+	public interface ISimplPlusCrosspointShim<T> : ISimplPlusCrosspointShim
+	{
+		new T Crosspoint { get; }
+	}
 }

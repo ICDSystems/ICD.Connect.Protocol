@@ -14,7 +14,8 @@ using ICD.Connect.Settings.SPlusShims;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
-	public abstract class AbstractSimplPlusXSigCrosspointShim : AbstractSPlusShim, ISimplPlusCrosspointShim
+	public abstract class AbstractSimplPlusXSigCrosspointShim<T> : AbstractSPlusShim, ISimplPlusCrosspointShim<T>
+		where T : ICrosspoint
 	{
 		#region Events
 
@@ -128,7 +129,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			}
 		}
 
-		public abstract ICrosspoint Crosspoint { get; protected set; }
+		ICrosspoint ISimplPlusCrosspointShim.Crosspoint { get { return Crosspoint; } }
+
+		public abstract T Crosspoint { get; protected set; }
 
 		protected abstract ICrosspointManager Manager { get; set; }
 
@@ -217,7 +220,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 			Crosspoint.Dispose();
 
-			Crosspoint = null;
+			Crosspoint = default(T);
 		}
 
 		[PublicAPI("S+")]
@@ -277,7 +280,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected abstract void RegisterCrosspoint();
 		protected abstract void UnregisterCrosspoint();
-		protected abstract ICrosspoint CreateCrosspoint(int id, string name);
+		protected abstract T CreateCrosspoint(int id, string name);
 
 		protected void CrosspointOnSendOutputData(ICrosspoint sender, CrosspointData data)
 		{
