@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
 	public interface IEquipmentCrosspoint : ICrosspoint
 	{
+		event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
+
 		/// <summary>
 		/// Gets the ids for the control crosspoints that are currently connected to this equipment.
 		/// </summary>
@@ -31,5 +35,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <param name="controlId"></param>
 		[PublicAPI]
 		void Deinitialize(int controlId);
+
+		/// <summary>
+		/// Disconnects the equipment from all currently connected controls.
+		/// </summary>
+		[PublicAPI]
+		void Deinitialize();
 	}
 }

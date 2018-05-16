@@ -1,6 +1,5 @@
 ﻿using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-#if SIMPLSHARP
 using ICD.Connect.API;
 using ICD.Common.Logging.Console;
 using ICD.Common.Logging.Console.Loggers;
@@ -14,7 +13,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		/// </summary>
 		public static Xp3 Xp3Core { get; private set; }
 
-		public static SimplPlusCrosspointWrapperManager WrapperManager { get; private set; }
+		public static SimplPlusCrosspointShimManager ShimManager { get; private set; }
 
 		/// <summary>
 		/// Constructor to create the Xp3
@@ -32,13 +31,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			Xp3Core = new Xp3();
 			ApiConsole.RegisterChild(Xp3Core);
 
-			// Create Wrapper instance
-			WrapperManager = new SimplPlusCrosspointWrapperManager();
-			ApiConsole.RegisterChild(WrapperManager);
+			// Create Shim instance
+			ShimManager = new SimplPlusCrosspointShimManager();
+			ApiConsole.RegisterChild(ShimManager);
 
-			WrapperManager.RegisterXp3(Xp3Core);
+			ShimManager.RegisterXp3(Xp3Core);
 		}
 	}
 }
-
-#endif

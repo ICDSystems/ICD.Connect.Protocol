@@ -95,11 +95,12 @@
     </Compile>
     <Compile Include="Crosspoints\IEquipmentCrosspoint.cs" />
     <Compile Include="CrosspointData.cs" />
-    <Compile Include="SimplPlus\CrosspointWrappers\ISimplPlusCrosspointWrapper.cs" />
-    <Compile Include="SimplPlus\CrosspointWrappers\SimplPlusXsigControlCrosspointWrapper.cs" />
-    <Compile Include="SimplPlus\CrosspointWrappers\SimplPlusXsigEquipmentCrosspointWrapper.cs" />
+    <Compile Include="SimplPlus\CrosspointShims\AbstractSimplPlusXSigCrosspointShim.cs" />
+    <Compile Include="SimplPlus\CrosspointShims\ISimplPlusCrosspointShim.cs" />
+    <Compile Include="SimplPlus\CrosspointShims\SimplPlusXSigControlCrosspointShim.cs" />
+    <Compile Include="SimplPlus\CrosspointShims\SimplPlusXSigEquipmentCrosspointShim.cs" />
     <Compile Include="SimplPlus\SimplPlusAdvertisementManagerControls.cs" />
-    <Compile Include="SimplPlus\SimplPlusCrosspointWrapperManager.cs" />
+    <Compile Include="SimplPlus\SimplPlusCrosspointShimManager.cs" />
     <Compile Include="SimplPlus\SimplPlusStaticCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Xp3.cs" />
