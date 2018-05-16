@@ -1,10 +1,10 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Settings;
-#if SIMPLSHARP
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
-		#region Properties
+#region Properties
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
@@ -34,9 +34,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		public bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
 
-		#endregion
+#endregion
 
-		#region Constructors
+#region Constructors
 
 		/// <summary>
 		/// Constructor.
@@ -64,9 +64,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			UpdateCachedOnlineStatus();
 		}
 
-		#endregion
+#endregion
 
-		#region Methods
+#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -264,7 +264,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			return success;
 		}
 
-		#endregion
+#endregion
 
 		/// <summary>
 		/// Returns true if the configured URI scheme is https.

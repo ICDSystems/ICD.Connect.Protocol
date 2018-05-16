@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Utils.Services.Logging;
 
-namespace ICD.Connect.Protocol.Network.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class AsyncTcpClient
 	{
@@ -25,7 +25,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to obtain SocketMutex for connect", this);
+				Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
 				return;
 			}
 
@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				if (!m_TcpClient.Connected)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2}", this, Address, Port);
+					Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
 					return;
 				}
 
@@ -49,8 +49,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				          {
 					          if (x is SocketException)
 					          {
-						          Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port,
-						                          x.Message);
+						          Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
 						          return true;
 					          }
 
@@ -59,7 +58,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port, e.Message);
+				Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, e.Message);
 			}
 			finally
 			{
@@ -110,7 +109,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (SocketException e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} - {1}", this, e.Message);
+				Log(eSeverity.Error, "Failed to send data - {0}", e.Message);
 				return false;
 			}
 			finally
@@ -128,8 +127,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			if (task.IsFaulted)
 			{
 				string message = task.Exception.InnerExceptions.First().Message;
-				Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2} - {3}", this, Address, Port,
-								message);
+				Log(eSeverity.Error, "Failed to receive data from host {0}:{1} - {2}", Address, Port, message);
 				UpdateIsConnectedState();
 				return;
 			}

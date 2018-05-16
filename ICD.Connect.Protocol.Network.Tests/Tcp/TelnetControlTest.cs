@@ -1,4 +1,4 @@
-﻿using ICD.Connect.Protocol.Network.Tcp;
+﻿using ICD.Connect.Protocol.Network.Ports.Tcp;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Network.Tests.Tcp

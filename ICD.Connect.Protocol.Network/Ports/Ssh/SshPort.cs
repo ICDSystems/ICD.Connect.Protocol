@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Crestron.SimplSharp;
-using Crestron.SimplSharp.Ssh;
-using Crestron.SimplSharp.Ssh.Common;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
@@ -12,7 +9,9 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
-
+using Crestron.SimplSharp;
+using Crestron.SimplSharp.Ssh;
+using Crestron.SimplSharp.Ssh.Common;
 #else
 using Renci.SshNet;
 using Renci.SshNet.Common;

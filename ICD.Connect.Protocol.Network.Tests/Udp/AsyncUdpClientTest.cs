@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Network.Udp;
+using ICD.Connect.Protocol.Network.Ports.Udp;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Network.Tests.Udp

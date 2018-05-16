@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.Network.Udp
+namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
 	public sealed partial class AsyncUdpClient
 	{
@@ -29,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.Message);
+				Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
 			}
 
 			UpdateIsConnectedState();
