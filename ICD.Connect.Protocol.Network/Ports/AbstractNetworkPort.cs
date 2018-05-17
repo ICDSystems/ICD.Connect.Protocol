@@ -1,4 +1,7 @@
-﻿using ICD.Connect.Protocol.Ports;
+﻿using System.Collections.Generic;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports
 {
@@ -14,5 +17,47 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// Gets/sets the port of the remote server.
 		/// </summary>
 		public abstract ushort Port { get; set; }
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Address", Address);
+			addRow("Port", Port);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new GenericConsoleCommand<string>("SetAddress",
+														   "Sets the address for next connection attempt",
+														   s => Address = s);
+			yield return new GenericConsoleCommand<ushort>("SetPort",
+														   "Sets the port for next connection attempt",
+														   s => Port = s);
+		}
+
+		/// <summary>
+		/// Workaround to avoid "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
+		#endregion
 	}
 }
