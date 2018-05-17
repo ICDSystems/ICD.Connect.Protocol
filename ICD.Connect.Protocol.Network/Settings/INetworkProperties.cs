@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		ushort NetworkPort { get; set; }
+		ushort? NetworkPort { get; set; }
 	}
 
 	public static class NetworkPropertiesExtensions
@@ -34,6 +34,24 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			extends.NetworkAddress = other.NetworkAddress;
 			extends.NetworkPort = other.NetworkPort;
+		}
+
+		/// <summary>
+		/// Updates the Network Properties instance where values are not already configured.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="address"></param>
+		/// <param name="port"></param>
+		public static void ApplyDefaultValues(this INetworkProperties extends, string address, ushort? port)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (extends.NetworkAddress == null)
+				extends.NetworkAddress = address;
+
+			if (extends.NetworkPort == null)
+				extends.NetworkPort = port;
 		}
 	}
 }

@@ -14,12 +14,12 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Gets/sets the configurable pulse time for the IR driver.
 		/// </summary>
-		ushort IrPulseTime { get; set; }
+		ushort? IrPulseTime { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable between time for the IR driver.
 		/// </summary>
-		ushort IrBetweenTime { get; set; }
+		ushort? IrBetweenTime { get; set; }
 	}
 
 	public static class IrDriverPropertiesExtensions
@@ -40,6 +40,28 @@ namespace ICD.Connect.Protocol.Settings
 			extends.IrDriverPath = other.IrDriverPath;
 			extends.IrPulseTime = other.IrPulseTime;
 			extends.IrBetweenTime = other.IrBetweenTime;
+		}
+
+		/// <summary>
+		/// Updates the IR Driver Properties instance where values are not already configured.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="driverPath"></param>
+		/// <param name="pulseTime"></param>
+		/// <param name="betweenTime"></param>
+		public static void ApplyDefaultValues(this IIrDriverProperties extends, string driverPath, ushort? pulseTime, ushort? betweenTime)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (extends.IrDriverPath == null)
+				extends.IrDriverPath = driverPath;
+
+			if (extends.IrPulseTime == null)
+				extends.IrPulseTime = pulseTime;
+
+			if (extends.IrBetweenTime == null)
+				extends.IrBetweenTime = betweenTime;
 		}
 	}
 }

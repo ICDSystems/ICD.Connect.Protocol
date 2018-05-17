@@ -10,6 +10,6 @@
 		/// <summary>
 		/// Gets/sets the password for authentication with the remote server.
 		/// </summary>
-		ushort Password { get; set; }
+		string Password { get; set; }
 	}
 }

@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	public sealed partial class AsyncUdpClient : AbstractSerialPort<AsyncUdpClientSettings>
+	public sealed partial class AsyncUdpClient : AbstractNetworkPort<AsyncUdpClientSettings>
 	{
 		public const ushort DEFAULT_BUFFER_SIZE = 16384;
 		public const string ACCEPT_ALL = "0.0.0.0";
 
+		private readonly NetworkProperties m_NetworkProperties;
+
 		private bool m_ListeningRequested;
-		private string m_Address;
 
 		#region Properties
 
@@ -24,17 +25,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// Address to accept connections from.
 		/// </summary>
 		[PublicAPI]
-		public string Address
+		public override string Address
 		{
-			get { return m_Address; }
-			set { m_Address = IcdEnvironment.NetworkAddresses.Contains(value) ? "127.0.0.1" : value; }
+			get { return m_NetworkProperties.NetworkAddress; }
+			set { m_NetworkProperties.NetworkAddress = value; }
 		}
 
 		/// <summary>
 		/// Port to accept connections from.
 		/// </summary>
 		[PublicAPI]
-		public ushort Port { get; set; }
+		public override ushort Port
+		{
+			get { return m_NetworkProperties.NetworkPort ?? 0; }
+			set { m_NetworkProperties.NetworkPort = value; }
+		}
+
 
 		/// <summary>
 		/// Get or set the receive buffer size.
@@ -49,6 +55,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// </summary>
 		public AsyncUdpClient()
 		{
+			m_NetworkProperties = new NetworkProperties();
+
 			BufferSize = DEFAULT_BUFFER_SIZE;
 			Address = ACCEPT_ALL;
 
@@ -143,8 +151,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.NetworkAddress = Address;
-			settings.NetworkPort = Port;
+			settings.Copy(m_NetworkProperties);
 		}
 
 		/// <summary>
@@ -154,9 +161,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			base.ClearSettingsFinal();
 
-			Address = ACCEPT_ALL;
-			Port = 0;
-			BufferSize = DEFAULT_BUFFER_SIZE;
+			m_NetworkProperties.Clear();
 		}
 
 		/// <summary>
@@ -168,8 +173,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.NetworkAddress;
-			Port = settings.NetworkPort;
+			m_NetworkProperties.Copy(settings);
 		}
 
 		#endregion
@@ -184,8 +188,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Address", Address);
-			addRow("Port", Port);
 			addRow("Buffer Size", BufferSize);
 #if SIMPLSHARP
 			addRow("Server Status", m_UdpClient == null ? string.Empty : m_UdpClient.ServerStatus.ToString());
@@ -201,12 +203,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<string>("SetAddress",
-			                                               "Sets the address for next connection attempt",
-			                                               s => Address = s);
-			yield return new GenericConsoleCommand<ushort>("SetPort",
-			                                               "Sets the port for next connection attempt",
-			                                               s => Port = s);
 			yield return new GenericConsoleCommand<ushort>("SetBufferSize",
 			                                               "Sets the buffer size for next connection attempt",
 			                                               s => BufferSize = s);

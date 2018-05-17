@@ -2,7 +2,6 @@
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
-
 	#region ComPort enums
 
 	[Flags]

@@ -83,7 +83,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				Host = m_UriProperties.UriHost,
 				Password = m_UriProperties.UriPassword,
 				Path = localAddress,
-				Port = m_UriProperties.UriPort,
+				Port = m_UriProperties.UriPort ?? 0,
 				Query = m_UriProperties.UriQuery,
 				Scheme = m_UriProperties.UriScheme,
 				UserName = m_UriProperties.UriUsername

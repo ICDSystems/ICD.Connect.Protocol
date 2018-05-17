@@ -5,9 +5,6 @@ namespace ICD.Connect.Protocol.Settings
 {
 	public abstract class AbstractIrDriverProperties : IIrDriverProperties
 	{
-		private const ushort DEFAULT_PULSE_TIME = 100;
-		private const ushort DEFAULT_BETWEEN_TIME = 750;
-
 		private const string ELEMENT = "IR";
 
 		private const string DRIVER_ELEMENT = "Driver";
@@ -24,12 +21,12 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Gets/sets the configurable pulse time for the IR driver.
 		/// </summary>
-		public ushort IrPulseTime { get; set; }
+		public ushort? IrPulseTime { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable between time for the IR driver.
 		/// </summary>
-		public ushort IrBetweenTime { get; set; }
+		public ushort? IrBetweenTime { get; set; }
 
 		#endregion
 
@@ -49,8 +46,8 @@ namespace ICD.Connect.Protocol.Settings
 		public void Clear()
 		{
 			IrDriverPath = null;
-			IrPulseTime = DEFAULT_PULSE_TIME;
-			IrBetweenTime = DEFAULT_BETWEEN_TIME;
+			IrPulseTime = null;
+			IrBetweenTime = null;
 		}
 
 		/// <summary>
@@ -84,9 +81,8 @@ namespace ICD.Connect.Protocol.Settings
 				return;
 
 			IrDriverPath = XmlUtils.TryReadChildElementContentAsString(ir, DRIVER_ELEMENT);
-			IrPulseTime = XmlUtils.TryReadChildElementContentAsUShort(ir, PULSETIME_ELEMENT) ?? DEFAULT_PULSE_TIME;
-			IrBetweenTime = XmlUtils.TryReadChildElementContentAsUShort(ir, BETWEENTIME_ELEMENT) ??
-			                DEFAULT_BETWEEN_TIME;
+			IrPulseTime = XmlUtils.TryReadChildElementContentAsUShort(ir, PULSETIME_ELEMENT);
+			IrBetweenTime = XmlUtils.TryReadChildElementContentAsUShort(ir, BETWEENTIME_ELEMENT);
 		}
 
 		#endregion

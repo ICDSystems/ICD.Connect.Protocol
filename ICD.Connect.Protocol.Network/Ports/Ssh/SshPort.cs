@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
@@ -23,11 +21,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 	/// <summary>
 	/// Port for communication with an SSH device.
 	/// </summary>
-	public sealed class SshPort : AbstractNetworkPort<SshPortSettings>
+	public sealed class SshPort : AbstractSecureNetworkPort<SshPortSettings>
 	{
 		public const ushort DEFAULT_PORT = 22;
 
 		private readonly SafeCriticalSection m_SshSection;
+
+		private readonly SecureNetworkProperties m_NetworkProperties;
 
 		private KeyboardInteractiveConnectionInfo m_ConnectionInfo;
 		private ShellStream m_SshStream;
@@ -39,19 +39,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// Gets/sets the password.
 		/// </summary>
 		[PublicAPI]
-		public string Password { get; set; }
+		public override string Password
+		{
+			get { return m_NetworkProperties.NetworkPassword; }
+			set { m_NetworkProperties.NetworkPassword = value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the username.
 		/// </summary>
 		[PublicAPI]
-		public string Username { get; set; }
+		public override string Username
+		{
+			get { return m_NetworkProperties.NetworkUsername; }
+			set { m_NetworkProperties.NetworkUsername = value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the port.
 		/// </summary>
 		[PublicAPI]
-		public override ushort Port { get; set; }
+		public override ushort Port
+		{
+			get { return m_NetworkProperties.NetworkPort ?? 22; }
+			set { m_NetworkProperties.NetworkPort = value == 0 ? (ushort)22 : value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the address.
@@ -69,6 +81,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		public SshPort()
 		{
 			m_SshSection = new SafeCriticalSection();
+			m_NetworkProperties = new SecureNetworkProperties();
 		}
 
 		/// <summary>
@@ -332,10 +345,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.NetworkAddress = Address;
-			settings.NetworkPassword = Password;
-			settings.NetworkPort = Port;
-			settings.NetworkUsername = Username;
+			settings.Copy(m_NetworkProperties);
 		}
 
 		/// <summary>
@@ -345,10 +355,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.ClearSettingsFinal();
 
-			Address = null;
-			Password = null;
-			Port = DEFAULT_PORT;
-			Username = null;
+			m_NetworkProperties.Clear();
 		}
 
 		/// <summary>
@@ -360,10 +367,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.NetworkAddress;
-			Password = settings.NetworkPassword;
-			Port = settings.NetworkPort;
-			Username = settings.NetworkUsername;
+			m_NetworkProperties.Copy(settings);
 		}
 
 		#endregion
@@ -525,56 +529,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			base.BuildStringRepresentationProperties(addPropertyAndValue);
 
 			addPropertyAndValue("Host", new HostInfo(Address, Port));
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("Username", Username);
-			addRow("Password", StringUtils.PasswordFormat(Password));
-			addRow("Address", Address);
-			addRow("Port", Port);
-		}
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new GenericConsoleCommand<string>("SetUsername",
-			                                               "Sets the username for next connection attempt",
-			                                               s => Username = s);
-			yield return new GenericConsoleCommand<string>("SetPassword",
-			                                               "Sets the password for next connection attempt",
-			                                               s => Password = s);
-			yield return new GenericConsoleCommand<string>("SetAddress",
-			                                               "Sets the address for next connection attempt",
-			                                               s => Address = s);
-			yield return new GenericConsoleCommand<ushort>("SetPort",
-			                                               "Sets the port for next connection attempt",
-			                                               s => Port = s);
-		}
-
-		/// <summary>
-		/// Workaround to avoid "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
 		}
 
 		#endregion

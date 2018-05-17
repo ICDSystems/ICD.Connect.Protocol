@@ -10,17 +10,43 @@ namespace ICD.Connect.Protocol.Network.Settings
 		private const string NETWORK_ADDRESS_ELEMENT = "Address";
 		private const string NETWORK_PORT_ELEMENT = "Port";
 
+		private string m_Address;
+
 		#region Properties
 
 		/// <summary>
 		/// Gets/sets the configurable network address.
 		/// </summary>
-		public string NetworkAddress { get; set; }
+		public string NetworkAddress
+		{
+			get { return m_Address; }
+			set
+			{
+				if (value == null)
+				{
+					m_Address = null;
+				}
+				else
+				{
+					Uri uri = null;
+
+					try
+					{
+						uri = new Uri(value);
+					}
+					catch (Exception)
+					{
+					}
+
+					m_Address = uri == null ? value : uri.Host;
+				}
+			}
+		}
 
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		public ushort NetworkPort { get; set; }
+		public ushort? NetworkPort { get; set; }
 
 		#endregion
 
@@ -81,7 +107,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		protected virtual void ParseInnerXml(string xml)
 		{
 			NetworkAddress = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_ADDRESS_ELEMENT);
-			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(xml, NETWORK_PORT_ELEMENT) ?? 0;
+			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(xml, NETWORK_PORT_ELEMENT);
 		}
 
 		#endregion

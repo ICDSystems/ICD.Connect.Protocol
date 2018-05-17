@@ -35,5 +35,27 @@ namespace ICD.Connect.Protocol.Network.Settings
 			extends.NetworkUsername = other.NetworkUsername;
 			extends.NetworkPassword = other.NetworkPassword;
 		}
+
+		/// <summary>
+		/// Updates the Network Properties instance where values are not already configured.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="port"></param>
+		/// <param name="username"></param>
+		/// <param name="password"></param>
+		/// <param name="address"></param>
+		public static void ApplyDefaultValues(this ISecureNetworkProperties extends, string address, ushort? port, string username, string password)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			extends.ApplyDefaultValues(address, port);
+
+			if (extends.NetworkUsername == null)
+				extends.NetworkUsername = username;
+
+			if (extends.NetworkPassword == null)
+				extends.NetworkPassword = password;
+		}
 	}
 }

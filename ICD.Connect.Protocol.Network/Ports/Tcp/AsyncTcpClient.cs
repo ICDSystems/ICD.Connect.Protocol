@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
@@ -14,6 +15,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private const ushort DEFAULT_BUFFER_SIZE = 16384;
 
 		private readonly SafeMutex m_SocketMutex;
+		private readonly NetworkProperties m_NetworkProperties;
 
 		private string m_Address;
 
@@ -70,6 +72,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public AsyncTcpClient()
 		{
+			m_NetworkProperties = new NetworkProperties();
 			m_SocketMutex = new SafeMutex();
 
 			BufferSize = DEFAULT_BUFFER_SIZE;
@@ -176,8 +179,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.NetworkAddress = Address;
-			settings.NetworkPort = Port;
+			settings.Copy(m_NetworkProperties);
 		}
 
 		/// <summary>
@@ -187,9 +189,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			base.ClearSettingsFinal();
 
-			Address = null;
-			Port = 0;
-			BufferSize = DEFAULT_BUFFER_SIZE;
+			m_NetworkProperties.Clear();
 		}
 
 		/// <summary>
@@ -201,8 +201,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			Address = settings.NetworkAddress;
-			Port = settings.NetworkPort;
+			m_NetworkProperties.Copy(settings);
 		}
 
 		#endregion
@@ -218,12 +217,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<string>("SetAddress",
-			                                               "Sets the address for next connection attempt",
-			                                               s => Address = s);
-			yield return new GenericConsoleCommand<ushort>("SetPort",
-			                                               "Sets the port for next connection attempt",
-			                                               s => Port = s);
 			yield return new GenericConsoleCommand<ushort>("SetBufferSize",
 			                                               "Sets the buffer size for next connection attempt",
 			                                               s => BufferSize = s);

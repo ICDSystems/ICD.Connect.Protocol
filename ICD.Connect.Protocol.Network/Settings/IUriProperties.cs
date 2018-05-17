@@ -26,7 +26,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Gets/sets the configurable URI port.
 		/// </summary>
-		ushort UriPort { get; set; }
+		ushort? UriPort { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable URI scheme.
@@ -75,6 +75,49 @@ namespace ICD.Connect.Protocol.Network.Settings
 		}
 
 		/// <summary>
+		/// Updates the URI Properties instance where values are not already configured.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="username"></param>
+		/// <param name="host"></param>
+		/// <param name="port"></param>
+		/// <param name="password"></param>
+		/// <param name="scheme"></param>
+		/// <param name="path"></param>
+		/// <param name="query"></param>
+		/// <param name="fragment"></param>
+		public static void ApplyDefaultValues(this IUriProperties extends, string username, string password, string host,
+		                                      ushort? port, string scheme, string path, string query, string fragment)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (extends.UriUsername == null)
+				extends.UriUsername = username;
+
+			if (extends.UriPassword == null)
+				extends.UriPassword = password;
+
+			if (extends.UriHost == null)
+				extends.UriHost = host;
+
+			if (extends.UriPort == null)
+				extends.UriPort = port;
+
+			if (extends.UriScheme == null)
+				extends.UriScheme = scheme;
+
+			if (extends.UriPath == null)
+				extends.UriPath = path;
+
+			if (extends.UriQuery == null)
+				extends.UriQuery = query;
+
+			if (extends.UriFragment == null)
+				extends.UriFragment = fragment;
+		}
+
+		/// <summary>
 		/// Builds a URI from the configured properties.
 		/// </summary>
 		/// <param name="extends"></param>
@@ -90,7 +133,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 				Host = extends.UriHost,
 				Password = extends.UriPassword,
 				Path = extends.UriPath,
-				Port = extends.UriPort,
+				Port = extends.UriPort ?? 0,
 				Query = extends.UriQuery,
 				Scheme = extends.UriScheme,
 				UserName = extends.UriUsername
@@ -115,7 +158,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 				Host = extends.UriHost,
 				Password = extends.UriPassword,
 				Path = extends.UriPath,
-				Port = extends.UriPort,
+				Port = extends.UriPort ?? 0,
 				Query = extends.UriQuery,
 				Scheme = extends.UriScheme,
 				UserName = extends.UriUsername

@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Gets/sets the configurable URI port.
 		/// </summary>
-		public ushort UriPort { get; set; }
+		public ushort? UriPort { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable URI scheme.
@@ -124,7 +124,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			UriUsername = XmlUtils.TryReadChildElementContentAsString(uri, URI_USERNAME_ELEMENT);
 			UriPassword = XmlUtils.TryReadChildElementContentAsString(uri, URI_PASSWORD_ELEMENT);
 			UriHost = XmlUtils.TryReadChildElementContentAsString(uri, URI_HOST_ELEMENT);
-			UriPort = XmlUtils.TryReadChildElementContentAsUShort(uri, URI_PORT_ELEMENT) ?? 0;
+			UriPort = XmlUtils.TryReadChildElementContentAsUShort(uri, URI_PORT_ELEMENT);
 			UriPath = XmlUtils.TryReadChildElementContentAsString(uri, URI_PATH_ELEMENT);
 			UriQuery = XmlUtils.TryReadChildElementContentAsString(uri, URI_QUERY_ELEMENT);
 			UriFragment = XmlUtils.TryReadChildElementContentAsString(uri, URI_FRAGMENT_ELEMENT);

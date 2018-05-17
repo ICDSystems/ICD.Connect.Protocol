@@ -44,7 +44,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		public override ushort NetworkPort
+		public override ushort? NetworkPort
 		{
 			get { return m_NetworkProperties.NetworkPort; }
 			set { m_NetworkProperties.NetworkPort = value; }
