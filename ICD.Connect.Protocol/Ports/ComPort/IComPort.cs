@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
@@ -95,5 +96,17 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		                    eComStopBits numberOfStopBits, eComProtocolType protocolType,
 		                    eComHardwareHandshakeType hardwareHandShake,
 		                    eComSoftwareHandshakeType softwareHandshake, bool reportCtsChanges);
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyDeviceConfiguration(IComSpecProperties properties);
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyConfiguration(IComSpecProperties properties);
 	}
 }

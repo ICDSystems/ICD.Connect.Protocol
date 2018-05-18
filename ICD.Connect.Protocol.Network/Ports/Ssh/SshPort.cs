@@ -46,6 +46,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		}
 
 		/// <summary>
+		/// Gets the Secure Network configuration properties.
+		/// </summary>
+		protected override SecureNetworkProperties SecureNetworkProperties { get { return m_NetworkProperties; } }
+
+		/// <summary>
 		/// Gets/sets the username.
 		/// </summary>
 		[PublicAPI]

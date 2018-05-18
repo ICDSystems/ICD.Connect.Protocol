@@ -53,5 +53,27 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (extends.NetworkPort == null)
 				extends.NetworkPort = port;
 		}
+
+		/// <summary>
+		/// Creates a new properties instance, applying this instance over the top of the other instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static INetworkProperties Superimpose(this INetworkProperties extends, INetworkProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			NetworkProperties output = new NetworkProperties();
+
+			output.Copy(other);
+			output.ApplyDefaultValues(extends.NetworkAddress, extends.NetworkPort);
+
+			return output;
+		}
 	}
 }

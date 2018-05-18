@@ -118,6 +118,29 @@ namespace ICD.Connect.Protocol.Network.Settings
 		}
 
 		/// <summary>
+		/// Creates a new properties instance, applying this instance over the top of the other instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static IUriProperties Superimpose(this IUriProperties extends, IUriProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			UriProperties output = new UriProperties();
+
+			output.Copy(other);
+			output.ApplyDefaultValues(extends.UriUsername, extends.UriPassword, extends.UriHost, extends.UriPort,
+			                          extends.UriScheme, extends.UriPassword, extends.UriQuery, extends.UriFragment);
+
+			return output;
+		}
+
+		/// <summary>
 		/// Builds a URI from the configured properties.
 		/// </summary>
 		/// <param name="extends"></param>

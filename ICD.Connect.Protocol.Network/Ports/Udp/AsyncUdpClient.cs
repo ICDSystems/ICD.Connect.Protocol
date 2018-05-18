@@ -40,6 +40,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			set { m_NetworkProperties.NetworkPort = value; }
 		}
 
+		/// <summary>
+		/// Gets the Network configuration properties.
+		/// </summary>
+		protected override INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
 		/// Get or set the receive buffer size.

@@ -1,4 +1,5 @@
 ﻿using ICD.Connect.Protocol.Ports.IrPort;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 {
@@ -22,6 +23,11 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		/// Gets/sets the default time in milliseconds between PressAndRelease commands.
 		/// </summary>
 		public override ushort BetweenTime { get; set; }
+
+		/// <summary>
+		/// Gets the IR Driver configuration properties.
+		/// </summary>
+		protected override IIrDriverProperties IrDriverProperties { get { return new IrDriverProperties(); } }
 
 		/// <summary>
 		/// Loads the driver from the given path.

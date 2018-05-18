@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
 	public abstract class AbstractIrPort<T> : AbstractPort<T>, IIrPort
 		where T : IIrPortSettings, new()
 	{
+		private const ushort DEFAULT_PULSE_TIME = 100;
+		private const ushort DEFAULT_BETWEEN_TIME = 750;
+
 		#region Properties
 
 		/// <summary>
@@ -18,6 +23,11 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// Gets/sets the default time in milliseconds between PressAndRelease commands.
 		/// </summary>
 		public abstract ushort BetweenTime { get; set; }
+
+		/// <summary>
+		/// Gets the IR Driver configuration properties.
+		/// </summary>
+		protected abstract IIrDriverProperties IrDriverProperties { get; }
 
 		#endregion
 
@@ -60,6 +70,36 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="pulseTime"></param>
 		/// <param name="betweenTime"></param>
 		public abstract void PressAndRelease(string command, ushort pulseTime, ushort betweenTime);
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyDeviceConfiguration(IIrDriverProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			// Port supercedes device configuration
+			IIrDriverProperties config = IrDriverProperties.Superimpose(properties);
+
+			ApplyConfiguration(config);
+		}
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyConfiguration(IIrDriverProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			PulseTime = properties.IrPulseTime ?? DEFAULT_PULSE_TIME;
+			BetweenTime = properties.IrBetweenTime ?? DEFAULT_BETWEEN_TIME;
+
+			LoadDriver(properties.IrDriverPath);
+		}
 
 		#endregion
 

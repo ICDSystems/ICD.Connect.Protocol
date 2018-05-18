@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports
@@ -8,6 +10,8 @@ namespace ICD.Connect.Protocol.Network.Ports
 	public abstract class AbstractNetworkPort<TSettings> : AbstractSerialPort<TSettings>, INetworkPort
 		where TSettings : INetworkPortSettings, new()
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets/sets the hostname of the remote server.
 		/// </summary>
@@ -17,6 +21,45 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// Gets/sets the port of the remote server.
 		/// </summary>
 		public abstract ushort Port { get; set; }
+
+		/// <summary>
+		/// Gets the Network configuration properties.
+		/// </summary>
+		protected abstract INetworkProperties NetworkProperties { get; }
+
+		#endregion
+
+		#region Methods
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyDeviceConfiguration(INetworkProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			// Port supercedes device configuration
+			INetworkProperties config = NetworkProperties.Superimpose(properties);
+
+			ApplyConfiguration(config);
+		}
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyConfiguration(INetworkProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			Address = properties.NetworkAddress;
+			Port = properties.NetworkPort ?? 0;
+		}
+
+		#endregion
 
 		#region Console
 

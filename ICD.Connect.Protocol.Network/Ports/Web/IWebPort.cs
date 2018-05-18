@@ -66,5 +66,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		[PublicAPI]
 		bool DispatchSoap(string action, string content, out string response);
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyDeviceConfiguration(IUriProperties properties);
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyConfiguration(IUriProperties properties);
 	}
 }

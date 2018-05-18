@@ -63,5 +63,27 @@ namespace ICD.Connect.Protocol.Settings
 			if (extends.IrBetweenTime == null)
 				extends.IrBetweenTime = betweenTime;
 		}
+
+		/// <summary>
+		/// Creates a new properties instance, applying this instance over the top of the other instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static IIrDriverProperties Superimpose(this IIrDriverProperties extends, IIrDriverProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			IrDriverProperties output = new IrDriverProperties();
+
+			output.Copy(other);
+			output.ApplyDefaultValues(extends.IrDriverPath, extends.IrPulseTime, extends.IrBetweenTime);
+
+			return output;
+		}
 	}
 }

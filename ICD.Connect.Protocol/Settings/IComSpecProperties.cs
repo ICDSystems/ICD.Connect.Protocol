@@ -116,5 +116,31 @@ namespace ICD.Connect.Protocol.Settings
 			if (extends.ComSpecReportCtsChanges == null)
 				extends.ComSpecReportCtsChanges = reportCtsChanges;
 		}
+
+		/// <summary>
+		/// Creates a new properties instance, applying this instance over the top of the other instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static IComSpecProperties Superimpose(this IComSpecProperties extends, IComSpecProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			ComSpecProperties output = new ComSpecProperties();
+
+			output.Copy(other);
+			output.ApplyDefaultValues(extends.ComSpecBaudRate,
+			                          extends.ComSpecNumberOfDataBits, extends.ComSpecParityType,
+			                          extends.ComSpecNumberOfStopBits, extends.ComSpecProtocolType,
+			                          extends.ComSpecHardwareHandShake, extends.ComSpecSoftwareHandshake,
+			                          extends.ComSpecReportCtsChanges);
+
+			return output;
+		}
 	}
 }

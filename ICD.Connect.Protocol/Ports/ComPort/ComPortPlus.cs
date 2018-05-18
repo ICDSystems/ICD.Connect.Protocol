@@ -2,6 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
@@ -21,6 +22,18 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// </summary>
 		[PublicAPI]
 		public ushort PortIndex { get; set; }
+
+		/// <summary>
+		/// Gets the Com Spec configuration properties.
+		/// </summary>
+		protected override IComSpecProperties ComSpecProperties
+		{
+			get
+			{
+				// TODO
+				return new ComSpecProperties();
+			}
+		}
 
 		#endregion
 

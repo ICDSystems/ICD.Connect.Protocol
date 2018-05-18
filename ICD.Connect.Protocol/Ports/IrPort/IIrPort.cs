@@ -1,4 +1,5 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
@@ -68,6 +69,18 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="betweenTime"></param>
 		[PublicAPI]
 		void PressAndRelease(string command, ushort pulseTime, ushort betweenTime);
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyDeviceConfiguration(IIrDriverProperties properties);
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyConfiguration(IIrDriverProperties properties);
 
 		#endregion
 	}

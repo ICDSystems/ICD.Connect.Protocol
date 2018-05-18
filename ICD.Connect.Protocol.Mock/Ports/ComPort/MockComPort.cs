@@ -2,6 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Protocol.Ports.ComPort;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 {
@@ -9,6 +10,21 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 	{
 		[PublicAPI]
 		public event EventHandler<StringEventArgs> OnSend;
+
+		/// <summary>
+		/// Gets the Com Spec configuration properties.
+		/// </summary>
+		protected override IComSpecProperties ComSpecProperties { get { return new ComSpecProperties(); } }
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnSend = null;
+
+			base.DisposeFinal(disposing);
+		}
 
 		/// <summary>
 		/// Implements the actual sending logic. Wrapped by Send to handle connection status.

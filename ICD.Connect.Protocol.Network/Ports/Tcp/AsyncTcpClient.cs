@@ -17,8 +17,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private readonly SafeMutex m_SocketMutex;
 		private readonly NetworkProperties m_NetworkProperties;
 
-		private string m_Address;
-
 		#region Properties
 
 		/// <summary>
@@ -27,35 +25,24 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public override string Address
 		{
-			get { return m_Address; }
-			set
-			{
-				if (value == null)
-				{
-					m_Address = null;
-				}
-				else
-				{
-					Uri uri = null;
-
-					try
-					{
-						uri = new Uri(value);
-					}
-					catch (Exception)
-					{
-					}
-
-					m_Address = uri == null ? value : uri.Host;
-				}
-			}
+			get { return m_NetworkProperties.NetworkAddress; }
+			set { m_NetworkProperties.NetworkAddress = value; }
 		}
 
 		/// <summary>
 		/// Get or set the port of the remote TCP server.
 		/// </summary>
 		[PublicAPI]
-		public override ushort Port { get; set; }
+		public override ushort Port
+		{
+			get { return m_NetworkProperties.NetworkPort ?? 0; }
+			set { m_NetworkProperties.NetworkPort = value; }
+		}
+
+		/// <summary>
+		/// Gets the Network configuration properties.
+		/// </summary>
+		protected override INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
 		/// Get or set the receive buffer size.

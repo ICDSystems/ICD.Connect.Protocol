@@ -44,7 +44,8 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="username"></param>
 		/// <param name="password"></param>
 		/// <param name="address"></param>
-		public static void ApplyDefaultValues(this ISecureNetworkProperties extends, string address, ushort? port, string username, string password)
+		public static void ApplyDefaultValues(this ISecureNetworkProperties extends, string address, ushort? port,
+		                                      string username, string password)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -56,6 +57,29 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			if (extends.NetworkPassword == null)
 				extends.NetworkPassword = password;
+		}
+
+		/// <summary>
+		/// Creates a new properties instance, applying this instance over the top of the other instance.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static ISecureNetworkProperties Superimpose(this ISecureNetworkProperties extends, ISecureNetworkProperties other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			SecureNetworkProperties output = new SecureNetworkProperties();
+
+			output.Copy(other);
+			output.ApplyDefaultValues(extends.NetworkAddress, extends.NetworkPort, extends.NetworkUsername,
+			                          extends.NetworkPassword);
+
+			return output;
 		}
 	}
 }
