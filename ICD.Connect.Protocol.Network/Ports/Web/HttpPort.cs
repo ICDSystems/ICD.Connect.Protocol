@@ -5,7 +5,6 @@ using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
-using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
@@ -13,7 +12,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	/// <summary>
 	/// Allows for communication with a HTTP service.
 	/// </summary>
-	public sealed partial class HttpPort : AbstractPort<HttpPortSettings>, IWebPort
+	public sealed partial class HttpPort : AbstractWebPort<HttpPortSettings>
 	{
 		private const string SOAP_ACCEPT = "application/xml";
 		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
@@ -28,7 +27,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the configured URI properties.
 		/// </summary>
-		public UriProperties UriProperties { get { return m_UriProperties; } }
+		public override UriProperties UriProperties { get { return m_UriProperties; } }
 
 		#endregion
 
@@ -56,7 +55,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public bool Post(string localUrl, string data, Encoding encoding, out string response)
+		public override bool Post(string localUrl, string data, Encoding encoding, out string response)
 		{
 			byte[] bytes = encoding.GetBytes(data);
 			return Post(localUrl, bytes, out response);

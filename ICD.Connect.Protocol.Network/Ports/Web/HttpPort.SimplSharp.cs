@@ -19,7 +19,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
-		public string Accept
+		public override string Accept
 		{
 			get { return m_HttpClient.Accept; }
 			set
@@ -32,7 +32,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
+		public override bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
 
 #endregion
 
@@ -97,7 +97,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="response"></param>
-		public bool Get(string localUrl, out string response)
+		public override bool Get(string localUrl, out string response)
 		{
 			bool success;
 
@@ -151,7 +151,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public bool Post(string localUrl, byte[] data, out string response)
+		public override bool Post(string localUrl, byte[] data, out string response)
 		{
 			bool success;
 
@@ -211,7 +211,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="content"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public bool DispatchSoap(string action, string content, out string response)
+		public override bool DispatchSoap(string action, string content, out string response)
 		{
 			bool success;
 
