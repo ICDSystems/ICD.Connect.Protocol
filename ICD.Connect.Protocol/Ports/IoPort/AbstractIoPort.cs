@@ -18,6 +18,13 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		public event EventHandler<UShortEventArgs> OnAnalogInChanged;
 		public event IoPortConfigurationCallback OnConfigurationChanged;
 
+		event EventHandler<BoolEventArgs> IDigitalInputPort.OnStateChanged
+		{
+			add { OnDigitalInChanged += value; }
+			// ReSharper disable once DelegateSubtraction
+			remove { OnDigitalInChanged -= value; }
+		}
+
 		private bool m_DigitalIn;
 		private bool m_DigitalOut;
 		private ushort m_AnalogIn;
@@ -103,6 +110,11 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 			}
 		}
 
+		/// <summary>
+		/// Gets the current digital input state.
+		/// </summary>
+		bool IDigitalInputPort.State { get { return DigitalIn; } }
+
 		#endregion
 
 		/// <summary>
@@ -175,17 +187,5 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		}
 
 		#endregion
-
-		event EventHandler<BoolEventArgs> IDigitalInputPort.OnStateChanged
-		{
-			add { OnDigitalInChanged += value; }
-// ReSharper disable once DelegateSubtraction
-			remove { OnDigitalInChanged -= value; }
-		}
-
-		/// <summary>
-		/// Gets the current digital input state.
-		/// </summary>
-		bool IDigitalInputPort.State { get { return DigitalIn; } }
 	}
 }
