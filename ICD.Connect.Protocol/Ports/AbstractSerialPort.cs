@@ -120,13 +120,13 @@ namespace ICD.Connect.Protocol.Ports
 			{
 				if (!IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - Port is not connected. Attempting to reconnect.", this);
+					Log(eSeverity.Notice, "Port is not connected. Attempting to reconnect.");
 					Connect();
 				}
 
 				if (!IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} - Port is not connected. Reconnection failed.", this);
+					Log(eSeverity.Error, "Port is not connected. Reconnection failed.");
 					return false;
 				}
 
