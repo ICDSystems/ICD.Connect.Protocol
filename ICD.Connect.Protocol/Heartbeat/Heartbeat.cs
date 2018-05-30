@@ -93,7 +93,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 		public void StartMonitoring()
 		{
 			m_MonitoringActive = true;
-
+			
 			// Check the connection now, but in a new thread
 			// This will start the timer if we are currently disconnected
 			ThreadingUtils.SafeInvoke(TimerCallback);

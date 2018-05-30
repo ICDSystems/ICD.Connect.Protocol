@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		private readonly ISerialBuffer m_Buffer;
 		private readonly object m_Parent;
 
-		private ISerialPort m_Port;
+		private readonly ConnectionStateManager m_ConnectionStateManager;
 
 		/// <summary>
 		/// Constructor.
@@ -28,6 +28,9 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		{
 			m_Buffer = new JsonSerialBuffer();
 			m_Parent = parent;
+
+			m_ConnectionStateManager = new ConnectionStateManager(this){ConfigurePort = ConfigurePort};
+			m_ConnectionStateManager.OnSerialDataReceived += PortOnSerialDataReceived;
 
 			Subscribe(m_Buffer);
 		}
@@ -39,8 +42,10 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// </summary>
 		public void Dispose()
 		{
-			SetPort(null);
 			Unsubscribe(m_Buffer);
+
+			m_ConnectionStateManager.OnSerialDataReceived -= PortOnSerialDataReceived;
+			m_ConnectionStateManager.Dispose();
 		}
 
 		/// <summary>
@@ -71,28 +76,14 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="data"></param>
 		private void SendData(ISerialData data)
 		{
-			if (m_Port == null)
+			if (!m_ConnectionStateManager.IsConnected)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} unable to send data, port is null", GetType().Name);
+				               .AddEntry(eSeverity.Error, "{0} - Unable to communicate with port - connection state is false", GetType().Name);
 				return;
 			}
 
-			if (!m_Port.IsConnected)
-			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Warning, "{0} port disconnected, attempting reconnect", GetType().Name);
-				m_Port.Connect();
-			}
-
-			if (!m_Port.IsConnected)
-			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} unable to communicate with port", GetType().Name);
-				return;
-			}
-
-			m_Port.Send(data.Serialize());
+			m_ConnectionStateManager.Send(data.Serialize());
 		}
 
 		/// <summary>
@@ -102,44 +93,17 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
 		{
-			if (port == m_Port)
-				return;
+			m_ConnectionStateManager.SetPort(port);
+		}
 
-			Ubsubscribe(m_Port);
-
+		private void ConfigurePort(ISerialPort port)
+		{
 			m_Buffer.Clear();
-			m_Port = port;
-
-			Subscribe(m_Port);
 		}
 
 		#endregion
 
 		#region Port Callbacks
-
-		/// <summary>
-		/// Subscribe to the port events.
-		/// </summary>
-		/// <param name="port"></param>
-		private void Subscribe(ISerialPort port)
-		{
-			if (port == null)
-				return;
-
-			port.OnSerialDataReceived += PortOnSerialDataReceived;
-		}
-
-		/// <summary>
-		/// Unsubscribe from the port events.
-		/// </summary>
-		/// <param name="port"></param>
-		private void Ubsubscribe(ISerialPort port)
-		{
-			if (port == null)
-				return;
-
-			port.OnSerialDataReceived -= PortOnSerialDataReceived;
-		}
 
 		/// <summary>
 		/// Called when the port receieves some serial data.
