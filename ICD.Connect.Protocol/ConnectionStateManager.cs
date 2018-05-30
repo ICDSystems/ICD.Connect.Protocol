@@ -4,6 +4,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Protocol.Heartbeat;
 using ICD.Connect.Protocol.Ports;
 
@@ -191,7 +192,7 @@ namespace ICD.Connect.Protocol
 			IsConnected = m_Port != null && m_Port.IsConnected;
 		}
 
-		private void WrappedPortOnIsOnlineStateChanged(object sender, BoolEventArgs e)
+		private void WrappedPortOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs eventArgs)
 		{
 			IsOnline = m_Port != null && m_Port.IsOnline;
 		}
