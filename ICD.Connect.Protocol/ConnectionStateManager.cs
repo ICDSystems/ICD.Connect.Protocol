@@ -6,7 +6,6 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Heartbeat;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 
 namespace ICD.Connect.Protocol
 {
@@ -18,7 +17,7 @@ namespace ICD.Connect.Protocol
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
 		public event EventHandler<BoolEventArgs> OnIsOnlineStateChanged;
 
-		private readonly object m_Device;
+		private object m_Parent;
 
 		private ISerialPort m_Port;
 		private bool m_IsConnected;
@@ -68,7 +67,7 @@ namespace ICD.Connect.Protocol
 
 		public ConnectionStateManager(object connectable)
 		{
-			m_Device = connectable;
+			m_Parent = connectable;
 			Heartbeat = new Heartbeat.Heartbeat(this);
 		}
 
@@ -76,17 +75,19 @@ namespace ICD.Connect.Protocol
 		{
 			Heartbeat.Dispose();
 
+			SetPort(null);
+
 			ConfigurePort = null;
+			m_Parent = null;
 		}
 
 		/// <summary>
-		/// Sets the port for communicating with the device.
+		/// Sets the port for communicating with the remote endpoint.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
 		{
-			Log(eSeverity.Debug, "IsOnline: {0} IsConnected {1}", IsOnline, IsConnected);
 			if (port == m_Port)
 				return;
 
@@ -109,9 +110,6 @@ namespace ICD.Connect.Protocol
 			IsConnected = m_Port != null && m_Port.IsConnected;
 		}
 
-		/// <summary>
-		/// Connect to the codec.
-		/// </summary>
 		[PublicAPI]
 		public void Connect()
 		{
@@ -124,9 +122,6 @@ namespace ICD.Connect.Protocol
 			m_Port.Connect();
 		}
 
-		/// <summary>
-		/// Disconnect from the codec.
-		/// </summary>
 		[PublicAPI]
 		public void Disconnect()
 		{
@@ -143,7 +138,7 @@ namespace ICD.Connect.Protocol
 		{
 			if (!m_Port.IsConnected)
 			{
-				Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Device);
+				Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
 				return false;
 			}
 			return m_Port.Send(data);
@@ -155,7 +150,7 @@ namespace ICD.Connect.Protocol
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return string.Format("({0}){1} ", GetType().Name, m_Device);
+			return string.Format("({0}){1}", GetType().Name, m_Parent);
 		}
 
 		/// <summary>

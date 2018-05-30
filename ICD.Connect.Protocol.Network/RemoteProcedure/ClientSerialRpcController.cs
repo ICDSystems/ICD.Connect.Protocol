@@ -45,6 +45,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			Unsubscribe(m_Buffer);
 
 			m_ConnectionStateManager.OnSerialDataReceived -= PortOnSerialDataReceived;
+			m_ConnectionStateManager.Dispose();
 		}
 
 		/// <summary>
@@ -78,7 +79,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			if (!m_ConnectionStateManager.IsConnected)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} unable to communicate with port", GetType().Name);
+				               .AddEntry(eSeverity.Error, "{0} - Unable to communicate with port - connection state is false", GetType().Name);
 				return;
 			}
 
