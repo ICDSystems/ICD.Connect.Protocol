@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
@@ -27,7 +28,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 		private ISerialBuffer m_Buffer;
 
-		private readonly List<ISerialData> m_CommandQueue;
+		private readonly PriorityQueue<ISerialData> m_CommandQueue;
 		private readonly SafeCriticalSection m_CommandLock;
 		private readonly SafeTimer m_TimeoutTimer;
 		private readonly IcdStopwatch m_DisconnectedTimer;
@@ -84,7 +85,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		protected AbstractSerialQueue()
 		{
-			m_CommandQueue = new List<ISerialData>();
+			m_CommandQueue = new PriorityQueue<ISerialData>();
 			m_CommandLock = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
@@ -162,7 +163,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
-				m_CommandQueue.Add(data);
+				m_CommandQueue.Enqueue(data);
 				CommandAdded();
 			}
 			finally
@@ -190,9 +191,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="data"></param>
 		/// <param name="comparer"></param>
 		public void Enqueue<T>(T data, Func<T, T, bool> comparer)
-			where T : ISerialData
+			where T : class, ISerialData
 		{
-// ReSharper disable once CompareNonConstrainedGenericWithNull
 			if (data == null)
 				throw new ArgumentNullException("data");
 
@@ -200,24 +200,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
-				bool found = false;
-
-				// Search for the existing command
-				for (int index = 0; index < m_CommandQueue.Count; index++)
-				{
-					ISerialData other = m_CommandQueue[index];
-					if (!(other is T) || !comparer(data, (T)other))
-						continue;
-
-					m_CommandQueue[index] = data;
-					found = true;
-					break;
-				}
-
-				if (found)
-					return;
-
-				Enqueue(data);
+				Func<ISerialData, bool> removeCallback = d => (d is T) && comparer(data, d as T);
+				m_CommandQueue.EnqueueRemove(data, removeCallback);
 			}
 			finally
 			{
@@ -234,7 +218,25 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
-				m_CommandQueue.Insert(0, data);
+				m_CommandQueue.Enqueue(data, 0);
+				CommandAdded();
+			}
+			finally
+			{
+				m_CommandLock.Leave();
+			}
+		}
+
+		public void EnqueuePriority(ISerialData data, int priority)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			m_CommandLock.Enter();
+
+			try
+			{
+				m_CommandQueue.Enqueue(data, priority);
 				CommandAdded();
 			}
 			finally
@@ -279,8 +281,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				StartTimeoutTimer();
 
-				CurrentCommand = m_CommandQueue[0];
-				m_CommandQueue.RemoveAt(0);
+				CurrentCommand = m_CommandQueue.Dequeue();
 				IsCommandInProgress = true;
 
 				try
