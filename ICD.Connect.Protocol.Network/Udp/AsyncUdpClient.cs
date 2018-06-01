@@ -104,7 +104,9 @@ namespace ICD.Connect.Protocol.Network.Udp
 		{
 #if SIMPLSHARP
 			IcdEnvironment.eEthernetAdapterType adapterType =
-				IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
+				m_UdpClient == null
+					? IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter
+					: IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
 
 			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
 				return;
@@ -117,6 +119,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 					break;
 
 				case IcdEnvironment.eEthernetEventType.LinkDown:
+					if (m_UdpClient == null)
+						break;
 #if SIMPLSHARP
 					m_UdpClient.DisableUDPServer();
 #else

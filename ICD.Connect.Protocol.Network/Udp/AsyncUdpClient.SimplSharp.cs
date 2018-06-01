@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Properties;
+#if SIMPLSHARP
 using System;
 using System.Linq;
 using Crestron.SimplSharp;
@@ -11,6 +12,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 {
 	public sealed partial class AsyncUdpClient
 	{
+		[CanBeNull]
 		private UDPServer m_UdpClient;
 
 		#region Methods
@@ -105,6 +107,13 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// </summary>
 		private bool SendToAddressFinal(string data, string ipAddress, int port)
 		{
+			if (m_UdpClient == null)
+			{
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - Wrapped client is null",
+				    ipAddress, port);
+				return false;
+			}
+
 			byte[] bytes = StringUtils.ToBytes(data);
 
 			try
@@ -127,6 +136,12 @@ namespace ICD.Connect.Protocol.Network.Udp
 		/// </summary>
 		protected override bool SendFinal(string data)
 		{
+			if (m_UdpClient == null)
+			{
+				Log(eSeverity.Error, "Failed to send data - Wrapped client is null");
+				return false;
+			}
+
 			byte[] bytes = StringUtils.ToBytes(data);
 
 			try
