@@ -38,15 +38,15 @@ namespace ICD.Connect.Protocol.Network.Udp
 				    error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
 				    error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
-					                this, address, port, error);
+					Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+					    address, port, error);
 					Disconnect();
 				}
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
-				                this, address, port, e.Message);
+				Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+				    address, port, e.Message);
 				Disconnect();
 			}
 
@@ -115,8 +115,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
-								this, ipAddress, port, e.Message);
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				    ipAddress, port, e.Message);
 			}
 
 			return false;
@@ -137,8 +137,8 @@ namespace ICD.Connect.Protocol.Network.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
-				                this, m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				    m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
 			}
 
 			return false;
