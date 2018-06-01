@@ -202,6 +202,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				Func<ISerialData, bool> removeCallback = d => (d is T) && comparer(data, d as T);
 				m_CommandQueue.EnqueueRemove(data, removeCallback);
+				CommandAdded();
 			}
 			finally
 			{
