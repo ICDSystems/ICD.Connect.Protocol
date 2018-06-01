@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - RPC uses ConnectionStateManager for maintaining connection with remote endpoints
+ - Fixed bug where a disconnected UDP client would throw an exception on network interface linkdown
 
 ## [6.0.0] - 2018-05-24
 ### Changed
