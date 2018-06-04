@@ -45,9 +45,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		/// <param name="data"></param>
 		/// <param name="comparer"></param>
-		void Enqueue<T>(T data, Func<T, T, bool> comparer) where T : ISerialData;
+		void Enqueue<T>(T data, Func<T, T, bool> comparer) where T : class, ISerialData;
 
 		void EnqueuePriority(ISerialData data);
+
+		void EnqueuePriority(ISerialData data, int priority);
 	}
 
 	public static class SerialQueueExtensions
