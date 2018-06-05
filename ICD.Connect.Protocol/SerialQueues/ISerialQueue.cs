@@ -18,6 +18,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		event EventHandler<SerialDataEventArgs> OnTimeout;
 
 		/// <summary>
+		/// Returns the number of queued commands.
+		/// </summary>
+		int CommandCount { get; }
+
+		/// <summary>
 		/// Gets the current port.
 		/// </summary>
 		ISerialPort Port { get; }
