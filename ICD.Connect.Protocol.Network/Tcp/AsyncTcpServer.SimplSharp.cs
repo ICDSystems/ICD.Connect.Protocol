@@ -45,7 +45,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
 
-				m_TcpListener.Stop();
 				m_TcpListener.DisconnectAll();
 
 				ServiceProvider.TryGetService<ILoggerService>()
