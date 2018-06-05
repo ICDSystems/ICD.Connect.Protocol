@@ -7,8 +7,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 {
 	public interface ISerialQueue : IDisposable
 	{
+		/// <summary>
+		/// Raises individual commands with their responses.
+		/// </summary>
 		event EventHandler<SerialResponseEventArgs> OnSerialResponse;
 
+		/// <summary>
+		/// Raised when a command does not yield a response within a time limit.
+		/// </summary>
 		event EventHandler<SerialDataEventArgs> OnTimeout;
 
 		/// <summary>
