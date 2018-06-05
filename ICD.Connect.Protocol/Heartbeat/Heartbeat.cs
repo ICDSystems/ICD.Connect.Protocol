@@ -78,6 +78,11 @@ namespace ICD.Connect.Protocol.Heartbeat
 			Subscribe(m_Instance);
 		}
 
+		#region Methods
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public void Dispose()
 		{
 			Unsubscribe(m_Instance);
@@ -88,8 +93,9 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_Instance = null;
 		}
 
-		#region Methods
-
+		/// <summary>
+		/// Starts maintaining connection state.
+		/// </summary>
 		public void StartMonitoring()
 		{
 			m_MonitoringActive = true;
@@ -99,6 +105,9 @@ namespace ICD.Connect.Protocol.Heartbeat
 			ThreadingUtils.SafeInvoke(TimerCallback);
 		}
 
+		/// <summary>
+		/// Stops maintaining connection state.
+		/// </summary>
 		public void StopMonitoring()
 		{
 			m_MonitoringActive = false;
@@ -145,6 +154,11 @@ namespace ICD.Connect.Protocol.Heartbeat
 			instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
 		}
 
+		/// <summary>
+		/// Called when the instance connection state changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
 		private void InstanceOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
 		{
 			if (!m_MonitoringActive)
