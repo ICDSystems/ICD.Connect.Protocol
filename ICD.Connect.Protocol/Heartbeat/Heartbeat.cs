@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
@@ -26,9 +27,10 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private readonly long m_MaxIntervalMs;
 		private readonly long[] m_RampIntervalMs;
 		private readonly SafeTimer m_Timer;
+		private readonly SafeCriticalSection m_ConnectSection;
+
 		private int m_ConnectAttempts;
 		private bool m_MonitoringActive;
-		private bool m_Connecting;
 		private IConnectable m_Instance;
 
 		public ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
@@ -73,7 +75,8 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_Instance = instance;
 			m_MaxIntervalMs = maxIntervalMs;
 			m_RampIntervalMs = rampIntervalMs.ToArray();
-			m_Timer = SafeTimer.Stopped(TimerCallback);
+			m_Timer = SafeTimer.Stopped(HandleConnectionState);
+			m_ConnectSection = new SafeCriticalSection();
 
 			Subscribe(m_Instance);
 		}
@@ -102,7 +105,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 			
 			// Check the connection now, but in a new thread
 			// This will start the timer if we are currently disconnected
-			ThreadingUtils.SafeInvoke(TimerCallback);
+			ThreadingUtils.SafeInvoke(HandleConnectionState);
 		}
 
 		/// <summary>
@@ -116,17 +119,6 @@ namespace ICD.Connect.Protocol.Heartbeat
 		}
 
 		#endregion
-
-		private void TimerCallback()
-		{
-			if (m_Instance == null)
-				return;
-
-			if (m_Instance.IsConnected)
-				HandleConnected();
-			else
-				HandleDisconnected();
-		}
 
 		#region Instance Callbacks
 
@@ -161,14 +153,25 @@ namespace ICD.Connect.Protocol.Heartbeat
 		/// <param name="eventArgs"></param>
 		private void InstanceOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
 		{
-			if (!m_MonitoringActive)
+			if (m_Instance == null)
 				return;
 
 			if (eventArgs.Data)
-			{
-				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", sender);
+				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", m_Instance);
+			else
+				Logger.AddEntry(eSeverity.Warning, "{0} lost connection.", m_Instance);
+
+			if (m_MonitoringActive)
+				HandleConnectionState();
+		}
+
+		private void HandleConnectionState()
+		{
+			if (m_Instance == null)
+				return;
+
+			if (m_Instance.IsConnected)
 				HandleConnected();
-			}
 			else
 				HandleDisconnected();
 		}
@@ -176,45 +179,32 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private void HandleConnected()
 		{
 			m_ConnectAttempts = 0;
-			m_Connecting = false;
 		}
 
 		private void HandleDisconnected()
 		{
-			if (m_Connecting)
-				return;
-
-			if (m_Instance == null)
+			if (!m_ConnectSection.TryEnter())
 				return;
 
 			try
 			{
-				m_Connecting = true;
+				long interval = m_RampIntervalMs.ElementAtOrDefault(m_ConnectAttempts, m_MaxIntervalMs);
+				eSeverity severity = m_ConnectAttempts >= m_RampIntervalMs.Length ? eSeverity.Error : eSeverity.Warning;
+
+				Logger.AddEntry(severity, "{0} - Attempting to reconnect (Attempt {1}).",
+				                m_Instance, m_ConnectAttempts + 1);
 
 				m_Instance.Connect();
 
-				if (m_ConnectAttempts < m_RampIntervalMs.Length)
+				if (!m_Instance.IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Warning,
-					                m_ConnectAttempts == 0
-						                ? "{0} lost connection. Attempting to reconnect. Attempted {1} time."
-						                : "{0} lost connection. Attempting to reconnect. Attempted {1} times.",
-					                m_Instance,
-					                m_ConnectAttempts + 1);
-					m_Timer.Reset(m_RampIntervalMs[m_ConnectAttempts]);
-					m_ConnectAttempts++;
-				}
-				else
-				{
-					Logger.AddEntry(eSeverity.Error, "{0} lost connection. Attempting to reconnect. Attempted {1} times.", m_Instance,
-					                m_ConnectAttempts + 1);
-					m_Timer.Reset(m_MaxIntervalMs);
+					m_Timer.Reset(interval);
 					m_ConnectAttempts++;
 				}
 			}
 			finally
 			{
-				m_Connecting = false;
+				m_ConnectSection.Leave();
 			}
 		}
 
