@@ -34,17 +34,14 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				}
 				else
 				{
-					Uri uri = null;
-
 					try
 					{
-						uri = new Uri(value);
+						m_Address = new Uri(value).Host;
 					}
 					catch (Exception)
 					{
+						m_Address = value;
 					}
-
-					m_Address = uri == null ? value : uri.Host;
 				}
 			}
 		}
