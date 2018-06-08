@@ -41,7 +41,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
 
-				m_TcpListener.Stop();
 				m_TcpListener.DisconnectAll();
 
 				Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
