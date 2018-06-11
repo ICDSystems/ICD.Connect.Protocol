@@ -14,8 +14,19 @@ namespace ICD.Connect.Protocol
 
 	public sealed class ConnectionStateManager : IConnectable, IDisposable
 	{
+		/// <summary>
+		/// Raised when the connection state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
+
+		/// <summary>
+		/// Raised when serial data is received.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
+
+		/// <summary>
+		/// Raised when the online state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsOnlineStateChanged;
 
 		private object m_Parent;
@@ -23,6 +34,8 @@ namespace ICD.Connect.Protocol
 		private ISerialPort m_Port;
 		private bool m_IsConnected;
 		private bool m_IsOnline;
+
+		#region Properties
 
 		private ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
@@ -64,14 +77,26 @@ namespace ICD.Connect.Protocol
 			}
 		}
 
+		/// <summary>
+		/// Gets the id of the current serial port.
+		/// </summary>
 		public int? PortNumber { get { return m_Port == null ? (int?)null : m_Port.Id; } }
 
+		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="connectable"></param>
 		public ConnectionStateManager(object connectable)
 		{
 			m_Parent = connectable;
 			Heartbeat = new Heartbeat.Heartbeat(this);
 		}
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public void Dispose()
 		{
 			Heartbeat.Dispose();
@@ -81,6 +106,8 @@ namespace ICD.Connect.Protocol
 			ConfigurePort = null;
 			m_Parent = null;
 		}
+
+		#region Methods
 
 		/// <summary>
 		/// Sets the port for communicating with the remote endpoint.
@@ -137,12 +164,11 @@ namespace ICD.Connect.Protocol
 
 		public bool Send(string data)
 		{
-			if (!m_Port.IsConnected)
-			{
-				Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
-				return false;
-			}
-			return m_Port.Send(data);
+			if (m_Port.IsConnected)
+				return m_Port.Send(data);
+
+			Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
+			return false;
 		}
 
 		/// <summary>
@@ -153,6 +179,24 @@ namespace ICD.Connect.Protocol
 		{
 			return string.Format("({0}){1}", GetType().Name, m_Parent);
 		}
+
+		#endregion
+
+		#region Private Methods
+
+		private void Log(eSeverity severity, string message)
+		{
+			Logger.AddEntry(severity, "{0} - {1}", this, message);
+		}
+
+		private void Log(eSeverity severity, string message, params object[] args)
+		{
+			Logger.AddEntry(severity, string.Format("{0} - {1}", this, string.Format(message, args)));
+		}
+
+		#endregion
+
+		#region Prot Callbacks
 
 		/// <summary>
 		/// Subscribes to the port events.
@@ -197,14 +241,6 @@ namespace ICD.Connect.Protocol
 			IsOnline = m_Port != null && m_Port.IsOnline;
 		}
 
-		private void Log(eSeverity severity, string message)
-		{
-			Logger.AddEntry(severity, "{0} - {1}", this, message);
-		}
-
-		private void Log(eSeverity severity, string message, params object[] args)
-		{
-			Logger.AddEntry(severity, string.Format("{0} - {1}", this, string.Format(message, args)));
-		}
+		#endregion
 	}
 }
