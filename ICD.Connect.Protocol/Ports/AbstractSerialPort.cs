@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
@@ -181,7 +182,6 @@ namespace ICD.Connect.Protocol.Ports
 			yield return new ConsoleCommand("Connect", "Connects to the physical endpoint", () => Connect());
 			yield return new ConsoleCommand("Disconnect", "Disconnects from the physical endpoint", () => Disconnect());
 			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => ConsoleSend(a));
-			yield return new ParamsConsoleCommand("SendHex", "Sends hex data in the format \\xFF\\xFF...", b => SendHex(b));
 		}
 
 		/// <summary>
@@ -199,17 +199,16 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		private void ConsoleSend(params string[] data)
 		{
-			Send(string.Join(" ", data));
-		}
+			if (data == null)
+				throw new ArgumentNullException("data");
 
-		/// <summary>
-		/// Shim to send hex data from console command.
-		/// </summary>
-		/// <param name="data"></param>
-		private void SendHex(params string[] data)
-		{
-			foreach (string literal in data.Select(item => StringUtils.FromHexLiteral(item)))
-				Send(literal);
+			// Rejoin the parameters
+			string command = string.Join(" ", data);
+
+			// Replace escape codes with the actual characters
+			command = Regex.Unescape(command);
+
+			Send(command);
 		}
 
 		#endregion
