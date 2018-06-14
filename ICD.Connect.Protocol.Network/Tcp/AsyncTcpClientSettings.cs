@@ -11,17 +11,23 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private const string HOST_PORT_ELEMENT = "Port";
 		private const string BUFFER_SIZE_ELEMENT = "BufferSize";
 
-		private ushort m_BufferSize = AsyncTcpClient.DEFAULT_BUFFER_SIZE;
-
 		#region Properties
 
 		public string Address { get; set; }
 
 		public ushort Port { get; set; }
 
-		public ushort BufferSize { get { return m_BufferSize; } set { m_BufferSize = value; } }
+		public ushort BufferSize { get; set; }
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public AsyncTcpClientSettings()
+		{
+			BufferSize = AsyncTcpClient.DEFAULT_BUFFER_SIZE;
+		}
 
 		/// <summary>
 		/// Writes property elements to xml.

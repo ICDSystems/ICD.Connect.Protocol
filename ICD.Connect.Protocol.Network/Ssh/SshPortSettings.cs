@@ -15,8 +15,6 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		private const string USERNAME_ELEMENT = "Username";
 		private const string PASSWORD_ELEMENT = "Password";
 
-		private ushort m_Port = SshPort.DEFAULT_PORT;
-
 		#region Properties
 
 		public string Address { get; set; }
@@ -25,9 +23,17 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 		public string Password { get; set; }
 
-		public ushort Port { get { return m_Port; } set { m_Port = value; } }
+		public ushort Port { get; set; }
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public SshPortSettings()
+		{
+			Port = SshPort.DEFAULT_PORT;
+		}
 
 		#region Method
 

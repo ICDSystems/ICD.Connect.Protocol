@@ -11,11 +11,23 @@ namespace ICD.Connect.Protocol.Network.Udp
 		private const string HOST_PORT_ELEMENT = "Port";
 		private const string BUFFER_SIZE_ELEMENT = "BufferSize";
 
-		private int m_BufferSize = AsyncUdpClient.DEFAULT_BUFFER_SIZE;
+		#region Properties
 
 		public string Address { get; set; }
+
 		public ushort Port { get; set; }
-		public int BufferSize { get { return m_BufferSize; } set { m_BufferSize = value; } }
+
+		public int BufferSize { get; set; }
+
+		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public AsyncUdpClientSettings()
+		{
+			BufferSize = AsyncUdpClient.DEFAULT_BUFFER_SIZE;
+		}
 
 		/// <summary>
 		/// Writes property elements to xml.
