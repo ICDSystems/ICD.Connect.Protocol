@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
@@ -79,7 +80,18 @@ namespace ICD.Connect.Protocol.Network.Udp
 		[PublicAPI]
 		public bool SendToAddress(string data, string ipAddress, int port)
 		{
-			return ConnectAndSend(data, s => SendToAddressFinal(s, ipAddress, port));
+			try
+			{
+				if (IsConnected)
+					return SendToAddressFinal(data, ipAddress, port);
+
+				Logger.AddEntry(eSeverity.Error, "{0} - Unable to send to address - Port is not connected.", this);
+				return false;
+			}
+			finally
+			{
+				UpdateIsConnectedState();
+			}
 		}
 
 		#endregion

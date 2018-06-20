@@ -72,11 +72,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		}
 
 		/// <summary>
-		/// Destructor.
+		/// Release resources.
 		/// </summary>
-		~SshPort()
+		protected override void DisposeFinal(bool disposing)
 		{
-			Dispose();
+			base.DisposeFinal(disposing);
+
+			Disconnect();
 		}
 
 		#endregion
@@ -88,12 +90,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		public override void Connect()
 		{
-			Disconnect();
-
 			m_SshSection.Enter();
 
 			try
 			{
+				Disconnect();
+
 				if (Address == null)
 				{
 					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Address is null", this);
@@ -197,6 +199,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
 			}
 		}
@@ -206,15 +209,26 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeConnectionInfo()
 		{
-			if (m_ConnectionInfo == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_ConnectionInfo);
-			m_ConnectionInfo.Dispose();
+			try
+			{
+				if (m_ConnectionInfo == null)
+					return;
 
-			m_ConnectionInfo = null;
+				Unsubscribe(m_ConnectionInfo);
+				m_ConnectionInfo.Dispose();
 
-			UpdateIsConnectedState();
+				m_ConnectionInfo = null;
+
+				UpdateIsConnectedState();
+			}
+			finally
+			{
+				m_SshSection.Leave();
+
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -222,21 +236,30 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeClient()
 		{
-			if (m_SshClient == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshClient);
-			m_SshClient.Disconnect();
+			try
+			{
+				if (m_SshClient == null)
+					return;
 
-			//Disposing the client, let's dispose the stream too?
-			DisposeStream();
+				Unsubscribe(m_SshClient);
+				m_SshClient.Disconnect();
 
-			//Disposing the client in a different thread, because we've seen it lock up before?
-			ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
+				//Disposing the client, let's dispose the stream too?
+				DisposeStream();
 
-			m_SshClient = null;
+				//Disposing the client in a different thread, because we've seen it lock up before?
+				ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
 
-			UpdateIsConnectedState();
+				m_SshClient = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
+
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -244,36 +267,45 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeStream()
 		{
-			if (m_SshStream == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshStream);
+			try
+			{
+				if (m_SshStream == null)
+					return;
+
+				Unsubscribe(m_SshStream);
 
 #if SIMPLSHARP
-			// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
-			// This will raise a base Exception.
-			try
-			{
-				m_SshStream.Close();
-			}
-			catch (Exception e)
-			{
-				Logger.AddEntry(eSeverity.Warning, "{0} Failed to close SSHStream - {1}", GetType().Name, e.Message);
-			}
+				// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
+				// This will raise a base Exception.
+				try
+				{
+					m_SshStream.Close();
+				}
+				catch (Exception e)
+				{
+					Logger.AddEntry(eSeverity.Warning, "{0} Failed to close SSHStream - {1}", GetType().Name, e.Message);
+				}
 #endif
 
-			try
-			{
-				m_SshStream.Dispose();
-			}
-			catch (Exception e)
-			{
-				Logger.AddEntry(eSeverity.Warning, "{0} Failed to dispose SSHStream - {1}", GetType().Name, e.Message);
-			}
+				try
+				{
+					m_SshStream.Dispose();
+				}
+				catch (Exception e)
+				{
+					Logger.AddEntry(eSeverity.Warning, "{0} Failed to dispose SSHStream - {1}", GetType().Name, e.Message);
+				}
 
-			m_SshStream = null;
+				m_SshStream = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 
-			UpdateIsConnectedState();
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -316,6 +348,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
 			}
 		}
