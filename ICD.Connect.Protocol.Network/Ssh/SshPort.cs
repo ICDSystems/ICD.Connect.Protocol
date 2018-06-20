@@ -29,7 +29,8 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 		private readonly SafeCriticalSection m_SshSection;
 
-		private KeyboardInteractiveConnectionInfo m_ConnectionInfo;
+		private KeyboardInteractiveAuthenticationMethod m_Auth;
+		private ConnectionInfo m_ConnectionInfo;
 		private ShellStream m_SshStream;
 		private SshClient m_SshClient;
 
@@ -108,8 +109,17 @@ namespace ICD.Connect.Protocol.Network.Ssh
 					return;
 				}
 
-				m_ConnectionInfo = new KeyboardInteractiveConnectionInfo(Address, Port, Username);
-				Subscribe(m_ConnectionInfo);
+				m_Auth = new KeyboardInteractiveAuthenticationMethod(Username);
+				Subscribe(m_Auth);
+
+				AuthenticationMethod[] authMethods =
+				{
+					m_Auth,
+					new NoneAuthenticationMethod(Username),
+					new PasswordAuthenticationMethod(Username, Password)
+				};
+
+				m_ConnectionInfo = new ConnectionInfo(Address, Port, Username, authMethods);
 
 				try
 				{
@@ -192,6 +202,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 
 			try
 			{
+				DisposeAuth();
 				DisposeConnectionInfo();
 				DisposeStream();
 				DisposeClient();
@@ -201,6 +212,29 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				m_SshSection.Leave();
 
 				UpdateIsConnectedState();
+			}
+		}
+
+		/// <summary>
+		/// Dispose the auth object.
+		/// </summary>
+		private void DisposeAuth()
+		{
+			m_SshSection.Enter();
+
+			try
+			{
+				if (m_Auth == null)
+					return;
+
+				Unsubscribe(m_Auth);
+
+				m_Auth.Dispose();
+				m_Auth = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 			}
 		}
 
@@ -216,12 +250,10 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				if (m_ConnectionInfo == null)
 					return;
 
-				Unsubscribe(m_ConnectionInfo);
+#if SIMPLSHARP
 				m_ConnectionInfo.Dispose();
-
+#endif
 				m_ConnectionInfo = null;
-
-				UpdateIsConnectedState();
 			}
 			finally
 			{
@@ -406,17 +438,17 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <summary>
 		/// Subscribe to the connection info events.
 		/// </summary>
-		/// <param name="connectionInfo"></param>
-		private void Subscribe(KeyboardInteractiveConnectionInfo connectionInfo)
+		/// <param name="authMethod"></param>
+		private void Subscribe(KeyboardInteractiveAuthenticationMethod authMethod)
 		{
-			connectionInfo.AuthenticationPrompt += ConnInfoAuthenticationPrompt;
+			authMethod.AuthenticationPrompt += ConnInfoAuthenticationPrompt;
 		}
 
 		/// <summary>
 		/// Unsubscribes from the connection info.
 		/// </summary>
 		/// <param name="connectionInfo"></param>
-		private void Unsubscribe(KeyboardInteractiveConnectionInfo connectionInfo)
+		private void Unsubscribe(KeyboardInteractiveAuthenticationMethod connectionInfo)
 		{
 			connectionInfo.AuthenticationPrompt -= ConnInfoAuthenticationPrompt;
 		}
