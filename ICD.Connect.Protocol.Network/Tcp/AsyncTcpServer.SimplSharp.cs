@@ -41,10 +41,25 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
 
-				m_TcpListener.DisconnectAll();
+				try
+				{
+					m_TcpListener.DisconnectAll();
+				}
+				catch (Exception e)
+				{
+					// Handling some internal Crestron exception that occurs when the stream is disposed.
+					// SimplSharpPro: Got unhandled exception System.Exception:  Object not initialized
+					//	at Crestron.SimplSharp.CEvent.Set()
+					//	at Crestron.SimplSharp.AsyncStream.Close()
+					//	at Crestron.SimplSharp.CrestronIO.Stream.Dispose()
+					//	at Crestron.SimplSharp.CrestronSockets.TCPServer.DisconnectAll()
+					if (!e.Message.Contains("Object not initialized"))
+						throw;
+				}
 
 				Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
 			}
+
 			m_TcpListener = null;
 
 			foreach (uint client in GetClients())

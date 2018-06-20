@@ -72,11 +72,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		}
 
 		/// <summary>
-		/// Destructor.
+		/// Release resources.
 		/// </summary>
-		~SshPort()
+		protected override void DisposeFinal(bool disposing)
 		{
-			Dispose();
+			base.DisposeFinal(disposing);
+
+			Disconnect();
 		}
 
 		#endregion
@@ -88,12 +90,12 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		public override void Connect()
 		{
-			Disconnect();
-
 			m_SshSection.Enter();
 
 			try
 			{
+				Disconnect();
+
 				if (Address == null)
 				{
 					Log(eSeverity.Error, "Failed to connect - Address is null");
@@ -121,7 +123,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 					Subscribe(m_SshClient);
 					m_SshClient.Connect();
 				}
-					// Catches when we attempt to connect to an invalid/offline endpoint.
+				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SshException e)
 				{
 					// Potential fix for "Message type 80 is not valid" - the Crestron SSH implementation should be ignoring this.
@@ -131,7 +133,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 						Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 					}
 				}
-					// Catches when we attempt to connect to an invalid/offline endpoint.
+				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SocketException e)
 				{
 					DisposeClient();
@@ -197,6 +199,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
 			}
 		}
@@ -206,15 +209,26 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeConnectionInfo()
 		{
-			if (m_ConnectionInfo == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_ConnectionInfo);
-			m_ConnectionInfo.Dispose();
+			try
+			{
+				if (m_ConnectionInfo == null)
+					return;
 
-			m_ConnectionInfo = null;
+				Unsubscribe(m_ConnectionInfo);
+				m_ConnectionInfo.Dispose();
 
-			UpdateIsConnectedState();
+				m_ConnectionInfo = null;
+
+				UpdateIsConnectedState();
+			}
+			finally
+			{
+				m_SshSection.Leave();
+
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -222,21 +236,30 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeClient()
 		{
-			if (m_SshClient == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshClient);
-			m_SshClient.Disconnect();
+			try
+			{
+				if (m_SshClient == null)
+					return;
 
-			//Disposing the client, let's dispose the stream too?
-			DisposeStream();
+				Unsubscribe(m_SshClient);
+				m_SshClient.Disconnect();
 
-			//Disposing the client in a different thread, because we've seen it lock up before?
-			ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
+				//Disposing the client, let's dispose the stream too?
+				DisposeStream();
 
-			m_SshClient = null;
+				//Disposing the client in a different thread, because we've seen it lock up before?
+				ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
 
-			UpdateIsConnectedState();
+				m_SshClient = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
+
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -244,36 +267,45 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// </summary>
 		private void DisposeStream()
 		{
-			if (m_SshStream == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshStream);
+			try
+			{
+				if (m_SshStream == null)
+					return;
+
+				Unsubscribe(m_SshStream);
 
 #if SIMPLSHARP
-			// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
-			// This will raise a base Exception.
-			try
-			{
-				m_SshStream.Close();
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
-			}
+				// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
+				// This will raise a base Exception.
+				try
+				{
+					m_SshStream.Close();
+				}
+				catch (Exception e)
+				{
+					Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
+				}
 #endif
 
-			try
-			{
-				m_SshStream.Dispose();
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
-			}
+				try
+				{
+					m_SshStream.Dispose();
+				}
+				catch (Exception e)
+				{
+					Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
+				}
 
-			m_SshStream = null;
+				m_SshStream = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 
-			UpdateIsConnectedState();
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -316,6 +348,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
 			}
 		}
@@ -555,17 +588,17 @@ namespace ICD.Connect.Protocol.Network.Ssh
 				yield return command;
 
 			yield return new GenericConsoleCommand<string>("SetUsername",
-			                                               "Sets the username for next connection attempt",
-			                                               s => Username = s);
+														   "Sets the username for next connection attempt",
+														   s => Username = s);
 			yield return new GenericConsoleCommand<string>("SetPassword",
-			                                               "Sets the password for next connection attempt",
-			                                               s => Password = s);
+														   "Sets the password for next connection attempt",
+														   s => Password = s);
 			yield return new GenericConsoleCommand<string>("SetAddress",
-			                                               "Sets the address for next connection attempt",
-			                                               s => Address = s);
+														   "Sets the address for next connection attempt",
+														   s => Address = s);
 			yield return new GenericConsoleCommand<ushort>("SetPort",
-			                                               "Sets the port for next connection attempt",
-			                                               s => Port = s);
+														   "Sets the port for next connection attempt",
+														   s => Port = s);
 		}
 
 		/// <summary>
