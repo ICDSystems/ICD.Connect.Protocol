@@ -97,46 +97,28 @@ namespace ICD.Connect.Protocol.Ports
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
+
 			if (IsDisposed)
 				throw new ObjectDisposedException(GetType().Name, string.Format("{0} is disposed", this));
 
-			return ConnectAndSend(data, SendFinal);
-		}
-
-		/// <summary>
-		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
-		/// </summary>
-		protected abstract bool SendFinal(string data);
-
-		/// <summary>
-		/// Attempts to connect if not currently connected and calls the send function.
-		/// </summary>
-		/// <param name="data"></param>
-		/// <param name="sendFunction"></param>
-		/// <returns></returns>
-		protected bool ConnectAndSend(string data, Func<string, bool> sendFunction)
-		{
 			try
 			{
-				if (!IsConnected)
-				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - Port is not connected. Attempting to reconnect.", this);
-					Connect();
-				}
+				if (IsConnected)
+					return SendFinal(data);
 
-				if (!IsConnected)
-				{
-					Logger.AddEntry(eSeverity.Error, "{0} - Port is not connected. Reconnection failed.", this);
-					return false;
-				}
-
-				return sendFunction(data);
+				Logger.AddEntry(eSeverity.Error, "{0} - Unable to send - Port is not connected.", this);
+				return false;
 			}
 			finally
 			{
 				UpdateIsConnectedState();
 			}
 		}
+
+		/// <summary>
+		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
+		/// </summary>
+		protected abstract bool SendFinal(string data);
 
 		/// <summary>
 		/// Raises the OnSerialDataReceived event.
