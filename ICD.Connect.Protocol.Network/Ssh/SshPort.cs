@@ -96,13 +96,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			{
 				if (Address == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Address is null", this);
+					Log(eSeverity.Error, "Failed to connect - Address is null");
 					return;
 				}
 
 				if (Username == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - Username is null", this);
+					Log(eSeverity.Error, "Failed to connect - Username is null");
 					return;
 				}
 
@@ -128,14 +128,14 @@ namespace ICD.Connect.Protocol.Network.Ssh
 					if (!e.Message.Contains("Message type 80 is not valid"))
 					{
 						DisposeClient();
-						Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
+						Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 					}
 				}
 					// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SocketException e)
 				{
 					DisposeClient();
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.GetBaseException().Message);
+					Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 				}
 
 				// ShellStream can only be instantiated when the client is connected.
@@ -160,7 +160,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 						if (e.Message.Contains("Message type 80 is not valid"))
 							continue;
 
-						Logger.AddEntry(eSeverity.Error, "{0} failed to create shell stream - {1}", this, e.Message);
+						Log(eSeverity.Error, "Failed to create shell stream - {0}", e.Message);
 					}
 
 					break;
@@ -258,7 +258,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} Failed to close SSHStream - {1}", GetType().Name, e.Message);
+				Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
 			}
 #endif
 
@@ -268,7 +268,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} Failed to dispose SSHStream - {1}", GetType().Name, e.Message);
+				Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
 			}
 
 			m_SshStream = null;
@@ -288,7 +288,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			{
 				if (m_SshStream == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} unable to write to stream - stream is null", this);
+					Log(eSeverity.Error, "Unable to write to stream - stream is null");
 					return false;
 				}
 
@@ -300,13 +300,13 @@ namespace ICD.Connect.Protocol.Network.Ssh
 			// Thrown when we lose connection.
 			catch (SshConnectionException e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1}", this, e.Message);
+				Log(eSeverity.Error, "Failed writing to stream - {0}", e.Message);
 				return false;
 			}
 			catch (ObjectDisposedException e)
 			{
 				// ObjectDisposedException message is kinda worthless on its own
-				Logger.AddEntry(eSeverity.Error, "{0} failed writing to stream - {1} {2}", this, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "Failed writing to stream - {0} {1}", e.GetType().Name, e.Message);
 
 				// Stream is broken so clean it up
 				DisposeStream();
@@ -499,7 +499,7 @@ namespace ICD.Connect.Protocol.Network.Ssh
 		/// <param name="args"></param>
 		private void SshClientOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.AddEntry(eSeverity.Error, "{0} - Internal Error - {1}", this, args.Exception.Message);
+			Log(eSeverity.Error, "Internal Error - {0}", args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 
