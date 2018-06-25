@@ -39,7 +39,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				if (!m_TcpClient.Connected)
 				{
-					Log(eSeverity.Error, "{0} failed to connect to {1}:{2}", this, Address, Port);
+					Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
 					return;
 				}
 				m_Stream = m_TcpClient.GetStream();
