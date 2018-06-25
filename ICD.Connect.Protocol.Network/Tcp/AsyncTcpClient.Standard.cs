@@ -6,6 +6,7 @@ using ICD.Common.Utils;
 using System.Threading.Tasks;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Utils.Services.Logging;
+using System.Threading;
 
 namespace ICD.Connect.Protocol.Network.Tcp
 {
@@ -14,6 +15,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private TcpClient m_TcpClient;
 		private NetworkStream m_Stream;
 		private readonly byte[] m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
+		private CancellationTokenSource m_Cancellation;
 
 		/// <summary>
 		/// Connects to the remote end point Asyncrohnously
@@ -25,41 +27,41 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to obtain SocketMutex for connect", this);
+				Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
 				return;
 			}
 
 			try
 			{
 				m_TcpClient = new TcpClient();
+				m_Cancellation = new CancellationTokenSource();
 				m_TcpClient.ConnectAsync(Address, Port).Wait();
 
 				if (!m_TcpClient.Connected)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2}", this, Address, Port);
+					Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
 					return;
 				}
-
 				m_Stream = m_TcpClient.GetStream();
-				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
+				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length, m_Cancellation.Token)
+					.ContinueWith(TcpClientReceiveHandler, m_Cancellation.Token);
 			}
 			catch (AggregateException ae)
 			{
 				ae.Handle(x =>
-				          {
-					          if (x is SocketException)
-					          {
-						          Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port,
-						                          x.Message);
-						          return true;
-					          }
+				{
+					if (x is SocketException)
+					{
+						Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
+						return true;
+					}
 
-					          return false;
-				          });
+					return false;
+				});
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this, Address, Port, e.Message);
+				Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, e.Message);
 			}
 			finally
 			{
@@ -83,12 +85,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		private void DisposeTcpClient()
 		{
-			if (m_Stream != null)
-				m_Stream.Dispose();
+			m_Cancellation?.Cancel();
+
+			m_Stream?.Dispose();
 			m_Stream = null;
 
-			if (m_TcpClient != null)
-				m_TcpClient.Dispose();
+			m_TcpClient?.Dispose();
 			m_TcpClient = null;
 
 			UpdateIsConnectedState();
@@ -110,7 +112,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (SocketException e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} - {1}", this, e.Message);
+				Log(eSeverity.Error, "Failed to send data - {0}", e.Message);
 				return false;
 			}
 			finally
@@ -128,7 +130,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			if (task.IsFaulted)
 			{
 				string message = task.Exception.InnerExceptions.First().Message;
-				Logger.AddEntry(eSeverity.Error, "{0} failed to receive data from host {1}:{2} - {3}", this, Address, Port,
+				Log(eSeverity.Error, "Failed to receive data from host {0}:{1} - {2}", Address, Port,
 								message);
 				UpdateIsConnectedState();
 				return;

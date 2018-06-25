@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added fallback authentication methods for SSH
+ 
+### Changed
+- Added cancellation tokens to AsyncTcpClient to fix disconnect issues
 
 ### Changed
  - Small fixes for SSH and TCP Server exceptions

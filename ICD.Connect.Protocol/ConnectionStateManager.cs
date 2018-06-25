@@ -196,7 +196,7 @@ namespace ICD.Connect.Protocol
 
 		#endregion
 
-		#region Prot Callbacks
+		#region Port Callbacks
 
 		/// <summary>
 		/// Subscribes to the port events.
