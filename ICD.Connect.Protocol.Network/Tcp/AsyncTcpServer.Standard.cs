@@ -32,7 +32,19 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			Active = true;
 
 			m_TcpListener = new TcpListener(IPAddress.Any, Port);
-			m_TcpListener.Start();
+			try
+			{
+				m_TcpListener.Start();
+			}
+			catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+			{
+				// if application crashes on linux it doesn't clean up the socket use immediately
+				m_TcpListener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+				m_TcpListener.Start();
+			}
+			// if more socket exceptions start popping up, take a look here for different error codes
+			// https://docs.microsoft.com/en-us/windows/desktop/WinSock/windows-sockets-error-codes-2
+
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
 			Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
