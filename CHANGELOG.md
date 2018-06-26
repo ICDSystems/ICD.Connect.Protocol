@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Added cancellation tokens to AsyncTcpClient to fix disconnect issues
  - Small fixes for SSH and TCP Server exceptions
+ - Fixed ObjectDisposedException in Heartbeat
 
 ## [6.2.0] - 2018-06-19
 ### Added

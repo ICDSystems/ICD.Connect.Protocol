@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
@@ -10,7 +9,7 @@ using ICD.Common.Utils.Timers;
 
 namespace ICD.Connect.Protocol.Heartbeat
 {
-	public sealed class Heartbeat : IDisposable
+	public sealed class Heartbeat : IStateDisposable
 	{
 		private const long MAX_INTERVAL_MS_DEFAULT = 60 * 1000;
 
@@ -34,6 +33,11 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private IConnectable m_Instance;
 
 		public ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
+
+		/// <summary>
+		/// Returns true if this instance has been disposed.
+		/// </summary>
+		public bool IsDisposed { get; private set; }
 
 		/// <summary>
 		/// Constructor.
@@ -88,12 +92,17 @@ namespace ICD.Connect.Protocol.Heartbeat
 		/// </summary>
 		public void Dispose()
 		{
+			if (IsDisposed)
+				return;
+
 			Unsubscribe(m_Instance);
 
 			StopMonitoring();
 			m_Timer.Dispose();
 
 			m_Instance = null;
+
+			IsDisposed = true;
 		}
 
 		/// <summary>
