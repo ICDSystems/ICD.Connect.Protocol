@@ -15,7 +15,14 @@ namespace ICD.Connect.Protocol.Ports
 	public abstract class AbstractSerialPort<T> : AbstractPort<T>, ISerialPort
 		where T : ISerialPortSettings, new()
 	{
+		/// <summary>
+		/// Rasied when the port receives data from the remote endpoint.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
+
+		/// <summary>
+		/// Raised when the port connects/disconnects to/from the remote endpoint.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 
 		private bool m_IsConnected;
@@ -70,6 +77,9 @@ namespace ICD.Connect.Protocol.Ports
 			return GetIsConnectedState();
 		}
 
+		/// <summary>
+		/// Updates the IsConnected property.
+		/// </summary>
 		protected void UpdateIsConnectedState()
 		{
 			IsConnected = GetIsConnectedState();
