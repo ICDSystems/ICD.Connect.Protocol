@@ -156,7 +156,10 @@ namespace ICD.Connect.Protocol.Heartbeat
 				HandleConnected();
 			}
 			else
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} lost connection.", sender);
 				HandleDisconnected();
+			}
 		}
 
 		private void HandleConnected()
@@ -183,8 +186,8 @@ namespace ICD.Connect.Protocol.Heartbeat
 				{
 					Logger.AddEntry(eSeverity.Warning,
 					                m_ConnectAttempts == 0
-						                ? "{0} lost connection. Attempting to reconnect. Attempted {1} time."
-						                : "{0} lost connection. Attempting to reconnect. Attempted {1} times.",
+						                ? "{0} Attempting to reconnect. Attempted {1} time."
+						                : "{0} Attempting to reconnect. Attempted {1} times.",
 					                m_Instance,
 					                m_ConnectAttempts + 1);
 					m_Timer.Reset(m_RampIntervalMs[m_ConnectAttempts]);
@@ -192,7 +195,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 				}
 				else
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} lost connection. Attempting to reconnect. Attempted {1} times.", m_Instance,
+					Logger.AddEntry(eSeverity.Error, "{0} Attempting to reconnect. Attempted {1} times.", m_Instance,
 					                m_ConnectAttempts + 1);
 					m_Timer.Reset(m_MaxIntervalMs);
 					m_ConnectAttempts++;
