@@ -172,6 +172,7 @@ namespace ICD.Connect.Protocol.Ports
 			yield return new ConsoleCommand("Connect", "Connects to the physical endpoint", () => Connect());
 			yield return new ConsoleCommand("Disconnect", "Disconnects from the physical endpoint", () => Disconnect());
 			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => ConsoleSend(a));
+			yield return new ParamsConsoleCommand("Receive", "Mocks incoming data from the port", a => ConsoleReceive(a));
 		}
 
 		/// <summary>
@@ -199,6 +200,24 @@ namespace ICD.Connect.Protocol.Ports
 			command = Regex.Unescape(command);
 
 			Send(command);
+		}
+
+		/// <summary>
+		/// Shim to receive data from console command.
+		/// </summary>
+		/// <param name="data"></param>
+		private void ConsoleReceive(params string[] data)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Rejoin the parameters
+			string command = string.Join(" ", data);
+
+			// Replace escape codes with the actual characters
+			command = Regex.Unescape(command);
+
+			Receive(command);
 		}
 
 		#endregion
