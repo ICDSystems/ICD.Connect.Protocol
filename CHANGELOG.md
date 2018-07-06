@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added console command to mock incoming data from serial ports
+ 
+### Changed
+ - Logging relay open/close state changes
 
 ## [6.3.0] - 2018-07-02
 ### Added
