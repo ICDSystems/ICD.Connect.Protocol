@@ -99,6 +99,10 @@ namespace ICD.Connect.Protocol
 		/// </summary>
 		public void Dispose()
 		{
+			OnConnectedStateChanged = null;
+			OnSerialDataReceived = null;
+			OnIsOnlineStateChanged = null;
+
 			Heartbeat.Dispose();
 
 			SetPort(null);
@@ -164,6 +168,12 @@ namespace ICD.Connect.Protocol
 
 		public bool Send(string data)
 		{
+			if (m_Port == null)
+			{
+				Log(eSeverity.Critical, "Unable to send data, port is null");
+				return false;
+			}
+
 			if (m_Port.IsConnected)
 				return m_Port.Send(data);
 
