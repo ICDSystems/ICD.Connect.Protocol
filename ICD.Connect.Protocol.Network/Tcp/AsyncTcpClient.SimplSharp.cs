@@ -21,7 +21,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to obtain SocketMutex for connect", this);
+				Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
 				return;
 			}
 
@@ -34,7 +34,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				if (m_TcpClient.ClientStatus != SocketStatus.SOCKET_STATUS_CONNECTED)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect with error code {1}", this, result);
+					Log(eSeverity.Error, "Failed to connect with error code {0}", result);
 					return;
 				}
 
@@ -42,10 +42,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to host {1}:{2} - {3}", this,
-				                m_TcpClient.AddressClientConnectedTo,
-				                m_TcpClient.PortNumber,
-				                e.Message);
+				Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}",
+				    m_TcpClient.AddressClientConnectedTo,
+				    m_TcpClient.PortNumber,
+				    e.Message);
 			}
 			finally
 			{
@@ -180,9 +180,9 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			if (socketError != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to ReceiveDataAsync from host {1}:{2}", this,
-				                tcpClient.AddressClientConnectedTo,
-				                tcpClient.PortNumber);
+				Log(eSeverity.Error, "Failed to ReceiveDataAsync from host {0}:{1}",
+				    tcpClient.AddressClientConnectedTo,
+				    tcpClient.PortNumber);
 			}
 
 			UpdateIsConnectedState();
