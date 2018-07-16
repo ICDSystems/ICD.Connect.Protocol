@@ -82,6 +82,11 @@ namespace ICD.Connect.Protocol
 		/// </summary>
 		public int? PortNumber { get { return m_Port == null ? (int?)null : m_Port.Id; } }
 
+		public ISerialPort Port
+		{
+			get { return m_Port; }
+		}
+
 		#endregion
 
 		/// <summary>
