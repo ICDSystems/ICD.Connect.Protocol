@@ -5,11 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Added
  - Added console command to mock incoming data from serial ports
+ - ConnectionStateManager exposes wrapped port
  
 ### Changed
  - Logging relay open/close state changes
+ - Fixed bug where generic types would appear incorrectly in the console
+ - Fixed potential null ref in ConnectionStateManager
 
 ## [6.3.0] - 2018-07-02
 ### Added
