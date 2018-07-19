@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.4.0] - 2018-07-19
 ### Added
  - Added console command to mock incoming data from serial ports
  - ConnectionStateManager exposes wrapped port
