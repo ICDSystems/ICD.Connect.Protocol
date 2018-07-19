@@ -106,7 +106,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				m_TcpClient.Client.Send(bytes, 0, bytes.Length, SocketFlags.None);
+				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 				PrintTx(data);
 				return true;
 			}
