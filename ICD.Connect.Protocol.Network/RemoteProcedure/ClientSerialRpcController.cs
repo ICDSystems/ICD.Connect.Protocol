@@ -76,13 +76,6 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="data"></param>
 		private void SendData(ISerialData data)
 		{
-			if (!m_ConnectionStateManager.IsConnected)
-			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} - Unable to communicate with port - connection state is false", GetType().Name);
-				return;
-			}
-
 			m_ConnectionStateManager.Send(data.Serialize());
 		}
 
