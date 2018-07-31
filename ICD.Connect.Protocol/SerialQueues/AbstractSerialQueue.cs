@@ -21,8 +21,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 	[PublicAPI]
 	public abstract class AbstractSerialQueue : ISerialQueue
 	{
+		/// <summary>
+		/// Raises individual commands with their responses.
+		/// </summary>
 		public event EventHandler<SerialResponseEventArgs> OnSerialResponse;
 
+		/// <summary>
+		/// Raised when a command does not yield a response within a time limit.
+		/// </summary>
 		public event EventHandler<SerialDataEventArgs> OnTimeout;
 
 		private ISerialBuffer m_Buffer;
@@ -52,6 +58,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// Gets/sets the numer of times to timeout in a row before clearing the queue.
 		/// </summary>
 		public int MaxTimeoutCount { get { return m_MaxTimeoutCount; } set { m_MaxTimeoutCount = value; } }
+
+		/// <summary>
+		/// Gets the number of times in a row the queue has raised a timeout.
+		/// </summary>
+		public int TimeoutCount { get { return m_TimeoutCount; } }
 
 		/// <summary>
 		/// DisconnectedTime is the number of milliseconds since the last timeout.
@@ -314,6 +325,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if (!m_DisconnectedTimer.IsRunning)
 				m_DisconnectedTimer.Start();
 
+			m_TimeoutCount++;
+
 			FinishCommand(command => OnTimeout.Raise(this, new SerialDataEventArgs(command)));
 		}
 
@@ -452,6 +465,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="args"></param>
 		protected virtual void BufferCompletedSerial(object buffer, StringEventArgs args)
 		{
+			m_TimeoutCount = 0;
+
 			string data = args.Data;
 			FinishCommand(command => OnSerialResponse.Raise(this, new SerialResponseEventArgs(command, data)));
 		}

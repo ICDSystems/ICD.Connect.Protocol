@@ -23,6 +23,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		int CommandCount { get; }
 
 		/// <summary>
+		/// Gets the number of times in a row the queue has raised a timeout.
+		/// </summary>
+		int TimeoutCount { get; }
+
+		/// <summary>
 		/// Gets the current port.
 		/// </summary>
 		ISerialPort Port { get; }
