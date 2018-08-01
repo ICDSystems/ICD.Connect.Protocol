@@ -10,7 +10,7 @@ namespace ICD.Connect.Protocol.Ports
 	/// <summary>
 	/// Simple pairing of hostname and port.
 	/// </summary>
-	public struct HostInfo
+	public struct HostInfo : IEquatable<HostInfo>
 	{
 		private readonly string m_Address;
 		private readonly ushort m_Port;
@@ -91,7 +91,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// <returns></returns>
 		public static bool operator !=(HostInfo s1, HostInfo s2)
 		{
-			return !(s1 == s2);
+			return !s1.Equals(s2);
 		}
 
 		/// <summary>
@@ -101,10 +101,13 @@ namespace ICD.Connect.Protocol.Ports
 		/// <returns></returns>
 		public override bool Equals(object other)
 		{
-			if (other == null || GetType() != other.GetType())
-				return false;
+			return other is HostInfo && Equals((HostInfo)other);
+		}
 
-			return GetHashCode() == ((HostInfo)other).GetHashCode();
+		public bool Equals(HostInfo other)
+		{
+			return m_Port == other.m_Port &&
+			       m_Address == other.m_Address;
 		}
 
 		/// <summary>

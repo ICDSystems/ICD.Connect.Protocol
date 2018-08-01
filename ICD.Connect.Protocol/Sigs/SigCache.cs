@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
@@ -14,7 +15,7 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <summary>
 		/// We cache the sigs by their type and address.
 		/// </summary>
-		private struct SigKey
+		private struct SigKey : IEquatable<SigKey>
 		{
 			private readonly eSigType m_Type;
 			private readonly uint m_Number;
@@ -36,9 +37,17 @@ namespace ICD.Connect.Protocol.Sigs
 
 			#region Equality
 
+			public bool Equals(SigKey other)
+			{
+				return m_Type == other.m_Type &&
+				       m_Number == other.m_Number &&
+				       m_Name == other.m_Name &&
+				       m_SmartObject == other.m_SmartObject;
+			}
+
 			public override bool Equals(object obj)
 			{
-				return obj is SigKey && this == (SigKey)obj;
+				return obj is SigKey && Equals((SigKey)obj);
 			}
 
 			public override int GetHashCode()
@@ -58,17 +67,12 @@ namespace ICD.Connect.Protocol.Sigs
 
 			public static bool operator ==(SigKey x, SigKey y)
 			{
-				bool output = x.m_Type == y.m_Type &&
-				              x.m_Number == y.m_Number &&
-				              x.m_Name == y.m_Name &&
-				              x.m_SmartObject == y.m_SmartObject;
-
-				return output;
+				return x.Equals(y);
 			}
 
 			public static bool operator !=(SigKey x, SigKey y)
 			{
-				return !(x == y);
+				return !x.Equals(y);
 			}
 
 			#endregion
