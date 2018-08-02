@@ -1,4 +1,4 @@
-﻿#if STANDARD
+#if STANDARD
 using System;
 using System.Linq;
 using System.Net.Sockets;
@@ -145,7 +145,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			PrintRx(data);
 			Receive(data);
 
-			if (m_TcpClient.Connected)
+			if (m_TcpClient?.Connected ?? false)
 				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
 
 			UpdateIsConnectedState();
