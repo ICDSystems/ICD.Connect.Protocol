@@ -21,6 +21,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private TcpListener m_TcpListener;
 
 		private readonly Dictionary<uint, TcpClient> m_Clients = new Dictionary<uint, TcpClient>();
+		private readonly SafeCriticalSection m_ClientsSection = new SafeCriticalSection();
 		private readonly Dictionary<uint, byte[]> m_ClientBuffers = new Dictionary<uint, byte[]>();
 
 		/// <summary>
@@ -73,7 +74,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			m_TcpListener = null;
 
 			foreach (uint client in GetClients())
-				RemoveClient(client);
+				RemoveTcpClient(client);
 		}
 
 		/// <summary>
@@ -84,10 +85,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
-			foreach (KeyValuePair<uint, TcpClient> kvp in m_Clients.Where(kvp => kvp.Value.Connected))
+			foreach (uint clientId in m_Clients.Keys)
 			{
-				PrintTx(kvp.Key, data);
-				kvp.Value.Client.Send(byteData, 0, byteData.Length, SocketFlags.None);
+				PrintTx(clientId, data);
+				Send(clientId, byteData);
 			}
 		}
 
@@ -99,16 +100,33 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public void Send(uint clientId, string data)
 		{
-			if (!ClientConnected(clientId))
-			{
-				string message = string.Format("{0} - Unable to send data to unconnected client {1}", this, clientId);
-				throw new InvalidOperationException(message);
-			}
-
 			byte[] byteData = StringUtils.ToBytes(data);
 
 			PrintTx(clientId, data);
-			m_Clients[clientId].Client.Send(byteData, 0, byteData.Length, SocketFlags.None);
+			Send(clientId, byteData);
+		}
+
+		public void Send(uint clientId, byte[] data)
+		{
+			if (!ClientConnected(clientId))
+			{
+				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send data to unconnected client {1}", this, clientId);
+				return;
+			}
+
+			try
+			{
+				m_Clients[clientId].Client.Send(data, 0, data.Length, SocketFlags.None);
+			}
+			catch (SocketException ex)
+			{
+				Logger.AddEntry(eSeverity.Error, ex, "Failed to send data to client {0}", GetHostnameForClientId(clientId));
+			}
+
+			if (!ClientConnected(clientId))
+			{
+				RemoveTcpClient(clientId);
+			}
 		}
 
 		/// <summary>
@@ -132,12 +150,21 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public bool ClientConnected(uint client)
 		{
-			// This is a hack. We have no way of determining if a client id is still valid,
-			// so if we get a null address we know the client is invalid.
-			if (!m_Clients.ContainsKey(client) || m_Clients[client] == null)
-				return false;
+			m_ClientsSection.Enter();
 
-			return m_Clients[client].Connected;
+			try
+			{
+				// This is a hack. We have no way of determining if a client id is still valid,
+				// so if we get a null address we know the client is invalid.
+				if (!m_Clients.ContainsKey(client) || m_Clients[client] == null)
+					return false;
+
+				return m_Clients[client].Connected;
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -146,18 +173,28 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="tcpClient"></param>
 		private void TcpClientConnectCallback(Task<TcpClient> tcpClient)
 		{
-			uint clientId = (uint)IdUtils.GetNewId(m_Clients.Keys.Select(i => (int)i));
-		    if (tcpClient.Status == TaskStatus.Faulted)
-		    {
-		        return;
-		    }
-			m_Clients[clientId] = tcpClient.Result;
-			m_ClientBuffers[clientId] = new byte[16384];
-			AddClient(clientId);
-			OnSocketStateChange.Raise(this, new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
-			m_Clients[clientId].GetStream()
-			                   .ReadAsync(m_ClientBuffers[clientId], 0, 16384)
-			                   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+			m_ClientsSection.Enter();
+			try
+			{
+				uint clientId = (uint) IdUtils.GetNewId(m_Clients.Keys.Select(i => (int) i));
+				if (tcpClient.Status == TaskStatus.Faulted)
+				{
+					return;
+				}
+
+				m_Clients[clientId] = tcpClient.Result;
+				m_ClientBuffers[clientId] = new byte[16384];
+				AddClient(clientId);
+				OnSocketStateChange.Raise(this,
+					new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
+				m_Clients[clientId].GetStream()
+					.ReadAsync(m_ClientBuffers[clientId], 0, 16384)
+					.ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 
 			// Spawn new thread for accepting new clients
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
@@ -184,17 +221,17 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			catch (AggregateException ae)
 			{
 				ae.Handle(e =>
-				          {
-							  // Aborted by local software
-					          if (e is IOException)
-						          return true;
+				{
+					// Aborted by local software
+					if (e is IOException)
+						return true;
 
-							  // Aborted by remote host
-					          if (e is SocketException)
-						          return true;
+					// Aborted by remote host
+					if (e is SocketException)
+						return true;
 
-					          return false;
-				          });
+					return false;
+				});
 			}
 
 			if (length > 0)
@@ -207,7 +244,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			if (!ClientConnected(clientId))
 			{
-				RemoveClient(clientId);
+				RemoveTcpClient(clientId);
+				
 				return;
 			}
 
@@ -215,6 +253,27 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			m_Clients[clientId].GetStream()
 			                   .ReadAsync(buffer, 0, 16384)
 			                   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+		}
+
+		private void RemoveTcpClient(uint clientId)
+		{
+			m_ClientsSection.Enter();
+
+			try
+			{
+				if (m_Clients.ContainsKey(clientId))
+				{
+					var client = m_Clients[clientId];
+					m_Clients.Remove(clientId);
+					client?.Dispose();
+				}
+
+				RemoveClient(clientId);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 		}
 
 		/// <summary>
