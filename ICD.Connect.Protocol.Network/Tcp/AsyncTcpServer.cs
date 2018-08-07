@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -31,7 +31,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		public event EventHandler<SocketStateEventArgs> OnSocketStateChange;
 
-		private readonly Dictionary<uint, string> m_Connections;
+		private readonly IcdOrderedDictionary<uint, string> m_Connections;
 		private readonly SafeCriticalSection m_ConnectionLock;
 
 		private int m_MaxNumberOfClients;
@@ -82,6 +82,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		}
 
 		/// <summary>
+		/// Number of active connections.
+		/// </summary>
+		public int NumberOfClients { get { return m_ConnectionLock.Execute(() => m_Connections.Count); } }
+
+		/// <summary>
 		/// Assigns a name to the server for use with logging.
 		/// </summary>
 		public string Name { get; set; }
@@ -129,7 +134,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public AsyncTcpServer(ushort port, int maxNumberOfClients)
 		{
-			m_Connections = new Dictionary<uint, string>();
+			m_Connections = new IcdOrderedDictionary<uint, string>();
 			m_ConnectionLock = new SafeCriticalSection();
 
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
@@ -172,7 +177,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public IEnumerable<uint> GetClients()
 		{
-			return m_ConnectionLock.Execute(() => m_Connections.Keys.Order().ToArray());
+			return m_ConnectionLock.Execute(() => m_Connections.Keys.ToArray(m_Connections.Count));
 		}
 
 		/// <summary>
@@ -335,7 +340,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			addRow("Name", Name);
 			addRow("Port", Port);
-			addRow("Max Clients", MaxNumberOfClients);
+			addRow("Active Clients", string.Format("{0}/{1}", NumberOfClients, MaxNumberOfClients));
 			addRow("Active", Active);
 			addRow("Debug Rx", DebugRx);
 			addRow("Debug Tx", DebugTx);
