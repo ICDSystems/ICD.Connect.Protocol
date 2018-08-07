@@ -22,6 +22,13 @@ namespace ICD.Connect.Protocol.Sigs
 			private readonly string m_Name;
 			private readonly ushort m_SmartObject;
 
+			/// <summary>
+			/// Constructor.
+			/// </summary>
+			/// <param name="type"></param>
+			/// <param name="number"></param>
+			/// <param name="name"></param>
+			/// <param name="smartObject"></param>
 			private SigKey(eSigType type, uint number, string name, ushort smartObject)
 			{
 				m_Type = type;
@@ -84,6 +91,7 @@ namespace ICD.Connect.Protocol.Sigs
 		#region Properties
 
 		public int Count { get { return m_KeyToSig.Count; } }
+
 		public bool IsReadOnly { get { return false; } }
 
 		#endregion
@@ -103,14 +111,23 @@ namespace ICD.Connect.Protocol.Sigs
 			return m_KeyToSig.Values.GetEnumerator();
 		}
 
-		public void Add(SigInfo item)
+		public bool Add(SigInfo item)
 		{
-			m_KeyToSig[SigKey.FromSig(item)] = item;
+			SigKey key = SigKey.FromSig(item);
+
+			SigInfo cached;
+			if (m_KeyToSig.TryGetValue(key, out cached) && item == cached)
+				return false;
+
+			m_KeyToSig[key] = item;
+
+			return true;
 		}
 
 		public void AddRange(IEnumerable<SigInfo> sigs)
 		{
-			sigs.ForEach(Add);
+			foreach (SigInfo sig in sigs)
+				Add(sig);
 		}
 
 		/// <summary>
@@ -119,7 +136,8 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <param name="sigs"></param>
 		public void AddHighRemoveLow(IEnumerable<SigInfo> sigs)
 		{
-			sigs.ForEach(AddHighRemoveLow);
+			foreach (SigInfo sig in sigs)
+				AddHighRemoveLow(sig);
 		}
 
 		/// <summary>
@@ -182,6 +200,11 @@ namespace ICD.Connect.Protocol.Sigs
 		}
 
 		#endregion
+
+		void ICollection<SigInfo>.Add(SigInfo item)
+		{
+			Add(item);
+		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
