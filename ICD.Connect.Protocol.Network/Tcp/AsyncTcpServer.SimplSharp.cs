@@ -91,7 +91,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			if (!ClientConnected(clientId))
 			{
-				Logger.AddEntry(eSeverity.Notice, "{0} unable to send data to unconnected client {1}", GetType().Name, clientId);
+				Logger.AddEntry(eSeverity.Notice, "{0} - Unable to send data to unconnected client {1}", this, clientId);
 				RemoveClient(clientId);
 				return;
 			}
