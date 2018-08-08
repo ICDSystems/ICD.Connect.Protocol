@@ -74,10 +74,19 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
-			foreach (uint clientId in GetClients())
+			m_ConnectionLock.Enter();
+
+			try
 			{
-				PrintTx(clientId, data);
-				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+				foreach (uint clientId in m_Connections.Keys)
+				{
+					PrintTx(clientId, data);
+					m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+				}
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
 			}
 		}
 
