@@ -67,8 +67,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 			m_ClientBuffers = new TcpClientPoolBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ClientBuffers.SetPool(m_ClientPool);
 			Subscribe(m_ClientBuffers);
-
-			m_Server.Start();
 		}
 
 		#endregion
@@ -97,6 +95,16 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_Server.Dispose();
 			m_ClientPool.Dispose();
+		}
+
+		public void Start()
+		{
+			m_Server.Start();
+		}
+
+		public void Stop()
+		{
+			m_Server.Stop();
 		}
 
 		#region Server Methods
