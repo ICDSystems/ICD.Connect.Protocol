@@ -8,6 +8,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 	/// </summary>
 	public interface ISerialBuffer
 	{
+		/// <summary>
+		/// Raised when a complete message has been buffered.
+		/// </summary>
 		event EventHandler<StringEventArgs> OnCompletedSerial;
 
 		/// <summary>

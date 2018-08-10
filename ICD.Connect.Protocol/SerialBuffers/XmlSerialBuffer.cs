@@ -8,6 +8,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 {
 	public sealed class XmlSerialBuffer : ISerialBuffer
 	{
+		/// <summary>
+		/// Raised when a complete message has been buffered.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
 
 		private readonly Queue<string> m_Queue;
