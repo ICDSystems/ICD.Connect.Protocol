@@ -91,12 +91,12 @@ namespace ICD.Connect.Protocol.Sigs
 		{
 			switch (extends.Type)
 			{
+				case eSigType.Na:
+					return false;
 				case eSigType.Digital:
 					return extends.GetBoolValue();
-
 				case eSigType.Analog:
 					return extends.GetUShortValue() > 0;
-
 				case eSigType.Serial:
 					return extends.GetStringValue() != null;
 
