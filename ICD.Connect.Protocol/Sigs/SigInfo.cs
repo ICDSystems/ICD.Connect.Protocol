@@ -201,7 +201,8 @@ namespace ICD.Connect.Protocol.Sigs
 			if (m_SmartObject != 0)
 				builder.AppendProperty("SmartObject", m_SmartObject);
 
-			builder.AppendProperty("Value", this.GetValue());
+			if (Type != eSigType.Na)
+				builder.AppendProperty("Value", this.GetValue());
 
 			return builder.ToString();
 		}
