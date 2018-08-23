@@ -106,6 +106,22 @@ namespace ICD.Connect.Protocol.SerialQueues
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
 		}
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public virtual void Dispose()
+		{
+			OnSerialTransmission = null;
+			OnSerialResponse = null;
+			OnTimeout = null;
+
+			m_TimeoutTimer.Dispose();
+			m_DisconnectedTimer.Stop();
+
+			SetPort(null);
+			SetBuffer(null);
+		}
+
 		#endregion
 
 		#region Methods
@@ -130,21 +146,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 			Unsubscribe(m_Buffer);
 			m_Buffer = buffer;
 			Subscribe(m_Buffer);
-		}
-
-		/// <summary>
-		/// Release resources.
-		/// </summary>
-		public virtual void Dispose()
-		{
-			OnSerialResponse = null;
-			OnTimeout = null;
-
-			m_TimeoutTimer.Dispose();
-			m_DisconnectedTimer.Stop();
-
-			SetPort(null);
-			SetBuffer(null);
 		}
 
 		/// <summary>
