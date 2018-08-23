@@ -71,8 +71,6 @@ namespace ICD.Connect.Protocol.Sigs
 				case eSigType.Serial:
 					m_StringValue = sig.GetStringValue();
 					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 		}
 
@@ -91,6 +89,11 @@ namespace ICD.Connect.Protocol.Sigs
 		{
 		}
 
+		public SigInfo(uint number, ushort smartObject)
+			: this(number, null, smartObject)
+		{
+		}
+
 		public SigInfo(string name, ushort smartObject, string value)
 			: this(0, name, smartObject, value)
 		{
@@ -103,6 +106,11 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public SigInfo(string name, ushort smartObject, ushort value)
 			: this(0, name, smartObject, value)
+		{
+		}
+
+		public SigInfo(string name, ushort smartObject)
+			: this(0, name, smartObject)
 		{
 		}
 
@@ -122,6 +130,11 @@ namespace ICD.Connect.Protocol.Sigs
 			: this(eSigType.Analog, number, name, smartObject)
 		{
 			m_UshortValue = value;
+		}
+
+		public SigInfo(uint number, string name, ushort smartObject)
+			: this(eSigType.Na, number, name, smartObject)
+		{
 		}
 
 		private SigInfo(eSigType type, uint number, string name, ushort smartObject)
