@@ -55,6 +55,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public ISerialPort Port { get; private set; }
 
 		/// <summary>
+		/// When true the serial queue will ignore responses and immediately start processing the next command.
+		/// </summary>
+		public bool Trust { get; set; }
+
+		/// <summary>
 		/// Gets/sets the length of the timeout timer.
 		/// </summary>
 		public long Timeout { get { return m_Timeout; } set { m_Timeout = value; } }
@@ -310,6 +315,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 							return false;
 
 						OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(CurrentCommand));
+						if (Trust)
+							FinishCommand(command => { });
+
 						return true;
 					}
 
@@ -335,6 +343,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		private void TimeoutCallback()
 		{
+			// Don't care about timeouts in trust mode
+			if (Trust)
+				return;
+
 			if (!m_DisconnectedTimer.IsRunning)
 				m_DisconnectedTimer.Start();
 
@@ -440,6 +452,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if (m_DisconnectedTimer.IsRunning)
 				m_DisconnectedTimer.Reset();
 
+			// Ignore buffer feedback
+			if (Trust)
+				return;
+
 			m_Buffer.Enqueue(args.Data);
 		}
 
@@ -478,6 +494,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="args"></param>
 		protected virtual void BufferCompletedSerial(object buffer, StringEventArgs args)
 		{
+			// Ignore buffer feedback
+			if (Trust)
+				return;
+
 			m_TimeoutCount = 0;
 
 			string data = args.Data;

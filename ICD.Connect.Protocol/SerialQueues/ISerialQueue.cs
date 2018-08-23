@@ -38,6 +38,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		ISerialPort Port { get; }
 
 		/// <summary>
+		/// When true the serial queue will ignore responses and immediately start processing the next command.
+		/// </summary>
+		bool Trust { get; set; }
+
+		/// <summary>
 		/// Clears the command queue.
 		/// </summary>
 		void Clear();
