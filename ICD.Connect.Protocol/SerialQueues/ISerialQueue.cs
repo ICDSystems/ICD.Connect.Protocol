@@ -8,6 +8,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 	public interface ISerialQueue : IDisposable
 	{
 		/// <summary>
+		/// Raised when serial data is sent to the port.
+		/// </summary>
+		event EventHandler<SerialTransmissionEventArgs> OnSerialTransmission;
+
+		/// <summary>
 		/// Raises individual commands with their responses.
 		/// </summary>
 		event EventHandler<SerialResponseEventArgs> OnSerialResponse;

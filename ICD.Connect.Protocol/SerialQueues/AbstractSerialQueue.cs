@@ -22,6 +22,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 	public abstract class AbstractSerialQueue : ISerialQueue
 	{
 		/// <summary>
+		/// Raised when serial data is sent to the port.
+		/// </summary>
+		public event EventHandler<SerialTransmissionEventArgs> OnSerialTransmission;
+
+		/// <summary>
 		/// Raises individual commands with their responses.
 		/// </summary>
 		public event EventHandler<SerialResponseEventArgs> OnSerialResponse;
@@ -298,7 +303,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 				try
 				{
 					if (Port != null)
-						return Port.Send(CurrentCommand.Serialize());
+					{
+						bool output = Port.Send(CurrentCommand.Serialize());
+						if (!output)
+							return false;
+
+						OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(CurrentCommand));
+						return true;
+					}
 
 					ServiceProvider.GetService<ILoggerService>()
 					               .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null", GetType().Name);

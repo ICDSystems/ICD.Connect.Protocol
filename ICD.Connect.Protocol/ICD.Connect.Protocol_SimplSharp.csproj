@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionStateManager.cs" />
+    <Compile Include="EventArguments\SerialTransmissionEventArgs.cs" />
     <Compile Include="EventArguments\XSigEventArgs.cs" />
     <Compile Include="FeedbackDebounce\FeedbackDebounce.cs" />
     <Compile Include="FeedbackDebounce\IFeedbackDebounce.cs" />
