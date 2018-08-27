@@ -237,7 +237,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 			try
 			{
-				m_Buffer.Enqueue(xsig.ToString());
+				m_Buffer.Enqueue(xsig);
 			}
 			finally
 			{
