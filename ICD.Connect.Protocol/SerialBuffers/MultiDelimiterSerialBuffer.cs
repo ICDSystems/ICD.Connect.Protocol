@@ -10,6 +10,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 {
 	public sealed class MultiDelimiterSerialBuffer : ISerialBuffer
 	{
+		/// <summary>
+		/// Raised when a complete message has been buffered.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
 
 		private readonly StringBuilder m_RxData;
