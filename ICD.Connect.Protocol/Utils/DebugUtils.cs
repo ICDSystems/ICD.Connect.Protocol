@@ -109,7 +109,14 @@ namespace ICD.Connect.Protocol.Utils
 					return StringUtils.ToMixedReadableHexLiteral(data);
 
 				case eDebugMode.Xml:
-					return XmlUtils.Format(data);
+					try
+					{
+						return XmlUtils.Format(data);
+					}
+					catch (IcdXmlException)
+					{
+						return FormatData("(Invalid XML)" + data, eDebugMode.Ascii);
+					}
 
 				case eDebugMode.Json:
 					return JsonUtils.Format(data);
