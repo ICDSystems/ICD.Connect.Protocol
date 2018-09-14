@@ -212,7 +212,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private string ConsoleGet(string path)
 		{
 			string output;
-			Get(path, out output, null);
+			Get(path, out output);
 			return output;
 		}
 

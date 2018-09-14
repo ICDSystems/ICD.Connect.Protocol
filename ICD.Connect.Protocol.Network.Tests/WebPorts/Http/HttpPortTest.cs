@@ -98,7 +98,7 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 			};
 
 			string result;
-			Assert.IsTrue(port.Get(request, out result, null));
+			Assert.IsTrue(port.Get(request, out result));
 
 			Post post = JsonConvert.DeserializeObject<Post>(result);
 

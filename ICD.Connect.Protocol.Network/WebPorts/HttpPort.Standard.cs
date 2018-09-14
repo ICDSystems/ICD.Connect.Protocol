@@ -133,13 +133,23 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			m_ClientHandler.Dispose();
 		}
 
-	    /// <summary>
-	    /// Sends a GET request to the server.
-	    /// </summary>
-	    /// <param name="localUrl"></param>
-	    /// <param name="response"></param>
-	    /// <param name="headers"></param>
-	    public bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers)
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="response"></param>
+		public bool Get(string localUrl, out string response)
+		{
+			return Get(localUrl, out response, new Dictionary<string, List<string>>());
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="response"></param>
+		/// <param name="headers"></param>
+		public bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers)
 		{
 			bool success;
 
@@ -258,7 +268,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				if (response == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.RequestUri);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri);
 					return false;
 				}
 
@@ -267,8 +277,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if ((int)response.StatusCode < 300)
 					return true;
 
-				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri,
-				                response.StatusCode);
+				Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri, response.StatusCode);
 				return false;
 			}
 			catch (AggregateException ae)
@@ -277,7 +286,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				          {
 					          if (x is TaskCanceledException)
 					          {
-						          Logger.AddEntry(eSeverity.Error, "{0} {1} request timed out", this, request.RequestUri);
+						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
 								  return true;
 					          }
 

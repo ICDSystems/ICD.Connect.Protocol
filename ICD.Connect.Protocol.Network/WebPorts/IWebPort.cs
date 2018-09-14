@@ -49,6 +49,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers);
 
 		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="response"></param>
+		[PublicAPI]
+		bool Get(string localUrl, out string response);
+
+		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
