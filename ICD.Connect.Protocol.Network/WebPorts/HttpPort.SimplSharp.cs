@@ -130,16 +130,16 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="response"></param>
 		public bool Get(string localUrl, out string response)
 		{
-			return Get(localUrl, out response, new Dictionary<string, List<string>>());
+			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
 		}
 
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
 		/// <param name="headers"></param>
-		public bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers)
+		/// <param name="response"></param>
+		public bool Get(string localUrl, Dictionary<string, List<string>> headers, out string response)
 		{
 			bool success;
 

@@ -39,14 +39,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		[PublicAPI]
 		bool Busy { get; }
 
-	    /// <summary>
-	    /// Sends a GET request to the server.
-	    /// </summary>
-	    /// <param name="localUrl"></param>
-	    /// <param name="response"></param>
-	    /// <param name="headers"></param>
-	    [PublicAPI]
-		bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers);
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		[PublicAPI]
+		bool Get(string localUrl, Dictionary<string, List<string>> headers, out string response);
 
 		/// <summary>
 		/// Sends a GET request to the server.
