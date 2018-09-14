@@ -1,4 +1,5 @@
-﻿using ICD.Common.Properties;
+﻿using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.WebPorts
@@ -38,13 +39,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		[PublicAPI]
 		bool Busy { get; }
 
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		[PublicAPI]
-		bool Get(string localUrl, out string response);
+	    /// <summary>
+	    /// Sends a GET request to the server.
+	    /// </summary>
+	    /// <param name="localUrl"></param>
+	    /// <param name="response"></param>
+	    /// <param name="headers"></param>
+	    [PublicAPI]
+		bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers);
 
 		/// <summary>
 		/// Sends a POST request to the server.

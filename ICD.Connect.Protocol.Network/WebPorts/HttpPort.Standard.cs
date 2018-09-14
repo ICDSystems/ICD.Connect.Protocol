@@ -1,5 +1,6 @@
 ﻿#if STANDARD
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -132,12 +133,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			m_ClientHandler.Dispose();
 		}
 
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		public bool Get(string localUrl, out string response)
+	    /// <summary>
+	    /// Sends a GET request to the server.
+	    /// </summary>
+	    /// <param name="localUrl"></param>
+	    /// <param name="response"></param>
+	    /// <param name="headers"></param>
+	    public bool Get(string localUrl, out string response, Dictionary<string, List<string>> headers)
 		{
 			bool success;
 
@@ -148,7 +150,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
 				PrintTx(uri.AbsolutePath);
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri){};
+			    foreach (var header in headers)
+			    {
+			        request.Headers.Add(header.Key, header.Value);
+                }
 				success = Dispatch(request, out response);
 			}
 			finally
