@@ -1,5 +1,6 @@
 ﻿#if STANDARD
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -139,6 +140,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="response"></param>
 		public bool Get(string localUrl, out string response)
 		{
+			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public bool Get(string localUrl, Dictionary<string, List<string>> headers, out string response)
+		{
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -148,7 +160,11 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
 				PrintTx(uri.AbsolutePath);
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri){};
+			    foreach (var header in headers)
+			    {
+			        request.Headers.Add(header.Key, header.Value);
+                }
 				success = Dispatch(request, out response);
 			}
 			finally
@@ -252,7 +268,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				if (response == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.RequestUri);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri);
 					return false;
 				}
 
@@ -261,8 +277,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if ((int)response.StatusCode < 300)
 					return true;
 
-				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.RequestUri,
-				                response.StatusCode);
+				Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri, response.StatusCode);
 				return false;
 			}
 			catch (AggregateException ae)
@@ -271,7 +286,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				          {
 					          if (x is TaskCanceledException)
 					          {
-						          Logger.AddEntry(eSeverity.Error, "{0} {1} request timed out", this, request.RequestUri);
+						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
 								  return true;
 					          }
 

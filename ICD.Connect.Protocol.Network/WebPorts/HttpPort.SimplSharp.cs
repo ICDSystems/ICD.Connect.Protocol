@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Net.Http;
@@ -129,6 +130,17 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="response"></param>
 		public bool Get(string localUrl, out string response)
 		{
+			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public bool Get(string localUrl, Dictionary<string, List<string>> headers, out string response)
+		{
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -149,6 +161,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
+					foreach (var header in headers)
+					{
+						foreach (var value in header.Value)
+						{
+							request.Header.SetHeaderValue(header.Key, value);
+						}	
+					}
+
 					success = Dispatch(request, out response);
 				}
 				else
@@ -160,6 +180,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
+					
+					foreach (var header in headers)
+					{
+						foreach (var value in header.Value)
+						{
+							request.Header.SetHeaderValue(header.Key, value);
+						}
+					}
 
 					success = Dispatch(request, out response);
 				}
