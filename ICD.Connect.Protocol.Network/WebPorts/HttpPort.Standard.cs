@@ -149,7 +149,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="localUrl"></param>
 		/// <param name="headers"></param>
 		/// <param name="response"></param>
-		public bool Get(string localUrl, Dictionary<string, List<string>> headers, out string response)
+		public bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
 		{
 			bool success;
 
