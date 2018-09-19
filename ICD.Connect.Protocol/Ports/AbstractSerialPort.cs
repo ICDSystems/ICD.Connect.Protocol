@@ -42,6 +42,8 @@ namespace ICD.Connect.Protocol.Ports
 
 				m_IsConnected = value;
 
+				Log(eSeverity.Informational, "Connected state changed to {0}", m_IsConnected);
+
 				UpdateCachedOnlineStatus();
 
 				OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
