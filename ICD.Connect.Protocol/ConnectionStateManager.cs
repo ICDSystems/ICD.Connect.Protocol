@@ -32,60 +32,27 @@ namespace ICD.Connect.Protocol
 		private object m_Parent;
 
 		private ISerialPort m_Port;
-		private bool m_IsConnected;
-		private bool m_IsOnline;
+
+		private ILoggerService m_CachedLogger;
 
 		#region Properties
 
-		private ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
+		private ILoggerService Logger { get { return m_CachedLogger = m_CachedLogger ?? ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		public ConfigurePortCallback ConfigurePort { get; set; }
 
 		public Heartbeat.Heartbeat Heartbeat { get; private set; }
 
-		public bool IsConnected
-		{
-			get
-			{
-				return m_IsConnected;
-			}
-			private set
-			{
-				if (value == m_IsConnected)
-					return;
-				
-				m_IsConnected = value;
+		public bool IsConnected { get { return m_Port != null && m_Port.IsConnected; } }
 
-				OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
-			}
-		}
-
-		public bool IsOnline
-		{
-			get
-			{
-				return m_IsOnline;
-			}
-			private set
-			{
-				if (value == m_IsOnline)
-					return;
-
-				m_IsOnline = value;
-
-				OnIsOnlineStateChanged.Raise(this, new BoolEventArgs(m_IsOnline));
-			}
-		}
+		public bool IsOnline { get { return m_Port != null && m_Port.IsOnline; } }
 
 		/// <summary>
 		/// Gets the id of the current serial port.
 		/// </summary>
 		public int? PortNumber { get { return m_Port == null ? (int?)null : m_Port.Id; } }
 
-		public ISerialPort Port
-		{
-			get { return m_Port; }
-		}
+		public ISerialPort Port { get { return m_Port; } }
 
 		#endregion
 
@@ -142,9 +109,6 @@ namespace ICD.Connect.Protocol
 
 			if (m_Port != null)
 				Heartbeat.StartMonitoring();
-
-			IsOnline = m_Port != null && m_Port.IsOnline;
-			IsConnected = m_Port != null && m_Port.IsConnected;
 		}
 
 		[PublicAPI]
@@ -248,12 +212,12 @@ namespace ICD.Connect.Protocol
 
 		private void WrappedPortOnConnectionStatusChanged(object sender, BoolEventArgs e)
 		{
-			IsConnected = m_Port != null && m_Port.IsConnected;
+			OnConnectedStateChanged.Raise(this, new BoolEventArgs(e.Data));
 		}
 
 		private void WrappedPortOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs eventArgs)
 		{
-			IsOnline = m_Port != null && m_Port.IsOnline;
+			OnIsOnlineStateChanged.Raise(this, new BoolEventArgs(eventArgs.Data));
 		}
 
 		#endregion
