@@ -352,7 +352,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				if (response == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
 					return false;
 				}
 
@@ -361,7 +361,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response.Code < 300)
 					return true;
 
-				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.Url, response.Code);
+				Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
 				return false;
 			}
 			finally
@@ -388,7 +388,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 				if (response == null)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} {1} received null response. Is the port busy?", this, request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
 					return false;
 				}
 
@@ -398,7 +398,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					return true;
 				}
 
-				Logger.AddEntry(eSeverity.Error, "{0} {1} got response with error code {2}", this, request.Url, response.Code);
+				Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
 				return false;
 			}
 			finally
