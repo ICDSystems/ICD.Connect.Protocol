@@ -347,7 +347,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		private string GetRequestUrl(string localAddress)
 		{
-			return new IcdUriBuilder(Address) {Path = localAddress}.ToString();
+			Uri root = new Uri(Address);
+			return new Uri(root, localAddress).ToString();
 		}
 
 		/// <summary>

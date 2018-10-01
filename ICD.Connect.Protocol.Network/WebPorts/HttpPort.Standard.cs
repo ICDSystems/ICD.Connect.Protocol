@@ -157,14 +157,14 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
+				Uri uri = new Uri(new Uri(Address), localUrl);
 				PrintTx(uri.AbsolutePath);
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri){};
-			    foreach (var header in headers)
-			    {
-			        request.Headers.Add(header.Key, header.Value);
-                }
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				foreach (KeyValuePair<string, List<string>> header in headers)
+				{
+					request.Headers.Add(header.Key, header.Value);
+				}
 				success = Dispatch(request, out response);
 			}
 			finally
@@ -192,7 +192,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				Uri uri = new Uri(new Uri(GetAddressWithProtocol()), localUrl);
+				Uri uri = new Uri(new Uri(Address), localUrl);
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri)
@@ -231,7 +231,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			try
 			{
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, GetAddressWithProtocol())
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(Address))
 				{
 					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
 				};
@@ -287,12 +287,12 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					          if (x is TaskCanceledException)
 					          {
 						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
-								  return true;
+						          return true;
 					          }
 
 					          return false;
 				          });
-				
+
 				return false;
 			}
 			finally
