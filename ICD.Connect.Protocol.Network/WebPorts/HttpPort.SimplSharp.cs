@@ -316,6 +316,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			SetLastRequestSucceeded(success);
 			PrintRx(response);
+
 			return success;
 		}
 
@@ -331,7 +332,22 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			if (url == null)
 				throw new ArgumentNullException("url");
 
-			return url.ToLower().StartsWith("https://");
+			Uri output;
+			return UriUtils.TryParse(url, out output) && output.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// Builds a request url from the given path.
+		/// e.g.
+		///		"Test/Path"
+		/// May result in
+		///		https://10.3.14.15/Test/Path
+		/// </summary>
+		/// <param name="localAddress"></param>
+		/// <returns></returns>
+		private string GetRequestUrl(string localAddress)
+		{
+			return new IcdUriBuilder(Address) {Path = localAddress}.ToString();
 		}
 
 		/// <summary>

@@ -57,45 +57,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		#region Private Methods
 
 		/// <summary>
-		/// Builds a request url from the given path.
-		/// e.g.
-		///		"Test/Path"
-		/// May result in
-		///		https://10.3.14.15/Test/Path
-		/// </summary>
-		/// <param name="localAddress"></param>
-		/// <returns></returns>
-		private string GetRequestUrl(string localAddress)
-		{
-			string output = GetAddressWithProtocol();
-
-			if (string.IsNullOrEmpty(localAddress))
-				return output;
-
-			// Avoid doubling up the trailing slash
-			if (localAddress.StartsWith("/"))
-				localAddress = localAddress.Substring(1);
-
-			// Append the local address to the base address
-			return string.Format("{0}{1}", output, localAddress);
-		}
-
-		private string GetAddressWithProtocol()
-		{
-			string output = Address;
-
-			// Ensure the address starts with a protocol
-			if (!output.Contains("://"))
-				output = string.Format("http://{0}", output);
-
-			// Ensure the address ends with a trailing slash
-			if (!output.EndsWith("/"))
-				output = string.Format("{0}/", output);
-
-			return output;
-		}
-
-		/// <summary>
 		/// Updates the IsOnline status and raises events.
 		/// </summary>
 		/// <param name="succeeded"></param>
