@@ -85,7 +85,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
-			foreach (uint clientId in m_Clients.Keys)
+			foreach (uint clientId in GetClients())
 			{
 				PrintTx(clientId, data);
 				Send(clientId, byteData);
