@@ -332,8 +332,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			if (url == null)
 				throw new ArgumentNullException("url");
 
-			Uri output;
-			return UriUtils.TryParse(url, out output) && output.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
+			return new IcdUriBuilder(url).Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>
@@ -347,8 +346,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		private string GetRequestUrl(string localAddress)
 		{
-			Uri root = new Uri(Address);
-			return new Uri(root, localAddress).ToString();
+			return new IcdUriBuilder(Address) {Path = localAddress}.ToString();
 		}
 
 		/// <summary>
