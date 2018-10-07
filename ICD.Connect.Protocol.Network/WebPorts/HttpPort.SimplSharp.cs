@@ -332,7 +332,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			if (url == null)
 				throw new ArgumentNullException("url");
 
-			return new IcdUriBuilder(url).Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase);
+			return new IcdUriBuilder(url).Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>
