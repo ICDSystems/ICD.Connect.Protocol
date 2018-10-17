@@ -1,4 +1,6 @@
-﻿using ICD.Common.Utils.Xml;
+﻿using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
 
@@ -10,7 +12,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 	[KrangSettings("SSH", typeof(SshPort))]
 	public sealed class SshPortSettings : AbstractSecureNetworkPortSettings
 	{
+		private const string PRIVATE_KEYS_ELEMENT = "PrivateKeys";
+		private const string PRIVATE_KEY_ELEMENT = "PrivateKey";
+		private const string PATH_ELEMENT = "Path";
+		private const string PASSPHRASE_ELEMENT = "PassPhrase";
+
 		private readonly SecureNetworkProperties m_NetworkProperties;
+
+		/// <summary>
+		/// Path -> Pass-phrase
+		/// </summary>
+		private readonly Dictionary<string, string> m_PrivateKeys; 
 
 		#region Properties
 
@@ -61,9 +73,30 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			{
 				NetworkPort = SshPort.DEFAULT_PORT
 			};
+
+			m_PrivateKeys = new Dictionary<string, string>();
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Gets the configured path -> pass-phrase pairs.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<KeyValuePair<string, string>> GetPrivateKeys()
+		{
+			return m_PrivateKeys.ToArray(m_PrivateKeys.Count);
+		}
+
+		/// <summary>
+		/// Sets the configured path -> pass-phrase pairs.
+		/// </summary>
+		/// <returns></returns>
+		public void SetPrivateKeys(IEnumerable<KeyValuePair<string, string>> privateKeys)
+		{
+			m_PrivateKeys.Clear();
+			m_PrivateKeys.AddRange(privateKeys);
+		}
 
 		/// <summary>
 		/// Clears the configured values.
@@ -74,12 +107,28 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		}
 
 		/// <summary>
+		/// Writes property elements to xml.
+		/// </summary>
+		/// <param name="writer"></param>
+		protected override void WriteElements(IcdXmlTextWriter writer)
+		{
+			base.WriteElements(writer);
+
+			XmlUtils.WriteDictToXml(writer, GetPrivateKeys(), PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT, PASSPHRASE_ELEMENT);
+		}
+
+		/// <summary>
 		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
 		public override void ParseXml(string xml)
 		{
 			base.ParseXml(xml);
+
+			IEnumerable<KeyValuePair<string, string>> privateKeys =
+				XmlUtils.ReadDictFromXml<string, string>(xml, PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT, PASSPHRASE_ELEMENT);
+
+			SetPrivateKeys(privateKeys);
 
 			NetworkPort = NetworkPort == 0 ? SshPort.DEFAULT_PORT : NetworkPort;
 		}
