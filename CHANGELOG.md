@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added extensions for setting relay open/closed state
  - Added WebProxySettings and WebProxyProperties
  - Added web proxy features to existing web ports
- 
+ - SSHPort supports configurable private keys with pass-phrases
+
 ### Changed
  - Greatly simplified IcdTcpServer, potential fixes for deadlocks
 
