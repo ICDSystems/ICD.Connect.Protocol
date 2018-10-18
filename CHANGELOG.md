@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.1.0] - 2018-10-18
+### Changed
+ - Better URI building
+ - TCP threading improvements for Net Standard
+ - Logging improvements
+
 ## [7.0.1] - 2018-09-25
 ### Changed
  - ConnectionStateManager provides more accurate feedback
