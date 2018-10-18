@@ -173,11 +173,12 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="tcpClient"></param>
 		private void TcpClientConnectCallback(Task<TcpClient> tcpClient)
 		{
+			uint clientId = 0;
 			m_ClientsSection.Enter();
 			try
 			{
-				uint clientId = (uint) IdUtils.GetNewId(m_Clients.Keys.Select(i => (int) i));
-				if (tcpClient.Status == TaskStatus.Faulted)
+				clientId = (uint) IdUtils.GetNewId(m_Clients.Keys.Select(i => (int) i));
+				if (tcpClient.Status == TaskStatus.Faulted || clientId == 0)
 				{
 					return;
 				}
@@ -185,8 +186,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				m_Clients[clientId] = tcpClient.Result;
 				m_ClientBuffers[clientId] = new byte[16384];
 				AddClient(clientId);
-				OnSocketStateChange.Raise(this,
-					new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
 				m_Clients[clientId].GetStream()
 					.ReadAsync(m_ClientBuffers[clientId], 0, 16384)
 					.ContinueWith(a => TcpClientReceiveHandler(a, clientId));
@@ -198,6 +197,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			// Spawn new thread for accepting new clients
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
+
+			// let the rest of the application know a new client connected
+			if(clientId != 0)
+				OnSocketStateChange.Raise(this,
+					new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
 		}
 
 		/// <summary>
