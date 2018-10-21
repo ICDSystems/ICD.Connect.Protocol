@@ -28,7 +28,7 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 
 				m_State = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} state changed to {1}", this, m_State);
+				Log(eSeverity.Informational, "State changed to {0}", m_State);
 
 				OnStateChanged.Raise(this, new BoolEventArgs(m_State));
 			}
