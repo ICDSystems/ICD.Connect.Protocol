@@ -7,6 +7,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports.DigitalInput;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
@@ -142,6 +143,34 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		/// </summary>
 		/// <param name="digitalOut"></param>
 		public abstract void SetDigitalOut(bool digitalOut);
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Configuration = Configuration;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			if (settings.Configuration != eIoPortConfiguration.None)
+				SetConfiguration(settings.Configuration);
+		}
 
 		#endregion
 
