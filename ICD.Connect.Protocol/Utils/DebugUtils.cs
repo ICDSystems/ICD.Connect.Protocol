@@ -8,6 +8,9 @@ namespace ICD.Connect.Protocol.Utils
 {
 	public static class DebugUtils
 	{
+		private const string RX = "RX";
+		private const string TX = "TX";
+
 		/// <summary>
 		/// Formats and prints the received data to the console.
 		/// Does nothing if mode is off.
@@ -30,7 +33,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="data"></param>
 		public static void PrintRx(object instance, eDebugMode mode, string context, string data)
 		{
-			PrintData(instance, context, data, "RX", mode);
+			PrintData(instance, context, data, RX, mode);
 		}
 
 		/// <summary>
@@ -55,7 +58,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="data"></param>
 		public static void PrintTx(object instance, eDebugMode mode, string context, string data)
 		{
-			PrintData(instance, context, data, "TX", mode);
+			PrintData(instance, context, data, TX, mode);
 		}
 
 		/// <summary>
@@ -80,7 +83,9 @@ namespace ICD.Connect.Protocol.Utils
 			data = FormatData(data, mode);
 
 			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-			IcdConsole.Print("{0} {1}{2}({3}) - {4}", instance, context, direction, modeString, data);
+			IcdConsole.Print("{0} {1}", instance, context);
+			IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
+			IcdConsole.Print("({0}) - {1}", modeString, data);
 			IcdConsole.PrintLine(string.Empty);
 		}
 
