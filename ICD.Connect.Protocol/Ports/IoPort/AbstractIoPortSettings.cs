@@ -31,7 +31,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 			base.ParseXml(xml);
 
 			Configuration = XmlUtils.TryReadChildElementContentAsEnum<eIoPortConfiguration>(xml, CONFIGURATION_ELEMENT, true) ??
-							eIoPortConfiguration.None;
+			                eIoPortConfiguration.None;
 		}
 	}
 }
