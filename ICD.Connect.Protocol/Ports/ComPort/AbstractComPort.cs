@@ -28,6 +28,17 @@
 			return true;
 		}
 
+		/// <summary>
+		/// Configures the com port with the given attributes.
+		/// </summary>
+		/// <param name="baudRate"></param>
+		/// <param name="numberOfDataBits"></param>
+		/// <param name="parityType"></param>
+		/// <param name="numberOfStopBits"></param>
+		/// <param name="protocolType"></param>
+		/// <param name="hardwareHandShake"></param>
+		/// <param name="softwareHandshake"></param>
+		/// <param name="reportCtsChanges"></param>
 		public abstract void SetComPortSpec(eComBaudRates baudRate, eComDataBits numberOfDataBits, eComParityType parityType,
 		                                    eComStopBits numberOfStopBits, eComProtocolType protocolType,
 		                                    eComHardwareHandshakeType hardwareHandShake,
