@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.2.0] - 2018-10-30
+### Added
+ - Colour-coded port debugging
+ - IO port configuration can be set via settings
+ - SerialQueue exposes EnqueuePriority method with comparer
+
 ## [7.1.0] - 2018-10-18
 ### Changed
  - Better URI building
