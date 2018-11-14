@@ -50,6 +50,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		void EnqueuePriority(ISerialData data);
 
 		void EnqueuePriority(ISerialData data, int priority);
+
+		/// <summary>
+		/// Gets the number of times a command has timed out since the last success.
+		/// </summary>
+		int TimeoutCount { get; }
 	}
 
 	public static class SerialQueueExtensions

@@ -76,6 +76,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public ISerialData CurrentCommand { get; protected set; }
 
+		/// <summary>
+		/// Gets the number of times a command has timed out since the last success.
+		/// </summary>
+		public int TimeoutCount { get { return m_TimeoutCount; } }
+
 		#endregion
 
 		#region Constructors
