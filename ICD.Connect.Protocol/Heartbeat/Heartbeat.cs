@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 
 namespace ICD.Connect.Protocol.Heartbeat
 {
-	public sealed class Heartbeat : IDisposable
+	public sealed class Heartbeat : IStateDisposable
 	{
 		private const long MAX_INTERVAL_MS_DEFAULT = 60 * 1000;
 
@@ -26,12 +26,18 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private readonly long m_MaxIntervalMs;
 		private readonly long[] m_RampIntervalMs;
 		private readonly SafeTimer m_Timer;
+		private readonly SafeCriticalSection m_ConnectSection;
+
 		private int m_ConnectAttempts;
 		private bool m_MonitoringActive;
-		private bool m_Connecting;
 		private IConnectable m_Instance;
 
 		public ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
+
+		/// <summary>
+		/// Returns true if this instance has been disposed.
+		/// </summary>
+		public bool IsDisposed { get; private set; }
 
 		/// <summary>
 		/// Constructor.
@@ -73,32 +79,46 @@ namespace ICD.Connect.Protocol.Heartbeat
 			m_Instance = instance;
 			m_MaxIntervalMs = maxIntervalMs;
 			m_RampIntervalMs = rampIntervalMs.ToArray();
-			m_Timer = SafeTimer.Stopped(TimerCallback);
+			m_Timer = SafeTimer.Stopped(HandleConnectionState);
+			m_ConnectSection = new SafeCriticalSection();
 
 			Subscribe(m_Instance);
 		}
 
+		#region Methods
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public void Dispose()
 		{
+			if (IsDisposed)
+				return;
+
 			Unsubscribe(m_Instance);
 
 			StopMonitoring();
 			m_Timer.Dispose();
 
 			m_Instance = null;
+
+			IsDisposed = true;
 		}
 
-		#region Methods
-
+		/// <summary>
+		/// Starts maintaining connection state.
+		/// </summary>
 		public void StartMonitoring()
 		{
 			m_MonitoringActive = true;
 			
-			// Check the connection now, but in a new thread
-			// This will start the timer if we are currently disconnected
-			ThreadingUtils.SafeInvoke(TimerCallback);
+			// Check after the first interval to see if we are connected
+			m_Timer.Reset(s_RampMsDefault[0]);
 		}
 
+		/// <summary>
+		/// Stops maintaining connection state.
+		/// </summary>
 		public void StopMonitoring()
 		{
 			m_MonitoringActive = false;
@@ -107,17 +127,6 @@ namespace ICD.Connect.Protocol.Heartbeat
 		}
 
 		#endregion
-
-		private void TimerCallback()
-		{
-			if (m_Instance == null)
-				return;
-
-			if (m_Instance.IsConnected)
-				HandleConnected();
-			else
-				HandleDisconnected();
-		}
 
 		#region Instance Callbacks
 
@@ -145,65 +154,66 @@ namespace ICD.Connect.Protocol.Heartbeat
 			instance.OnConnectedStateChanged -= InstanceOnConnectedStateChanged;
 		}
 
+		/// <summary>
+		/// Called when the instance connection state changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
 		private void InstanceOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
 		{
-			if (!m_MonitoringActive)
+			if (m_Instance == null)
 				return;
 
 			if (eventArgs.Data)
-			{
-				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", sender);
-				HandleConnected();
-			}
+				Logger.AddEntry(eSeverity.Notice, "{0} established connection.", m_Instance);
 			else
-			{
-				Logger.AddEntry(eSeverity.Error, "{0} lost connection.", sender);
+				Logger.AddEntry(eSeverity.Warning, "{0} lost connection.", m_Instance);
+
+			// Check after the first interval to start 
+			if (m_MonitoringActive)
+				m_Timer.Reset(s_RampMsDefault[0]);
+		}
+
+		private void HandleConnectionState()
+		{
+			if (m_Instance == null)
+				return;
+
+			if (m_Instance.IsConnected)
+				HandleConnected();
+			else
 				HandleDisconnected();
-			}
 		}
 
 		private void HandleConnected()
 		{
 			m_ConnectAttempts = 0;
-			m_Connecting = false;
 		}
 
 		private void HandleDisconnected()
 		{
-			if (m_Connecting)
-				return;
-
-			if (m_Instance == null)
+			if (!m_ConnectSection.TryEnter())
 				return;
 
 			try
 			{
-				m_Connecting = true;
+				long interval = m_RampIntervalMs.ElementAtOrDefault(m_ConnectAttempts, m_MaxIntervalMs);
+				eSeverity severity = m_ConnectAttempts >= m_RampIntervalMs.Length ? eSeverity.Error : eSeverity.Warning;
+
+				Logger.AddEntry(severity, "{0} - Attempting to reconnect (Attempt {1}).",
+				                m_Instance, m_ConnectAttempts + 1);
 
 				m_Instance.Connect();
 
-				if (m_ConnectAttempts < m_RampIntervalMs.Length)
+				if (!m_Instance.IsConnected)
 				{
-					Logger.AddEntry(eSeverity.Warning,
-					                m_ConnectAttempts == 0
-						                ? "{0} Attempting to reconnect. Attempted {1} time."
-						                : "{0} Attempting to reconnect. Attempted {1} times.",
-					                m_Instance,
-					                m_ConnectAttempts + 1);
-					m_Timer.Reset(m_RampIntervalMs[m_ConnectAttempts]);
-					m_ConnectAttempts++;
-				}
-				else
-				{
-					Logger.AddEntry(eSeverity.Error, "{0} Attempting to reconnect. Attempted {1} times.", m_Instance,
-					                m_ConnectAttempts + 1);
-					m_Timer.Reset(m_MaxIntervalMs);
+					m_Timer.Reset(interval);
 					m_ConnectAttempts++;
 				}
 			}
 			finally
 			{
-				m_Connecting = false;
+				m_ConnectSection.Leave();
 			}
 		}
 
