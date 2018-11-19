@@ -29,7 +29,8 @@ namespace ICD.Connect.Protocol
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsOnlineStateChanged;
 
-		private object m_Parent;
+		private readonly object m_Parent;
+		private readonly Heartbeat.Heartbeat m_Heartbeat;
 
 		private ISerialPort m_Port;
 
@@ -41,7 +42,7 @@ namespace ICD.Connect.Protocol
 
 		public ConfigurePortCallback ConfigurePort { get; set; }
 
-		public Heartbeat.Heartbeat Heartbeat { get; private set; }
+		public Heartbeat.Heartbeat Heartbeat { get { return m_Heartbeat; } }
 
 		public bool IsConnected { get { return m_Port != null && m_Port.IsConnected; } }
 
@@ -63,7 +64,7 @@ namespace ICD.Connect.Protocol
 		public ConnectionStateManager(object connectable)
 		{
 			m_Parent = connectable;
-			Heartbeat = new Heartbeat.Heartbeat(this);
+			m_Heartbeat = new Heartbeat.Heartbeat(this);
 		}
 
 		/// <summary>
@@ -75,12 +76,11 @@ namespace ICD.Connect.Protocol
 			OnSerialDataReceived = null;
 			OnIsOnlineStateChanged = null;
 
-			Heartbeat.Dispose();
+			m_Heartbeat.Dispose();
 
 			SetPort(null);
 
 			ConfigurePort = null;
-			m_Parent = null;
 		}
 
 		#region Methods
@@ -98,7 +98,7 @@ namespace ICD.Connect.Protocol
 			if (ConfigurePort != null)
 				ConfigurePort(port);
 
-			Heartbeat.StopMonitoring();
+			m_Heartbeat.StopMonitoring();
 
 			if (m_Port != null)
 				Disconnect();
@@ -108,7 +108,7 @@ namespace ICD.Connect.Protocol
 			Subscribe(m_Port);
 
 			if (m_Port != null)
-				Heartbeat.StartMonitoring();
+				m_Heartbeat.StartMonitoring();
 		}
 
 		[PublicAPI]
