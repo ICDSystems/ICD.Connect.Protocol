@@ -108,11 +108,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  <param name="comparer"></param>
 		/// <param name="priority"></param>
 		void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority) where T : class, ISerialData;
-
-		/// <summary>
-		/// Gets the number of times a command has timed out since the last success.
-		/// </summary>
-		int TimeoutCount { get; }
 	}
 
 	public static class SerialQueueExtensions
