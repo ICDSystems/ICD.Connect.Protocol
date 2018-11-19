@@ -112,9 +112,8 @@ namespace ICD.Connect.Protocol.Heartbeat
 		{
 			m_MonitoringActive = true;
 			
-			// Check the connection now, but in a new thread
-			// This will start the timer if we are currently disconnected
-			ThreadingUtils.SafeInvoke(HandleConnectionState);
+			// Check after the first interval to see if we are connected
+			m_Timer.Reset(s_RampMsDefault[0]);
 		}
 
 		/// <summary>
@@ -170,8 +169,9 @@ namespace ICD.Connect.Protocol.Heartbeat
 			else
 				Logger.AddEntry(eSeverity.Warning, "{0} lost connection.", m_Instance);
 
+			// Check after the first interval to start 
 			if (m_MonitoringActive)
-				HandleConnectionState();
+				m_Timer.Reset(s_RampMsDefault[0]);
 		}
 
 		private void HandleConnectionState()
