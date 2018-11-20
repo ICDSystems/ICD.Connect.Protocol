@@ -197,7 +197,10 @@ namespace ICD.Connect.Protocol.Heartbeat
 
 			try
 			{
-				long interval = m_RampIntervalMs.ElementAtOrDefault(m_ConnectAttempts, m_MaxIntervalMs);
+				long interval;
+				if (!m_RampIntervalMs.TryElementAt(m_ConnectAttempts, out interval))
+					interval = m_MaxIntervalMs;
+
 				eSeverity severity = m_ConnectAttempts >= m_RampIntervalMs.Length ? eSeverity.Error : eSeverity.Warning;
 
 				Logger.AddEntry(severity, "{0} - Attempting to reconnect (Attempt {1}).",
