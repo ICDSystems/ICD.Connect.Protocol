@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.2.1] - 2018-11-20
+### Changed
+ - Heartbeat forces a reconnection after an interval, allowing devices to deinitialize
+
 ## [7.2.0] - 2018-10-30
 ### Added
  - Colour-coded port debugging
