@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
@@ -22,6 +23,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
 		public abstract bool Busy { get; }
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public abstract bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response);
 
 		/// <summary>
 		/// Sends a GET request to the server.

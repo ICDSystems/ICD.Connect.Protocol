@@ -81,6 +81,8 @@ namespace ICD.Connect.Protocol.Network.Ports
 
 			addRow("Username", Username);
 			addRow("Password", StringUtils.PasswordFormat(Password));
+			addRow("Address", Address);
+			addRow("Port", Port);
 		}
 
 		/// <summary>
@@ -98,6 +100,12 @@ namespace ICD.Connect.Protocol.Network.Ports
 			yield return new GenericConsoleCommand<string>("SetPassword",
 														   "Sets the password for next connection attempt",
 														   s => Password = s);
+			yield return new GenericConsoleCommand<string>("SetAddress",
+														   "Sets the address for next connection attempt",
+														   s => Address = s);
+			yield return new GenericConsoleCommand<ushort>("SetPort",
+														   "Sets the port for next connection attempt",
+														   s => Port = s);
 		}
 
 		/// <summary>

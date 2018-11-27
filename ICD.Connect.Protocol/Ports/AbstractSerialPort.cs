@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using ICD.Common.Utils;
+using System.Text.RegularExpressions;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -17,7 +16,7 @@ namespace ICD.Connect.Protocol.Ports
 		where T : ISerialPortSettings, new()
 	{
 		/// <summary>
-		/// Raised when data is received from the port.
+		/// Rasied when the port receives data from the remote endpoint.
 		/// </summary>
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
 
@@ -42,6 +41,8 @@ namespace ICD.Connect.Protocol.Ports
 					return;
 
 				m_IsConnected = value;
+
+				Log(eSeverity.Informational, "Connected state changed to {0}", m_IsConnected);
 
 				UpdateCachedOnlineStatus();
 
@@ -111,43 +112,24 @@ namespace ICD.Connect.Protocol.Ports
 			if (IsDisposed)
 				throw new ObjectDisposedException(GetType().Name, string.Format("{0} is disposed", this));
 
-			return ConnectAndSend(data, SendFinal);
-		}
-
-		/// <summary>
-		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
-		/// </summary>
-		protected abstract bool SendFinal(string data);
-
-		/// <summary>
-		/// Attempts to connect if not currently connected and calls the send function.
-		/// </summary>
-		/// <param name="data"></param>
-		/// <param name="sendFunction"></param>
-		/// <returns></returns>
-		protected bool ConnectAndSend(string data, Func<string, bool> sendFunction)
-		{
 			try
 			{
-				if (!IsConnected)
-				{
-					Log(eSeverity.Notice, "Port is not connected. Attempting to reconnect.");
-					Connect();
-				}
+				if (IsConnected)
+					return SendFinal(data);
 
-				if (!IsConnected)
-				{
-					Log(eSeverity.Error, "Port is not connected. Reconnection failed.");
-					return false;
-				}
-
-				return sendFunction(data);
+				Log(eSeverity.Error, "Unable to send - Port is not connected.");
+				return false;
 			}
 			finally
 			{
 				UpdateIsConnectedState();
 			}
 		}
+
+		/// <summary>
+		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
+		/// </summary>
+		protected abstract bool SendFinal(string data);
 
 		/// <summary>
 		/// Raises the OnSerialDataReceived event.
@@ -192,7 +174,7 @@ namespace ICD.Connect.Protocol.Ports
 			yield return new ConsoleCommand("Connect", "Connects to the physical endpoint", () => Connect());
 			yield return new ConsoleCommand("Disconnect", "Disconnects from the physical endpoint", () => Disconnect());
 			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => ConsoleSend(a));
-			yield return new ParamsConsoleCommand("SendHex", "Sends hex data in the format \\xFF\\xFF...", b => SendHex(b));
+			yield return new ParamsConsoleCommand("Receive", "Mocks incoming data from the port", a => ConsoleReceive(a));
 		}
 
 		/// <summary>
@@ -210,17 +192,34 @@ namespace ICD.Connect.Protocol.Ports
 		/// <param name="data"></param>
 		private void ConsoleSend(params string[] data)
 		{
-			Send(string.Join(" ", data));
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Rejoin the parameters
+			string command = string.Join(" ", data);
+
+			// Replace escape codes with the actual characters
+			command = Regex.Unescape(command);
+
+			Send(command);
 		}
 
 		/// <summary>
-		/// Shim to send hex data from console command.
+		/// Shim to receive data from console command.
 		/// </summary>
 		/// <param name="data"></param>
-		private void SendHex(params string[] data)
+		private void ConsoleReceive(params string[] data)
 		{
-			foreach (string literal in data.Select(item => StringUtils.FromHexLiteral(item)))
-				Send(literal);
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Rejoin the parameters
+			string command = string.Join(" ", data);
+
+			// Replace escape codes with the actual characters
+			command = Regex.Unescape(command);
+
+			Receive(command);
 		}
 
 		#endregion

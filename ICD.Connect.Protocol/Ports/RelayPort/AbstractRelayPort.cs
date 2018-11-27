@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
@@ -26,6 +27,8 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 					return;
 
 				m_Closed = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} closed changed to {1}", this, m_Closed);
 
 				OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
 			}

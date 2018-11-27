@@ -1,5 +1,6 @@
 ﻿#if STANDARD
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,7 +23,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Content type for the server to respond with.
 		/// </summary>
-		public string Accept
+		public override string Accept
 		{
 			get
 			{
@@ -40,7 +41,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public bool Busy
+		public override bool Busy
 		{
 			get
 			{
@@ -96,7 +97,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="localUrl"></param>
 		/// <param name="response"></param>
-		public bool Get(string localUrl, out string response)
+		public override bool Get(string localUrl, out string response)
+		{
+			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
 		{
 			bool success;
 
@@ -108,6 +120,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				foreach (KeyValuePair<string, List<string>> header in headers)
+				{
+					request.Headers.Add(header.Key, header.Value);
+				}
 				success = Dispatch(request, out response);
 			}
 			finally
@@ -127,7 +143,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public bool Post(string localUrl, byte[] data, out string response)
+		public override bool Post(string localUrl, byte[] data, out string response)
 		{
 			bool success;
 
@@ -162,7 +178,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="content"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public bool DispatchSoap(string action, string content, out string response)
+		public override bool DispatchSoap(string action, string content, out string response)
 		{
 			PrintTx(action);
 
@@ -235,7 +251,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					          return false;
 				          });
-				
+
 				return false;
 			}
 			finally

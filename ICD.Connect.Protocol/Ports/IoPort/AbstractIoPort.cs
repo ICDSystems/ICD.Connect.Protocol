@@ -7,6 +7,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports.DigitalInput;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
@@ -17,6 +18,13 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		public event EventHandler<BoolEventArgs> OnDigitalOutChanged;
 		public event EventHandler<UShortEventArgs> OnAnalogInChanged;
 		public event IoPortConfigurationCallback OnConfigurationChanged;
+
+		event EventHandler<BoolEventArgs> IDigitalInputPort.OnStateChanged
+		{
+			add { OnDigitalInChanged += value; }
+			// ReSharper disable once DelegateSubtraction
+			remove { OnDigitalInChanged -= value; }
+		}
 
 		private bool m_DigitalIn;
 		private bool m_DigitalOut;
@@ -38,7 +46,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_DigitalIn = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} digital-in changed to {1}", this, m_DigitalIn);
+				Log(eSeverity.Informational, "Digital-in changed to {0}", m_DigitalIn);
 
 				OnDigitalInChanged.Raise(this, new BoolEventArgs(m_DigitalIn));
 			}
@@ -57,7 +65,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_DigitalOut = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} digital-out changed to {1}", this, m_DigitalOut);
+				Log(eSeverity.Informational, "Digital-out changed to {0}", m_DigitalOut);
 
 				OnDigitalOutChanged.Raise(this, new BoolEventArgs(m_DigitalOut));
 			}
@@ -76,7 +84,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_AnalogIn = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} analog-in changed to {1}", this, m_AnalogIn);
+				Log(eSeverity.Informational, "Analog-in changed to {0}", m_AnalogIn);
 
 				OnAnalogInChanged.Raise(this, new UShortEventArgs(m_AnalogIn));
 			}
@@ -95,13 +103,18 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_Configuration = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} configuration changed to {1}", this, m_Configuration);
+				Log(eSeverity.Informational, "Configuration changed to {0}", m_Configuration);
 
 				IoPortConfigurationCallback handler = OnConfigurationChanged;
 				if (handler != null)
 					handler(this, m_Configuration);
 			}
 		}
+
+		/// <summary>
+		/// Gets the current digital input state.
+		/// </summary>
+		bool IDigitalInputPort.State { get { return DigitalIn; } }
 
 		#endregion
 
@@ -130,6 +143,34 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		/// </summary>
 		/// <param name="digitalOut"></param>
 		public abstract void SetDigitalOut(bool digitalOut);
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Configuration = Configuration;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			if (settings.Configuration != eIoPortConfiguration.None)
+				SetConfiguration(settings.Configuration);
+		}
 
 		#endregion
 
@@ -175,17 +216,5 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		}
 
 		#endregion
-
-		event EventHandler<BoolEventArgs> IDigitalInputPort.OnStateChanged
-		{
-			add { OnDigitalInChanged += value; }
-// ReSharper disable once DelegateSubtraction
-			remove { OnDigitalInChanged -= value; }
-		}
-
-		/// <summary>
-		/// Gets the current digital input state.
-		/// </summary>
-		bool IDigitalInputPort.State { get { return DigitalIn; } }
 	}
 }

@@ -8,6 +8,74 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added interfaces for port configuration
 
+## [7.2.1] - 2018-11-20
+### Changed
+ - Heartbeat forces a reconnection after an interval, allowing devices to deinitialize
+
+## [7.2.0] - 2018-10-30
+### Added
+ - Colour-coded port debugging
+ - IO port configuration can be set via settings
+ - SerialQueue exposes EnqueuePriority method with comparer
+
+## [7.1.0] - 2018-10-18
+### Changed
+ - Better URI building
+ - TCP threading improvements for Net Standard
+ - Logging improvements
+
+## [7.0.1] - 2018-09-25
+### Changed
+ - ConnectionStateManager provides more accurate feedback
+ - Logging serial port connection status
+
+## [7.0.0] - 2018-09-14
+### Added
+ - Added trust mode to serial queues
+ - Added transmission event to serial queues
+
+### Changed
+ - Various performance improvements
+ - TCP fixes for Net Standard
+
+## [6.4.0] - 2018-07-19
+### Added
+ - Added console command to mock incoming data from serial ports
+ - ConnectionStateManager exposes wrapped port
+ 
+### Changed
+ - Logging relay open/close state changes
+ - Fixed bug where generic types would appear incorrectly in the console
+ - Fixed potential null ref in ConnectionStateManager
+
+## [6.3.0] - 2018-07-02
+### Added
+ - Added fallback authentication methods for SSH
+ 
+### Changed
+ - Added cancellation tokens to AsyncTcpClient to fix disconnect issues
+ - Small fixes for SSH and TCP Server exceptions
+ - Fixed ObjectDisposedException in Heartbeat
+
+## [6.2.0] - 2018-06-19
+### Added
+ - SerialPort console support for sending escape codes (crlf, hex, etc)
+
+### Changed
+ - Fixing Heartbeat logging order
+
+## [6.1.0] - 2018-06-04
+### Added
+ - Added ConnectionStateManager for standardized serial connection management between drivers
+
+### Changed
+ - RPC uses ConnectionStateManager for maintaining connection with remote endpoints
+ - Fixed bug where a disconnected UDP client would throw an exception on network interface linkdown
+
+## [6.0.0] - 2018-05-24
+### Changed
+ - Crosspoint SPlus shims reworked to new paradigm
+
 ## [5.0.1] - 2018-05-09
 ### Changed
  - Fixed subscription bug in Heartbeat

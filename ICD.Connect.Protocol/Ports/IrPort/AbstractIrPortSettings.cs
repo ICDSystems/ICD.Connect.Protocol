@@ -1,5 +1,6 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
@@ -12,6 +13,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <summary>
 		/// Gets/sets the configurable path to the IR driver.
 		/// </summary>
+		[PathSettingsProperty("IRDrivers", ".ir")]
 		public string IrDriverPath { get; set; }
 
 		/// <summary>

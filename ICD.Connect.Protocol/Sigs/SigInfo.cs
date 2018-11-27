@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
 {
-	public struct SigInfo : IUShortOutputSig, IStringOutputSig, IBoolOutputSig
+	public struct SigInfo : IUShortOutputSig, IStringOutputSig, IBoolOutputSig, IEquatable<SigInfo>
 	{
 		// JSON
 		private const string TYPE_PROPERTY = "T";
@@ -71,8 +71,6 @@ namespace ICD.Connect.Protocol.Sigs
 				case eSigType.Serial:
 					m_StringValue = sig.GetStringValue();
 					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 		}
 
@@ -91,6 +89,11 @@ namespace ICD.Connect.Protocol.Sigs
 		{
 		}
 
+		public SigInfo(uint number, ushort smartObject)
+			: this(number, null, smartObject)
+		{
+		}
+
 		public SigInfo(string name, ushort smartObject, string value)
 			: this(0, name, smartObject, value)
 		{
@@ -103,6 +106,11 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public SigInfo(string name, ushort smartObject, ushort value)
 			: this(0, name, smartObject, value)
+		{
+		}
+
+		public SigInfo(string name, ushort smartObject)
+			: this(0, name, smartObject)
 		{
 		}
 
@@ -122,6 +130,11 @@ namespace ICD.Connect.Protocol.Sigs
 			: this(eSigType.Analog, number, name, smartObject)
 		{
 			m_UshortValue = value;
+		}
+
+		public SigInfo(uint number, string name, ushort smartObject)
+			: this(eSigType.Na, number, name, smartObject)
+		{
 		}
 
 		private SigInfo(eSigType type, uint number, string name, ushort smartObject)
@@ -201,7 +214,8 @@ namespace ICD.Connect.Protocol.Sigs
 			if (m_SmartObject != 0)
 				builder.AppendProperty("SmartObject", m_SmartObject);
 
-			builder.AppendProperty("Value", this.GetValue());
+			if (Type != eSigType.Na)
+				builder.AppendProperty("Value", this.GetValue());
 
 			return builder.ToString();
 		}
@@ -212,7 +226,18 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public override bool Equals(object obj)
 		{
-			return obj is SigInfo && this == (SigInfo)obj;
+			return obj is SigInfo && Equals((SigInfo)obj);
+		}
+
+		public bool Equals(SigInfo other)
+		{
+			return m_Type == other.m_Type &&
+			       m_Number == other.m_Number &&
+			       m_Name == other.m_Name &&
+			       m_SmartObject == other.m_SmartObject &&
+			       m_BoolValue == other.m_BoolValue &&
+			       m_UshortValue == other.m_UshortValue &&
+			       m_StringValue == other.m_StringValue;
 		}
 
 		public override int GetHashCode()
@@ -236,20 +261,12 @@ namespace ICD.Connect.Protocol.Sigs
 
 		public static bool operator ==(SigInfo x, SigInfo y)
 		{
-			bool output = x.m_Type == y.m_Type &&
-			              x.m_Number == y.m_Number &&
-			              x.m_Name == y.m_Name &&
-			              x.m_SmartObject == y.m_SmartObject &&
-			              x.m_BoolValue == y.m_BoolValue &&
-			              x.m_UshortValue == y.m_UshortValue &&
-			              x.m_StringValue == y.m_StringValue;
-
-			return output;
+			return x.Equals(y);
 		}
 
 		public static bool operator !=(SigInfo x, SigInfo y)
 		{
-			return !(x == y);
+			return !x.Equals(y);
 		}
 
 		#endregion

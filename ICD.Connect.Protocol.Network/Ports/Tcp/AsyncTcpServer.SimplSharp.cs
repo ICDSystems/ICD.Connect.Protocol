@@ -41,11 +41,25 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			{
 				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
 
-				m_TcpListener.Stop();
-				m_TcpListener.DisconnectAll();
+				try
+				{
+					m_TcpListener.DisconnectAll();
+				}
+				catch (Exception e)
+				{
+					// Handling some internal Crestron exception that occurs when the stream is disposed.
+					// SimplSharpPro: Got unhandled exception System.Exception:  Object not initialized
+					//	at Crestron.SimplSharp.CEvent.Set()
+					//	at Crestron.SimplSharp.AsyncStream.Close()
+					//	at Crestron.SimplSharp.CrestronIO.Stream.Dispose()
+					//	at Crestron.SimplSharp.CrestronSockets.TCPServer.DisconnectAll()
+					if (!e.Message.Contains("Object not initialized"))
+						throw;
+				}
 
 				Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
 			}
+
 			m_TcpListener = null;
 
 			foreach (uint client in GetClients())
@@ -60,10 +74,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
-			foreach (uint clientId in GetClients())
+			m_ConnectionLock.Enter();
+
+			try
 			{
-				PrintTx(clientId, data);
-				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+				foreach (uint clientId in m_Connections.Keys)
+				{
+					PrintTx(clientId, data);
+					m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+				}
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
 			}
 		}
 
@@ -77,7 +100,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			if (!ClientConnected(clientId))
 			{
-				Logger.AddEntry(eSeverity.Notice, "{0} unable to send data to unconnected client {1}", GetType().Name, clientId);
+				Logger.AddEntry(eSeverity.Notice, "{0} - Unable to send data to unconnected client {1}", this, clientId);
 				RemoveClient(clientId);
 				return;
 			}

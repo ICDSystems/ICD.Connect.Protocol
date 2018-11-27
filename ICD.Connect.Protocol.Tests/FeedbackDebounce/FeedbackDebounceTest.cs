@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 								  feedback.Add(args);
 
 								  // Simulate some process time
-								  ThreadingUtils.Sleep(100);
+								  ThreadingUtils.Sleep(1000);
 							  };
 
 			bool toggle = false;
@@ -52,7 +52,7 @@ namespace ICD.Connect.Protocol.Tests.FeedbackDebounce
 			{
 				toggle = !toggle;
 				bounce.Enqueue(toggle);
-				ThreadingUtils.Sleep(10);
+				ThreadingUtils.Sleep(100);
 			}
 
 			Assert.AreEqual(2, feedback.Count, 1);

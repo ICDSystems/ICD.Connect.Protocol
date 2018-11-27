@@ -3,6 +3,7 @@ using System.Linq;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using NUnit.Framework;
+using TcpReceiveEventArgs = ICD.Connect.Protocol.Network.Ports.Tcp.TcpReceiveEventArgs;
 
 namespace ICD.Connect.Protocol.Network.Tests.Tcp
 {

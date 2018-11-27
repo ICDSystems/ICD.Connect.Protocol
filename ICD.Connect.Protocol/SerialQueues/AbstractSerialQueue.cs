@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
@@ -21,13 +21,24 @@ namespace ICD.Connect.Protocol.SerialQueues
 	[PublicAPI]
 	public abstract class AbstractSerialQueue : ISerialQueue
 	{
+		/// <summary>
+		/// Raised when serial data is sent to the port.
+		/// </summary>
+		public event EventHandler<SerialTransmissionEventArgs> OnSerialTransmission;
+
+		/// <summary>
+		/// Raises individual commands with their responses.
+		/// </summary>
 		public event EventHandler<SerialResponseEventArgs> OnSerialResponse;
 
+		/// <summary>
+		/// Raised when a command does not yield a response within a time limit.
+		/// </summary>
 		public event EventHandler<SerialDataEventArgs> OnTimeout;
 
 		private ISerialBuffer m_Buffer;
 
-		private readonly List<ISerialData> m_CommandQueue;
+		private readonly PriorityQueue<ISerialData> m_CommandQueue;
 		private readonly SafeCriticalSection m_CommandLock;
 		private readonly SafeTimer m_TimeoutTimer;
 		private readonly IcdStopwatch m_DisconnectedTimer;
@@ -44,6 +55,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public ISerialPort Port { get; private set; }
 
 		/// <summary>
+		/// When true the serial queue will ignore responses and immediately start processing the next command.
+		/// </summary>
+		public bool Trust { get; set; }
+
+		/// <summary>
 		/// Gets/sets the length of the timeout timer.
 		/// </summary>
 		public long Timeout { get { return m_Timeout; } set { m_Timeout = value; } }
@@ -52,6 +68,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// Gets/sets the numer of times to timeout in a row before clearing the queue.
 		/// </summary>
 		public int MaxTimeoutCount { get { return m_MaxTimeoutCount; } set { m_MaxTimeoutCount = value; } }
+
+		/// <summary>
+		/// Gets the number of times in a row the queue has raised a timeout.
+		/// </summary>
+		public int TimeoutCount { get { return m_TimeoutCount; } }
 
 		/// <summary>
 		/// DisconnectedTime is the number of milliseconds since the last timeout.
@@ -84,10 +105,26 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		protected AbstractSerialQueue()
 		{
-			m_CommandQueue = new List<ISerialData>();
+			m_CommandQueue = new PriorityQueue<ISerialData>();
 			m_CommandLock = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public virtual void Dispose()
+		{
+			OnSerialTransmission = null;
+			OnSerialResponse = null;
+			OnTimeout = null;
+
+			m_TimeoutTimer.Dispose();
+			m_DisconnectedTimer.Stop();
+
+			SetPort(null);
+			SetBuffer(null);
 		}
 
 		#endregion
@@ -117,21 +154,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 		}
 
 		/// <summary>
-		/// Release resources.
-		/// </summary>
-		public virtual void Dispose()
-		{
-			OnSerialResponse = null;
-			OnTimeout = null;
-
-			m_TimeoutTimer.Dispose();
-			m_DisconnectedTimer.Stop();
-
-			SetPort(null);
-			SetBuffer(null);
-		}
-
-		/// <summary>
 		/// Clears the command queue.
 		/// </summary>
 		public void Clear()
@@ -158,17 +180,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if (data == null)
 				throw new ArgumentNullException("data");
 
-			m_CommandLock.Enter();
-
-			try
-			{
-				m_CommandQueue.Add(data);
-				CommandAdded();
-			}
-			finally
-			{
-				m_CommandLock.Leave();
-			}
+			EnqueuePriority(data, int.MaxValue);
 		}
 
 		/// <summary>
@@ -190,9 +202,33 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="data"></param>
 		/// <param name="comparer"></param>
 		public void Enqueue<T>(T data, Func<T, T, bool> comparer)
-			where T : ISerialData
+			where T : class, ISerialData
 		{
-// ReSharper disable once CompareNonConstrainedGenericWithNull
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			EnqueuePriority(data, comparer, int.MaxValue);
+		}
+
+		/// <summary>
+		/// Enqueues the given data at higher than normal priority.
+		/// </summary>
+		/// <param name="data"></param>
+		public void EnqueuePriority(ISerialData data)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			EnqueuePriority(data, 0);
+		}
+
+		/// <summary>
+		/// Enqueues the given data with the given priority (lower value is higher priority) 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="priority"></param>
+		public void EnqueuePriority(ISerialData data, int priority)
+		{
 			if (data == null)
 				throw new ArgumentNullException("data");
 
@@ -200,24 +236,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
-				bool found = false;
-
-				// Search for the existing command
-				for (int index = 0; index < m_CommandQueue.Count; index++)
-				{
-					ISerialData other = m_CommandQueue[index];
-					if (!(other is T) || !comparer(data, (T)other))
-						continue;
-
-					m_CommandQueue[index] = data;
-					found = true;
-					break;
-				}
-
-				if (found)
-					return;
-
-				Enqueue(data);
+				m_CommandQueue.Enqueue(data, priority);
+				CommandAdded();
 			}
 			finally
 			{
@@ -225,7 +245,29 @@ namespace ICD.Connect.Protocol.SerialQueues
 			}
 		}
 
-		public void EnqueuePriority(ISerialData data)
+		///  <summary>
+		///  Enqueues the given data with the given priority (lower value is higher priority) 
+		/// 
+		///  Uses the comparer to determine if a matching command is already queued.
+		///  If true, replace the original command with the new one.
+		///  
+		///  This is useful in cases such as ramping volume, where we can collapse:
+		/// 		PowerOn
+		/// 		Volume11
+		/// 		Volume12
+		/// 		MuteOn
+		/// 		Volume13
+		///  
+		///  To:
+		/// 		PowerOn
+		/// 		Volume13
+		/// 		MuteOn
+		///  </summary>
+		///  <param name="data"></param>
+		///  <param name="comparer"></param>
+		/// <param name="priority"></param>
+		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority)
+			where T : class, ISerialData
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
@@ -234,7 +276,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
-				m_CommandQueue.Insert(0, data);
+				Func<ISerialData, bool> removeCallback = d => (d is T) && comparer(data, d as T);
+				m_CommandQueue.EnqueueRemove(data, removeCallback, priority);
 				CommandAdded();
 			}
 			finally
@@ -279,14 +322,23 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				StartTimeoutTimer();
 
-				CurrentCommand = m_CommandQueue[0];
-				m_CommandQueue.RemoveAt(0);
+				CurrentCommand = m_CommandQueue.Dequeue();
 				IsCommandInProgress = true;
 
 				try
 				{
 					if (Port != null)
-						return Port.Send(CurrentCommand.Serialize());
+					{
+						bool output = Port.Send(CurrentCommand.Serialize());
+						if (!output)
+							return false;
+
+						OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(CurrentCommand));
+						if (Trust)
+							FinishCommand(command => { });
+
+						return true;
+					}
 
 					ServiceProvider.GetService<ILoggerService>()
 					               .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null", GetType().Name);
@@ -310,8 +362,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		private void TimeoutCallback()
 		{
+			// Don't care about timeouts in trust mode
+			if (Trust)
+				return;
+
 			if (!m_DisconnectedTimer.IsRunning)
 				m_DisconnectedTimer.Start();
+
+			m_TimeoutCount++;
 
 			FinishCommand(command => OnTimeout.Raise(this, new SerialDataEventArgs(command)));
 		}
@@ -413,6 +471,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if (m_DisconnectedTimer.IsRunning)
 				m_DisconnectedTimer.Reset();
 
+			// Ignore buffer feedback
+			if (Trust)
+				return;
+
 			m_Buffer.Enqueue(args.Data);
 		}
 
@@ -451,6 +513,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="args"></param>
 		protected virtual void BufferCompletedSerial(object buffer, StringEventArgs args)
 		{
+			// Ignore buffer feedback
+			if (Trust)
+				return;
+
+			m_TimeoutCount = 0;
+
 			string data = args.Data;
 			FinishCommand(command => OnSerialResponse.Raise(this, new SerialResponseEventArgs(command, data)));
 		}

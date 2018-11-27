@@ -13,6 +13,7 @@ namespace ICD.Connect.Protocol.Extensions
 		/// <param name="id"></param>
 		/// <returns></returns>
 		[PublicAPI]
+		[NotNull]
 		public static IPort GetPortById(this IDeviceFactory factory, int id)
 		{
 			return factory.GetOriginatorById<IPort>(id);

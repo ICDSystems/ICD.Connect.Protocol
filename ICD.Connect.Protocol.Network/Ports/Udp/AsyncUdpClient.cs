@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
@@ -90,7 +91,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		[PublicAPI]
 		public bool SendToAddress(string data, string ipAddress, int port)
 		{
-			return ConnectAndSend(data, s => SendToAddressFinal(s, ipAddress, port));
+			try
+			{
+				if (IsConnected)
+					return SendToAddressFinal(data, ipAddress, port);
+
+				Log(eSeverity.Error, "Unable to send to address - Port is not connected.");
+				return false;
+			}
+			finally
+			{
+				UpdateIsConnectedState();
+			}
 		}
 
 		#endregion
@@ -115,7 +127,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 #if SIMPLSHARP
 			IcdEnvironment.eEthernetAdapterType adapterType =
-				IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
+				m_UdpClient == null
+					? IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter
+					: IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
 
 			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
 				return;
@@ -128,6 +142,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 					break;
 
 				case IcdEnvironment.eEthernetEventType.LinkDown:
+					if (m_UdpClient == null)
+						break;
 #if SIMPLSHARP
 					m_UdpClient.DisableUDPServer();
 #else

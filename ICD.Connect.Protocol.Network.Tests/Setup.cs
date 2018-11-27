@@ -20,6 +20,7 @@ namespace ICD.Connect.Protocol.Network.Tests
 			m_Logger.SeverityLevel = eSeverity.Debug;
 
 			ServiceProvider.AddService<ILoggerService>(m_Logger);
+
 			ServiceProvider.AddService(new PermissionsManager());
 		}
 

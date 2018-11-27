@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Properties;
+#if SIMPLSHARP
 using System;
 using System.Linq;
 using Crestron.SimplSharp;
@@ -11,6 +12,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
 	public sealed partial class AsyncUdpClient
 	{
+		[CanBeNull]
 		private UDPServer m_UdpClient;
 
 		#region Methods
@@ -38,15 +40,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 				    error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
 				    error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
-					                this, address, port, error);
+					Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+					    address, port, error);
 					Disconnect();
 				}
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect to {1}:{2} - {3}",
-				                this, address, port, e.Message);
+				Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+				    address, port, e.Message);
 				Disconnect();
 			}
 
@@ -105,6 +107,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// </summary>
 		private bool SendToAddressFinal(string data, string ipAddress, int port)
 		{
+			if (m_UdpClient == null)
+			{
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - Wrapped client is null",
+				    ipAddress, port);
+				return false;
+			}
+
 			byte[] bytes = StringUtils.ToBytes(data);
 
 			try
@@ -115,8 +124,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
-								this, ipAddress, port, e.Message);
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				    ipAddress, port, e.Message);
 			}
 
 			return false;
@@ -127,6 +136,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// </summary>
 		protected override bool SendFinal(string data)
 		{
+			if (m_UdpClient == null)
+			{
+				Log(eSeverity.Error, "Failed to send data - Wrapped client is null");
+				return false;
+			}
+
 			byte[] bytes = StringUtils.ToBytes(data);
 
 			try
@@ -137,8 +152,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to send data to {1}:{2} - {3}",
-				                this, m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
+				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				    m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
 			}
 
 			return false;

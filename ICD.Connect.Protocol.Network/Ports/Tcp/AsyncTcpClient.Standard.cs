@@ -1,4 +1,4 @@
-﻿#if STANDARD
+#if STANDARD
 using System;
 using System.Linq;
 using System.Net.Sockets;
@@ -6,6 +6,7 @@ using ICD.Common.Utils;
 using System.Threading.Tasks;
 using ICD.Connect.API.Nodes;
 using ICD.Common.Utils.Services.Logging;
+using System.Threading;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
@@ -14,6 +15,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private TcpClient m_TcpClient;
 		private NetworkStream m_Stream;
 		private readonly byte[] m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
+		private CancellationTokenSource m_Cancellation;
 
 		/// <summary>
 		/// Connects to the remote end point Asyncrohnously
@@ -32,6 +34,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			try
 			{
 				m_TcpClient = new TcpClient();
+				m_Cancellation = new CancellationTokenSource();
 				m_TcpClient.ConnectAsync(Address, Port).Wait();
 
 				if (!m_TcpClient.Connected)
@@ -39,22 +42,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 					Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
 					return;
 				}
-
 				m_Stream = m_TcpClient.GetStream();
-				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
+				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length, m_Cancellation.Token)
+					.ContinueWith(TcpClientReceiveHandler, m_Cancellation.Token);
 			}
 			catch (AggregateException ae)
 			{
 				ae.Handle(x =>
-				          {
-					          if (x is SocketException)
-					          {
-						          Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
-						          return true;
-					          }
+				{
+					if (x is SocketException)
+					{
+						Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
+						return true;
+					}
 
-					          return false;
-				          });
+					return false;
+				});
 			}
 			catch (Exception e)
 			{
@@ -82,12 +85,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		private void DisposeTcpClient()
 		{
-			if (m_Stream != null)
-				m_Stream.Dispose();
+			m_Cancellation?.Cancel();
+
+			m_Stream?.Dispose();
 			m_Stream = null;
 
-			if (m_TcpClient != null)
-				m_TcpClient.Dispose();
+			m_TcpClient?.Dispose();
 			m_TcpClient = null;
 
 			UpdateIsConnectedState();
@@ -103,7 +106,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				m_TcpClient.Client.Send(bytes, 0, bytes.Length, SocketFlags.None);
+				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 				PrintTx(data);
 				return true;
 			}
@@ -141,7 +144,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			PrintRx(data);
 			Receive(data);
 
-			if (m_TcpClient.Connected)
+			if (m_TcpClient?.Connected ?? false)
 				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(TcpClientReceiveHandler);
 
 			UpdateIsConnectedState();

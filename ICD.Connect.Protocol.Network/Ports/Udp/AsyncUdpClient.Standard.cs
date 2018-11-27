@@ -44,6 +44,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 
 			if (m_UdpClient != null)
 				m_UdpClient.Dispose();
+
 			m_UdpClient = null;
 
 			UpdateIsConnectedState();

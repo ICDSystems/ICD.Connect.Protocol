@@ -29,7 +29,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 
 		private readonly SecureNetworkProperties m_NetworkProperties;
 
-		private KeyboardInteractiveConnectionInfo m_ConnectionInfo;
+		private KeyboardInteractiveAuthenticationMethod m_Auth;
+		private ConnectionInfo m_ConnectionInfo;
 		private ShellStream m_SshStream;
 		private SshClient m_SshClient;
 
@@ -74,7 +75,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// Gets/sets the address.
 		/// </summary>
 		[PublicAPI]
-		public override string Address { get; set; }
+		public override string Address
+		{
+			get { return m_NetworkProperties.NetworkAddress; }
+			set { m_NetworkProperties.NetworkAddress = value; }
+		}
 
 		#endregion
 
@@ -90,11 +95,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		}
 
 		/// <summary>
-		/// Destructor.
+		/// Release resources.
 		/// </summary>
-		~SshPort()
+		protected override void DisposeFinal(bool disposing)
 		{
-			Dispose();
+			base.DisposeFinal(disposing);
+
+			Disconnect();
 		}
 
 		#endregion
@@ -106,12 +113,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// </summary>
 		public override void Connect()
 		{
-			Disconnect();
-
 			m_SshSection.Enter();
 
 			try
 			{
+				Disconnect();
+
 				if (Address == null)
 				{
 					Log(eSeverity.Error, "Failed to connect - Address is null");
@@ -124,8 +131,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 					return;
 				}
 
-				m_ConnectionInfo = new KeyboardInteractiveConnectionInfo(Address, Port, Username);
-				Subscribe(m_ConnectionInfo);
+				m_Auth = new KeyboardInteractiveAuthenticationMethod(Username);
+				Subscribe(m_Auth);
+
+				AuthenticationMethod[] authMethods =
+				{
+					m_Auth,
+					new NoneAuthenticationMethod(Username),
+					new PasswordAuthenticationMethod(Username, Password)
+				};
+
+				m_ConnectionInfo = new ConnectionInfo(Address, Port, Username, authMethods);
 
 				try
 				{
@@ -139,7 +155,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 					Subscribe(m_SshClient);
 					m_SshClient.Connect();
 				}
-					// Catches when we attempt to connect to an invalid/offline endpoint.
+				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SshException e)
 				{
 					// Potential fix for "Message type 80 is not valid" - the Crestron SSH implementation should be ignoring this.
@@ -149,7 +165,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 						Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 					}
 				}
-					// Catches when we attempt to connect to an invalid/offline endpoint.
+				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SocketException e)
 				{
 					DisposeClient();
@@ -208,6 +224,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 
 			try
 			{
+				DisposeAuth();
 				DisposeConnectionInfo();
 				DisposeStream();
 				DisposeClient();
@@ -215,7 +232,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
+			}
+		}
+
+		/// <summary>
+		/// Dispose the auth object.
+		/// </summary>
+		private void DisposeAuth()
+		{
+			m_SshSection.Enter();
+
+			try
+			{
+				if (m_Auth == null)
+					return;
+
+				Unsubscribe(m_Auth);
+
+				m_Auth.Dispose();
+				m_Auth = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 			}
 		}
 
@@ -224,15 +265,24 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// </summary>
 		private void DisposeConnectionInfo()
 		{
-			if (m_ConnectionInfo == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_ConnectionInfo);
-			m_ConnectionInfo.Dispose();
+			try
+			{
+				if (m_ConnectionInfo == null)
+					return;
 
-			m_ConnectionInfo = null;
+#if SIMPLSHARP
+				m_ConnectionInfo.Dispose();
+#endif
+				m_ConnectionInfo = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 
-			UpdateIsConnectedState();
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -240,21 +290,30 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// </summary>
 		private void DisposeClient()
 		{
-			if (m_SshClient == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshClient);
-			m_SshClient.Disconnect();
+			try
+			{
+				if (m_SshClient == null)
+					return;
 
-			//Disposing the client, let's dispose the stream too?
-			DisposeStream();
+				Unsubscribe(m_SshClient);
+				m_SshClient.Disconnect();
 
-			//Disposing the client in a different thread, because we've seen it lock up before?
-			ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
+				//Disposing the client, let's dispose the stream too?
+				DisposeStream();
 
-			m_SshClient = null;
+				//Disposing the client in a different thread, because we've seen it lock up before?
+				ThreadingUtils.SafeInvoke(m_SshClient.Dispose);
 
-			UpdateIsConnectedState();
+				m_SshClient = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
+
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -262,36 +321,45 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// </summary>
 		private void DisposeStream()
 		{
-			if (m_SshStream == null)
-				return;
+			m_SshSection.Enter();
 
-			Unsubscribe(m_SshStream);
+			try
+			{
+				if (m_SshStream == null)
+					return;
+
+				Unsubscribe(m_SshStream);
 
 #if SIMPLSHARP
-			// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
-			// This will raise a base Exception.
-			try
-			{
-				m_SshStream.Close();
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
-			}
+				// Sometimes the SSHStream will try to close gracefully when we don't have an active connection.
+				// This will raise a base Exception.
+				try
+				{
+					m_SshStream.Close();
+				}
+				catch (Exception e)
+				{
+					Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
+				}
 #endif
 
-			try
-			{
-				m_SshStream.Dispose();
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
-			}
+				try
+				{
+					m_SshStream.Dispose();
+				}
+				catch (Exception e)
+				{
+					Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
+				}
 
-			m_SshStream = null;
+				m_SshStream = null;
+			}
+			finally
+			{
+				m_SshSection.Leave();
 
-			UpdateIsConnectedState();
+				UpdateIsConnectedState();
+			}
 		}
 
 		/// <summary>
@@ -334,6 +402,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			finally
 			{
 				m_SshSection.Leave();
+
 				UpdateIsConnectedState();
 			}
 		}
@@ -382,17 +451,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <summary>
 		/// Subscribe to the connection info events.
 		/// </summary>
-		/// <param name="connectionInfo"></param>
-		private void Subscribe(KeyboardInteractiveConnectionInfo connectionInfo)
+		/// <param name="authMethod"></param>
+		private void Subscribe(KeyboardInteractiveAuthenticationMethod authMethod)
 		{
-			connectionInfo.AuthenticationPrompt += ConnInfoAuthenticationPrompt;
+			authMethod.AuthenticationPrompt += ConnInfoAuthenticationPrompt;
 		}
 
 		/// <summary>
 		/// Unsubscribes from the connection info.
 		/// </summary>
 		/// <param name="connectionInfo"></param>
-		private void Unsubscribe(KeyboardInteractiveConnectionInfo connectionInfo)
+		private void Unsubscribe(KeyboardInteractiveAuthenticationMethod connectionInfo)
 		{
 			connectionInfo.AuthenticationPrompt -= ConnInfoAuthenticationPrompt;
 		}

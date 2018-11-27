@@ -178,11 +178,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			SocketErrorCodes socketError = tcpClient.ReceiveDataAsync(TcpClientReceiveHandler);
 
-			if (socketError != SocketErrorCodes.SOCKET_OPERATION_PENDING)
+			switch (socketError)
 			{
-				Log(eSeverity.Error, "Failed to ReceiveDataAsync from host {0}:{1}",
-				    tcpClient.AddressClientConnectedTo,
-				    tcpClient.PortNumber);
+				case SocketErrorCodes.SOCKET_OK:
+				case SocketErrorCodes.SOCKET_OPERATION_PENDING:
+					break;
+
+				default:
+					Log(eSeverity.Error, "Failed to ReceiveDataAsync from host {0}:{1} - {2}",
+					    tcpClient.AddressClientConnectedTo,
+					    tcpClient.PortNumber,
+					    socketError);
+					break;
 			}
 
 			UpdateIsConnectedState();

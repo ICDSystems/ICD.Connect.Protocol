@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
@@ -8,7 +9,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 	/// <summary>
 	/// Simple pairing of crosspoint id to host info.
 	/// </summary>
-	public struct CrosspointInfo
+	public struct CrosspointInfo : IEquatable<CrosspointInfo>
 	{
 		private readonly HostInfo m_Host;
 		private readonly int m_Id;
@@ -97,7 +98,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public static bool operator !=(CrosspointInfo s1, CrosspointInfo s2)
 		{
-			return !(s1 == s2);
+			return !s1.Equals(s2);
 		}
 
 		/// <summary>
@@ -107,10 +108,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <returns></returns>
 		public override bool Equals(object other)
 		{
-			if (other == null || GetType() != other.GetType())
-				return false;
+			return other is CrosspointInfo && Equals((CrosspointInfo)other);
+		}
 
-			return GetHashCode() == ((CrosspointInfo)other).GetHashCode();
+		public bool Equals(CrosspointInfo other)
+		{
+			return m_Id == other.m_Id &&
+			       m_Name == other.m_Name &&
+				   m_Host == other.m_Host;
 		}
 
 		/// <summary>

@@ -60,7 +60,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <summary>
 		/// Gets the name of the node.
 		/// </summary>
-		public string ConsoleName { get { return Name ?? GetType().Name; } }
+		public string ConsoleName { get { return Name ?? GetType().GetNameWithoutGenericArity(); } }
 
 		/// <summary>
 		/// Gets the help information for the node.

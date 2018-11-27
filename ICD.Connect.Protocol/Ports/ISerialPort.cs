@@ -9,7 +9,7 @@ namespace ICD.Connect.Protocol.Ports
 	public interface ISerialPort : IPort
 	{
 		/// <summary>
-		/// Raised when data is received from the port.
+		/// Rasied when the port receives data from the remote endpoint.
 		/// </summary>
 		event EventHandler<StringEventArgs> OnSerialDataReceived;
 
@@ -34,12 +34,16 @@ namespace ICD.Connect.Protocol.Ports
 		void Disconnect();
 
 		/// <summary>
-		/// Sends the data to the port.
+		/// Sends data to the remote endpoint.
 		/// </summary>
 		/// <param name="data"></param>
 		/// <returns></returns>
 		bool Send(string data);
 
+		/// <summary>
+		/// Simulates receiving data from the remote endpoint.
+		/// </summary>
+		/// <param name="data"></param>
 		void Receive(string data);
 	}
 }

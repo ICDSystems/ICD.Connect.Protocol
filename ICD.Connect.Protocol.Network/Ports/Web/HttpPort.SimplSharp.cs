@@ -1,9 +1,10 @@
 ﻿#if SIMPLSHARP
 using System;
+﻿using System.Collections.Generic;
+using ICD.Common.Utils.Services.Logging;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
@@ -99,6 +100,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="response"></param>
 		public override bool Get(string localUrl, out string response)
 		{
+			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
+		{
 			bool success;
 
 			m_ClientBusySection.Enter();
@@ -119,6 +131,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
+					foreach (var header in headers)
+					{
+						foreach (var value in header.Value)
+						{
+							request.Header.SetHeaderValue(header.Key, value);
+						}	
+					}
+
 					success = Dispatch(request, out response);
 				}
 				else
@@ -130,6 +150,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
+					
+					foreach (var header in headers)
+					{
+						foreach (var value in header.Value)
+						{
+							request.Header.SetHeaderValue(header.Key, value);
+						}
+					}
 
 					success = Dispatch(request, out response);
 				}
@@ -261,6 +289,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			SetLastRequestSucceeded(success);
 			PrintRx(response);
+
 			return success;
 		}
 
@@ -272,7 +301,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		private bool UseHttps()
 		{
-			return string.Equals(m_UriProperties.UriScheme, "https", StringComparison.OrdinalIgnoreCase);
+			return new IcdUriBuilder(m_UriProperties.UriScheme).Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>

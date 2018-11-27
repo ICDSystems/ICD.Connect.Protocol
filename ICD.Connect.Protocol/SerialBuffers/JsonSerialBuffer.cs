@@ -11,6 +11,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 	[PublicAPI]
 	public sealed class JsonSerialBuffer : ISerialBuffer
 	{
+		/// <summary>
+		/// Raised when a complete message has been buffered.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
 
 		private readonly Queue<string> m_Queue;
@@ -18,6 +21,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		private readonly SafeCriticalSection m_ParseSection;
 
 		private readonly StringBuilder m_RxData;
+
+		private static readonly char[] s_Tokens = {'{', '}'};
+
 		private int m_OpenCount;
 		private int m_CloseCount;
 
@@ -45,6 +51,9 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// <param name="data"></param>
 		public void Enqueue(string data)
 		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
 			m_QueueSection.Execute(() => m_Queue.Enqueue(data));
 			Parse();
 		}
@@ -88,11 +97,31 @@ namespace ICD.Connect.Protocol.SerialBuffers
 
 				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
 				{
-					foreach (char character in data)
+					int start = 0;
+
+					while (start < data.Length)
 					{
-						switch (character)
+						int index = data.IndexOfAny(s_Tokens, start);
+
+						// Simple case - No tokens in the data
+						if (index < 0)
+						{
+							m_RxData.Append(data.Substring(start));
+							break;
+						}
+
+						// Harder case - Append everything up to and including the token
+						m_RxData.Append(data.Substring(start, (index - start) + 1));
+						start = index + 1;
+
+						char token = data[index];
+
+						switch (token)
 						{
 							case '{':
+								// Trim any leading nonsense
+								if (m_OpenCount == 0)
+									m_RxData.Remove(0, m_RxData.Length - 1);
 								m_OpenCount++;
 								break;
 							case '}':
@@ -100,20 +129,16 @@ namespace ICD.Connect.Protocol.SerialBuffers
 								break;
 						}
 
-						// Trim any leading nonsense
-						if (m_OpenCount == 0)
-							continue;
-
-						m_RxData.Append(character);
-
-						if (m_OpenCount != m_CloseCount)
+						if (m_OpenCount == 0 || m_OpenCount != m_CloseCount)
 							continue;
 
 						m_OpenCount = 0;
 						m_CloseCount = 0;
 
 						string output = m_RxData.Pop();
-						OnCompletedSerial.Raise(this, new StringEventArgs(output));
+
+						if (!string.IsNullOrEmpty(output))
+							OnCompletedSerial.Raise(this, new StringEventArgs(output));
 					}
 				}
 			}

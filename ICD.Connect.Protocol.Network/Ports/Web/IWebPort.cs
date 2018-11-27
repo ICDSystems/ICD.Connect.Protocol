@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Settings;
+﻿using System.Collections.Generic;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
@@ -27,6 +28,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		[PublicAPI]
 		bool Busy { get; }
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="localUrl"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		[PublicAPI]
+		bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response);
 
 		/// <summary>
 		/// Sends a GET request to the server.
