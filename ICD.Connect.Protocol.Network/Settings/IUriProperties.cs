@@ -205,7 +205,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			Uri uri = new Uri(address);
+			Uri uri = new Uri(address, UriKind.RelativeOrAbsolute);
 
 			extends.UriFragment = uri.Fragment;
 			extends.UriHost = uri.Host;
