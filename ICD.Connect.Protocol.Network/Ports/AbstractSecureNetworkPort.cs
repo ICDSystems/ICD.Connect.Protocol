@@ -63,8 +63,11 @@ namespace ICD.Connect.Protocol.Network.Ports
 			// Apply the network properties
 			base.ApplyConfiguration(properties);
 
-			Username = properties.NetworkUsername;
-			Password = properties.NetworkPassword;
+			if (properties.NetworkUsername != null)
+				Username = properties.NetworkUsername;
+
+			if (properties.NetworkPassword != null)
+				Password = properties.NetworkPassword;
 		}
 
 		#endregion

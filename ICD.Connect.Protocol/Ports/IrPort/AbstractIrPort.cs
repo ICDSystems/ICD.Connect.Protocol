@@ -95,10 +95,14 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			PulseTime = properties.IrPulseTime ?? DEFAULT_PULSE_TIME;
-			BetweenTime = properties.IrBetweenTime ?? DEFAULT_BETWEEN_TIME;
+			if (properties.IrPulseTime.HasValue)
+				PulseTime = properties.IrPulseTime.Value;
 
-			LoadDriver(properties.IrDriverPath);
+			if (properties.IrBetweenTime.HasValue)
+				BetweenTime = properties.IrBetweenTime.Value;
+
+			if (properties.IrDriverPath != null)
+				LoadDriver(properties.IrDriverPath);
 		}
 
 		#endregion

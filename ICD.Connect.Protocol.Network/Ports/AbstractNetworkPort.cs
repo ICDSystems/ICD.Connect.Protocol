@@ -55,8 +55,11 @@ namespace ICD.Connect.Protocol.Network.Ports
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			Address = properties.NetworkAddress;
-			Port = properties.NetworkPort ?? 0;
+			if (properties.NetworkAddress != null)
+				Address = properties.NetworkAddress;
+
+			if (properties.NetworkPort.HasValue)
+				Port = properties.NetworkPort.Value;
 		}
 
 		#endregion
