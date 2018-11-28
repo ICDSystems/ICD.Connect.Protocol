@@ -1,18 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public abstract class AbstractWebPort<TSettings> : AbstractPort<TSettings>, IWebPort
 		where TSettings : IWebPortSettings, new()
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the URI configuration for the web port.
 		/// </summary>
-		public abstract UriProperties UriProperties { get; }
+		public abstract IUriProperties UriProperties { get; }
+
+		/// <summary>
+		/// The base URI for requests.
+		/// </summary>
+		[CanBeNull]
+		public abstract Uri Uri { get; set; }
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
@@ -23,6 +34,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
 		public abstract bool Busy { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Sends a GET request to the server.
@@ -83,6 +98,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
+		/// Applies the configuration properties to the port.
+		/// </summary>
+		public void ApplyConfiguration()
+		{
+			ApplyConfiguration(UriProperties);
+		}
+
+		/// <summary>
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
@@ -91,7 +114,74 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			UriProperties.Copy(properties);
+			IcdUriBuilder builder = new IcdUriBuilder(Uri);
+			{
+				if (properties.UriFragment != null)
+					builder.Fragment = properties.UriFragment;
+
+				if (properties.UriHost != null)
+					builder.Host = properties.UriHost;
+
+				if (properties.UriPassword != null)
+					builder.Password = properties.UriPassword;
+
+				if (properties.UriPath != null)
+					builder.Path = properties.UriPath;
+
+				if (properties.UriPort.HasValue)
+					builder.Port = properties.UriPort.Value;
+
+				if (properties.UriQuery != null)
+					builder.Query = properties.UriQuery;
+
+				if (properties.UriScheme != null)
+					builder.Scheme = properties.UriScheme;
+
+				if (properties.UriUsername != null)
+					builder.UserName = properties.UriUsername;
+			}
+			Uri = builder.Uri;
 		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Copy(UriProperties);
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			UriProperties.Clear();
+			ApplyConfiguration();
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			UriProperties.Copy(settings);
+			ApplyConfiguration();
+		}
+
+		#endregion
 	}
 }

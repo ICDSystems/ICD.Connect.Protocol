@@ -5,7 +5,6 @@ using ICD.Common.Utils.Services.Logging;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Network.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -252,7 +251,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				string url = m_UriProperties.GetAddressFromUri();
+				string url = Uri == null ? null : Uri.ToString();
 				UrlParser urlParser = new UrlParser(url);
 
 				if (UseHttps())
@@ -301,7 +300,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		private bool UseHttps()
 		{
-			return new IcdUriBuilder(m_UriProperties.UriScheme).Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+			return Uri != null && Uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>

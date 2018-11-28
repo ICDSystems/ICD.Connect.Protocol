@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Settings;
 ﻿using System.Collections.Generic;
@@ -15,7 +16,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Gets the URI configuration for the web port.
 		/// </summary>
 		[PublicAPI]
-		UriProperties UriProperties { get; }
+		IUriProperties UriProperties { get; }
+
+		/// <summary>
+		/// The base URI for requests.
+		/// </summary>
+		[CanBeNull]
+		Uri Uri { get; set; }
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
@@ -82,6 +89,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="properties"></param>
 		void ApplyDeviceConfiguration(IUriProperties properties);
+
+		/// <summary>
+		/// Applies the configuration properties to the port.
+		/// </summary>
+		void ApplyConfiguration();
 
 		/// <summary>
 		/// Applies the given configuration properties to the port.

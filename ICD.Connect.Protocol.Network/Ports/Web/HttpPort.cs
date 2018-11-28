@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -27,7 +27,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the configured URI properties.
 		/// </summary>
-		public override UriProperties UriProperties { get { return m_UriProperties; } }
+		public override IUriProperties UriProperties { get { return m_UriProperties; } }
+
+		/// <summary>
+		/// The base URI for requests.
+		/// </summary>
+		public override Uri Uri { get; set; }
 
 		#endregion
 
@@ -76,19 +81,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		private string GetRequestUrl(string localAddress)
 		{
-			IcdUriBuilder builder = new IcdUriBuilder
-			{
-				Fragment = m_UriProperties.UriFragment,
-				Host = m_UriProperties.UriHost,
-				Password = m_UriProperties.UriPassword,
-				Path = localAddress,
-				Port = m_UriProperties.UriPort ?? 0,
-				Query = m_UriProperties.UriQuery,
-				Scheme = m_UriProperties.UriScheme,
-				UserName = m_UriProperties.UriUsername
-			};
-
-			return builder.ToString();
+			return new IcdUriBuilder(Uri) {Path = localAddress}.ToString();
 		}
 
 		/// <summary>
@@ -112,43 +105,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 		#endregion
 
-		#region Settings
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(HttpPortSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Copy(m_UriProperties);
-		}
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			m_UriProperties.Clear();
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(HttpPortSettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			m_UriProperties.Copy(settings);
-		}
-
-		#endregion
-
 		#region Console
 
 		/// <summary>
@@ -159,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("URI", m_UriProperties.GetAddressFromUri());
+			addRow("URI", Uri);
 			addRow("Accept", Accept);
 			addRow("Busy", Busy);
 		}
