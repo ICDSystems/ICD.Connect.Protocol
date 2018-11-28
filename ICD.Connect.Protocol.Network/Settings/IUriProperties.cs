@@ -47,6 +47,11 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// Gets/sets the configurable URI fragment.
 		/// </summary>
 		string UriFragment { get; set; }
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void Clear();
 	}
 
 	public static class UriPropertiesExtensions

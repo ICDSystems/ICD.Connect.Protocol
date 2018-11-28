@@ -69,5 +69,13 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void IIrDriverProperties.Clear()
+		{
+			m_IrDriverProperties.Clear();
+		}
 	}
 }

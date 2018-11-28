@@ -20,6 +20,11 @@ namespace ICD.Connect.Protocol.Settings
 		/// Gets/sets the configurable between time for the IR driver.
 		/// </summary>
 		ushort? IrBetweenTime { get; set; }
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void Clear();
 	}
 
 	public static class IrDriverPropertiesExtensions

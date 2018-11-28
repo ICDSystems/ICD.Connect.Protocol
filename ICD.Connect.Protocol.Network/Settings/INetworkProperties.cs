@@ -15,6 +15,11 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// Gets/sets the configurable network port.
 		/// </summary>
 		ushort? NetworkPort { get; set; }
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void Clear();
 	}
 
 	public static class NetworkPropertiesExtensions

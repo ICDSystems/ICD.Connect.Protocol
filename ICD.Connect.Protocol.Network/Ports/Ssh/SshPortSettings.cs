@@ -66,6 +66,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		#region Methods
 
 		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		public override void Clear()
+		{
+			m_NetworkProperties.Clear();
+		}
+
+		/// <summary>
 		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>

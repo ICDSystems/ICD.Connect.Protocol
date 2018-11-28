@@ -43,6 +43,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		}
 
 		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		public override void Clear()
+		{
+			m_NetworkProperties.Clear();
+		}
+
+		/// <summary>
 		/// Override to serialize the network configuration to XML.
 		/// </summary>
 		/// <param name="writer"></param>

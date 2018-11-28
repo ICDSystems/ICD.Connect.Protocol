@@ -108,5 +108,13 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 
 			m_ComSpecProperties.WriteElements(writer);
 		}
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void IComSpecProperties.Clear()
+		{
+			m_ComSpecProperties.Clear();
+		}
 	}
 }

@@ -44,6 +44,11 @@ namespace ICD.Connect.Protocol.Settings
 		/// Gets/sets the configurable report CTS changes state.
 		/// </summary>
 		bool? ComSpecReportCtsChanges { get; set; }
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void Clear();
 	}
 
 	public static class ComSpecPropertiesExtensions

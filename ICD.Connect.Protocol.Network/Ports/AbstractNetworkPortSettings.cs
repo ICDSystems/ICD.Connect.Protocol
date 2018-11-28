@@ -17,6 +17,11 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// </summary>
 		public abstract ushort? NetworkPort { get; set; }
 
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		public abstract void Clear();
+
 		#endregion
 
 		#region Methods
