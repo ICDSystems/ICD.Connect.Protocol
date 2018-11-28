@@ -356,5 +356,18 @@ namespace ICD.Connect.Protocol.Utils
 			return string.Format("{0}{1}{2}{3}{4}{5}{6}", (char)0x12, (char)(0x80 | port), (char)0x00,
 			                     Low(cspec), High(cspec), (char)0x00, (char)0x00);
 		}
+
+		public static string AssembleComSpec(int port, ComSpec comSpec)
+		{
+			return AssembleComSpec(port,
+			                       comSpec.BaudRate,
+			                       comSpec.NumberOfDataBits,
+			                       comSpec.ParityType,
+			                       comSpec.NumberOfStopBits,
+			                       comSpec.ProtocolType,
+			                       comSpec.HardwareHandShake,
+			                       comSpec.SoftwareHandshake,
+			                       comSpec.ReportCtsChanges);
+		}
 	}
 }
