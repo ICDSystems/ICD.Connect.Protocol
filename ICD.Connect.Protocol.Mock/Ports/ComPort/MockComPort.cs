@@ -11,10 +11,20 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 		[PublicAPI]
 		public event EventHandler<StringEventArgs> OnSend;
 
+		private readonly ComSpecProperties m_ComSpecProperties;
+
 		/// <summary>
 		/// Gets the Com Spec configuration properties.
 		/// </summary>
-		protected override IComSpecProperties ComSpecProperties { get { return new ComSpecProperties(); } }
+		protected override IComSpecProperties ComSpecProperties { get { return m_ComSpecProperties; } }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public MockComPort()
+		{
+			m_ComSpecProperties = new ComSpecProperties();
+		}
 
 		/// <summary>
 		/// Release resources.
