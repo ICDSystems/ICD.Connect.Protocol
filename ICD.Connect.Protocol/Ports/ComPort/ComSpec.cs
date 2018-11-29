@@ -79,5 +79,52 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		public eComHardwareHandshakeType HardwareHandshake { get; set; }
 		public eComSoftwareHandshakeType SoftwareHandshake { get; set; }
 		public bool ReportCtsChanges { get; set; }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public ComSpec()
+		{
+			// Very common defaults, also avoids the problem of defaulting to values
+			// that are not part of the enumeration.
+			BaudRate = eComBaudRates.BaudRate9600;
+			NumberOfDataBits = eComDataBits.DataBits8;
+			ParityType = eComParityType.None;
+			NumberOfStopBits = eComStopBits.StopBits1;
+			ProtocolType = eComProtocolType.Rs232;
+			HardwareHandshake = eComHardwareHandshakeType.None;
+			SoftwareHandshake = eComSoftwareHandshakeType.None;
+			ReportCtsChanges = false;
+		}
+
+		/// <summary>
+		/// Returns a new copy of the com spec.
+		/// </summary>
+		/// <returns></returns>
+		public ComSpec Copy()
+		{
+			ComSpec comSpec = new ComSpec();
+			comSpec.Copy(this);
+			return comSpec;
+		}
+
+		/// <summary>
+		/// Copies the values from the given com spec instance.
+		/// </summary>
+		/// <param name="comSpec"></param>
+		public void Copy(ComSpec comSpec)
+		{
+			if (comSpec == null)
+				throw new ArgumentNullException("comSpec");
+
+			BaudRate = comSpec.BaudRate;
+			NumberOfDataBits = comSpec.NumberOfDataBits;
+			ParityType = comSpec.ParityType;
+			NumberOfStopBits = comSpec.NumberOfStopBits;
+			ProtocolType = comSpec.ProtocolType;
+			HardwareHandshake = comSpec.HardwareHandshake;
+			SoftwareHandshake = comSpec.SoftwareHandshake;
+			ReportCtsChanges = comSpec.ReportCtsChanges;
+		}
 	}
 }
