@@ -7,70 +7,64 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	[Flags]
 	public enum eComBaudRates
 	{
-		ComspecBaudRate300 = 1,
-		ComspecBaudRate600 = 2,
-		ComspecBaudRate1200 = 4,
-		ComspecBaudRate1800 = 8,
-		ComspecBaudRate2400 = 16,
-		ComspecBaudRate3600 = 32,
-		ComspecBaudRate4800 = 64,
-		ComspecBaudRate7200 = 128,
-		ComspecBaudRate9600 = 256,
-		ComspecBaudRate14400 = 512,
-		ComspecBaudRate19200 = 1024,
-		ComspecBaudRate28800 = 2048,
-		ComspecBaudRate38400 = 4096,
-		ComspecBaudRate57600 = 8192,
-		ComspecBaudRate115200 = 65536,
+		BaudRate300 = 1,
+		BaudRate600 = 2,
+		BaudRate1200 = 4,
+		BaudRate1800 = 8,
+		BaudRate2400 = 16,
+		BaudRate3600 = 32,
+		BaudRate4800 = 64,
+		BaudRate7200 = 128,
+		BaudRate9600 = 256,
+		BaudRate14400 = 512,
+		BaudRate19200 = 1024,
+		BaudRate28800 = 2048,
+		BaudRate38400 = 4096,
+		BaudRate57600 = 8192,
+		BaudRate115200 = 65536,
 	}
 
 	public enum eComDataBits
 	{
-		ComspecDataBits7 = 7,
-		ComspecDataBits8 = 8,
+		DataBits7 = 7,
+		DataBits8 = 8,
 	}
 
 	public enum eComHardwareHandshakeType
 	{
-		// ReSharper disable InconsistentNaming
-		ComspecHardwareHandshakeNone = 0,
-		ComspecHardwareHandshakeRTS = 1,
-		ComspecHardwareHandshakeCTS = 2,
-		ComspecHardwareHandshakeRTSCTS = 3,
-		// ReSharper restore InconsistentNaming
+		None = 0,
+		Rts = 1,
+		Cts = 2,
+		RtsCts = 3,
 	}
 
 	public enum eComParityType
 	{
-		ComspecParityNone = 0,
-		ComspecParityEven = 1,
-		ComspecParityOdd = 2,
-		ComspecParityZeroStick = 3
+		None = 0,
+		Even = 1,
+		Odd = 2,
+		Mark = 3
 	}
 
 	public enum eComProtocolType
 	{
-		// ReSharper disable InconsistentNaming
-		ComspecProtocolRS232 = 0,
-		ComspecProtocolRS422 = 1,
-		ComspecProtocolRS485 = 2,
-		// ReSharper restore InconsistentNaming
+		Rs232 = 0,
+		Rs422 = 1,
+		Rs485 = 2,
 	}
 
 	public enum eComSoftwareHandshakeType
 	{
-		// ReSharper disable InconsistentNaming
-		ComspecSoftwareHandshakeNone = 0,
-		ComspecSoftwareHandshakeXON = 1,
-		ComspecSoftwareHandshakeXONT = 2,
-		ComspecSoftwareHandshakeXONR = 3,
-		// ReSharper restore InconsistentNaming
+		None = 0,
+		XOn = 1,
+		XOnTransmit = 2,
+		XOnReceive = 3,
 	}
 
 	public enum eComStopBits
 	{
-		ComspecStopBits1 = 1,
-		ComspecStopBits2 = 2,
+		StopBits1 = 1,
+		StopBits2 = 2,
 	}
 
 	#endregion

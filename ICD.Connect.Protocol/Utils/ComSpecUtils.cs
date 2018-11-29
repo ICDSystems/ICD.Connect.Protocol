@@ -16,9 +16,9 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (stopBits)
 			{
-				case eComStopBits.ComspecStopBits1:
+				case eComStopBits.StopBits1:
 					return 1;
-				case eComStopBits.ComspecStopBits2:
+				case eComStopBits.StopBits2:
 					return 2;
 				default:
 					throw new ArgumentOutOfRangeException("stopBits");
@@ -36,9 +36,9 @@ namespace ICD.Connect.Protocol.Utils
 			switch (count)
 			{
 				case 1:
-					return eComStopBits.ComspecStopBits1;
+					return eComStopBits.StopBits1;
 				case 2:
-					return eComStopBits.ComspecStopBits2;
+					return eComStopBits.StopBits2;
 
 				default:
 					throw new ArgumentOutOfRangeException("count");
@@ -55,35 +55,35 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (baudRate)
 			{
-				case eComBaudRates.ComspecBaudRate300:
+				case eComBaudRates.BaudRate300:
 					return 300;
-				case eComBaudRates.ComspecBaudRate600:
+				case eComBaudRates.BaudRate600:
 					return 600;
-				case eComBaudRates.ComspecBaudRate1200:
+				case eComBaudRates.BaudRate1200:
 					return 1200;
-				case eComBaudRates.ComspecBaudRate1800:
+				case eComBaudRates.BaudRate1800:
 					return 1800;
-				case eComBaudRates.ComspecBaudRate2400:
+				case eComBaudRates.BaudRate2400:
 					return 2400;
-				case eComBaudRates.ComspecBaudRate3600:
+				case eComBaudRates.BaudRate3600:
 					return 3600;
-				case eComBaudRates.ComspecBaudRate4800:
+				case eComBaudRates.BaudRate4800:
 					return 4800;
-				case eComBaudRates.ComspecBaudRate7200:
+				case eComBaudRates.BaudRate7200:
 					return 7200;
-				case eComBaudRates.ComspecBaudRate9600:
+				case eComBaudRates.BaudRate9600:
 					return 9600;
-				case eComBaudRates.ComspecBaudRate14400:
+				case eComBaudRates.BaudRate14400:
 					return 14400;
-				case eComBaudRates.ComspecBaudRate19200:
+				case eComBaudRates.BaudRate19200:
 					return 19200;
-				case eComBaudRates.ComspecBaudRate28800:
+				case eComBaudRates.BaudRate28800:
 					return 28800;
-				case eComBaudRates.ComspecBaudRate38400:
+				case eComBaudRates.BaudRate38400:
 					return 38400;
-				case eComBaudRates.ComspecBaudRate57600:
+				case eComBaudRates.BaudRate57600:
 					return 57600;
-				case eComBaudRates.ComspecBaudRate115200:
+				case eComBaudRates.BaudRate115200:
 					return 115200;
 
 				default:
@@ -102,35 +102,35 @@ namespace ICD.Connect.Protocol.Utils
 			switch (rate)
 			{
 				case 300:
-					return eComBaudRates.ComspecBaudRate300;
+					return eComBaudRates.BaudRate300;
 				case 600:
-					return eComBaudRates.ComspecBaudRate600;
+					return eComBaudRates.BaudRate600;
 				case 1200:
-					return eComBaudRates.ComspecBaudRate1200;
+					return eComBaudRates.BaudRate1200;
 				case 1800:
-					return eComBaudRates.ComspecBaudRate1800;
+					return eComBaudRates.BaudRate1800;
 				case 2400:
-					return eComBaudRates.ComspecBaudRate2400;
+					return eComBaudRates.BaudRate2400;
 				case 3600:
-					return eComBaudRates.ComspecBaudRate3600;
+					return eComBaudRates.BaudRate3600;
 				case 4800:
-					return eComBaudRates.ComspecBaudRate4800;
+					return eComBaudRates.BaudRate4800;
 				case 7200:
-					return eComBaudRates.ComspecBaudRate7200;
+					return eComBaudRates.BaudRate7200;
 				case 9600:
-					return eComBaudRates.ComspecBaudRate9600;
+					return eComBaudRates.BaudRate9600;
 				case 14400:
-					return eComBaudRates.ComspecBaudRate14400;
+					return eComBaudRates.BaudRate14400;
 				case 19200:
-					return eComBaudRates.ComspecBaudRate19200;
+					return eComBaudRates.BaudRate19200;
 				case 28800:
-					return eComBaudRates.ComspecBaudRate28800;
+					return eComBaudRates.BaudRate28800;
 				case 38400:
-					return eComBaudRates.ComspecBaudRate38400;
+					return eComBaudRates.BaudRate38400;
 				case 57600:
-					return eComBaudRates.ComspecBaudRate57600;
+					return eComBaudRates.BaudRate57600;
 				case 115200:
-					return eComBaudRates.ComspecBaudRate115200;
+					return eComBaudRates.BaudRate115200;
 
 				default:
 					throw new ArgumentOutOfRangeException("rate");
@@ -142,35 +142,35 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (baudRate)
 			{
-				case eComBaudRates.ComspecBaudRate300:
+				case eComBaudRates.BaudRate300:
 					return 0x0000;
-				case eComBaudRates.ComspecBaudRate600:
+				case eComBaudRates.BaudRate600:
 					return 0x0001;
-				case eComBaudRates.ComspecBaudRate1200:
+				case eComBaudRates.BaudRate1200:
 					return 0x0002;
-				case eComBaudRates.ComspecBaudRate1800:
+				case eComBaudRates.BaudRate1800:
 					return 0x0080;
-				case eComBaudRates.ComspecBaudRate2400:
+				case eComBaudRates.BaudRate2400:
 					return 0x0003;
-				case eComBaudRates.ComspecBaudRate3600:
+				case eComBaudRates.BaudRate3600:
 					return 0x0081;
-				case eComBaudRates.ComspecBaudRate4800:
+				case eComBaudRates.BaudRate4800:
 					return 0x0004;
-				case eComBaudRates.ComspecBaudRate7200:
+				case eComBaudRates.BaudRate7200:
 					return 0x0082;
-				case eComBaudRates.ComspecBaudRate9600:
+				case eComBaudRates.BaudRate9600:
 					return 0x0005;
-				case eComBaudRates.ComspecBaudRate14400:
+				case eComBaudRates.BaudRate14400:
 					return 0x0083;
-				case eComBaudRates.ComspecBaudRate19200:
+				case eComBaudRates.BaudRate19200:
 					return 0x0006;
-				case eComBaudRates.ComspecBaudRate28800:
+				case eComBaudRates.BaudRate28800:
 					return 0x0084;
-				case eComBaudRates.ComspecBaudRate38400:
+				case eComBaudRates.BaudRate38400:
 					return 0x0007;
-				case eComBaudRates.ComspecBaudRate57600:
+				case eComBaudRates.BaudRate57600:
 					return 0x0085;
-				case eComBaudRates.ComspecBaudRate115200:
+				case eComBaudRates.BaudRate115200:
 					return 0x0086;
 
 				default:
@@ -183,11 +183,11 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (protocol)
 			{
-				case eComProtocolType.ComspecProtocolRS232:
+				case eComProtocolType.Rs232:
 					return 0x0000;
-				case eComProtocolType.ComspecProtocolRS422:
+				case eComProtocolType.Rs422:
 					return 0x0100;
-				case eComProtocolType.ComspecProtocolRS485:
+				case eComProtocolType.Rs485:
 					return 0x2100;
 
 				default:
@@ -200,13 +200,13 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (parity)
 			{
-				case eComParityType.ComspecParityNone:
+				case eComParityType.None:
 					return 0x0000;
-				case eComParityType.ComspecParityZeroStick:
+				case eComParityType.Mark:
 					return 0x0010;
-				case eComParityType.ComspecParityOdd:
+				case eComParityType.Odd:
 					return 0x0018;
-				case eComParityType.ComspecParityEven:
+				case eComParityType.Even:
 					return 0x0008;
 
 				default:
@@ -219,9 +219,9 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (dataBits)
 			{
-				case eComDataBits.ComspecDataBits7:
+				case eComDataBits.DataBits7:
 					return 0x0000;
-				case eComDataBits.ComspecDataBits8:
+				case eComDataBits.DataBits8:
 					return 0x0020;
 
 				default:
@@ -234,9 +234,9 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (stopBits)
 			{
-				case eComStopBits.ComspecStopBits1:
+				case eComStopBits.StopBits1:
 					return 0x0000;
-				case eComStopBits.ComspecStopBits2:
+				case eComStopBits.StopBits2:
 					return 0x0040;
 
 				default:
@@ -249,13 +249,13 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (softFc)
 			{
-				case eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone:
+				case eComSoftwareHandshakeType.None:
 					return 0x0000;
-				case eComSoftwareHandshakeType.ComspecSoftwareHandshakeXON:
+				case eComSoftwareHandshakeType.XOn:
 					return 0x1800;
-				case eComSoftwareHandshakeType.ComspecSoftwareHandshakeXONT:
+				case eComSoftwareHandshakeType.XOnTransmit:
 					return 0x0800;
-				case eComSoftwareHandshakeType.ComspecSoftwareHandshakeXONR:
+				case eComSoftwareHandshakeType.XOnReceive:
 					return 0x1000;
 
 				default:
@@ -268,13 +268,13 @@ namespace ICD.Connect.Protocol.Utils
 		{
 			switch (hardFc)
 			{
-				case eComHardwareHandshakeType.ComspecHardwareHandshakeNone:
+				case eComHardwareHandshakeType.None:
 					return 0x0000;
-				case eComHardwareHandshakeType.ComspecHardwareHandshakeRTS:
+				case eComHardwareHandshakeType.Rts:
 					return 0x0400;
-				case eComHardwareHandshakeType.ComspecHardwareHandshakeCTS:
+				case eComHardwareHandshakeType.Cts:
 					return 0x0200;
-				case eComHardwareHandshakeType.ComspecHardwareHandshakeRTSCTS:
+				case eComHardwareHandshakeType.RtsCts:
 					return (0x0400 | 0x0200);
 
 				default:
