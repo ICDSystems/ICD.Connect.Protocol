@@ -116,8 +116,6 @@
     <Compile Include="Extensions\DeviceFactoryExtensions.cs" />
     <Compile Include="Ports\AbstractPort.cs" />
     <Compile Include="Ports\AbstractSerialPort.cs" />
-    <Compile Include="Ports\ComPort\ComPortPlus.cs" />
-    <Compile Include="Ports\ComPort\ComPortPlusSettings.cs" />
     <Compile Include="Ports\ComPort\IComPort.cs" />
     <Compile Include="Ports\HostInfo.cs" />
     <Compile Include="Ports\IoPort\IIoPort.cs" />

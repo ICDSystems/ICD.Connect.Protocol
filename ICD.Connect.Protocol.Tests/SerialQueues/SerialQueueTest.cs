@@ -2,7 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Ports.ComPort;
+using ICD.Connect.Protocol.Mock.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using NUnit.Framework;
@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			List<SerialResponseEventArgs> responses = new List<SerialResponseEventArgs>();
 
 			DelimiterSerialBuffer buffer = new DelimiterSerialBuffer('\n');
-			ComPortPlus port = new ComPortPlus(1);
+			MockComPort port = new MockComPort();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
@@ -48,7 +48,7 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			List<SerialResponseEventArgs> responses = new List<SerialResponseEventArgs>();
 
 			DelimiterSerialBuffer buffer = new DelimiterSerialBuffer('\n');
-			ComPortPlus port = new ComPortPlus(1);
+			MockComPort port = new MockComPort();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
@@ -74,7 +74,7 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			List<SerialDataEventArgs> responses = new List<SerialDataEventArgs>();
 
 			DelimiterSerialBuffer buffer = new DelimiterSerialBuffer('\n');
-			ComPortPlus port = new ComPortPlus(1);
+			MockComPort port = new MockComPort();
 			SerialQueue queue = new SerialQueue { Timeout = 100 };
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
