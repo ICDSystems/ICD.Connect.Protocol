@@ -7,6 +7,45 @@ namespace ICD.Connect.Protocol.Utils
 	public static class ComSpecUtils
 	{
 		/// <summary>
+		/// Returns the number of data bits.
+		/// </summary>
+		/// <param name="stopBits"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static int DataBitsToCount(eComDataBits stopBits)
+		{
+			switch (stopBits)
+			{
+				case eComDataBits.DataBits7:
+					return 7;
+				case eComDataBits.DataBits8:
+					return 8;
+				default:
+					throw new ArgumentOutOfRangeException("stopBits");
+			}
+		}
+
+		/// <summary>
+		/// Returns the number of data bits.
+		/// </summary>
+		/// <param name="count"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static eComDataBits DataBitsFromCount(int count)
+		{
+			switch (count)
+			{
+				case 7:
+					return eComDataBits.DataBits7;
+				case 8:
+					return eComDataBits.DataBits8;
+
+				default:
+					throw new ArgumentOutOfRangeException("count");
+			}
+		}
+
+		/// <summary>
 		/// Returns the number of stop bits.
 		/// </summary>
 		/// <param name="stopBits"></param>

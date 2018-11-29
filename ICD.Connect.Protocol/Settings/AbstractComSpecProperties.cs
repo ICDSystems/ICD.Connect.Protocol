@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports.ComPort;
+using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Settings
 {
@@ -95,12 +96,20 @@ namespace ICD.Connect.Protocol.Settings
 			if (writer == null)
 				throw new ArgumentNullException("writer");
 
+			int? baud = ComSpecBaudRate.HasValue ? ComSpecUtils.BaudRateToRate(ComSpecBaudRate.Value) : (int?)null;
+			int? dataBits = ComSpecNumberOfDataBits.HasValue
+				                ? ComSpecUtils.DataBitsToCount(ComSpecNumberOfDataBits.Value)
+				                : (int?)null;
+			int? stopBits = ComSpecNumberOfStopBits.HasValue
+				                ? ComSpecUtils.StopBitsToCount(ComSpecNumberOfStopBits.Value)
+				                : (int?)null;
+
 			writer.WriteStartElement(ELEMENT);
 			{
-				writer.WriteElementString(COM_SPEC_BAUD_RATE_ELEMENT, IcdXmlConvert.ToString(ComSpecBaudRate));
-				writer.WriteElementString(COM_SPEC_NUMBER_OF_DATA_BITS_ELEMENT, IcdXmlConvert.ToString(ComSpecNumberOfDataBits));
+				writer.WriteElementString(COM_SPEC_BAUD_RATE_ELEMENT, IcdXmlConvert.ToString(baud));
+				writer.WriteElementString(COM_SPEC_NUMBER_OF_DATA_BITS_ELEMENT, IcdXmlConvert.ToString(dataBits));
 				writer.WriteElementString(COM_SPEC_PARITY_TYPE_ELEMENT, IcdXmlConvert.ToString(ComSpecParityType));
-				writer.WriteElementString(COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT, IcdXmlConvert.ToString(ComSpecNumberOfStopBits));
+				writer.WriteElementString(COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT, IcdXmlConvert.ToString(stopBits));
 				writer.WriteElementString(COM_SPEC_PROTOCOL_TYPE_ELEMENT, IcdXmlConvert.ToString(ComSpecProtocolType));
 				writer.WriteElementString(COM_SPEC_HARDWARE_HAND_SHAKE_ELEMENT, IcdXmlConvert.ToString(ComSpecHardwareHandShake));
 				writer.WriteElementString(COM_SPEC_SOFTWARE_HANDSHAKE_ELEMENT, IcdXmlConvert.ToString(ComSpecSoftwareHandshake));
@@ -121,10 +130,19 @@ namespace ICD.Connect.Protocol.Settings
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out comSpec))
 				return;
 
-			ComSpecBaudRate = XmlUtils.TryReadChildElementContentAsEnum<eComBaudRates>(comSpec, COM_SPEC_BAUD_RATE_ELEMENT, true);
-			ComSpecNumberOfDataBits = XmlUtils.TryReadChildElementContentAsEnum<eComDataBits>(comSpec, COM_SPEC_NUMBER_OF_DATA_BITS_ELEMENT, true);
+			int? baud = XmlUtils.TryReadChildElementContentAsInt(comSpec, COM_SPEC_BAUD_RATE_ELEMENT);
+			if (baud.HasValue)
+				ComSpecBaudRate = ComSpecUtils.BaudRateFromRate(baud.Value);
+
+			int? dataBits = XmlUtils.TryReadChildElementContentAsInt(comSpec, COM_SPEC_NUMBER_OF_DATA_BITS_ELEMENT);
+			if (dataBits.HasValue)
+				ComSpecNumberOfDataBits = ComSpecUtils.DataBitsFromCount(dataBits.Value);
+
+			int? stopBits = XmlUtils.TryReadChildElementContentAsInt(comSpec, COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT);
+			if (stopBits.HasValue)
+				ComSpecNumberOfStopBits = ComSpecUtils.StopBitsFromCount(stopBits.Value);
+
 			ComSpecParityType = XmlUtils.TryReadChildElementContentAsEnum<eComParityType>(comSpec, COM_SPEC_PARITY_TYPE_ELEMENT, true);
-			ComSpecNumberOfStopBits = XmlUtils.TryReadChildElementContentAsEnum<eComStopBits>(comSpec, COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT, true);
 			ComSpecProtocolType = XmlUtils.TryReadChildElementContentAsEnum<eComProtocolType>(comSpec, COM_SPEC_PROTOCOL_TYPE_ELEMENT, true);
 			ComSpecHardwareHandShake = XmlUtils.TryReadChildElementContentAsEnum<eComHardwareHandshakeType>(comSpec, COM_SPEC_HARDWARE_HAND_SHAKE_ELEMENT, true);
 			ComSpecSoftwareHandshake = XmlUtils.TryReadChildElementContentAsEnum<eComSoftwareHandshakeType>(comSpec, COM_SPEC_SOFTWARE_HANDSHAKE_ELEMENT, true);
