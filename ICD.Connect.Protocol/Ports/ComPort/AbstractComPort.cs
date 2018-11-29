@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
@@ -6,10 +7,54 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	public abstract class AbstractComPort<TSettings> : AbstractSerialPort<TSettings>, IComPort
 		where TSettings : IComPortSettings, new()
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the Com Spec configuration properties.
 		/// </summary>
 		protected abstract IComSpecProperties ComSpecProperties { get; }
+
+		/// <summary>
+		/// Gets the baud rate.
+		/// </summary>
+		public abstract eComBaudRates BaudRate { get; }
+
+		/// <summary>
+		/// Gets the number of data bits.
+		/// </summary>
+		public abstract eComDataBits NumberOfDataBits { get; }
+
+		/// <summary>
+		/// Gets the parity type.
+		/// </summary>
+		public abstract eComParityType ParityType { get; }
+
+		/// <summary>
+		/// Gets the number of stop bits.
+		/// </summary>
+		public abstract eComStopBits NumberOfStopBits { get; }
+
+		/// <summary>
+		/// Gets the protocol type.
+		/// </summary>
+		public abstract eComProtocolType ProtocolType { get; }
+
+		/// <summary>
+		/// Gets the hardware handshake mode.
+		/// </summary>
+		public abstract eComHardwareHandshakeType HardwareHandShake { get; }
+
+		/// <summary>
+		/// Gets the software handshake mode.
+		/// </summary>
+		public abstract eComSoftwareHandshakeType SoftwareHandshake { get; }
+
+		/// <summary>
+		/// Gets the report CTS changes mode.
+		/// </summary>
+		public abstract bool ReportCtsChanges { get; }
+
+		#endregion
 
 		#region Methods
 
@@ -68,18 +113,41 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			throw new NotImplementedException();
+			ComSpec comSpec = new ComSpec
+			{
+				BaudRate = properties.ComSpecBaudRate ?? BaudRate,
+				NumberOfDataBits = properties.ComSpecNumberOfDataBits ?? NumberOfDataBits,
+				ParityType = properties.ComSpecParityType ?? ParityType,
+				NumberOfStopBits = properties.ComSpecNumberOfStopBits ?? NumberOfStopBits,
+				ProtocolType = properties.ComSpecProtocolType ?? ProtocolType,
+				HardwareHandShake = properties.ComSpecHardwareHandShake ?? HardwareHandShake,
+				SoftwareHandshake = properties.ComSpecSoftwareHandshake ?? SoftwareHandshake,
+				ReportCtsChanges = properties.ComSpecReportCtsChanges ?? ReportCtsChanges
+			};
 
-			/*
-			SetComPortSpec(properties.ComSpecBaudRate ?? default(eComBaudRates),
-			               properties.ComSpecNumberOfDataBits ?? default(eComDataBits),
-			               properties.ComSpecParityType ?? default(eComParityType),
-			               properties.ComSpecNumberOfStopBits ?? default(eComStopBits),
-			               properties.ComSpecProtocolType ?? default(eComProtocolType),
-			               properties.ComSpecHardwareHandShake ?? default(eComHardwareHandshakeType),
-			               properties.ComSpecSoftwareHandshake ?? default(eComSoftwareHandshakeType),
-			               properties.ComSpecReportCtsChanges ?? false);
-			 */
+			SetComPortSpec(comSpec);
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Baud Rate", BaudRate);
+			addRow("Number of Data Bits", NumberOfDataBits);
+			addRow("Parity Type", ParityType);
+			addRow("Number of Stop Bits", NumberOfStopBits);
+			addRow("Protocol Type", ProtocolType);
+			addRow("Hardware Handshake", HardwareHandShake);
+			addRow("Software Handshake", SoftwareHandshake);
+			addRow("Report CTS Changes", ReportCtsChanges);
 		}
 
 		#endregion

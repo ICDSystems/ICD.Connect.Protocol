@@ -8,6 +8,46 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	public interface IComPort : ISerialPort
 	{
 		/// <summary>
+		/// Gets the baud rate.
+		/// </summary>
+		eComBaudRates BaudRate { get; }
+
+		/// <summary>
+		/// Gets the number of data bits.
+		/// </summary>
+		eComDataBits NumberOfDataBits { get; }
+
+		/// <summary>
+		/// Gets the parity type.
+		/// </summary>
+		eComParityType ParityType { get; }
+
+		/// <summary>
+		/// Gets the number of stop bits.
+		/// </summary>
+		eComStopBits NumberOfStopBits { get; }
+
+		/// <summary>
+		/// Gets the protocol type.
+		/// </summary>
+		eComProtocolType ProtocolType { get; }
+
+		/// <summary>
+		/// Gets the hardware handshake mode.
+		/// </summary>
+		eComHardwareHandshakeType HardwareHandShake { get; }
+
+		/// <summary>
+		/// Gets the software handshake mode.
+		/// </summary>
+		eComSoftwareHandshakeType SoftwareHandshake { get; }
+
+		/// <summary>
+		/// Gets the report CTS changes mode.
+		/// </summary>
+		bool ReportCtsChanges { get; }
+
+		/// <summary>
 		/// Configures the ComPort for communication.
 		/// </summary>
 		/// <param name="comSpec"></param>
