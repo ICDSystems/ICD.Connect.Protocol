@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
 
@@ -12,7 +13,8 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <summary>
 		/// Gets the Com Spec configuration properties.
 		/// </summary>
-		protected abstract IComSpecProperties ComSpecProperties { get; }
+		[NotNull]
+		public abstract IComSpecProperties ComSpecProperties { get; }
 
 		/// <summary>
 		/// Gets the baud rate.

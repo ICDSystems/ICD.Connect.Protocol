@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Protocol.Settings;
+﻿using ICD.Common.Properties;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
@@ -7,6 +8,12 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	/// </summary>
 	public interface IComPort : ISerialPort
 	{
+		/// <summary>
+		/// Gets the Com Spec configuration properties.
+		/// </summary>
+		[NotNull]
+		IComSpecProperties ComSpecProperties { get; }
+
 		/// <summary>
 		/// Gets the baud rate.
 		/// </summary>
