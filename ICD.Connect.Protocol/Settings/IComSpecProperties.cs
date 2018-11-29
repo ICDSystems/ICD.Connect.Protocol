@@ -33,7 +33,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Gets/sets the configurable hardware handshake type.
 		/// </summary>
-		eComHardwareHandshakeType? ComSpecHardwareHandShake { get; set; }
+		eComHardwareHandshakeType? ComSpecHardwareHandshake { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable software handshake type.
@@ -71,7 +71,7 @@ namespace ICD.Connect.Protocol.Settings
 			extends.ComSpecParityType = other.ComSpecParityType;
 			extends.ComSpecNumberOfStopBits = other.ComSpecNumberOfStopBits;
 			extends.ComSpecProtocolType = other.ComSpecProtocolType;
-			extends.ComSpecHardwareHandShake = other.ComSpecHardwareHandShake;
+			extends.ComSpecHardwareHandshake = other.ComSpecHardwareHandshake;
 			extends.ComSpecSoftwareHandshake = other.ComSpecSoftwareHandshake;
 			extends.ComSpecReportCtsChanges = other.ComSpecReportCtsChanges;
 		}
@@ -112,8 +112,8 @@ namespace ICD.Connect.Protocol.Settings
 			if (extends.ComSpecProtocolType == null)
 				extends.ComSpecProtocolType = protocolType;
 
-			if (extends.ComSpecHardwareHandShake == null)
-				extends.ComSpecHardwareHandShake = hardwareHandShake;
+			if (extends.ComSpecHardwareHandshake == null)
+				extends.ComSpecHardwareHandshake = hardwareHandShake;
 
 			if (extends.ComSpecSoftwareHandshake == null)
 				extends.ComSpecSoftwareHandshake = softwareHandshake;
@@ -142,7 +142,7 @@ namespace ICD.Connect.Protocol.Settings
 			output.ApplyDefaultValues(extends.ComSpecBaudRate,
 			                          extends.ComSpecNumberOfDataBits, extends.ComSpecParityType,
 			                          extends.ComSpecNumberOfStopBits, extends.ComSpecProtocolType,
-			                          extends.ComSpecHardwareHandShake, extends.ComSpecSoftwareHandshake,
+			                          extends.ComSpecHardwareHandshake, extends.ComSpecSoftwareHandshake,
 			                          extends.ComSpecReportCtsChanges);
 
 			return output;

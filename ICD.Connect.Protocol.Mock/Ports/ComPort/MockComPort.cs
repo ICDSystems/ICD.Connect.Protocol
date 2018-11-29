@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 		private eComParityType m_ParityType;
 		private eComStopBits m_NumberOfStopBits;
 		private eComProtocolType m_ProtocolType;
-		private eComHardwareHandshakeType m_HardwareHandShake;
+		private eComHardwareHandshakeType m_HardwareHandshake;
 		private eComSoftwareHandshakeType m_SoftwareHandshake;
 		private bool m_ReportCtsChanges;
 
@@ -57,7 +57,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 		/// <summary>
 		/// Gets the hardware handshake mode.
 		/// </summary>
-		public override eComHardwareHandshakeType HardwareHandShake { get { return m_HardwareHandShake; } }
+		public override eComHardwareHandshakeType HardwareHandshake { get { return m_HardwareHandshake; } }
 
 		/// <summary>
 		/// Gets the software handshake mode.
@@ -114,7 +114,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 			m_ParityType = comSpec.ParityType;
 			m_NumberOfStopBits = comSpec.NumberOfStopBits;
 			m_ProtocolType = comSpec.ProtocolType;
-			m_HardwareHandShake = comSpec.HardwareHandShake;
+			m_HardwareHandshake = comSpec.HardwareHandshake;
 			m_SoftwareHandshake = comSpec.SoftwareHandshake;
 			m_ReportCtsChanges = comSpec.ReportCtsChanges;
 		}

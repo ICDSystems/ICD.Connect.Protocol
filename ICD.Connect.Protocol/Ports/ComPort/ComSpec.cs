@@ -76,7 +76,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		public eComParityType ParityType { get; set; }
 		public eComStopBits NumberOfStopBits { get; set; }
 		public eComProtocolType ProtocolType { get; set; }
-		public eComHardwareHandshakeType HardwareHandShake { get; set; }
+		public eComHardwareHandshakeType HardwareHandshake { get; set; }
 		public eComSoftwareHandshakeType SoftwareHandshake { get; set; }
 		public bool ReportCtsChanges { get; set; }
 	}

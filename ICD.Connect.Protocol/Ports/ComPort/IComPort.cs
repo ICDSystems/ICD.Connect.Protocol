@@ -42,7 +42,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <summary>
 		/// Gets the hardware handshake mode.
 		/// </summary>
-		eComHardwareHandshakeType HardwareHandShake { get; }
+		eComHardwareHandshakeType HardwareHandshake { get; }
 
 		/// <summary>
 		/// Gets the software handshake mode.

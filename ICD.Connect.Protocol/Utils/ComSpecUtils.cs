@@ -404,7 +404,7 @@ namespace ICD.Connect.Protocol.Utils
 			                       comSpec.ParityType,
 			                       comSpec.NumberOfStopBits,
 			                       comSpec.ProtocolType,
-			                       comSpec.HardwareHandShake,
+			                       comSpec.HardwareHandshake,
 			                       comSpec.SoftwareHandshake,
 			                       comSpec.ReportCtsChanges);
 		}

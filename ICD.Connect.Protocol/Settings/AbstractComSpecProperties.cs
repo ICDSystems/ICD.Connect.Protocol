@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Settings
 		private const string COM_SPEC_PARITY_TYPE_ELEMENT = "ParityType";
 		private const string COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT = "NumberOfStopBits";
 		private const string COM_SPEC_PROTOCOL_TYPE_ELEMENT = "ProtocolType";
-		private const string COM_SPEC_HARDWARE_HAND_SHAKE_ELEMENT = "HardwareHandShake";
+		private const string COM_SPEC_HARDWARE_HANDSHAKE_ELEMENT = "HardwareHandshake";
 		private const string COM_SPEC_SOFTWARE_HANDSHAKE_ELEMENT = "SoftwareHandshake";
 		private const string COM_SPEC_REPORT_CTS_CHANGES_ELEMENT = "ReportCtsChanges";
 
@@ -48,7 +48,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Gets/sets the configurable hardware handshake type.
 		/// </summary>
-		public eComHardwareHandshakeType? ComSpecHardwareHandShake { get; set; }
+		public eComHardwareHandshakeType? ComSpecHardwareHandshake { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable software handshake type.
@@ -82,7 +82,7 @@ namespace ICD.Connect.Protocol.Settings
 			ComSpecParityType = null;
 			ComSpecNumberOfStopBits = null;
 			ComSpecProtocolType = null;
-			ComSpecHardwareHandShake = null;
+			ComSpecHardwareHandshake = null;
 			ComSpecSoftwareHandshake = null;
 			ComSpecReportCtsChanges = null;
 		}
@@ -111,7 +111,7 @@ namespace ICD.Connect.Protocol.Settings
 				writer.WriteElementString(COM_SPEC_PARITY_TYPE_ELEMENT, IcdXmlConvert.ToString(ComSpecParityType));
 				writer.WriteElementString(COM_SPEC_NUMBER_OF_STOP_BITS_ELEMENT, IcdXmlConvert.ToString(stopBits));
 				writer.WriteElementString(COM_SPEC_PROTOCOL_TYPE_ELEMENT, IcdXmlConvert.ToString(ComSpecProtocolType));
-				writer.WriteElementString(COM_SPEC_HARDWARE_HAND_SHAKE_ELEMENT, IcdXmlConvert.ToString(ComSpecHardwareHandShake));
+				writer.WriteElementString(COM_SPEC_HARDWARE_HANDSHAKE_ELEMENT, IcdXmlConvert.ToString(ComSpecHardwareHandshake));
 				writer.WriteElementString(COM_SPEC_SOFTWARE_HANDSHAKE_ELEMENT, IcdXmlConvert.ToString(ComSpecSoftwareHandshake));
 				writer.WriteElementString(COM_SPEC_REPORT_CTS_CHANGES_ELEMENT, IcdXmlConvert.ToString(ComSpecReportCtsChanges));
 			}
@@ -144,7 +144,7 @@ namespace ICD.Connect.Protocol.Settings
 
 			ComSpecParityType = XmlUtils.TryReadChildElementContentAsEnum<eComParityType>(comSpec, COM_SPEC_PARITY_TYPE_ELEMENT, true);
 			ComSpecProtocolType = XmlUtils.TryReadChildElementContentAsEnum<eComProtocolType>(comSpec, COM_SPEC_PROTOCOL_TYPE_ELEMENT, true);
-			ComSpecHardwareHandShake = XmlUtils.TryReadChildElementContentAsEnum<eComHardwareHandshakeType>(comSpec, COM_SPEC_HARDWARE_HAND_SHAKE_ELEMENT, true);
+			ComSpecHardwareHandshake = XmlUtils.TryReadChildElementContentAsEnum<eComHardwareHandshakeType>(comSpec, COM_SPEC_HARDWARE_HANDSHAKE_ELEMENT, true);
 			ComSpecSoftwareHandshake = XmlUtils.TryReadChildElementContentAsEnum<eComSoftwareHandshakeType>(comSpec, COM_SPEC_SOFTWARE_HANDSHAKE_ELEMENT, true);
 			ComSpecReportCtsChanges = XmlUtils.TryReadChildElementContentAsBoolean(comSpec, COM_SPEC_REPORT_CTS_CHANGES_ELEMENT);
 		}

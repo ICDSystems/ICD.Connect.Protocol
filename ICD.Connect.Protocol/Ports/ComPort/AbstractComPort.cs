@@ -44,7 +44,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// <summary>
 		/// Gets the hardware handshake mode.
 		/// </summary>
-		public abstract eComHardwareHandshakeType HardwareHandShake { get; }
+		public abstract eComHardwareHandshakeType HardwareHandshake { get; }
 
 		/// <summary>
 		/// Gets the software handshake mode.
@@ -122,7 +122,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 				ParityType = properties.ComSpecParityType ?? ParityType,
 				NumberOfStopBits = properties.ComSpecNumberOfStopBits ?? NumberOfStopBits,
 				ProtocolType = properties.ComSpecProtocolType ?? ProtocolType,
-				HardwareHandShake = properties.ComSpecHardwareHandShake ?? HardwareHandShake,
+				HardwareHandshake = properties.ComSpecHardwareHandshake ?? HardwareHandshake,
 				SoftwareHandshake = properties.ComSpecSoftwareHandshake ?? SoftwareHandshake,
 				ReportCtsChanges = properties.ComSpecReportCtsChanges ?? ReportCtsChanges
 			};
@@ -147,7 +147,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 			addRow("Parity Type", ParityType);
 			addRow("Number of Stop Bits", NumberOfStopBits);
 			addRow("Protocol Type", ProtocolType);
-			addRow("Hardware Handshake", HardwareHandShake);
+			addRow("Hardware Handshake", HardwareHandshake);
 			addRow("Software Handshake", SoftwareHandshake);
 			addRow("Report CTS Changes", ReportCtsChanges);
 		}
