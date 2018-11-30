@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
+using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
@@ -150,6 +153,46 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 			addRow("Hardware Handshake", HardwareHandshake);
 			addRow("Software Handshake", SoftwareHandshake);
 			addRow("Report CTS Changes", ReportCtsChanges);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new GenericConsoleCommand<int>("SetBaudRate", "Sets the baud rate", rate => SetBaudRate(rate));
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
+		private void SetBaudRate(int baudRate)
+		{
+			eComBaudRates comBaudRate = ComSpecUtils.BaudRateFromRate(baudRate);
+
+			ComSpec comSpec = new ComSpec
+			{
+				BaudRate = comBaudRate,
+				NumberOfDataBits = NumberOfDataBits,
+				ParityType = ParityType,
+				NumberOfStopBits = NumberOfStopBits,
+				ProtocolType = ProtocolType,
+				HardwareHandshake = HardwareHandshake,
+				SoftwareHandshake = SoftwareHandshake,
+				ReportCtsChanges = ReportCtsChanges
+			};
+
+			SetComPortSpec(comSpec);
 		}
 
 		#endregion
