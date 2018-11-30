@@ -127,7 +127,7 @@ namespace ICD.Connect.Protocol.Ports
 		}
 
 		/// <summary>
-		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
+		/// Sends the data to the remote endpoint.
 		/// </summary>
 		protected abstract bool SendFinal(string data);
 
@@ -143,7 +143,7 @@ namespace ICD.Connect.Protocol.Ports
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception handling received data - {1}", this, e.Message);
+				Log(eSeverity.Error, e, "{0} - Exception handling received data - {1}", this, e.Message);
 			}
 		}
 
