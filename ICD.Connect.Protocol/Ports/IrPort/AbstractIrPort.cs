@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
@@ -9,10 +10,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 	public abstract class AbstractIrPort<T> : AbstractPort<T>, IIrPort
 		where T : IIrPortSettings, new()
 	{
-		private const ushort DEFAULT_PULSE_TIME = 100;
-		private const ushort DEFAULT_BETWEEN_TIME = 750;
-
 		#region Properties
+
+		/// <summary>
+		/// Gets the path to the loaded IR driver.
+		/// </summary>
+		public abstract string DriverPath { get; }
 
 		/// <summary>
 		/// Gets/sets the default pulse time in milliseconds for a PressAndRelease.
@@ -27,7 +30,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <summary>
 		/// Gets the IR Driver configuration properties.
 		/// </summary>
-		protected abstract IIrDriverProperties IrDriverProperties { get; }
+		public abstract IIrDriverProperties IrDriverProperties { get; }
 
 		#endregion
 
@@ -38,6 +41,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		/// <param name="path"></param>
 		public abstract void LoadDriver(string path);
+
+		/// <summary>
+		/// Gets the loaded IR commands.
+		/// </summary>
+		/// <returns></returns>
+		public abstract IEnumerable<string> GetCommands();
 
 		/// <summary>
 		/// Begin sending the command.
@@ -117,6 +126,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		{
 			base.BuildConsoleStatus(addRow);
 
+			addRow("Driver Path", DriverPath);
 			addRow("Pulse Time", PulseTime);
 			addRow("Between Time", BetweenTime);
 		}
@@ -143,6 +153,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 			                                               a => PressAndRelease(a));
 			yield return
 				new GenericConsoleCommand<string>("LoadDriver", "Loads the driver at the given path", a => LoadDriver(a));
+			yield return new ConsoleCommand("PrintCommands", "Prints the available commands", () => PrintCommands());
 		}
 
 		/// <summary>
@@ -152,6 +163,16 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		private string PrintCommands()
+		{
+			TableBuilder builder = new TableBuilder("Command");
+
+			foreach (string command in GetCommands())
+				builder.AddRow(command);
+
+			return builder.ToString();
 		}
 
 		#endregion
