@@ -139,8 +139,8 @@ namespace ICD.Connect.Protocol
 			if (Port != null)
 				Heartbeat.StartMonitoring();
 
-			IsConnected = port.IsConnected;
-			IsOnline = port.IsOnline;
+			IsConnected = port != null && port.IsConnected;
+			IsOnline = port != null && port.IsOnline;
 		}
 
 		[PublicAPI]
