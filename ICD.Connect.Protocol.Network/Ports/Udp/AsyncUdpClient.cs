@@ -22,29 +22,21 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		#region Properties
 
 		/// <summary>
+		/// Gets the Network configuration properties.
+		/// </summary>
+		public override INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
+
+		/// <summary>
 		/// Address to accept connections from.
 		/// </summary>
 		[PublicAPI]
-		public override string Address
-		{
-			get { return m_NetworkProperties.NetworkAddress; }
-			set { m_NetworkProperties.NetworkAddress = value; }
-		}
+		public override string Address { get; set; }
 
 		/// <summary>
 		/// Port to accept connections from.
 		/// </summary>
 		[PublicAPI]
-		public override ushort Port
-		{
-			get { return m_NetworkProperties.NetworkPort ?? 0; }
-			set { m_NetworkProperties.NetworkPort = value; }
-		}
-
-		/// <summary>
-		/// Gets the Network configuration properties.
-		/// </summary>
-		protected override INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
+		public override ushort Port { get; set; }
 
 		/// <summary>
 		/// Get or set the receive buffer size.
@@ -163,24 +155,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		#region Settings
 
 		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(AsyncUdpClientSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Copy(m_NetworkProperties);
-		}
-
-		/// <summary>
 		/// Override to clear the instance settings.
 		/// </summary>
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
 
-			m_NetworkProperties.Clear();
+			ApplyConfiguration();
 		}
 
 		/// <summary>
@@ -192,7 +173,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			m_NetworkProperties.Copy(settings);
+			ApplyConfiguration();
 		}
 
 		#endregion

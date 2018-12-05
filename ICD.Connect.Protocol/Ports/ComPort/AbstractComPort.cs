@@ -5,6 +5,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Protocol.Utils;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.ComPort
 {
@@ -110,6 +111,14 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		}
 
 		/// <summary>
+		/// Applies the configuration properties to the port.
+		/// </summary>
+		public void ApplyConfiguration()
+		{
+			ApplyConfiguration(ComSpecProperties);
+		}
+
+		/// <summary>
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
@@ -131,6 +140,43 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 			};
 
 			SetComPortSpec(comSpec);
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			ComSpecProperties.Clear();
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Copy(ComSpecProperties);
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			ComSpecProperties.Copy(settings);
 		}
 
 		#endregion

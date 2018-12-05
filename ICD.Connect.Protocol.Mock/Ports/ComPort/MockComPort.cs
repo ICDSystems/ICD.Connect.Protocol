@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 {
@@ -89,19 +90,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 			base.DisposeFinal(disposing);
 		}
 
-		/// <summary>
-		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
-		/// </summary>
-		protected override bool SendFinal(string data)
-		{
-			EventHandler<StringEventArgs> handler = OnSend;
-			if (handler == null)
-				return false;
-
-			handler(this, new StringEventArgs(data));
-
-			return true;
-		}
+		#region Methods
 
 		/// <summary>
 		/// Configures the ComPort for communication.
@@ -118,5 +107,47 @@ namespace ICD.Connect.Protocol.Mock.Ports.ComPort
 			m_SoftwareHandshake = comSpec.SoftwareHandshake;
 			m_ReportCtsChanges = comSpec.ReportCtsChanges;
 		}
+
+		#endregion
+
+		/// <summary>
+		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
+		/// </summary>
+		protected override bool SendFinal(string data)
+		{
+			EventHandler<StringEventArgs> handler = OnSend;
+			if (handler == null)
+				return false;
+
+			handler(this, new StringEventArgs(data));
+
+			return true;
+		}
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			ApplyConfiguration();
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(MockComPortSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			ApplyConfiguration();
+		}
+
+		#endregion
 	}
 }

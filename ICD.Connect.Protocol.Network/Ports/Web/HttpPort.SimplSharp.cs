@@ -294,6 +294,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 #endregion
 
+		#region Private Methods
+
 		/// <summary>
 		/// Returns true if the configured URI scheme is https.
 		/// </summary>
@@ -375,6 +377,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				m_ClientBusySection.Leave();
 			}
 		}
+
+		#endregion
 	}
 }
 

@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports
 {
@@ -25,12 +26,12 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// <summary>
 		/// Gets the Secure Network configuration properties.
 		/// </summary>
-		protected abstract SecureNetworkProperties SecureNetworkProperties { get; }
+		public abstract ISecureNetworkProperties SecureNetworkProperties { get; }
 
 		/// <summary>
 		/// Gets the Network configuration properties.
 		/// </summary>
-		protected override INetworkProperties NetworkProperties { get { return SecureNetworkProperties; } }
+		public sealed override INetworkProperties NetworkProperties { get { return SecureNetworkProperties; } }
 
 		#endregion
 
@@ -52,6 +53,14 @@ namespace ICD.Connect.Protocol.Network.Ports
 		}
 
 		/// <summary>
+		/// Applies the secure network configuration to the port.
+		/// </summary>
+		public override void ApplyConfiguration()
+		{
+			ApplyConfiguration(SecureNetworkProperties);
+		}
+
+		/// <summary>
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
@@ -68,6 +77,43 @@ namespace ICD.Connect.Protocol.Network.Ports
 
 			if (properties.NetworkPassword != null)
 				Password = properties.NetworkPassword;
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			SecureNetworkProperties.Clear();
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Copy(SecureNetworkProperties);
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			SecureNetworkProperties.Copy(settings);
 		}
 
 		#endregion

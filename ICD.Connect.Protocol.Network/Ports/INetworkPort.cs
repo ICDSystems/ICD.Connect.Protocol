@@ -6,6 +6,11 @@ namespace ICD.Connect.Protocol.Network.Ports
 	public interface INetworkPort : ISerialPort
 	{
 		/// <summary>
+		/// Gets the network configuration.
+		/// </summary>
+		INetworkProperties NetworkProperties { get; }
+
+		/// <summary>
 		/// Gets/sets the hostname of the remote server.
 		/// </summary>
 		string Address { get; set; }

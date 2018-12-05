@@ -166,7 +166,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ClearSettingsFinal();
 
 			UriProperties.Clear();
-			ApplyConfiguration();
 		}
 
 		/// <summary>
@@ -179,7 +178,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ApplySettingsFinal(settings, factory);
 
 			UriProperties.Copy(settings);
-			ApplyConfiguration();
 		}
 
 		#endregion

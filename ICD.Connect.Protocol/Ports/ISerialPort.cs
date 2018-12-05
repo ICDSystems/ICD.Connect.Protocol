@@ -18,10 +18,16 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 
+		#region Properties
+
 		/// <summary>
 		/// Gets the current connection status of the port.
 		/// </summary>
 		bool IsConnected { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Connects the port.
@@ -45,5 +51,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		/// <param name="data"></param>
 		void Receive(string data);
+
+		#endregion
 	}
 }

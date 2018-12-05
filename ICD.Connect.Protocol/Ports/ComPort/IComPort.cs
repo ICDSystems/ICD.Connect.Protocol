@@ -8,6 +8,8 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 	/// </summary>
 	public interface IComPort : ISerialPort
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the Com Spec configuration properties.
 		/// </summary>
@@ -54,6 +56,10 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// </summary>
 		bool ReportCtsChanges { get; }
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		/// Configures the ComPort for communication.
 		/// </summary>
@@ -71,5 +77,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		/// </summary>
 		/// <param name="properties"></param>
 		void ApplyConfiguration(IComSpecProperties properties);
+
+		#endregion
 	}
 }

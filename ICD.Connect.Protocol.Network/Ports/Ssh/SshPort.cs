@@ -37,49 +37,33 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		#region Properties
 
 		/// <summary>
-		/// Gets/sets the password.
-		/// </summary>
-		[PublicAPI]
-		public override string Password
-		{
-			get { return m_NetworkProperties.NetworkPassword; }
-			set { m_NetworkProperties.NetworkPassword = value; }
-		}
-
-		/// <summary>
 		/// Gets the Secure Network configuration properties.
 		/// </summary>
-		protected override SecureNetworkProperties SecureNetworkProperties { get { return m_NetworkProperties; } }
+		public override ISecureNetworkProperties SecureNetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
 		/// Gets/sets the username.
 		/// </summary>
 		[PublicAPI]
-		public override string Username
-		{
-			get { return m_NetworkProperties.NetworkUsername; }
-			set { m_NetworkProperties.NetworkUsername = value; }
-		}
+		public override string Username { get; set; }
 
 		/// <summary>
-		/// Gets/sets the port.
+		/// Gets/sets the password.
 		/// </summary>
 		[PublicAPI]
-		public override ushort Port
-		{
-			get { return m_NetworkProperties.NetworkPort ?? 22; }
-			set { m_NetworkProperties.NetworkPort = value == 0 ? (ushort)22 : value; }
-		}
+		public override string Password { get; set; }
 
 		/// <summary>
 		/// Gets/sets the address.
 		/// </summary>
 		[PublicAPI]
-		public override string Address
-		{
-			get { return m_NetworkProperties.NetworkAddress; }
-			set { m_NetworkProperties.NetworkAddress = value; }
-		}
+		public override string Address { get; set; }
+
+		/// <summary>
+		/// Gets/sets the port.
+		/// </summary>
+		[PublicAPI]
+		public override ushort Port { get; set; }
 
 		#endregion
 
@@ -92,6 +76,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			m_SshSection = new SafeCriticalSection();
 			m_NetworkProperties = new SecureNetworkProperties();
+
+			Port = DEFAULT_PORT;
 		}
 
 		/// <summary>
@@ -412,24 +398,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		#region Settings
 
 		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(SshPortSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Copy(m_NetworkProperties);
-		}
-
-		/// <summary>
 		/// Override to clear the instance settings.
 		/// </summary>
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
 
-			m_NetworkProperties.Clear();
+			ApplyConfiguration();
 		}
 
 		/// <summary>
@@ -441,7 +416,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			m_NetworkProperties.Copy(settings);
+			ApplyConfiguration();
 		}
 
 		#endregion

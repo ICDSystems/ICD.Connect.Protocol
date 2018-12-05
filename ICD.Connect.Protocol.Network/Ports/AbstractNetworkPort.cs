@@ -4,6 +4,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports
 {
@@ -25,7 +26,7 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// <summary>
 		/// Gets the Network configuration properties.
 		/// </summary>
-		protected abstract INetworkProperties NetworkProperties { get; }
+		public abstract INetworkProperties NetworkProperties { get; }
 
 		#endregion
 
@@ -47,6 +48,14 @@ namespace ICD.Connect.Protocol.Network.Ports
 		}
 
 		/// <summary>
+		/// Applies the network configuration to the port.
+		/// </summary>
+		public virtual void ApplyConfiguration()
+		{
+			ApplyConfiguration(NetworkProperties);
+		}
+
+		/// <summary>
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
@@ -60,6 +69,43 @@ namespace ICD.Connect.Protocol.Network.Ports
 
 			if (properties.NetworkPort.HasValue)
 				Port = properties.NetworkPort.Value;
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			NetworkProperties.Clear();
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Copy(NetworkProperties);
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			NetworkProperties.Copy(settings);
 		}
 
 		#endregion

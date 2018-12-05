@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
@@ -96,6 +97,14 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		}
 
 		/// <summary>
+		/// Applies the IR driver configuration to the port.
+		/// </summary>
+		public void ApplyConfiguration()
+		{
+			ApplyConfiguration(IrDriverProperties);
+		}
+
+		/// <summary>
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
@@ -112,6 +121,43 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 
 			if (properties.IrDriverPath != null)
 				LoadDriver(properties.IrDriverPath);
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			IrDriverProperties.Clear();
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Copy(IrDriverProperties);
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			IrDriverProperties.Copy(settings);
 		}
 
 		#endregion
