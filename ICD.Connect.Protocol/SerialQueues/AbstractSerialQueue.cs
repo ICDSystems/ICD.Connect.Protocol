@@ -164,6 +164,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				m_CommandQueue.Clear();
 				StopTimeoutTimer();
+				IsCommandInProgress = false;
 			}
 			finally
 			{
