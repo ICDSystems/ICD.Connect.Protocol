@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added interfaces for port configuration
 
+### Changed
+ - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
+
 ## [7.2.1] - 2018-11-20
 ### Changed
  - Heartbeat forces a reconnection after an interval, allowing devices to deinitialize
