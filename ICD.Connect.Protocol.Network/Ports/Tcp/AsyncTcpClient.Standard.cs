@@ -158,8 +158,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Address", Address);
-			addRow("Port", Port);
 			addRow("Buffer Size", BufferSize);
 		}
 	}

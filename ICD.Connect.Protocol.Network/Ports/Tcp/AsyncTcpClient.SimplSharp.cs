@@ -205,8 +205,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Address", Address);
-			addRow("Port", Port);
 			addRow("Buffer Size", BufferSize);
 			addRow("Client Status", m_TcpClient == null ? string.Empty : m_TcpClient.ClientStatus.ToString());
 		}

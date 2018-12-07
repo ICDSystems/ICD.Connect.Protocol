@@ -130,8 +130,6 @@ namespace ICD.Connect.Protocol.Network.Ports
 
 			addRow("Username", Username);
 			addRow("Password", StringUtils.PasswordFormat(Password));
-			addRow("Address", Address);
-			addRow("Port", Port);
 		}
 
 		/// <summary>
