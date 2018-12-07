@@ -58,7 +58,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		public virtual void Clear()
 		{
 			NetworkAddress = null;
-			NetworkPort = 0;
+			NetworkPort = null;
 		}
 
 		/// <summary>

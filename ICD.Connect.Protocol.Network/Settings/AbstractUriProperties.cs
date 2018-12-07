@@ -78,7 +78,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			UriUsername = null;
 			UriPassword = null;
 			UriHost = null;
-			UriPort = 0;
+			UriPort = null;
 			UriScheme = null;
 			UriPath = null;
 			UriQuery = null;
