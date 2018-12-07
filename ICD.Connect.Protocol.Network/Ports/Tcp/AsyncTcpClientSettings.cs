@@ -38,7 +38,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			m_NetworkProperties = new NetworkProperties
 			{
-				NetworkPort = 23
+				NetworkPort = AsyncTcpClient.DEFAULT_PORT
 			};
 		}
 

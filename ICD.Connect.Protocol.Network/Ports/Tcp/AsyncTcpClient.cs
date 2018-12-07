@@ -12,6 +12,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class AsyncTcpClient : AbstractNetworkPort<AsyncTcpClientSettings>
 	{
+		public const ushort DEFAULT_PORT = 23;
 		private const ushort DEFAULT_BUFFER_SIZE = 16384;
 
 		private readonly SafeMutex m_SocketMutex;
@@ -54,6 +55,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_NetworkProperties = new NetworkProperties();
 			m_SocketMutex = new SafeMutex();
 
+			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
@@ -158,6 +160,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			base.ClearSettingsFinal();
 
 			ApplyConfiguration();
+
+			Port = DEFAULT_PORT;
+			BufferSize = DEFAULT_BUFFER_SIZE;
 		}
 
 		/// <summary>
