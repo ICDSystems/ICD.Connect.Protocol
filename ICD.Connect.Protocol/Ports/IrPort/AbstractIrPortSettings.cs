@@ -14,7 +14,11 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// Gets/sets the configurable path to the IR driver.
 		/// </summary>
 		[PathSettingsProperty("IRDrivers", ".ir")]
-		public string IrDriverPath { get; set; }
+		public string IrDriverPath
+		{
+			get { return m_IrDriverProperties.IrDriverPath; }
+			set { m_IrDriverProperties.IrDriverPath = value; }
+		}
 
 		/// <summary>
 		/// Gets/sets the configurable pulse time for the IR driver.
