@@ -12,6 +12,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	public abstract class AbstractWebPort<TSettings> : AbstractPort<TSettings>, IWebPort
 		where TSettings : IWebPortSettings, new()
 	{
+// ReSharper disable StaticFieldInGenericType
+		private static readonly Dictionary<string, ushort> s_SchemeToPort =
+// ReSharper restore StaticFieldInGenericType
+			new Dictionary<string, ushort>(StringComparer.OrdinalIgnoreCase)
+			{
+				{Uri.UriSchemeHttp, 80},
+				{Uri.UriSchemeHttps, 443}
+			};
+
 		#region Properties
 
 		/// <summary>
@@ -128,14 +137,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				if (properties.UriPath != null)
 					builder.Path = properties.UriPath;
 
+				// Set scheme before setting port
+				if (properties.UriScheme != null)
+					SetSchemeAndUpdatePort(builder, properties.UriScheme);
+
 				if (properties.UriPort.HasValue)
 					builder.Port = properties.UriPort.Value;
 
 				if (properties.UriQuery != null)
 					builder.Query = properties.UriQuery;
-
-				if (properties.UriScheme != null)
-					builder.Scheme = properties.UriScheme;
 
 				if (properties.UriUsername != null)
 					builder.UserName = properties.UriUsername;
@@ -144,6 +154,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Sets the scheme and, if the port matches the old scheme, updates the port to match the new scheme.
+		/// </summary>
+		/// <param name="builder"></param>
+		/// <param name="scheme"></param>
+		private static void SetSchemeAndUpdatePort(IcdUriBuilder builder, string scheme)
+		{
+			ushort port;
+			if (builder.Scheme != null && s_SchemeToPort.TryGetValue(builder.Scheme, out port) && port == builder.Port)
+				builder.Port = 0;
+
+			builder.Scheme = scheme;
+		}
 
 		#region Settings
 
