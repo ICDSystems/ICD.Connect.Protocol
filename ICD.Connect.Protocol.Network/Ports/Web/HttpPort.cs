@@ -82,7 +82,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		private string GetRequestUrl(string localAddress)
 		{
-			return new IcdUriBuilder(Uri) {Path = localAddress}.ToString();
+			IcdUriBuilder builder = new IcdUriBuilder(Uri);
+			builder.AppendPath(localAddress);
+
+			return builder.ToString();
 		}
 
 		/// <summary>
