@@ -34,7 +34,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <summary>
 		/// Returns true if the broadcast manager is actively broadcasting or listening for broadcasts.
 		/// </summary>
-		public bool Active { get; private set; }
+		public bool Active { get { return m_UdpClient.IsConnected; } }
 
 		/// <summary>
 		/// Constructor.
@@ -92,8 +92,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 				return;
 
 			m_UdpClient.Connect();
-
-			Active = true;
 		}
 
 		/// <summary>
@@ -105,8 +103,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 				return;
 
 			m_UdpClient.Disconnect();
-
-			Active = false;
 		}
 
 		/// <summary>
