@@ -32,11 +32,6 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
 
 		/// <summary>
-		/// Returns true if the broadcast manager is actively broadcasting or listening for broadcasts.
-		/// </summary>
-		public bool Active { get { return m_UdpClient.IsConnected; } }
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public BroadcastManager()
@@ -56,7 +51,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			{
 				Name = GetType().Name,
 				Address = NetworkUtils.MULTICAST_ADDRESS,
-				Port = NetworkUtils.GetBroadcastPortForSystem(m_SystemId),
+				Port = NetworkUtils.GetBroadcastPortForSystem(m_SystemId)
 			};
 
 			m_Addresses = new IcdHashSet<string>();
@@ -88,10 +83,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public void Start()
 		{
-			if (Active)
-				return;
-
-			m_UdpClient.Connect();
+			if (!m_UdpClient.IsConnected)
+				m_UdpClient.Connect();
 		}
 
 		/// <summary>
@@ -99,10 +92,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public void Stop()
 		{
-			if (!Active)
-				return;
-
-			m_UdpClient.Disconnect();
+			if (m_UdpClient.IsConnected)
+				m_UdpClient.Disconnect();
 		}
 
 		/// <summary>
@@ -207,10 +198,10 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		private void Broadcast(object data)
 		{
-			if (!Active)
+			if (data == null)
 				return;
 
-			if (data == null)
+			if (!m_UdpClient.IsConnected)
 				return;
 
 			BroadcastData broadcastData =
@@ -291,8 +282,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <param name="args"></param>
 		private void UdpClientOnSerialDataReceived(object sender, StringEventArgs args)
 		{
-			if (Active)
-				m_Buffer.Enqueue(args.Data);
+			m_Buffer.Enqueue(args.Data);
 		}
 
 		/// <summary>
@@ -384,7 +374,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("System ID", m_SystemId);
-			addRow("Active", Active);
+			addRow("Active", m_UdpClient.IsConnected);
 			addRow("Addresses", StringUtils.ArrayFormat(GetAdvertisementAddresses().Order()));
 			addRow("Host Info", GetHostInfo());
 		}
