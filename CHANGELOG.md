@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
+ - Failing more gracefully when trying to start multiple TCP servers with the same address in Net Standard
 
 ## [7.2.1] - 2018-11-20
 ### Changed
