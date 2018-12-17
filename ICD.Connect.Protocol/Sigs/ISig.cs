@@ -11,15 +11,6 @@ namespace ICD.Connect.Protocol.Sigs
 		[PublicAPI] Serial
 	}
 
-	[PublicAPI]
-	public enum eSigIoMask
-	{
-		[PublicAPI] Na,
-		[PublicAPI] OutputSigOnly,
-		[PublicAPI] InputSigOnly,
-		[PublicAPI] InputOutputSig,
-	}
-
 	public interface ISig
 	{
 		/// <summary>
