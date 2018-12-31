@@ -85,7 +85,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 				if (IsConnected)
 					return SendToAddressFinal(data, ipAddress, port);
 
-				Logger.AddEntry(eSeverity.Error, "{0} - Unable to send to address - Port is not connected.", this);
+				Log(eSeverity.Error, "Unable to send to address - Port is not connected.");
 				return false;
 			}
 			finally

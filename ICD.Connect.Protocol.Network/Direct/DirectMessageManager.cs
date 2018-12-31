@@ -53,7 +53,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_SystemId = systemId;
 
-			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(systemId), 64)
+			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
 			{
 				Name = GetType().Name
 			};
@@ -223,6 +223,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			string data = message.Serialize();
 
 			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
+			if (!client.IsConnected)
+				client.Connect();
+
 			client.Send(data);
 		}
 
@@ -249,6 +252,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			string data = message.Serialize();
 
 			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
+			if (!client.IsConnected)
+				client.Connect();
+
 			m_MessageCallbacks.Add(messageId, response => callback((TResponse)response));
 			client.Send(data);
 		}

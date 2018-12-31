@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+ - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
+ - Failing more gracefully when trying to start multiple TCP servers with the same address in Net Standard
+ - BroadcastManager no longer attempts to broadcast while the UDP client is disconnected
+
+## [7.2.1] - 2018-11-20
+### Changed
+ - Heartbeat forces a reconnection after an interval, allowing devices to deinitialize
 
 ## [7.2.0] - 2018-10-30
 ### Added

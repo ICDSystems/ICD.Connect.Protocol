@@ -29,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to connect - {1}", this, e.Message);
+				Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
 			}
 
 			UpdateIsConnectedState();
@@ -44,6 +44,7 @@ namespace ICD.Connect.Protocol.Network.Udp
 
 			if (m_UdpClient != null)
 				m_UdpClient.Dispose();
+
 			m_UdpClient = null;
 
 			UpdateIsConnectedState();
