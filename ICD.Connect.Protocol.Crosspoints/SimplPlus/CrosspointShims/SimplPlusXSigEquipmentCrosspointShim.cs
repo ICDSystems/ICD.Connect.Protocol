@@ -7,6 +7,13 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
 	public sealed class SimplPlusXSigEquipmentCrosspointShim : AbstractSimplPlusXSigCrosspointShim<IEquipmentCrosspoint>
 	{
+		#region Callbacks
+
+		[PublicAPI("S+")]
+		public SPlusCountCallback ControlCrosspointsConnectedCallback { get; set; }
+
+		#endregion
+
 		#region Private Members
 
 		private EquipmentCrosspointManager m_Manager;
@@ -75,7 +82,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			if (statusCallback != null)
 				statusCallback((ushort)Crosspoint.Status);
 
-			SPlusStatusUpdateCallback connectionsCallback = CrosspointStatusCallback;
+			SPlusCountCallback connectionsCallback = ControlCrosspointsConnectedCallback;
 			if (connectionsCallback != null)
 				connectionsCallback((ushort)Crosspoint.ControlCrosspointsCount);
 
@@ -94,7 +101,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			if (statusCallback != null)
 				statusCallback(0);
 
-			SPlusStatusUpdateCallback connectedControlsCallback = CrosspointStatusCallback;
+			SPlusCountCallback connectedControlsCallback = ControlCrosspointsConnectedCallback;
 			if (connectedControlsCallback != null)
 				connectedControlsCallback(0);
 
@@ -110,7 +117,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		private void CrosspointOnControlCrosspointCountChanged(object sender, IntEventArgs args)
 		{
-			SPlusStatusUpdateCallback callback = CrosspointStatusCallback;
+			SPlusCountCallback callback = ControlCrosspointsConnectedCallback;
 			if (callback != null)
 				callback((ushort)args.Data);
 		}

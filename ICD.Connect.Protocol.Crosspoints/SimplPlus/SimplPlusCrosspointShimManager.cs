@@ -156,7 +156,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 			{
 				m_CrosspointShims.ForEach(
 				                             (item, index) =>
-				                             builder.AddRow(index, item.CrosspointSymbolInstanceName,
+				                             builder.AddRow(index, item.Location,
 				                                            item.Crosspoint != null ? item.Crosspoint.GetType().ToString() : "",
 				                                            item.Crosspoint != null ? item.Crosspoint.Name : "",
 				                                            item.Crosspoint != null ? item.Crosspoint.Id.ToString() : ""));
