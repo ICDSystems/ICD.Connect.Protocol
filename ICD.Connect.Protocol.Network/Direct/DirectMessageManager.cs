@@ -223,6 +223,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			string data = message.Serialize();
 
 			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
+			if (!client.IsConnected)
+				client.Connect();
+
 			client.Send(data);
 		}
 
@@ -249,6 +252,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			string data = message.Serialize();
 
 			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
+			if (!client.IsConnected)
+				client.Connect();
+
 			m_MessageCallbacks.Add(messageId, response => callback((TResponse)response));
 			client.Send(data);
 		}
