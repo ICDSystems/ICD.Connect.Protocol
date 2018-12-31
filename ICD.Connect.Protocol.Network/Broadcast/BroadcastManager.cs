@@ -36,6 +36,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public bool Active { get; private set; }
 
+		public int SystemId { get { return m_SystemId; }}
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
