@@ -49,7 +49,8 @@ namespace ICD.Connect.Protocol.Network.Utils
 		/// <returns></returns>
 		public static IEnumerable<ushort> GetBroadcastPorts(int systemId)
 		{
-			return Enumerable.Range(1, PROGRAM_SLOT_COUNT).Select(index => GetBroadcastPortForProgramSlot((uint)index, systemId));
+			return Enumerable.Range(1, PROGRAM_SLOT_COUNT)
+			                 .Select(index => GetBroadcastPortForProgramSlot((uint)index, systemId));
 		}
 
 		/// <summary>
@@ -80,7 +81,8 @@ namespace ICD.Connect.Protocol.Network.Utils
 		/// <returns></returns>
 		public static IEnumerable<ushort> GetDirectMessagePorts(int systemId)
 		{
-			return Enumerable.Range(1, PROGRAM_SLOT_COUNT).Select(index => GetDirectMessagePortForProgramSlot((uint)index, systemId));
+			return Enumerable.Range(1, PROGRAM_SLOT_COUNT)
+			                 .Select(index => GetDirectMessagePortForProgramSlot((uint)index, systemId));
 		}
 
 		/// <summary>

@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added interfaces for port configuration
 
+## [7.3.0] - 2019-01-02
 ### Changed
  - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
+ - Failing more gracefully when trying to start multiple TCP servers with the same address in Net Standard
+ - BroadcastManager no longer attempts to broadcast while the UDP client is disconnected
 
 ## [7.2.1] - 2018-11-20
 ### Changed
