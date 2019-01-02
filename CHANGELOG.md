@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.3.0] - 2019-01-02
 ### Changed
  - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
  - Failing more gracefully when trying to start multiple TCP servers with the same address in Net Standard
