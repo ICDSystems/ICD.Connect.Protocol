@@ -103,7 +103,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		{
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} failed to obtain SocketMutex for disconnect", this);
+				Log(eSeverity.Error, "Failed to obtain SocketMutex for disconnect");
 				return;
 			}
 
@@ -113,8 +113,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			}
 			catch (Exception e)
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} failed to disconnect from host {1}:{2}", this,
-				                Address, Port);
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Failed to disconnect from host {1}:{2}", this, Address, Port);
 			}
 			finally
 			{
