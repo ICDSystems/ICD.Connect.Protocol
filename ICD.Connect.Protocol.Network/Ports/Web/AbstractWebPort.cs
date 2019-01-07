@@ -12,15 +12,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	public abstract class AbstractWebPort<TSettings> : AbstractPort<TSettings>, IWebPort
 		where TSettings : IWebPortSettings, new()
 	{
-// ReSharper disable StaticFieldInGenericType
-		private static readonly Dictionary<string, ushort> s_SchemeToPort =
-// ReSharper restore StaticFieldInGenericType
-			new Dictionary<string, ushort>(StringComparer.OrdinalIgnoreCase)
-			{
-				{Uri.UriSchemeHttp, 80},
-				{Uri.UriSchemeHttps, 443}
-			};
-
 		#region Properties
 
 		/// <summary>
@@ -163,7 +154,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private static void SetSchemeAndUpdatePort(IcdUriBuilder builder, string scheme)
 		{
 			ushort port;
-			if (builder.Scheme != null && s_SchemeToPort.TryGetValue(builder.Scheme, out port) && port == builder.Port)
+			if (builder.Scheme != null && UriUtils.TryGetPortForScheme(builder.Scheme, out port) && port == builder.Port)
 				builder.Port = 0;
 
 			builder.Scheme = scheme;
