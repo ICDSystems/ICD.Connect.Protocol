@@ -139,14 +139,21 @@ namespace ICD.Connect.Protocol.Network.Settings
 			UriProperties output = new UriProperties();
 
 			output.Copy(other);
-			output.ApplyDefaultValues(extends.UriUsername, extends.UriPassword, extends.UriHost, extends.UriPort,
-			                          extends.UriScheme, extends.UriPassword, extends.UriQuery, extends.UriFragment);
+
+			output.ApplyDefaultValues(extends.UriUsername,
+			                          extends.UriPassword,
+			                          extends.UriHost,
+			                          extends.UriPort,
+			                          extends.UriScheme,
+			                          extends.UriPassword,
+			                          extends.UriQuery,
+			                          extends.UriFragment);
 
 			return output;
 		}
 
 		/// <summary>
-		/// Builds a URI from the configured properties.
+		/// Builds a URI from the configured URI properties.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
@@ -171,28 +178,16 @@ namespace ICD.Connect.Protocol.Network.Settings
 		}
 
 		/// <summary>
-		/// Builds an address string from the available URI information.
+		/// Builds an address string from the configured URI information.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static string GetAddressFromUri(this IUriProperties extends)
+		public static string GetAddress(this IUriProperties extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			IcdUriBuilder builder = new IcdUriBuilder
-			{
-				Fragment = extends.UriFragment,
-				Host = extends.UriHost,
-				Password = extends.UriPassword,
-				Path = extends.UriPath,
-				Port = extends.UriPort ?? 0,
-				Query = extends.UriQuery,
-				Scheme = extends.UriScheme,
-				UserName = extends.UriUsername
-			};
-
-			return builder.ToString();
+			return extends.GetUri().ToString();
 		}
 
 		/// <summary>
