@@ -35,7 +35,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// </summary>
 		protected AbstractIrDriverProperties()
 		{
-			Clear();
+			ClearIrProperties();
 		}
 
 		#region Properties
@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public void Clear()
+		public void ClearIrProperties()
 		{
 			IrDriverPath = null;
 			IrPulseTime = null;
@@ -74,7 +74,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <param name="xml"></param>
 		public void ParseXml(string xml)
 		{
-			Clear();
+			ClearIrProperties();
 
 			string ir;
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out ir))

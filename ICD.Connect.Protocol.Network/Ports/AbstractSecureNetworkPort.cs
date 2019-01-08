@@ -90,7 +90,7 @@ namespace ICD.Connect.Protocol.Network.Ports
 		{
 			base.ClearSettingsFinal();
 
-			SecureNetworkProperties.Clear();
+			SecureNetworkProperties.ClearNetworkProperties();
 		}
 
 		/// <summary>

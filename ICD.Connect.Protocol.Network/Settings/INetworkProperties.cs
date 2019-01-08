@@ -19,7 +19,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void Clear();
+		void ClearNetworkProperties();
 	}
 
 	public static class NetworkPropertiesExtensions

@@ -55,7 +55,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public virtual void Clear()
+		public virtual void ClearNetworkProperties()
 		{
 			NetworkAddress = null;
 			NetworkPort = null;
@@ -93,7 +93,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="xml"></param>
 		public void ParseXml(string xml)
 		{
-			Clear();
+			ClearNetworkProperties();
 
 			string networking;
 			if (XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out networking))

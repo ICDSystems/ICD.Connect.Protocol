@@ -134,7 +134,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		{
 			base.ClearSettingsFinal();
 
-			IrDriverProperties.Clear();
+			IrDriverProperties.ClearIrProperties();
 		}
 
 		/// <summary>

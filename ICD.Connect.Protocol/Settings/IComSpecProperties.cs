@@ -48,7 +48,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void Clear();
+		void ClearComSpecProperties();
 	}
 
 	public static class ComSpecPropertiesExtensions

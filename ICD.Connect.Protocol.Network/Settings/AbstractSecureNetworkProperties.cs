@@ -26,9 +26,9 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public override void Clear()
+		public override void ClearNetworkProperties()
 		{
-			base.Clear();
+			base.ClearNetworkProperties();
 
 			NetworkUsername = null;
 			NetworkPassword = null;

@@ -82,7 +82,7 @@ namespace ICD.Connect.Protocol.Network.Ports
 		{
 			base.ClearSettingsFinal();
 
-			NetworkProperties.Clear();
+			NetworkProperties.ClearNetworkProperties();
 		}
 
 		/// <summary>

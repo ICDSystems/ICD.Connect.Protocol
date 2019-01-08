@@ -45,9 +45,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		public override void Clear()
+		public override void ClearNetworkProperties()
 		{
-			m_NetworkProperties.Clear();
+			m_NetworkProperties.ClearNetworkProperties();
 		}
 
 		/// <summary>

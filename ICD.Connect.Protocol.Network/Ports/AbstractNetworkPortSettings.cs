@@ -20,7 +20,7 @@ namespace ICD.Connect.Protocol.Network.Ports
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		public abstract void Clear();
+		public abstract void ClearNetworkProperties();
 
 		#endregion
 

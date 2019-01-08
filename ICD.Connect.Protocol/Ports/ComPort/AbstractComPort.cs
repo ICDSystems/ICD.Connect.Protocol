@@ -153,7 +153,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 		{
 			base.ClearSettingsFinal();
 
-			ComSpecProperties.Clear();
+			ComSpecProperties.ClearComSpecProperties();
 		}
 
 		/// <summary>

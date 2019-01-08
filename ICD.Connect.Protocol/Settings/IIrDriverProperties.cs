@@ -24,7 +24,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void Clear();
+		void ClearIrProperties();
 	}
 
 	public static class IrDriverPropertiesExtensions

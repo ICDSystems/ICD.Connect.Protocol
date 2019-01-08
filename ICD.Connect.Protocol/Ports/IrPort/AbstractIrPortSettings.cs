@@ -77,9 +77,9 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void IIrDriverProperties.Clear()
+		void IIrDriverProperties.ClearIrProperties()
 		{
-			m_IrDriverProperties.Clear();
+			m_IrDriverProperties.ClearIrProperties();
 		}
 	}
 }

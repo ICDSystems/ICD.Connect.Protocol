@@ -67,7 +67,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// </summary>
 		protected AbstractComSpecProperties()
 		{
-			Clear();
+			ClearComSpecProperties();
 		}
 
 		#region Methods
@@ -75,7 +75,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public void Clear()
+		public void ClearComSpecProperties()
 		{
 			ComSpecBaudRate = null;
 			ComSpecNumberOfDataBits = null;
@@ -124,7 +124,7 @@ namespace ICD.Connect.Protocol.Settings
 		/// <param name="xml"></param>
 		public void ParseXml(string xml)
 		{
-			Clear();
+			ClearComSpecProperties();
 
 			string comSpec;
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out comSpec))
