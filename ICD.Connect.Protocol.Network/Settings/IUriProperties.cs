@@ -211,5 +211,24 @@ namespace ICD.Connect.Protocol.Network.Settings
 			extends.UriScheme = uri.Scheme;
 			extends.UriUsername = uri.GetUserName();
 		}
+
+		/// <summary>
+		/// Updates the URI Properties instance where values are not already configured.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="address"></param>
+		public static void ApplyDefaultValuesFromAddress(this IUriProperties extends, string address)
+		{
+			Uri uri = new Uri(address, UriKind.RelativeOrAbsolute);
+
+			extends.ApplyDefaultValues(uri.GetUserName(),
+			                           uri.GetPassword(),
+			                           uri.Host,
+			                           (ushort)uri.Port,
+			                           uri.Scheme,
+			                           uri.AbsolutePath,
+			                           uri.Query,
+			                           uri.Fragment);
+		}
 	}
 }
