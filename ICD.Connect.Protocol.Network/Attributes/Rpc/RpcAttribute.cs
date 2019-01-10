@@ -117,7 +117,9 @@ namespace ICD.Connect.Protocol.Network.Attributes.Rpc
 							.GetMethods(BindingFlags.Public |
 							            BindingFlags.NonPublic |
 							            BindingFlags.Instance)
+// ReSharper disable InvokeAsExtensionMethod
 							.Where(m => ReflectionExtensions.GetCustomAttributes<RpcAttribute>(m, true)
+// ReSharper restore InvokeAsExtensionMethod
 							                                .Any(a => a.m_Key == key))
 							.ToIcdHashSet();
 				}
@@ -160,7 +162,9 @@ namespace ICD.Connect.Protocol.Network.Attributes.Rpc
 							.GetProperties(BindingFlags.Public |
 							               BindingFlags.NonPublic |
 							               BindingFlags.Instance)
+// ReSharper disable InvokeAsExtensionMethod
 							.Where(p => p.CanWrite && ReflectionExtensions.GetCustomAttributes<RpcAttribute>(p, true)
+// ReSharper restore InvokeAsExtensionMethod
 							                                              .Any(a => a.m_Key == key))
 							.ToIcdHashSet();
 				}

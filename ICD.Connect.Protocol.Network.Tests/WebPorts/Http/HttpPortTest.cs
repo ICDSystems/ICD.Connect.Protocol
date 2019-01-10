@@ -1,6 +1,7 @@
 using System.Text;
 using ICD.Common.Properties;
-using ICD.Connect.Protocol.Network.WebPorts;
+using ICD.Connect.Protocol.Network.Ports.Web;
+using ICD.Connect.Protocol.Network.Settings;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -25,20 +26,6 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 			public string Body { get; set; }
 		}
 
-		[TestCase("http://127.0.0.1/")]
-		[TestCase("http://google.com/")]
-		public void AddressTest(string address)
-		{
-			HttpPort port = new HttpPort
-			{
-				Address = address
-			};
-
-			Assert.AreEqual(address, port.Address);
-
-			port.Dispose();
-		}
-
 		[TestCase("application/json")]
 		[TestCase("text/plain")]
 		public void AcceptTest(string accept)
@@ -49,32 +36,6 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 			};
 
 			Assert.AreEqual(accept, port.Accept);
-
-			port.Dispose();
-		}
-
-		[TestCase("test")]
-		public void UsernameTest(string username)
-		{
-			HttpPort port = new HttpPort
-			{
-				Username = username
-			};
-
-			Assert.AreEqual(username, port.Username);
-
-			port.Dispose();
-		}
-
-		[TestCase("test")]
-		public void PasswordTest(string password)
-		{
-			HttpPort port = new HttpPort
-			{
-				Password = password
-			};
-
-			Assert.AreEqual(password, port.Password);
 
 			port.Dispose();
 		}
@@ -93,9 +54,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 
 			HttpPort port = new HttpPort
 			{
-				Address = address,
 				Accept = "application/json"
 			};
+			port.UriProperties.SetUriFromAddress(address);
 
 			string result;
 			Assert.IsTrue(port.Get(request, out result));
@@ -118,9 +79,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 
 			HttpPort port = new HttpPort
 			{
-				Address = address,
 				Accept = "application/json"
 			};
+			port.UriProperties.SetUriFromAddress(address);
 
 			const string dataString = @"{title: 'foo', body: 'bar', userId: 1}";
 			byte[] data = Encoding.ASCII.GetBytes(dataString);

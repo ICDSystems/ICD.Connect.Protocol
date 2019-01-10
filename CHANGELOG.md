@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Added interfaces for port configuration
+ - Added port configuration features to existing ports
+
+### Changed
+ - Numerous ComSpec refactorings
+ - Improvements to WebPort URI building
+
+### Removed
+ - Removed ComPortPlus and other unused code
 
 ## [7.3.0] - 2019-01-02
 ### Changed

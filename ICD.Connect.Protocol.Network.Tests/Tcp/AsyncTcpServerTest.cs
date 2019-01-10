@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
-using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Tcp;
+using ICD.Connect.Protocol.Network.Ports.Tcp;
 using NUnit.Framework;
-using TcpReceiveEventArgs = ICD.Connect.Protocol.Network.Tcp.TcpReceiveEventArgs;
+using TcpReceiveEventArgs = ICD.Connect.Protocol.Network.Ports.Tcp.TcpReceiveEventArgs;
 
 namespace ICD.Connect.Protocol.Network.Tests.Tcp
 {

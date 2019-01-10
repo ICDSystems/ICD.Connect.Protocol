@@ -14,14 +14,20 @@ namespace ICD.Connect.Protocol.Ports
 		event EventHandler<StringEventArgs> OnSerialDataReceived;
 
 		/// <summary>
-		/// Raised when the port connects/disconnects to/from the remote endpoint.
+		/// Raised when the port connection status changes.
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 
+		#region Properties
+
 		/// <summary>
-		/// Gets the current connection satte.
+		/// Gets the current connection status of the port.
 		/// </summary>
 		bool IsConnected { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Connects the port.
@@ -45,5 +51,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		/// <param name="data"></param>
 		void Receive(string data);
+
+		#endregion
 	}
 }
