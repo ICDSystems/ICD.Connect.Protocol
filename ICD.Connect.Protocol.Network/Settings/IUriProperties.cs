@@ -138,16 +138,16 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			UriProperties output = new UriProperties();
 
-			output.Copy(other);
+			output.Copy(extends);
 
-			output.ApplyDefaultValues(extends.UriUsername,
-			                          extends.UriPassword,
-			                          extends.UriHost,
-			                          extends.UriPort,
-			                          extends.UriScheme,
-			                          extends.UriPassword,
-			                          extends.UriQuery,
-			                          extends.UriFragment);
+			output.ApplyDefaultValues(other.UriUsername,
+									  other.UriPassword,
+									  other.UriHost,
+									  other.UriPort,
+									  other.UriScheme,
+									  other.UriPassword,
+									  other.UriQuery,
+									  other.UriFragment);
 
 			return output;
 		}

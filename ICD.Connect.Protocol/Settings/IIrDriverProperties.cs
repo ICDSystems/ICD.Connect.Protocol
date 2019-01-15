@@ -85,8 +85,8 @@ namespace ICD.Connect.Protocol.Settings
 
 			IrDriverProperties output = new IrDriverProperties();
 
-			output.Copy(other);
-			output.ApplyDefaultValues(extends.IrDriverPath, extends.IrPulseTime, extends.IrBetweenTime);
+			output.Copy(extends);
+			output.ApplyDefaultValues(other.IrDriverPath, other.IrPulseTime, other.IrBetweenTime);
 
 			return output;
 		}

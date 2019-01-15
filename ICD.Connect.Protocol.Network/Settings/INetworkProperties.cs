@@ -75,8 +75,8 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			NetworkProperties output = new NetworkProperties();
 
-			output.Copy(other);
-			output.ApplyDefaultValues(extends.NetworkAddress, extends.NetworkPort);
+			output.Copy(extends);
+			output.ApplyDefaultValues(other.NetworkAddress, other.NetworkPort);
 
 			return output;
 		}

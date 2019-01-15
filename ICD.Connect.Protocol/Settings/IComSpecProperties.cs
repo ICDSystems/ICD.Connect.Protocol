@@ -138,12 +138,15 @@ namespace ICD.Connect.Protocol.Settings
 
 			ComSpecProperties output = new ComSpecProperties();
 
-			output.Copy(other);
-			output.ApplyDefaultValues(extends.ComSpecBaudRate,
-			                          extends.ComSpecNumberOfDataBits, extends.ComSpecParityType,
-			                          extends.ComSpecNumberOfStopBits, extends.ComSpecProtocolType,
-			                          extends.ComSpecHardwareHandshake, extends.ComSpecSoftwareHandshake,
-			                          extends.ComSpecReportCtsChanges);
+			output.Copy(extends);
+			output.ApplyDefaultValues(other.ComSpecBaudRate,
+									  other.ComSpecNumberOfDataBits,
+									  other.ComSpecParityType,
+									  other.ComSpecNumberOfStopBits,
+									  other.ComSpecProtocolType,
+									  other.ComSpecHardwareHandshake,
+									  other.ComSpecSoftwareHandshake,
+									  other.ComSpecReportCtsChanges);
 
 			return output;
 		}
