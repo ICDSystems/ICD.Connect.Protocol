@@ -83,7 +83,7 @@ namespace ICD.Connect.Protocol.Utils
 			data = FormatData(data, mode);
 
 			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-			IcdConsole.Print("{0} {1}", instance, context);
+			IcdConsole.Print("[App {0}] {1} {2}", ProgramUtils.ProgramNumber, instance, context);
 			IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
 			IcdConsole.Print("({0}) - {1}", modeString, data);
 			IcdConsole.PrintLine(string.Empty);
