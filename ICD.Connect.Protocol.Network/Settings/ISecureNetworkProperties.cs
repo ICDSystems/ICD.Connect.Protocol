@@ -75,9 +75,9 @@ namespace ICD.Connect.Protocol.Network.Settings
 
 			SecureNetworkProperties output = new SecureNetworkProperties();
 
-			output.Copy(other);
-			output.ApplyDefaultValues(extends.NetworkAddress, extends.NetworkPort, extends.NetworkUsername,
-			                          extends.NetworkPassword);
+			output.Copy(extends);
+			output.ApplyDefaultValues(other.NetworkAddress, other.NetworkPort, other.NetworkUsername,
+			                          other.NetworkPassword);
 
 			return output;
 		}
