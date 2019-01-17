@@ -98,47 +98,58 @@ namespace ICD.Connect.Protocol.SerialBuffers
 				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
 				{
 					int start = 0;
+					int left = 0;
 
-					while (start < data.Length)
+					while (left < data.Length)
 					{
-						int index = data.IndexOfAny(s_Tokens, start);
+						int index = data.IndexOfAny(s_Tokens, left);
+						left = index + 1;
 
 						// Simple case - No tokens in the data
 						if (index < 0)
 						{
-							m_RxData.Append(data.Substring(start));
+							// Drop data without tokens if we are not inside an open json object
+							if (m_RxData.Length > 0)
+								m_RxData.Append(data);
+
+							data = string.Empty;
 							break;
 						}
 
-						// Harder case - Append everything up to and including the token
-						m_RxData.Append(data.Substring(start, (index - start) + 1));
-						start = index + 1;
-
+						// Harder case - Handle found token
 						char token = data[index];
 
 						switch (token)
 						{
 							case '{':
-								// Trim any leading nonsense
+								// Skip leading nonsense
 								if (m_OpenCount == 0)
-									m_RxData.Remove(0, m_RxData.Length - 1);
+									start = index;
 								m_OpenCount++;
 								break;
+
 							case '}':
-								m_CloseCount++;
+								// Skip over leading '}'
+								if (m_CloseCount >= m_OpenCount)
+									start = left;
+								else
+									m_CloseCount++;
 								break;
 						}
 
 						if (m_OpenCount == 0 || m_OpenCount != m_CloseCount)
 							continue;
 
+						// We found a complete message
 						m_OpenCount = 0;
 						m_CloseCount = 0;
 
-						string output = m_RxData.Pop();
+						string output =
+							m_RxData.Length == 0
+								? data.Substring(start, left - start)
+								: m_RxData.Append(data, start, left - start).Pop();
 
-						if (!string.IsNullOrEmpty(output))
-							OnCompletedSerial.Raise(this, new StringEventArgs(output));
+						OnCompletedSerial.Raise(this, new StringEventArgs(output));
 					}
 				}
 			}
