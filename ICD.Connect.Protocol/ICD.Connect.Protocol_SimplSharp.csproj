@@ -83,6 +83,7 @@
     <Compile Include="Ports\AbstractSerialPortSettings.cs" />
     <Compile Include="Ports\ComPort\AbstractComPort.cs" />
     <Compile Include="Ports\ComPort\AbstractComPortSettings.cs" />
+    <Compile Include="Ports\ComPort\ComSpec.cs" />
     <Compile Include="Ports\ComPort\IComPortSettings.cs" />
     <Compile Include="Ports\eDebugMode.cs" />
     <Compile Include="Ports\DigitalInput\AbstractDigitalInputPort.cs" />
@@ -100,6 +101,14 @@
     <Compile Include="SerialBuffers\BoundedSerialBuffer.cs" />
     <Compile Include="SerialBuffers\MultiDelimiterSerialBuffer.cs" />
     <Compile Include="SerialBuffers\XSigSerialBuffer.cs" />
+    <Compile Include="Settings\AbstractComSpecProperties.cs" />
+    <Compile Include="Settings\ComSpecProperties.cs" />
+    <Compile Include="Settings\IComSpecProperties.cs" />
+    <Compile Include="Settings\IComSpecSettings.cs" />
+    <Compile Include="Settings\IIrDriverProperties.cs" />
+    <Compile Include="Settings\AbstractIrDriverProperties.cs" />
+    <Compile Include="Settings\IIrDriverSettings.cs" />
+    <Compile Include="Settings\IrDriverProperties.cs" />
     <Compile Include="Utils\ComSpecUtils.cs" />
     <Compile Include="Data\AbstractSerialData.cs" />
     <Compile Include="Data\ISerialData.cs" />
@@ -107,8 +116,6 @@
     <Compile Include="Extensions\DeviceFactoryExtensions.cs" />
     <Compile Include="Ports\AbstractPort.cs" />
     <Compile Include="Ports\AbstractSerialPort.cs" />
-    <Compile Include="Ports\ComPort\ComPortPlus.cs" />
-    <Compile Include="Ports\ComPort\ComPortPlusSettings.cs" />
     <Compile Include="Ports\ComPort\IComPort.cs" />
     <Compile Include="Ports\HostInfo.cs" />
     <Compile Include="Ports\IoPort\IIoPort.cs" />

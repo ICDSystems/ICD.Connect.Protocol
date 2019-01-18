@@ -1,4 +1,6 @@
-﻿using ICD.Common.Properties;
+﻿using System.Collections.Generic;
+using ICD.Common.Properties;
+using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
 {
@@ -8,6 +10,16 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 	public interface IIrPort : IPort
 	{
 		#region Properties
+
+		/// <summary>
+		/// Gets the IR Driver configuration.
+		/// </summary>
+		IIrDriverProperties IrDriverProperties { get; }
+
+		/// <summary>
+		/// Gets the path to the loaded IR driver.
+		/// </summary>
+		string DriverPath { get; }
 
 		/// <summary>
 		/// Gets/sets the default pulse time in milliseconds for a PressAndRelease.
@@ -31,6 +43,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="path"></param>
 		[PublicAPI]
 		void LoadDriver(string path);
+
+		/// <summary>
+		/// Gets the loaded IR commands.
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<string> GetCommands();
 
 		/// <summary>
 		/// Begin sending the command.
@@ -68,6 +86,18 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="betweenTime"></param>
 		[PublicAPI]
 		void PressAndRelease(string command, ushort pulseTime, ushort betweenTime);
+
+		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyDeviceConfiguration(IIrDriverProperties properties);
+
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		void ApplyConfiguration(IIrDriverProperties properties);
 
 		#endregion
 	}

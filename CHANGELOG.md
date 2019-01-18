@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Added program number to port debug lines
+
+### Changed
+ - Performance improvements for JsonSerialBuffer
+
+## [8.0.0] - 2019-01-10
+### Added
+ - Added interfaces for port configuration
+ - Added port configuration features to existing ports
+
+### Changed
+ - Numerous ComSpec refactorings
+ - Improvements to WebPort URI building
+
+### Removed
+ - Removed ComPortPlus and other unused code
+
+## [7.3.0] - 2019-01-02
 ### Changed
  - AbstractSerialQueue clears IsCommandInProgress when clearing queue.
  - Failing more gracefully when trying to start multiple TCP servers with the same address in Net Standard

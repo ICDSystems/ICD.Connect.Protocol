@@ -4,7 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Tcp;
+using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
