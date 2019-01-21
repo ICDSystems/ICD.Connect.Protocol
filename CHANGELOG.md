@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added program number to port debug lines
+ - Added SystemId property to BroadcastManager
 
 ### Changed
  - Performance improvements for JsonSerialBuffer
