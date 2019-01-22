@@ -1,12 +1,19 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Settings.SPlusShims;
+#if SIMPLSHARP
+using ICDPlatformString = Crestron.SimplSharp.SimplSharpString;
+#else
+using ICDPlatformString = System.String;
+#endif
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
-	public delegate void SPlusJoinXSigCallback(string xsig);
+	public delegate void SPlusJoinXSigCallback(ICDPlatformString xsig);
 
 	public delegate void SPlusStatusUpdateCallback(ushort status);
+
+	public delegate void SPlusCountCallback(ushort status);
 
 	public delegate void SPlusCrosspointChangedCallback();
 
@@ -20,9 +27,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		[PublicAPI("S+")]
 		string CrosspointName { get; }
-
-		[PublicAPI("S+")]
-		string CrosspointSymbolInstanceName { get; }
 
 		ICrosspoint Crosspoint { get; }
 

@@ -29,9 +29,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		[PublicAPI("S+")]
 		public event EventHandler<StringEventArgs> OnCrosspointNameChanged;
 
-		[PublicAPI("S+")]
-		public event EventHandler<StringEventArgs> OnCrosspointSymbolInstanceNameChanged;
-
 		#endregion
 
 		#region Callbacks
@@ -114,21 +111,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			}
 		}
 
-		[PublicAPI("S+")]
-		public string CrosspointSymbolInstanceName
-		{
-			get { return m_CrosspointSymbolInstanceName; }
-			private set
-			{
-				if (m_CrosspointSymbolInstanceName == value)
-					return;
-				
-				m_CrosspointSymbolInstanceName = value;
-
-				OnCrosspointSymbolInstanceNameChanged.Raise(this, new StringEventArgs(m_CrosspointSymbolInstanceName));
-			}
-		}
-
 		ICrosspoint ISimplPlusCrosspointShim.Crosspoint { get { return Crosspoint; } }
 
 		public abstract T Crosspoint { get; protected set; }
@@ -145,7 +127,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		{
 			m_SendSection = new SafeCriticalSection();
 			m_ReceiveSection = new SafeCriticalSection();
-			CrosspointSymbolInstanceName = "";
 
 			m_Buffer = new XSigSerialBuffer();
 			m_Buffer.OnCompletedSerial += BufferOnCompletedSerial;
@@ -171,12 +152,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		public void SetCrosspointName(string name)
 		{
 			CrosspointName = name;
-		}
-
-		[PublicAPI("S+")]
-		public void SetCrosspointSymbolInstanceName(string name)
-		{
-			CrosspointSymbolInstanceName = name;
 		}
 
 		/// <summary>
@@ -254,7 +229,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			TableBuilder tb = new TableBuilder("Property", "Value");
 
 			tb.AddRow("Shim Type", GetType());
-			tb.AddRow("Shim Location", CrosspointSymbolInstanceName);
+			tb.AddRow("Shim Location", Location);
 			tb.AddRow("Shim Has Crosspoint", Crosspoint == null ? "False" : "True");
 
 			if (Crosspoint == null)
