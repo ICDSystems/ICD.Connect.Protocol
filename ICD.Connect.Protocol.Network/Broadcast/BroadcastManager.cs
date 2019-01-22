@@ -31,7 +31,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
 
-		public int SystemId { get { return m_SystemId; }}
+		public int SystemId {get { return m_SystemId; }}
 
 		/// <summary>
 		/// Constructor.
