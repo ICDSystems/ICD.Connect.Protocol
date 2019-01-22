@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added program number to port debug lines
  - Added SystemId property to BroadcastManager
+ - SerialPortServerDevice to make a ISerialPort avaliable over a TCP Server
 
 ### Changed
  - Performance improvements for JsonSerialBuffer
