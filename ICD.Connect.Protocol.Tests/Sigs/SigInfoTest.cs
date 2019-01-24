@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Sigs;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Tests.Sigs
@@ -82,9 +83,9 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 		public void SerializeTest()
 		{
 			SigInfo sig = new SigInfo(10, "test", 1, "serial");
-			string serial = sig.Serialize();
+			string serial = JsonConvert.SerializeObject(sig);
 
-			SigInfo result = SigInfo.Deserialize(serial);
+			SigInfo result = JsonConvert.DeserializeObject<SigInfo>(serial);
 
 			Assert.AreEqual(sig, result);
 		}
@@ -102,7 +103,7 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 			}";
 
 			SigInfo expected = new SigInfo(10, "test", 1, "serial");
-			SigInfo sig = SigInfo.Deserialize(serialized);
+			SigInfo sig = JsonConvert.DeserializeObject<SigInfo>(serialized);
 
 			Assert.AreEqual(expected, sig);
 		}

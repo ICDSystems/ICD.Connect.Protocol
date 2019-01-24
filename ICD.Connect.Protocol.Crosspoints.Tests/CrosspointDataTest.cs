@@ -133,9 +133,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 			data.AddSig(c);
 			data.AddJson("test");
 
-			string json = data.Serialize();
+			string json = JsonConvert.SerializeObject(data);
 
-			CrosspointData deserialized = CrosspointData.Deserialize(json);
+			CrosspointData deserialized = JsonConvert.DeserializeObject<CrosspointData>(json);
 
 			Assert.AreEqual(CrosspointData.eMessageType.ControlConnect, data.MessageType);
 
@@ -145,10 +145,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 			Assert.IsTrue(deserialized.GetJson().Contains("test"));
 
 			Assert.IsTrue(deserialized.GetSigs().Any(s => s.Name == a.Name && s.GetType() == a.GetType()));
-			Assert.IsTrue(
-			              deserialized.GetSigs()
-			                          .Any(
-			                               s =>
+			Assert.IsTrue(deserialized.GetSigs()
+			                          .Any(s =>
 			                               s.SmartObject == b.SmartObject && s.Number == b.Number && s.GetType() == b.GetType()));
 			Assert.IsTrue(deserialized.GetSigs().Any(s => s.Name == c.Name && s.Number == c.Number && s.GetType() == c.GetType()));
 		}
@@ -188,7 +186,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 			SigInfo b = new SigInfo(10, null, 1, 0);
 			SigInfo c = new SigInfo(10, "test", 0, false);
 
-			CrosspointData data = CrosspointData.Deserialize(json);
+			CrosspointData data = JsonConvert.DeserializeObject<CrosspointData>(json);
 
 			Assert.AreEqual(CrosspointData.eMessageType.ControlConnect, data.MessageType);
 

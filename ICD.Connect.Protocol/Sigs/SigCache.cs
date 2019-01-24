@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Protocol.Converters;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
 {
 	/// <summary>
 	/// Provides unique collection of sigs, ignoring serial/analog/digital values for comparison.
 	/// </summary>
-	[PublicAPI]
+	[JsonConverter(typeof(SigCacheConverter))]
 	public sealed class SigCache : ICollection<SigInfo>
 	{
 		/// <summary>
