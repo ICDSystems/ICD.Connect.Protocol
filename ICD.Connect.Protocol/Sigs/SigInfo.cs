@@ -141,6 +141,16 @@ namespace ICD.Connect.Protocol.Sigs
 			m_UshortValue = 0;
 		}
 
+		public static SigInfo FromObject(uint number, ushort smartObject, object value)
+		{
+			if (value is ushort)
+				return new SigInfo(number, smartObject, (ushort)value);
+			if (value is bool)
+				return new SigInfo(number, smartObject, (bool)value);
+			
+			return new SigInfo(number, smartObject, value as string);
+		}
+
 		#endregion
 
 		#region Methods
