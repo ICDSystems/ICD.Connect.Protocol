@@ -25,8 +25,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Converters
 		/// <param name="serializer"></param>
 		protected override void WriteProperties(JsonWriter writer, CrosspointData value, JsonSerializer serializer)
 		{
-			base.WriteProperties(writer, value, serializer);
-
 			writer.WritePropertyName(MESSAGE_TYPE_PROPERTY);
 			writer.WriteValue(value.MessageType.ToString());
 
@@ -61,12 +59,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Converters
 			if (value.SigsCount > 0)
 			{
 				writer.WritePropertyName(SIGS_PROPERTY);
-				writer.WriteStartArray();
-				{
-					foreach (SigInfo sig in value.GetSigs())
-						serializer.Serialize(writer, sig);
-				}
-				writer.WriteEndArray();
+				serializer.Serialize(writer, value.SigCache);
 			}
 		}
 
@@ -127,8 +120,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Converters
 						break;
 
 					case SIGS_PROPERTY:
-						while (reader.TokenType != JsonToken.EndArray)
-							sigs.Add(reader.ReadAsObject<SigInfo>());
+						sigs = reader.ReadAsObject<SigCache>(serializer);
 						break;
 				}
 			}
