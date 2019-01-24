@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionStateManager.cs" />
+    <Compile Include="Converters\SigCacheConverter.cs" />
     <Compile Include="Converters\SigInfoConverter.cs" />
     <Compile Include="EventArguments\SerialTransmissionEventArgs.cs" />
     <Compile Include="EventArguments\XSigEventArgs.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="SerialBuffers\BoundedSerialBuffer.cs" />
     <Compile Include="SerialBuffers\MultiDelimiterSerialBuffer.cs" />
     <Compile Include="SerialBuffers\XSigSerialBuffer.cs" />
-    <Compile Include="SerialDriver.cs" />
     <Compile Include="Settings\AbstractComSpecProperties.cs" />
     <Compile Include="Settings\ComSpecProperties.cs" />
     <Compile Include="Settings\IComSpecProperties.cs" />
