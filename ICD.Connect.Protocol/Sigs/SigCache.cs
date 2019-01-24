@@ -13,7 +13,6 @@ namespace ICD.Connect.Protocol.Sigs
 	[JsonConverter(typeof(SigCacheConverter))]
 	public sealed class SigCache : IEnumerable<SigInfo>
 	{
-		// The internal collection
 		private readonly Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>> m_KeyToSig;
 
 		#region Properties
@@ -21,6 +20,8 @@ namespace ICD.Connect.Protocol.Sigs
 		public int Count { get { return m_KeyToSig.Count; } }
 
 		public bool IsReadOnly { get { return false; } }
+
+		internal Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>> KeyToSig { get { return m_KeyToSig; } }
 
 		#endregion
 

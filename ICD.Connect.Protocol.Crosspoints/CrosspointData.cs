@@ -58,6 +58,8 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 		public int SigsCount { get { return m_Sigs.Count; } }
 
+		internal SigCache SigCache { get { return m_Sigs; } }
+
 		#endregion
 
 		#region Constructors
