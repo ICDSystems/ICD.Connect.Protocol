@@ -14,28 +14,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		#endregion
 
-		#region Private Members
-
-		private EquipmentCrosspointManager m_Manager;
-
-		#endregion
-
 		#region Public Properties
-
-		public override IEquipmentCrosspoint Crosspoint { get; protected set; }
 
 		protected override ICrosspointManager Manager
 		{
-			get
-			{
-				return m_Manager;
-			}
-			set
-			{
-				EquipmentCrosspointManager manager = value as EquipmentCrosspointManager;
-				if (manager != null)
-					m_Manager = manager;
-			}
+			get { return System == null ? null : System.GetOrCreateEquipmentCrosspointManager(); }
 		}
 
 		#endregion
@@ -74,6 +57,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void RegisterCrosspoint()
 		{
+			if (Crosspoint == null)
+				return;
+
 			Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
 			Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
 			Crosspoint.OnControlCrosspointCountChanged += CrosspointOnControlCrosspointCountChanged;
@@ -93,6 +79,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void UnregisterCrosspoint()
 		{
+			if (Crosspoint == null)
+				return;
+
 			Crosspoint.OnSendOutputData -= CrosspointOnSendOutputData;
 			Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
 			Crosspoint.OnControlCrosspointCountChanged -= CrosspointOnControlCrosspointCountChanged;

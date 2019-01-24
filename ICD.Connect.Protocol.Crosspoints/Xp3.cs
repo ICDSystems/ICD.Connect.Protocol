@@ -136,9 +136,8 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 			try
 			{
-				return m_Systems.ContainsKey(id)
-					       ? GetSystem(id)
-					       : CreateSystem(id);
+				CrosspointSystem system;
+				return m_Systems.TryGetValue(id, out system) ? system : CreateSystem(id);
 			}
 			finally
 			{

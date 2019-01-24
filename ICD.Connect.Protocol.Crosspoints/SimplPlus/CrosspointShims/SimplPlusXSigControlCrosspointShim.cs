@@ -7,28 +7,11 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
 	public sealed class SimplPlusXSigControlCrosspointShim : AbstractSimplPlusXSigCrosspointShim<IControlCrosspoint>
 	{
-		#region Private Members
-
-		private ControlCrosspointManager m_Manager;
-
-		#endregion
-
 		#region Public Properties
 
-		public override IControlCrosspoint Crosspoint { get; protected set; }
-
-		protected override ICrosspointManager Manager 
+		protected override ICrosspointManager Manager
 		{
-			get
-			{
-				return m_Manager;
-			}
-			set
-			{
-				ControlCrosspointManager manager = value as ControlCrosspointManager;
-				if (manager != null)
-					m_Manager = manager;
-			}
+			get { return System == null ? null : System.GetOrCreateControlCrosspointManager(); }
 		}
 
 		#endregion
@@ -78,10 +61,10 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		[PublicAPI("S+")]
 		public void SetAutoReconnect(ushort autoReconnect)
 		{
-			if (m_Manager == null)
-				return;
+			ControlCrosspointManager controlCrosspointManager = Manager as ControlCrosspointManager;
 
-			m_Manager.AutoReconnect = autoReconnect != 0;
+			if (controlCrosspointManager != null)
+				controlCrosspointManager.AutoReconnect = autoReconnect != 0;
 		}
 
 		#endregion
@@ -90,6 +73,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void RegisterCrosspoint()
 		{
+			if (Crosspoint == null)
+				return;
+
 			Crosspoint.OnSendOutputData += CrosspointOnSendOutputData;
 			Crosspoint.OnStatusChanged += CrosspointOnStatusChanged;
 
@@ -104,6 +90,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		protected override void UnregisterCrosspoint()
 		{
+			if (Crosspoint == null)
+				return;
+
 			Crosspoint.OnSendOutputData -= CrosspointOnSendOutputData;
 			Crosspoint.OnStatusChanged -= CrosspointOnStatusChanged;
 
