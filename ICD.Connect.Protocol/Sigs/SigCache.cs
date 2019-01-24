@@ -131,7 +131,19 @@ namespace ICD.Connect.Protocol.Sigs
 				return false;
 
 			Dictionary<uint, object> smartObjects;
-			return sigTypes.TryGetValue(item.SmartObject, out smartObjects) && smartObjects.Remove(item.Number);
+			if (!sigTypes.TryGetValue(item.SmartObject, out smartObjects))
+				return false;
+
+			if (!smartObjects.Remove(item.Number))
+				return false;
+
+			if (smartObjects.Count == 0)
+				sigTypes.Remove(item.SmartObject);
+
+			if (sigTypes.Count == 0)
+				m_KeyToSig.Remove(item.Type);
+
+			return true;
 		}
 
 		public void RemoveRange(IEnumerable<SigInfo> sigs)
