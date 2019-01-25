@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Converters;
 using Newtonsoft.Json;
 
@@ -14,10 +13,11 @@ namespace ICD.Connect.Protocol.Sigs
 	public sealed class SigCache : IEnumerable<SigInfo>
 	{
 		private readonly Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>> m_KeyToSig;
+		private int m_Count;
 
 		#region Properties
 
-		public int Count { get { return m_KeyToSig.Count; } }
+		public int Count { get { return m_Count; } }
 
 		public bool IsReadOnly { get { return false; } }
 
@@ -66,6 +66,7 @@ namespace ICD.Connect.Protocol.Sigs
 				return false;
 
 			smartObjects.Add(item.Number, item.GetValue());
+			m_Count++;
 
 			return true;
 		}
@@ -104,7 +105,8 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <param name="sigs"></param>
 		public void AddHighClearRemoveLow(IEnumerable<SigInfo> sigs)
 		{
-			sigs.ForEach(AddHighClearRemoveLow);
+			foreach (SigInfo sig in sigs)
+				AddHighClearRemoveLow(sig);
 		}
 
 		/// <summary>
@@ -122,6 +124,7 @@ namespace ICD.Connect.Protocol.Sigs
 		public void Clear()
 		{
 			m_KeyToSig.Clear();
+			m_Count = 0;
 		}
 
 		public bool Remove(SigInfo item)
@@ -142,6 +145,8 @@ namespace ICD.Connect.Protocol.Sigs
 
 			if (sigTypes.Count == 0)
 				m_KeyToSig.Remove(item.Type);
+
+			m_Count--;
 
 			return true;
 		}
