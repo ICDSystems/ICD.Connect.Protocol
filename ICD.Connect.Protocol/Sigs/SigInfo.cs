@@ -1,22 +1,14 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Json;
+using ICD.Connect.Protocol.Converters;
 using ICD.Connect.Protocol.XSig;
 using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
 {
+	[JsonConverter(typeof(SigInfoConverter))]
 	public struct SigInfo : IUShortOutputSig, IStringOutputSig, IBoolOutputSig, IEquatable<SigInfo>
 	{
-		// JSON
-		private const string TYPE_PROPERTY = "T";
-		private const string NUMBER_PROPERTY = "No";
-		private const string NAME_PROPERTY = "Na";
-		private const string SMARTOBJECT_PROPERTY = "SO";
-		private const string VALUE_PROPERTY = "V";
-
 		private readonly eSigType m_Type;
 		private readonly uint m_Number;
 		private readonly string m_Name;
@@ -147,6 +139,16 @@ namespace ICD.Connect.Protocol.Sigs
 			m_StringValue = null;
 			m_BoolValue = false;
 			m_UshortValue = 0;
+		}
+
+		public static SigInfo FromObject(uint number, ushort smartObject, object value)
+		{
+			if (value is ushort)
+				return new SigInfo(number, smartObject, (ushort)value);
+			if (value is bool)
+				return new SigInfo(number, smartObject, (bool)value);
+			
+			return new SigInfo(number, smartObject, value as string);
 		}
 
 		#endregion
@@ -282,175 +284,13 @@ namespace ICD.Connect.Protocol.Sigs
 			switch (m_Type)
 			{
 				case eSigType.Digital:
-					return new DigitalXSig(m_BoolValue, (ushort)(m_Number)).DataXSig;
+					return new DigitalXSig(m_BoolValue, (ushort)m_Number).DataXSig;
 
 				case eSigType.Analog:
-					return new AnalogXSig(m_UshortValue, (ushort)(m_Number)).DataXSig;
+					return new AnalogXSig(m_UshortValue, (ushort)m_Number).DataXSig;
 
 				case eSigType.Serial:
-					return new SerialXSig(m_StringValue, (ushort)(m_Number)).DataXSig;
-
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-		/// <summary>
-		/// Serializes the sig to JSON.
-		/// </summary>
-		/// <returns></returns>
-		[PublicAPI]
-		public string Serialize()
-		{
-			return JsonUtils.Serialize(Serialize);
-		}
-
-		/// <summary>
-		/// Serializes the sig to JSON.
-		/// </summary>
-		/// <param name="writer"></param>
-		[PublicAPI]
-		public void Serialize(JsonWriter writer)
-		{
-			writer.WriteStartObject();
-			{
-				writer.WritePropertyName(TYPE_PROPERTY);
-// ReSharper disable once ImpureMethodCallOnReadonlyValueField
-				writer.WriteValue(m_Type.ToString());
-
-				if (m_Number != 0)
-				{
-					writer.WritePropertyName(NUMBER_PROPERTY);
-					writer.WriteValue(m_Number);
-				}
-
-				if (!string.IsNullOrEmpty(m_Name))
-				{
-					writer.WritePropertyName(NAME_PROPERTY);
-					writer.WriteValue(m_Name);
-				}
-
-				if (m_SmartObject != 0)
-				{
-					writer.WritePropertyName(SMARTOBJECT_PROPERTY);
-					writer.WriteValue(m_SmartObject);
-				}
-
-				if (this.HasValue())
-				{
-					writer.WritePropertyName(VALUE_PROPERTY);
-					switch (m_Type)
-					{
-						case eSigType.Digital:
-							writer.WriteValue(m_BoolValue);
-							break;
-						case eSigType.Analog:
-							writer.WriteValue(m_UshortValue);
-							break;
-						case eSigType.Serial:
-							writer.WriteValue(m_StringValue);
-							break;
-						default:
-							throw new ArgumentOutOfRangeException();
-					}
-				}
-			}
-			writer.WriteEndObject();
-		}
-
-		/// <summary>
-		/// Deserializes the sig from json.
-		/// </summary>
-		/// <param name="json"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static SigInfo Deserialize(string json)
-		{
-			return JsonUtils.Deserialize(r => Deserialize(r), json);
-		}
-
-		/// <summary>
-		/// Deserializes the sig from json.
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static SigInfo Deserialize(JsonReader reader)
-		{
-			eSigType type = eSigType.Na;
-			uint number = 0;
-			string name = null;
-			ushort smartObject = 0;
-
-			bool boolValue = false;
-			ushort ushortValue = 0;
-			string stringValue = null;
-
-			while (reader.Read())
-			{
-				if (reader.TokenType == JsonToken.EndObject)
-				{
-					reader.Read();
-					break;
-				}
-
-				if (reader.TokenType != JsonToken.PropertyName)
-					continue;
-
-				string property = reader.Value as string;
-
-				// Read to the value
-				reader.Read();
-
-				switch (property)
-				{
-					case TYPE_PROPERTY:
-						type = reader.GetValueAsEnum<eSigType>();
-						break;
-
-					case NUMBER_PROPERTY:
-						number = (uint)reader.GetValueAsInt();
-						break;
-
-					case NAME_PROPERTY:
-						name = reader.GetValueAsString();
-						break;
-
-					case SMARTOBJECT_PROPERTY:
-						smartObject = (ushort)reader.GetValueAsInt();
-						break;
-
-					case VALUE_PROPERTY:
-						switch (reader.TokenType)
-						{
-							case JsonToken.Boolean:
-								boolValue = reader.GetValueAsBool();
-								break;
-
-							case JsonToken.Integer:
-								ushortValue = (ushort)reader.GetValueAsInt();
-								break;
-
-							case JsonToken.String:
-							case JsonToken.Null:
-								stringValue = reader.GetValueAsString();
-								break;
-
-							default:
-								throw new ArgumentOutOfRangeException();
-						}
-						break;
-				}
-			}
-
-			switch (type)
-			{
-				case eSigType.Digital:
-					return new SigInfo(number, name, smartObject, boolValue);
-				case eSigType.Analog:
-					return new SigInfo(number, name, smartObject, ushortValue);
-				case eSigType.Serial:
-					return new SigInfo(number, name, smartObject, stringValue);
+					return new SerialXSig(m_StringValue, (ushort)m_Number).DataXSig;
 
 				default:
 					throw new ArgumentOutOfRangeException();

@@ -34,12 +34,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		[Test, UsedImplicitly]
 		public void ControlClearTest()
 		{
-			SigInfo a = new SigInfo(1, "test a", 10, "test");
-			SigInfo b = new SigInfo(2, "test b", 10, null);
-			SigInfo c = new SigInfo(3, "test c", 10, true);
-			SigInfo d = new SigInfo(4, "test d", 10, false);
-			SigInfo e = new SigInfo(5, "test e", 10, 10);
-			SigInfo f = new SigInfo(6, "test f", 10, 0);
+			SigInfo a = new SigInfo(1, 10, "test");
+			SigInfo b = new SigInfo(2, 10, null);
+			SigInfo c = new SigInfo(3, 10, true);
+			SigInfo d = new SigInfo(4, 10, false);
+			SigInfo e = new SigInfo(5, 10, 10);
+			SigInfo f = new SigInfo(6, 10, 0);
 
 			SigInfo[] sigs = {a, b, c, d, e, f};
 
@@ -63,12 +63,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		[Test, UsedImplicitly]
 		public void EquipmentConnectTest()
 		{
-			SigInfo a = new SigInfo(1, "test a", 10, "test");
-			SigInfo b = new SigInfo(2, "test b", 10, null);
-			SigInfo c = new SigInfo(3, "test c", 10, true);
-			SigInfo d = new SigInfo(4, "test d", 10, false);
-			SigInfo e = new SigInfo(5, "test e", 10, 10);
-			SigInfo f = new SigInfo(6, "test f", 10, 0);
+			SigInfo a = new SigInfo(1, 10, "test");
+			SigInfo b = new SigInfo(2, 10, null);
+			SigInfo c = new SigInfo(3, 10, true);
+			SigInfo d = new SigInfo(4, 10, false);
+			SigInfo e = new SigInfo(5, 10, 10);
+			SigInfo f = new SigInfo(6, 10, 0);
 
 			SigInfo[] sigs = {a, b, c, d, e, f};
 
@@ -122,9 +122,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		[Test, UsedImplicitly]
 		public void SerializeTest()
 		{
-			SigInfo a = new SigInfo("test", 0, null);
+			SigInfo a = new SigInfo(1, 0, null);
 			SigInfo b = new SigInfo(10, 1, false);
-			SigInfo c = new SigInfo(10, "test", 0, false);
+			SigInfo c = new SigInfo(10, 0, false);
 
 			CrosspointData data = CrosspointData.ControlConnect(1, 2);
 
@@ -133,9 +133,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 			data.AddSig(c);
 			data.AddJson("test");
 
-			string json = data.Serialize();
+			string json = JsonConvert.SerializeObject(data);
 
-			CrosspointData deserialized = CrosspointData.Deserialize(json);
+			CrosspointData deserialized = JsonConvert.DeserializeObject<CrosspointData>(json);
 
 			Assert.AreEqual(CrosspointData.eMessageType.ControlConnect, data.MessageType);
 
@@ -145,10 +145,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 			Assert.IsTrue(deserialized.GetJson().Contains("test"));
 
 			Assert.IsTrue(deserialized.GetSigs().Any(s => s.Name == a.Name && s.GetType() == a.GetType()));
-			Assert.IsTrue(
-			              deserialized.GetSigs()
-			                          .Any(
-			                               s =>
+			Assert.IsTrue(deserialized.GetSigs()
+			                          .Any(s =>
 			                               s.SmartObject == b.SmartObject && s.Number == b.Number && s.GetType() == b.GetType()));
 			Assert.IsTrue(deserialized.GetSigs().Any(s => s.Name == c.Name && s.Number == c.Number && s.GetType() == c.GetType()));
 		}
@@ -156,39 +154,38 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		[Test, UsedImplicitly]
 		public void DeserializeTest()
 		{
-			const string json = @"
-{
-        ""T"": ""ControlConnect"",
-        ""EId"": 2,
-        ""CIds"": [
-                1
-        ],
-        ""J"": [
-                ""test""
-        ],
-        ""S"": [
-                {
-                        ""T"": ""Serial"",
-                        ""Na"": ""test""
-                },
-                {
-                        ""T"": ""Analog"",
-                        ""No"": 10,
-                        ""SO"": 1
-                },
-                {
-                        ""T"": ""Digital"",
-                        ""No"": 10,
-                        ""Na"": ""test""
-                }
-        ]
-}";
+			const string json = @"{
+    ""T"": ""ControlConnect"",
 
-			SigInfo a = new SigInfo(0, "test", 0, null);
-			SigInfo b = new SigInfo(10, null, 1, 0);
-			SigInfo c = new SigInfo(10, "test", 0, false);
+			""EId"": 2,
+			""CIds"": [
+			1
+				],
+			""J"": [
+			""test""
+				],
+			""S"": {
+				""Serial"": {
+					""0"": {
+						""1"": null
+					}
+				},
+				""Digital"": {
+					""1"": {
+						""10"": false
+					},
+					""0"": {
+						""10"": false
+					}
+				}
+			}
+		}";
 
-			CrosspointData data = CrosspointData.Deserialize(json);
+			SigInfo a = new SigInfo(1, 0, null);
+			SigInfo b = new SigInfo(10, 1, false);
+			SigInfo c = new SigInfo(10, 0, false);
+
+			CrosspointData data = JsonConvert.DeserializeObject<CrosspointData>(json);
 
 			Assert.AreEqual(CrosspointData.eMessageType.ControlConnect, data.MessageType);
 
@@ -267,10 +264,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		}
 
 		[UsedImplicitly]
-		[TestCase((ushort)1, "test", (uint)10)]
-		public void AddSigTest(ushort smartObject, string name, uint number)
+		[TestCase((ushort)1, (uint)10, "test")]
+		public void AddSigTest(ushort smartObject, uint number, string value)
 		{
-			SigInfo sigInfo = new SigInfo(number, name, smartObject, null);
+			SigInfo sigInfo = new SigInfo(number, smartObject, value);
 
 			CrosspointData data = new CrosspointData();
 			data.AddSig(sigInfo);
@@ -311,9 +308,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests
 		[Test, UsedImplicitly]
 		public void GetSigsTest()
 		{
-			SigInfo a = new SigInfo("test", 0, null);
+			SigInfo a = new SigInfo(10, 0, null);
 			SigInfo b = new SigInfo(10, 1, 0);
-			SigInfo c = new SigInfo(10, "test", 0, false);
+			SigInfo c = new SigInfo(10, 0, false);
 
 			CrosspointData data = new CrosspointData();
 

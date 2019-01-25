@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Sigs;
-using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Tests.Sigs
@@ -14,16 +13,12 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 		{
 			SigCache cache = new SigCache
 			{
-				new SigInfo(1, null, 0, false),
-				new SigInfo(1, null, 1, false),
-				new SigInfo(1, null, 1, false),
-
-				new SigInfo(0, "test", 0, false),
-				new SigInfo(0, "test", 1, false),
-				new SigInfo(0, "test", 1, false)
+				new SigInfo(1, 0, false),
+				new SigInfo(1, 1, false),
+				new SigInfo(1, 1, false)
 			};
 
-			Assert.AreEqual(4, cache.Count);
+			Assert.AreEqual(2, cache.Count);
 
 			cache.Clear();
 
@@ -37,13 +32,11 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 
 			cache.AddRange(new[]
 			{
-				new SigInfo(1, null, 0, false),
-				new SigInfo(1, null, 0, false),
-				new SigInfo(0, "test", 0, false),
-				new SigInfo(0, "test", 0, false)
+				new SigInfo(1, 0, false),
+				new SigInfo(1, 0, false)
 			});
 
-			Assert.AreEqual(2, cache.Count);
+			Assert.AreEqual(1, cache.Count);
 		}
 
 		[Test, UsedImplicitly]
@@ -52,12 +45,10 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 			// ReSharper disable once UseObjectOrCollectionInitializer
 			SigCache cache = new SigCache();
 
-			cache.Add(new SigInfo(1, null, 0, false));
-			cache.Add(new SigInfo(1, null, 0, false));
-			cache.Add(new SigInfo(0, "test", 0, false));
-			cache.Add(new SigInfo(0, "test", 0, false));
+			cache.Add(new SigInfo(1, 0, false));
+			cache.Add(new SigInfo(1, 0, false));
 
-			Assert.AreEqual(2, cache.Count);
+			Assert.AreEqual(1, cache.Count);
 		}
 
 		[Test, UsedImplicitly]
@@ -65,8 +56,8 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 		{
 			SigCache cache = new SigCache();
 
-			SigInfo a = new SigInfo(1, null, 0, false);
-			SigInfo b = new SigInfo(1, null, 1, false);
+			SigInfo a = new SigInfo(1, 0, false);
+			SigInfo b = new SigInfo(1, 1, false);
 
 			cache.Add(a);
 			cache.Add(b);
@@ -83,18 +74,15 @@ namespace ICD.Connect.Protocol.Tests.Sigs
 		{
 			SigCache cache = new SigCache();
 
-			SigInfo numbered = new SigInfo(1, null, 0, false);
-			SigInfo named = new SigInfo(0, "test", 0, false);
+			SigInfo numbered = new SigInfo(1, 0, false);
 
 			cache.Add(numbered);
-			cache.Add(named);
 
 			SigInfo[] sigs = cache.ToArray();
 
-			Assert.AreEqual(2, sigs.Length);
+			Assert.AreEqual(1, sigs.Length);
 
-			Assert.IsTrue(sigs.Any(s => s == numbered));
-			Assert.IsTrue(sigs.Any(s => s == named));
+			Assert.IsTrue(sigs[0] == numbered);
 		}
 	}
 }

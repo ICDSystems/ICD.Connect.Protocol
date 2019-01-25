@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.IO;
+using ICD.Connect.Protocol.Crosspoints.Converters;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Sigs;
 using Newtonsoft.Json;
@@ -15,16 +13,10 @@ namespace ICD.Connect.Protocol.Crosspoints
 	/// <summary>
 	/// Wrapper for all messages passing between Equipment and Control crosspoints.
 	/// </summary>
+	[JsonConverter(typeof(CrosspointDataConverter))]
 	public sealed class CrosspointData : ISerialData
 	{
 		public const char MESSAGE_TERMINATOR = (char)0xFF;
-
-		// Json
-		private const string MESSAGE_TYPE_PROPERTY = "T";
-		private const string EQUIPMENT_ID_PROPERTY = "EId";
-		private const string CONTROL_IDS_PROPERTY = "CIds";
-		private const string JSON_PROPERTY = "J";
-		private const string SIGS_PROPERTY = "S";
 
 		public enum eMessageType
 		{
@@ -58,7 +50,15 @@ namespace ICD.Connect.Protocol.Crosspoints
 		public int EquipmentId { get; set; }
 
 		[PublicAPI]
-		public eMessageType MessageType { get; private set; }
+		public eMessageType MessageType { get; set; }
+
+		public int ControlIdsCount { get { return m_ControlIds.Count; } }
+
+		public int JsonCount { get { return m_Json.Count; } }
+
+		public int SigsCount { get { return m_Sigs.Count; } }
+
+		internal SigCache SigCache { get { return m_Sigs; } }
 
 		#endregion
 
@@ -361,183 +361,13 @@ namespace ICD.Connect.Protocol.Crosspoints
 			                     GetType().Name, MessageType, EquipmentId, StringUtils.ArrayFormat(GetControlIds()), m_Sigs.Count);
 		}
 
-		#endregion
-
-		#region Serialization
-
 		/// <summary>
-		/// Serializes the CrosspointData to a JSON string.
+		/// Serialize this instance to a string.
 		/// </summary>
 		/// <returns></returns>
-		[PublicAPI]
 		public string Serialize()
 		{
-			StringBuilder builder = new StringBuilder();
-
-			using (JsonTextWriter writer = new JsonTextWriter(new IcdStringWriter(builder).WrappedStringWriter))
-				Serialize(writer);
-
-			return builder.ToString() + MESSAGE_TERMINATOR;
-		}
-
-		/// <summary>
-		/// Serializes the CrosspointData to JSON.
-		/// </summary>
-		/// <returns></returns>
-		[PublicAPI]
-		public void Serialize(JsonWriter writer)
-		{
-			//Stopwatch stopwatch = Stopwatch.StartNew();
-
-			try
-			{
-				writer.WriteStartObject();
-				{
-					writer.WritePropertyName(MESSAGE_TYPE_PROPERTY);
-					writer.WriteValue(MessageType.ToString());
-
-					if (EquipmentId != 0)
-					{
-						writer.WritePropertyName(EQUIPMENT_ID_PROPERTY);
-						writer.WriteValue(EquipmentId);
-					}
-
-					if (m_ControlIds.Count > 0)
-					{
-						writer.WritePropertyName(CONTROL_IDS_PROPERTY);
-						writer.WriteStartArray();
-						{
-							foreach (int id in m_ControlIds)
-								writer.WriteValue(id);
-						}
-						writer.WriteEndArray();
-					}
-
-					if (m_Json.Count > 0)
-					{
-						writer.WritePropertyName(JSON_PROPERTY);
-						writer.WriteStartArray();
-						{
-							foreach (string item in m_Json)
-								writer.WriteValue(item);
-						}
-						writer.WriteEndArray();
-					}
-
-					if (m_Sigs.Count > 0)
-					{
-						writer.WritePropertyName(SIGS_PROPERTY);
-						writer.WriteStartArray();
-						{
-							foreach (SigInfo sig in m_Sigs)
-								sig.Serialize(writer);
-						}
-						writer.WriteEndArray();
-					}
-				}
-				writer.WriteEndObject();
-			}
-			finally
-			{
-			//	CrestronConsole.PrintLine("{0} milliseconds to serialize {1}(MessageType={2})",
-			//	                          stopwatch.Elapsed.TotalMilliseconds, GetType().Name, MessageType);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes the CrosspointData from a JSON string.
-		/// </summary>
-		/// <param name="json"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static CrosspointData Deserialize(string json)
-		{
-			json = json.TrimEnd(MESSAGE_TERMINATOR);
-
-			using (JsonTextReader reader = new JsonTextReader(new IcdStringReader(json).WrappedStringReader))
-				return Deserialize(reader);
-		}
-
-		/// <summary>
-		/// Deserializes the CrosspointData from a JSON reader.
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static CrosspointData Deserialize(JsonReader reader)
-		{
-			//Stopwatch stopwatch = Stopwatch.StartNew();
-
-			CrosspointData output = null;
-
-			try
-			{
-				eMessageType type = eMessageType.Message;
-				int equipmentId = 0;
-				IcdHashSet<int> controlIds = new IcdHashSet<int>();
-				IcdHashSet<string> json = new IcdHashSet<string>();
-				SigCache sigs = new SigCache();
-
-				while (reader.Read())
-				{
-					if (reader.TokenType == JsonToken.EndObject)
-					{
-						reader.Read();
-						break;
-					}
-
-					if (reader.TokenType != JsonToken.PropertyName)
-						continue;
-
-					string property = reader.Value as string;
-
-					// Read to the value
-					reader.Read();
-
-					switch (property)
-					{
-						case MESSAGE_TYPE_PROPERTY:
-							type = reader.GetValueAsEnum<eMessageType>();
-							break;
-
-						case EQUIPMENT_ID_PROPERTY:
-							equipmentId = reader.GetValueAsInt();
-							break;
-
-						case CONTROL_IDS_PROPERTY:
-							while (reader.Read() && reader.TokenType != JsonToken.EndArray)
-								controlIds.Add(reader.GetValueAsInt());
-							break;
-
-						case JSON_PROPERTY:
-							while (reader.Read() && reader.TokenType != JsonToken.EndArray)
-								json.Add(reader.GetValueAsString());
-							break;
-
-						case SIGS_PROPERTY:
-							while (reader.TokenType != JsonToken.EndArray)
-								sigs.Add(SigInfo.Deserialize(reader));
-							break;
-					}
-				}
-
-				output = new CrosspointData
-				{
-					MessageType = type,
-					EquipmentId = equipmentId,
-				};
-
-				output.AddControlIds(controlIds);
-				output.AddJson(json);
-				output.AddSigs(sigs);
-
-				return output;
-			}
-			finally
-			{
-			//	CrestronConsole.PrintLine("{0} milliseconds to deserialize to {1}(MessageType={2})",
-			//	                          stopwatch.Elapsed.TotalMilliseconds, typeof(CrosspointData).Name, output.MessageType);
-			}
+			return JsonConvert.SerializeObject(this) + MESSAGE_TERMINATOR;
 		}
 
 		#endregion
