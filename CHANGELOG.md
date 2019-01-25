@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Performance improvements for JsonSerialBuffer
  - XP3 Changes to work with new SPlusShim paradigm
+ - SigCache JSON optimizations to better handle large amounts of data
 
 ## [8.0.0] - 2019-01-10
 ### Added
