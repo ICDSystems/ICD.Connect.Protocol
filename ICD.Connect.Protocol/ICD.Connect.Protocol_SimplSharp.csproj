@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionStateManager.cs" />
+    <Compile Include="Converters\SigCacheConverter.cs" />
+    <Compile Include="Converters\SigInfoConverter.cs" />
     <Compile Include="EventArguments\SerialTransmissionEventArgs.cs" />
     <Compile Include="EventArguments\XSigEventArgs.cs" />
     <Compile Include="FeedbackDebounce\FeedbackDebounce.cs" />

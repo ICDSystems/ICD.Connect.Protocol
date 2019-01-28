@@ -6,6 +6,7 @@ using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 {
@@ -228,7 +229,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="data"></param>
 		private void BufferManagerOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
 		{
-			CrosspointData crosspointData = CrosspointData.Deserialize(data);
+			CrosspointData crosspointData = JsonConvert.DeserializeObject<CrosspointData>(data);
 
 			switch (crosspointData.MessageType)
 			{

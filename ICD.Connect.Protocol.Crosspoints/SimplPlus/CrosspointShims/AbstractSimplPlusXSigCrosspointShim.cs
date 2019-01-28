@@ -15,7 +15,7 @@ using ICD.Connect.Settings.SPlusShims;
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {
 	public abstract class AbstractSimplPlusXSigCrosspointShim<T> : AbstractSPlusShim, ISimplPlusCrosspointShim<T>
-		where T : ICrosspoint
+		where T : class, ICrosspoint
 	{
 		#region Events
 
@@ -58,9 +58,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		private int m_SystemId;
 		private int m_CrosspointId;
-
 		private string m_CrosspointName;
-		private string m_CrosspointSymbolInstanceName;
 
 		#endregion
 
@@ -111,11 +109,20 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			}
 		}
 
+		[CanBeNull]
 		ICrosspoint ISimplPlusCrosspointShim.Crosspoint { get { return Crosspoint; } }
 
-		public abstract T Crosspoint { get; protected set; }
+		[CanBeNull]
+		public T Crosspoint { get; private set; }
 
-		protected abstract ICrosspointManager Manager { get; set; }
+		[CanBeNull]
+		protected abstract ICrosspointManager Manager { get; }
+
+		[CanBeNull]
+		protected CrosspointSystem System
+		{
+			get { return SystemId == 0 ? null : SimplPlusStaticCore.Xp3Core.GetOrCreateSystem(SystemId); }
+		}
 
 		#endregion
 
@@ -132,6 +139,18 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			m_Buffer.OnCompletedSerial += BufferOnCompletedSerial;
 
 			SimplPlusStaticCore.ShimManager.RegisterSPlusCrosspointShim(this);
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public override void Dispose()
+		{
+			OnSystemIdChanged = null;
+			OnCrosspointIdChanged = null;
+			OnCrosspointNameChanged = null;
+
+			base.Dispose();
 		}
 
 		#region Public S+ Methods
@@ -165,12 +184,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 				DeinstantiateCrosspoint();
 
 			// Bail out if all the information isn't set from S+ already
-			if (SystemId == 0 || CrosspointId == 0 || String.IsNullOrEmpty(CrosspointName))
+			if (Manager == null || CrosspointId == 0 || string.IsNullOrEmpty(CrosspointName))
 				return;
-
-			CrosspointSystem system = SimplPlusStaticCore.Xp3Core.GetOrCreateSystem(SystemId);
-
-			Manager = system.GetOrCreateControlCrosspointManager();
 
 			Crosspoint = CreateCrosspoint(CrosspointId, CrosspointName);
 
@@ -185,8 +200,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 		[PublicAPI("S+")]
 		public void DeinstantiateCrosspoint()
 		{
-			//Don't do things without a crosspoint
-			if (Crosspoint == null)
+			// Don't do things without a crosspoint
+			if (Manager == null || Crosspoint == null)
 				return;
 
 			Manager.UnregisterCrosspoint(Crosspoint);
@@ -232,7 +247,7 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			tb.AddRow("Shim Location", Location);
 			tb.AddRow("Shim Has Crosspoint", Crosspoint == null ? "False" : "True");
 
-			if (Crosspoint == null)
+			if (Manager == null || Crosspoint == null)
 			{
 				tb.AddRow("Shim SystemID", SystemId);
 				tb.AddRow("Shim CrosspointId", CrosspointId);
@@ -241,8 +256,8 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 			else
 			{
 				tb.AddRow("Crosspoint SystemID", Manager.SystemId);
-				tb.AddRow("Crosspoint Id", CrosspointId);
-				tb.AddRow("Crosspoint Name", CrosspointName ?? "Undefined");
+				tb.AddRow("Crosspoint Id", Crosspoint.Id);
+				tb.AddRow("Crosspoint Name", Crosspoint.Name ?? "Undefined");
 				tb.AddRow("Crosspoint Status", Crosspoint.Status.ToString());
 			}
 
@@ -308,6 +323,9 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 
 		private void BufferOnCompletedSerial(object sender, StringEventArgs stringEventArgs)
 		{
+			if (Crosspoint == null)
+				return;
+
 			SigInfo sig = XSigParser.Parse(stringEventArgs.Data).ToSigInfo();
 			CrosspointData data = new CrosspointData();
 			data.AddSig(sig);

@@ -1,98 +1,27 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using ICD.Common.Properties;
-using ICD.Common.Utils.Extensions;
+using System.Linq;
+using ICD.Connect.Protocol.Converters;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Sigs
 {
 	/// <summary>
 	/// Provides unique collection of sigs, ignoring serial/analog/digital values for comparison.
 	/// </summary>
-	[PublicAPI]
-	public sealed class SigCache : ICollection<SigInfo>
+	[JsonConverter(typeof(SigCacheConverter))]
+	public sealed class SigCache : IEnumerable<SigInfo>
 	{
-		/// <summary>
-		/// We cache the sigs by their type and address.
-		/// </summary>
-		private struct SigKey : IEquatable<SigKey>
-		{
-			private readonly eSigType m_Type;
-			private readonly uint m_Number;
-			private readonly string m_Name;
-			private readonly ushort m_SmartObject;
-
-			/// <summary>
-			/// Constructor.
-			/// </summary>
-			/// <param name="type"></param>
-			/// <param name="number"></param>
-			/// <param name="name"></param>
-			/// <param name="smartObject"></param>
-			private SigKey(eSigType type, uint number, string name, ushort smartObject)
-			{
-				m_Type = type;
-				m_Number = number;
-				m_Name = name;
-				m_SmartObject = smartObject;
-			}
-
-			public static SigKey FromSig(SigInfo sigInfo)
-			{
-				return new SigKey(sigInfo.Type, sigInfo.Number, sigInfo.Name, sigInfo.SmartObject);
-			}
-
-			#region Equality
-
-			public bool Equals(SigKey other)
-			{
-				return m_Type == other.m_Type &&
-				       m_Number == other.m_Number &&
-				       m_Name == other.m_Name &&
-				       m_SmartObject == other.m_SmartObject;
-			}
-
-			public override bool Equals(object obj)
-			{
-				return obj is SigKey && Equals((SigKey)obj);
-			}
-
-			public override int GetHashCode()
-			{
-				unchecked
-				{
-					int hash = 17;
-
-					hash = hash * 23 + (int)m_Type;
-					hash = hash * 23 + (int)m_Number;
-					hash = hash * 23 + (m_Name == null ? 0 : m_Name.GetHashCode());
-					hash = hash * 23 + m_SmartObject;
-
-					return hash;
-				}
-			}
-
-			public static bool operator ==(SigKey x, SigKey y)
-			{
-				return x.Equals(y);
-			}
-
-			public static bool operator !=(SigKey x, SigKey y)
-			{
-				return !x.Equals(y);
-			}
-
-			#endregion
-		}
-
-		// The internal collection
-		private readonly Dictionary<SigKey, SigInfo> m_KeyToSig;
+		private readonly Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>> m_KeyToSig;
+		private int m_Count;
 
 		#region Properties
 
-		public int Count { get { return m_KeyToSig.Count; } }
+		public int Count { get { return m_Count; } }
 
 		public bool IsReadOnly { get { return false; } }
+
+		internal Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>> KeyToSig { get { return m_KeyToSig; } }
 
 		#endregion
 
@@ -101,25 +30,43 @@ namespace ICD.Connect.Protocol.Sigs
 		/// </summary>
 		public SigCache()
 		{
-			m_KeyToSig = new Dictionary<SigKey, SigInfo>();
+			m_KeyToSig = new Dictionary<eSigType, Dictionary<ushort, Dictionary<uint, object>>>();
 		}
 
 		#region Methods
 
 		public IEnumerator<SigInfo> GetEnumerator()
 		{
-			return m_KeyToSig.Values.GetEnumerator();
+			return m_KeyToSig.SelectMany(
+				typeKvp => typeKvp.Value.SelectMany(
+					soKvp => soKvp.Value.Select(
+						numKvp => SigInfo.FromObject(numKvp.Key, soKvp.Key, numKvp.Value)
+						)
+					)
+				).GetEnumerator();
 		}
 
 		public bool Add(SigInfo item)
 		{
-			SigKey key = SigKey.FromSig(item);
+			Dictionary<ushort, Dictionary<uint, object>> sigTypes;
+			if (!m_KeyToSig.TryGetValue(item.Type, out sigTypes))
+			{
+				sigTypes = new Dictionary<ushort, Dictionary<uint, object>>();
+				m_KeyToSig.Add(item.Type, sigTypes);
+			}
 
-			SigInfo cached;
-			if (m_KeyToSig.TryGetValue(key, out cached) && item == cached)
+			Dictionary<uint, object> smartObjects;
+			if (!sigTypes.TryGetValue(item.SmartObject, out smartObjects))
+			{
+				smartObjects = new Dictionary<uint, object>();
+				sigTypes.Add(item.SmartObject, smartObjects);
+			}
+
+			if (smartObjects.ContainsKey(item.Number))
 				return false;
 
-			m_KeyToSig[key] = item;
+			smartObjects.Add(item.Number, item.GetValue());
+			m_Count++;
 
 			return true;
 		}
@@ -158,7 +105,8 @@ namespace ICD.Connect.Protocol.Sigs
 		/// <param name="sigs"></param>
 		public void AddHighClearRemoveLow(IEnumerable<SigInfo> sigs)
 		{
-			sigs.ForEach(AddHighClearRemoveLow);
+			foreach (SigInfo sig in sigs)
+				AddHighClearRemoveLow(sig);
 		}
 
 		/// <summary>
@@ -176,21 +124,31 @@ namespace ICD.Connect.Protocol.Sigs
 		public void Clear()
 		{
 			m_KeyToSig.Clear();
-		}
-
-		public bool Contains(SigInfo item)
-		{
-			return m_KeyToSig.ContainsKey(SigKey.FromSig(item));
-		}
-
-		public void CopyTo(SigInfo[] array, int arrayIndex)
-		{
-			m_KeyToSig.Values.CopyTo(array, arrayIndex);
+			m_Count = 0;
 		}
 
 		public bool Remove(SigInfo item)
 		{
-			return m_KeyToSig.Remove(SigKey.FromSig(item));
+			Dictionary<ushort, Dictionary<uint, object>> sigTypes;
+			if (!m_KeyToSig.TryGetValue(item.Type, out sigTypes))
+				return false;
+
+			Dictionary<uint, object> smartObjects;
+			if (!sigTypes.TryGetValue(item.SmartObject, out smartObjects))
+				return false;
+
+			if (!smartObjects.Remove(item.Number))
+				return false;
+
+			if (smartObjects.Count == 0)
+				sigTypes.Remove(item.SmartObject);
+
+			if (sigTypes.Count == 0)
+				m_KeyToSig.Remove(item.Type);
+
+			m_Count--;
+
+			return true;
 		}
 
 		public void RemoveRange(IEnumerable<SigInfo> sigs)
@@ -200,11 +158,6 @@ namespace ICD.Connect.Protocol.Sigs
 		}
 
 		#endregion
-
-		void ICollection<SigInfo>.Add(SigInfo item)
-		{
-			Add(item);
-		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
