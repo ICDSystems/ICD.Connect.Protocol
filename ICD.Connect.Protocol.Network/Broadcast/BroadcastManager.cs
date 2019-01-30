@@ -30,8 +30,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		private readonly int m_SystemId;
 
 		private readonly Dictionary<Type, IBroadcaster> m_Broadcasters;
+		private readonly Guid m_Session;
 
-		public int SystemId {get { return m_SystemId; }}
+		public int SystemId { get { return m_SystemId; } }
+
+		public Guid Session { get { return m_Session; } }
 
 		/// <summary>
 		/// Constructor.
@@ -48,6 +51,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		{
 			m_Broadcasters = new Dictionary<Type, IBroadcaster>();
 			m_SystemId = systemId;
+			m_Session = Guid.NewGuid();
 
 			m_UdpClient = new AsyncUdpClient
 			{
@@ -209,7 +213,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			BroadcastData broadcastData =
 				new BroadcastData
 				{
-					Source = GetHostInfo()
+					Source = GetHostInfo(),
+					Session = Session
 				};
 			broadcastData.SetData<object>(data);
 

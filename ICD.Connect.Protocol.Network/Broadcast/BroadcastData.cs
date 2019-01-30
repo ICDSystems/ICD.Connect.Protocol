@@ -12,14 +12,19 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		#region Properties
 
 		/// <summary>
-		/// The type of the data being advertised. Used for deserialization.
-		/// </summary>
-		public Type Type { get; set; }
-
-		/// <summary>
 		/// The source of this advertisement.
 		/// </summary>
 		public HostInfo Source { get; set; }
+
+		/// <summary>
+		/// Unique identifier for the session (this changes between program reboots).
+		/// </summary>
+		public Guid Session { get; set; }
+
+		/// <summary>
+		/// The type of the data being advertised. Used for deserialization.
+		/// </summary>
+		public Type Type { get; set; }
 
 		/// <summary>
 		/// The data that is being advertised.
@@ -45,6 +50,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			Type = broadcastData.Type;
 			Source = broadcastData.Source;
 			Data = broadcastData.Data;
+			Session = broadcastData.Session;
 		}
 
 		#region Methods

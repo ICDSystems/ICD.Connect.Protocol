@@ -8,6 +8,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast.Converters
 	public sealed class BroadcastDataConverter : AbstractGenericJsonConverter<BroadcastData>
 	{
 		private const string PROPERTY_SOURCE = "source";
+		private const string PROPERTY_SESSION = "session";
 		private const string PROPERTY_TYPE = "type";
 		private const string PROPERTY_DATA = "data";
 
@@ -33,6 +34,10 @@ namespace ICD.Connect.Protocol.Network.Broadcast.Converters
 			// Source
 			writer.WritePropertyName(PROPERTY_SOURCE);
 			serializer.Serialize(writer, value.Source);
+
+			// Session
+			writer.WritePropertyName(PROPERTY_SESSION);
+			writer.WriteValue(value.Session);
 
 			// Type
 			if (value.Type != null)
@@ -61,7 +66,11 @@ namespace ICD.Connect.Protocol.Network.Broadcast.Converters
 			switch (property)
 			{
 				case PROPERTY_SOURCE:
-					instance.Source = (HostInfo)serializer.Deserialize(reader, typeof(HostInfo));
+					instance.Source = reader.ReadAsObject<HostInfo>(serializer);
+					break;
+
+				case PROPERTY_SESSION:
+					instance.Session = reader.GetValueAsGuid();
 					break;
 
 				case PROPERTY_TYPE:
