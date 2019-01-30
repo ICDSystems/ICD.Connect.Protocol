@@ -1,7 +1,4 @@
 ﻿using System;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Services;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,23 +28,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		public static AbstractMessage Deserialize(string serial)
 		{
-			try
-			{
-				JObject obj = JObject.Parse(serial);
+			JObject obj = JObject.Parse(serial);
 
-				Type type = System.Type.GetType(obj.SelectToken("Type").ToString());
-				if (type == null)
-					return null;
-
-				return JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) as AbstractMessage;
-			}
-			catch (Exception e)
-			{
-				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "AbstractMessage failed to deserialize - {0}{1}{2}",
-				                         e.Message, IcdEnvironment.NewLine, serial);
+			Type type = System.Type.GetType(obj.SelectToken("Type").ToString());
+			if (type == null)
 				return null;
-			}
+
+			return JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) as AbstractMessage;
 		}
 	}
 }

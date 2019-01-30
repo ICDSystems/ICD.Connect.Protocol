@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Utils;
@@ -335,7 +337,19 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="data"></param>
 		private void ServerBufferOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
 		{
-			AbstractMessage msg = AbstractMessage.Deserialize(data);
+			AbstractMessage msg = null;
+
+			try
+			{
+				msg = AbstractMessage.Deserialize(data);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.TryGetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to deserialize message from {1} - {2}{3}{4}",
+				                         GetType().Name, m_Server.GetClientInfo(clientId), e.Message, IcdEnvironment.NewLine, data);
+			}
+
 			if (msg == null)
 				return;
 
@@ -388,7 +402,20 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (client == null)
 				throw new ArgumentNullException("client");
 
-			IReply message = AbstractMessage.Deserialize(data) as IReply;
+			IReply message = null;
+
+			try
+			{
+				message = AbstractMessage.Deserialize(data) as IReply;
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.TryGetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to deserialize message from {1} - {2}{3}{4}",
+				                         GetType().Name, new HostInfo(client.Address, client.Port), e.Message,
+				                         IcdEnvironment.NewLine, data);
+			}
+
 			if (message == null)
 				return;
 
