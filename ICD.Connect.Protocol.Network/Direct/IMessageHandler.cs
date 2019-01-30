@@ -24,12 +24,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <returns></returns>
 		[CanBeNull]
 		IReply HandleMessage(IMessage message);
-
-		/// <summary>
-		/// Called to inform the message handler of a client disconnect.
-		/// </summary>
-		/// <param name="clientId"></param>
-		void HandleClientDisconnect(uint clientId);
 	}
 
 	public interface IMessageHandler<TMessage, TReply> : IMessageHandler

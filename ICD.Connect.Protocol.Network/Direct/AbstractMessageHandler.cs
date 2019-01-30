@@ -51,14 +51,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		public abstract TReply HandleMessage(TMessage message);
 
 		/// <summary>
-		/// Called to inform the message handler of a client disconnect.
-		/// </summary>
-		/// <param name="clientId"></param>
-		public virtual void HandleClientDisconnect(uint clientId)
-		{
-		}
-
-		/// <summary>
 		/// Returns a reply to the tagged client.
 		/// </summary>
 		/// <param name="reply"></param>

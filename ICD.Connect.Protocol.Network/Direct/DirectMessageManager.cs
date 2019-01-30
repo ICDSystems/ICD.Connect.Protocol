@@ -4,7 +4,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
@@ -59,7 +58,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				Name = GetType().Name
 			};
-			Subscribe(m_Server);
 
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
@@ -78,7 +76,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		public void Dispose()
 		{
-			Unsubscribe(m_Server);
 			Unsubscribe(m_ServerBuffer);
 			Unsubscribe(m_ClientBuffers);
 
@@ -259,52 +256,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_MessageCallbacks.Add(messageId, response => callback((TResponse)response));
 			client.Send(data);
-		}
-
-		#endregion
-
-		#region Server Callbacks
-
-		/// <summary>
-		/// Subscribe to the server events.
-		/// </summary>
-		/// <param name="server"></param>
-		private void Subscribe(AsyncTcpServer server)
-		{
-			server.OnSocketStateChange += ServerOnOnSocketStateChange;
-		}
-
-		/// <summary>
-		/// Unsubscribe from the server events.
-		/// </summary>
-		/// <param name="server"></param>
-		private void Unsubscribe(AsyncTcpServer server)
-		{
-			server.OnSocketStateChange -= ServerOnOnSocketStateChange;
-		}
-
-		/// <summary>
-		/// Called when a client connects/disconnects.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="eventArgs"></param>
-		private void ServerOnOnSocketStateChange(object sender, SocketStateEventArgs eventArgs)
-		{
-			if (m_Server.ClientConnected(eventArgs.ClientId))
-				return;
-
-			m_MessageHandlersSection.Enter();
-
-			try
-			{
-				// Inform the handlers of a client disconnect.
-				foreach (IMessageHandler handler in m_MessageHandlers.Values)
-					handler.HandleClientDisconnect(eventArgs.ClientId);
-			}
-			finally
-			{
-				m_MessageHandlersSection.Leave();
-			}
 		}
 
 		#endregion
