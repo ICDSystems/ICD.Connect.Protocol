@@ -18,6 +18,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
 		private const int DEFAULT_MAX_NUMBER_OF_CLIENTS = 1;
+		private const int DEFAULT_BUFFER_SIZE = 16384;
 
 		[PublicAPI] public const int MAX_NUMBER_OF_CLIENTS_SUPPORTED = 64;
 
@@ -54,6 +55,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		[PublicAPI]
 		public ushort Port { get; set; }
+
+		/// <summary>
+		/// Get or set the receive buffer size.
+		/// </summary>
+		[PublicAPI]
+		public int BufferSize { get; set; }
 
 		/// <summary>
 		/// Returns true if the TCP Server actively listening for connections.
@@ -133,12 +140,25 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
 		[PublicAPI]
 		public AsyncTcpServer(ushort port, int maxNumberOfClients)
+			: this(port, maxNumberOfClients, DEFAULT_BUFFER_SIZE)
+		{
+		}
+
+		/// <summary>
+		/// Initializes the AsyncTcpServer
+		/// </summary>
+		/// <param name="port">Port number to listen on</param>
+		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
+		/// <param name="bufferSize"></param>
+		[PublicAPI]
+		public AsyncTcpServer(ushort port, int maxNumberOfClients, ushort bufferSize)
 		{
 			m_Connections = new IcdOrderedDictionary<uint, string>();
 			m_ConnectionLock = new SafeCriticalSection();
 
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 			Port = port;
+			BufferSize = bufferSize;
 			MaxNumberOfClients = maxNumberOfClients;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;

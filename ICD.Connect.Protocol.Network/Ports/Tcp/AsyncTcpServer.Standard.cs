@@ -35,6 +35,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			try
 			{
 				m_TcpListener = new TcpListener(IPAddress.Any, Port);
+				m_TcpListener.Server.ReceiveBufferSize = BufferSize;
 				try
 				{
 					m_TcpListener.Start();

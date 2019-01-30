@@ -1,5 +1,6 @@
 ﻿#if SIMPLSHARP
 using System;
+using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -22,7 +23,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			Active = true;
 
-			m_TcpListener = new TCPServer(Port, MaxNumberOfClients);
+			m_TcpListener = new TCPServer(AddressToAcceptConnectionFrom, Port, BufferSize,
+			                              EthernetAdapterType.EthernetUnknownAdapter, MaxNumberOfClients);
 			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
 			m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
 
