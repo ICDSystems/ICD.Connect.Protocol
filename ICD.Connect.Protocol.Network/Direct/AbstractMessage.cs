@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Ports;
@@ -43,7 +44,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 			catch (Exception e)
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, e, "AbstractMessage failed to deserialize - {0}", e.Message);
+				               .AddEntry(eSeverity.Error, "AbstractMessage failed to deserialize - {0}{1}{2}",
+				                         e.Message, IcdEnvironment.NewLine, serial);
 				return null;
 			}
 		}
