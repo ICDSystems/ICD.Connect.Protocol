@@ -304,7 +304,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (msg == null)
 				return;
 
-			msg.ClientId = clientId;
+			msg.MessageTo = clientId;
 
 			Type type = msg.GetType();
 			if (!m_MessageHandlers.ContainsKey(type))
@@ -413,14 +413,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (reply == null)
 				throw new ArgumentNullException("reply");
 
-			if (reply.ClientId <= 0)
-				throw new InvalidOperationException("Unable to send message to unknown client");
-
-			if (!m_Server.ClientConnected(reply.ClientId))
-				throw new InvalidOperationException("Unable to send message to disconnected client");
-
 			reply.MessageFrom = GetHostInfo();
-			m_Server.Send(reply.ClientId, reply.Serialize());
+
+			Send(reply.MessageTo, reply);
 		}
 
 		#endregion

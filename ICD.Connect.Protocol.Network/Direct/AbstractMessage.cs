@@ -16,10 +16,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		public HostInfo MessageFrom { get; set; }
 
-		/// <summary>
-		/// For messages recieved, tag them with a client ID so the handler can respond later to the correct client
-		/// </summary>
-		public uint ClientId { get; set; }
+		public HostInfo MessageTo { get; set; }
 
 		public string Serialize()
 		{

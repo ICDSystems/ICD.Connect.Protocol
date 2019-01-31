@@ -6,7 +6,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 {
 	public interface IMessage : ISerialData
 	{
-		uint ClientId { get; set; }
+		HostInfo MessageTo { get; set; }
 		HostInfo MessageFrom { get; set; }
 		Guid MessageId { get; set; }
 		string Type { get; }
