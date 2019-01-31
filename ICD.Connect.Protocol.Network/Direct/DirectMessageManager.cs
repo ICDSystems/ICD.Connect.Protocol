@@ -225,9 +225,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (message == null)
 				throw new ArgumentNullException("message");
 
-			if (callback == null)
-				throw new ArgumentNullException("callback");
-
 			Guid messageId = Guid.NewGuid();
 
 			message.MessageId = messageId;
@@ -240,7 +237,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (!client.IsConnected)
 				client.Connect();
 
-			m_MessageCallbacks.Add(messageId, callback);
+			if (callback != null)
+				m_MessageCallbacks.Add(messageId, callback);
+
 			client.Send(data);
 		}
 
