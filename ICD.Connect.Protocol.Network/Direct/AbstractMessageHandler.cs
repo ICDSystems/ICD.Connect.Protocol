@@ -44,7 +44,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		}
 
 		/// <summary>
-		/// Handles the message receieved
+		/// Handles the message receieved from the remote core.
 		/// </summary>
 		/// <param name="message"></param>
 		/// <returns>Returns an AbstractMessage as a reply, or null for no reply</returns>
