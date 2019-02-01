@@ -12,7 +12,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private TCPClient m_TcpClient;
 
 		/// <summary>
-		/// Connects to the remote end point Asyncrohnously
+		/// Connects to the remote end point synchronously.
 		/// </summary>
 		/// <returns></returns>
 		public override void Connect()

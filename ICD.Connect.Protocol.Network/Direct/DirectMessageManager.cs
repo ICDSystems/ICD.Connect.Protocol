@@ -13,8 +13,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 {
 	public delegate void ClientBufferCallback(IReply response);
 
-	public delegate void MessageResponseCallback<TResponse>(TResponse response) where TResponse : IReply;
-
 	public sealed class DirectMessageManager : IDisposable
 	{
 		private readonly TcpClientPool m_ClientPool;
