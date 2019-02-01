@@ -1,8 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Json;
 using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Ports
@@ -10,8 +11,11 @@ namespace ICD.Connect.Protocol.Ports
 	/// <summary>
 	/// Simple pairing of hostname and port.
 	/// </summary>
+	[JsonConverter(typeof(ToStringJsonConverter))]
 	public struct HostInfo : IEquatable<HostInfo>
 	{
+		private const string HOSTINFO_REGEX = @"^(?'host'\S+):(?'port'\d+)$";
+
 		private readonly string m_Address;
 		private readonly ushort m_Port;
 
@@ -20,19 +24,17 @@ namespace ICD.Connect.Protocol.Ports
 		/// <summary>
 		/// Gets the hostname.
 		/// </summary>
-		[DefaultValue(null)]
 		public string Address { get { return m_Address; } }
 
 		/// <summary>
 		/// Gets the port.
 		/// </summary>
-		[DefaultValue(0)]
 		public ushort Port { get { return m_Port; } }
 
 		/// <summary>
 		/// Gets the hostname. Returns localhost if the address points back to this processor.
 		/// </summary>
-		[PublicAPI, JsonIgnore]
+		[PublicAPI]
 		public string AddressOrLocalhost
 		{
 			get { return IsLocalHost ? "127.0.0.1" : m_Address; }
@@ -41,7 +43,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// <summary>
 		/// Returns true if the address represents the localhost.
 		/// </summary>
-		[PublicAPI, JsonIgnore]
+		[PublicAPI]
 		public bool IsLocalHost
 		{
 			get { return IcdEnvironment.NetworkAddresses.Contains(m_Address); }
@@ -54,7 +56,6 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		/// <param name="address"></param>
 		/// <param name="port"></param>
-		[JsonConstructor]
 		public HostInfo(string address, ushort port)
 		{
 			m_Address = address;
@@ -114,31 +115,42 @@ namespace ICD.Connect.Protocol.Ports
 		/// Gets the hashcode for this instance.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		public override int GetHashCode()
 		{
 			unchecked
 			{
 				int hash = 17;
 				hash = hash * 23 + m_Port;
-				hash = hash * 23 + (m_Address == null ? 0 : AddressOrLocalhost.GetHashCode());
+				hash = hash * 23 + (m_Address == null ? 0 : m_Address.GetHashCode());
 				return hash;
 			}
 		}
 
-		public static bool TryParse(string str, out HostInfo info)
+		[UsedImplicitly]
+		public static HostInfo Parse(string data)
 		{
-			try
-			{
-				int index = str.IndexOf(':');
-				ushort port = ushort.Parse(str.Substring(index + 1, str.Length - index - 1));
-				info = new HostInfo(str.Substring(0, index), port);
-				return true;
-			}
-			catch (Exception)
-			{
-				info = default(HostInfo);
+			HostInfo output;
+			if (!TryParse(data, out output))
+				throw new FormatException();
+
+			return output;
+		}
+
+		public static bool TryParse(string data, out HostInfo info)
+		{
+			info = default(HostInfo);
+
+			Match match;
+			if (!RegexUtils.Matches(data, HOSTINFO_REGEX, out match))
 				return false;
-			}
+
+			string hostname = match.Groups["host"].Value;
+			ushort port = ushort.Parse(match.Groups["port"].Value);
+
+			info = new HostInfo(hostname, port);
+
+			return true;
 		}
 
 		#endregion
