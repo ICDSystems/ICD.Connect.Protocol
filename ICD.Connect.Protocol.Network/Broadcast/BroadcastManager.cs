@@ -197,6 +197,12 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			return new HostInfo(address, port);
 		}
 
+		public HostSessionInfo GetHostSessionInfo()
+		{
+			HostInfo host = GetHostInfo();
+			return new HostSessionInfo(host, Session);
+		}
+
 		#endregion
 
 		/// <summary>
@@ -210,12 +216,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			if (!m_UdpClient.IsConnected)
 				return;
 
-			BroadcastData broadcastData =
-				new BroadcastData
-				{
-					Source = GetHostInfo(),
-					Session = Session
-				};
+			BroadcastData broadcastData = new BroadcastData {HostSession = GetHostSessionInfo()};
 			broadcastData.SetData<object>(data);
 
 			string serial = broadcastData.Serialize();
@@ -350,7 +351,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			}
 
 			// Broadcast back to the place we got this advertisement from
-			AddBroadcastAddress(broadcastData.Source.Address);
+			AddBroadcastAddress(broadcastData.HostSession.Host.Address);
 
 			Type type = broadcastData.Type;
 			if (type != null && m_Broadcasters.ContainsKey(type))

@@ -1,9 +1,9 @@
 ﻿using System;
-using ICD.Connect.Protocol.Network.Broadcast;
+using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.Broadcast
+namespace ICD.Connect.Protocol.Tests.Ports
 {
 	[TestFixture]
 	public sealed class HostSessionInfoTest

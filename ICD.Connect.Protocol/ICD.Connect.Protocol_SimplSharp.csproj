@@ -92,6 +92,7 @@
     <Compile Include="Ports\DigitalInput\AbstractDigitalInputPortSettings.cs" />
     <Compile Include="Ports\DigitalInput\IDigitalInputPort.cs" />
     <Compile Include="Ports\DigitalInput\IDigitalInputPortSettings.cs" />
+    <Compile Include="Ports\HostSessionInfo.cs" />
     <Compile Include="Ports\IoPort\AbstractIoPortSettings.cs" />
     <Compile Include="Ports\IoPort\IIoPortSettings.cs" />
     <Compile Include="Ports\IPortSettings.cs" />

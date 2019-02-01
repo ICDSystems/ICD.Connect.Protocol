@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Protocol.Network.Broadcast;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
@@ -25,6 +26,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private readonly SafeCriticalSection m_MessageHandlersSection;
 
 		private readonly int m_SystemId;
+
+		private BroadcastManager m_BroadcastManager;
+
+		private BroadcastManager BroadcastManager
+		{
+			get { return m_BroadcastManager ?? (m_BroadcastManager = ServiceProvider.GetService<BroadcastManager>()); }
+		}
 
 		#region Constructors
 
@@ -195,6 +203,14 @@ namespace ICD.Connect.Protocol.Network.Direct
 			return NetworkUtils.GetLocalHostInfo(m_SystemId);
 		}
 
+		public HostSessionInfo GetHostSessionInfo()
+		{
+			HostInfo host = GetHostInfo();
+			Guid session = BroadcastManager.Session;
+
+			return new HostSessionInfo(host, session);
+		}
+
 		#endregion
 
 		#region Client Methods
@@ -204,7 +220,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
-		public void Send(HostInfo sendTo, IMessage message)
+		public void Send(HostSessionInfo sendTo, IMessage message)
 		{
 			if (message == null)
 				throw new ArgumentNullException("message");
@@ -218,7 +234,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
 		/// <param name="callback"></param>
-		public void Send(HostInfo sendTo, IMessage message, ClientBufferCallback callback)
+		public void Send(HostSessionInfo sendTo, IMessage message, ClientBufferCallback callback)
 		{
 			if (message == null)
 				throw new ArgumentNullException("message");
@@ -226,12 +242,12 @@ namespace ICD.Connect.Protocol.Network.Direct
 			Guid messageId = Guid.NewGuid();
 
 			message.MessageId = messageId;
-			message.MessageFrom = GetHostInfo();
+			message.MessageFrom = GetHostSessionInfo();
 			message.MessageTo = sendTo;
 
 			string data = message.Serialize();
 
-			AsyncTcpClient client = m_ClientPool.GetClient(sendTo);
+			AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
 			if (!client.IsConnected)
 				client.Connect();
 

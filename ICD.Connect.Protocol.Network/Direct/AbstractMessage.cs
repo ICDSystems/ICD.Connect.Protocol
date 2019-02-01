@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Connect.Protocol.Network.Broadcast;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,9 +15,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		public Guid MessageId { get; set; }
 
-		public HostInfo MessageFrom { get; set; }
+		public HostSessionInfo MessageFrom { get; set; }
 
-		public HostInfo MessageTo { get; set; }
+		public HostSessionInfo MessageTo { get; set; }
 
 		public string Serialize()
 		{

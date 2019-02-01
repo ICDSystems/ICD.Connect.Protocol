@@ -3,10 +3,9 @@ using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Json;
-using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 
-namespace ICD.Connect.Protocol.Network.Broadcast
+namespace ICD.Connect.Protocol.Ports
 {
 	[JsonConverter(typeof(ToStringJsonConverter))]
 	public struct HostSessionInfo : IEquatable<HostSessionInfo>
