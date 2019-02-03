@@ -302,9 +302,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				// Instantiate the new client
 				output = new AsyncTcpClient
 				{
-					Name = GetType().Name,
+					Name = string.Format("{0} ({1})", GetType().Name, host),
 					Address = host.Address,
-					Port = host.Port
+					Port = host.Port,
+					DebugRx = DebugRx,
+					DebugTx = DebugTx
 				};
 				Subscribe(output);
 				m_Clients.Add(host, output);
