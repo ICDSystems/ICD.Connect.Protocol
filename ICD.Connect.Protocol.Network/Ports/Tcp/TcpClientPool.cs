@@ -6,6 +6,8 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
@@ -13,7 +15,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 	/// <summary>
 	/// The TcpClientPool provides a way to share existing TCP clients.
 	/// </summary>
-	public sealed class TcpClientPool : IDisposable
+	public sealed class TcpClientPool : IDisposable, IConsoleNode
 	{
 		public delegate void ClientCallback(TcpClientPool sender, AsyncTcpClient client);
 
@@ -41,16 +43,84 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public event ClientSerialDataCallback OnClientSerialDataReceived;
 
-		private readonly Dictionary<string, AsyncTcpClient> m_Clients;
+		private readonly Dictionary<HostInfo, AsyncTcpClient> m_Clients;
 		private readonly Dictionary<AsyncTcpClient, SafeTimer> m_ClientDisposalTimers;
 		private readonly SafeCriticalSection m_ClientsSection;
+
+		private eDebugMode m_DebugRx;
+		private eDebugMode m_DebugTx;
+
+		#region Properties
+
+		/// <summary>
+		/// Gets the number of TCP clients.
+		/// </summary>
+		public int Count { get { return m_ClientsSection.Execute(() => m_Clients.Count); } }
+
+		/// <summary>
+		/// When enabled prints the received data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugRx
+		{
+			get { return m_ClientsSection.Execute(() => m_DebugRx); }
+			set
+			{
+				m_ClientsSection.Enter();
+
+				try
+				{
+					if (value == m_DebugRx)
+						return;
+
+					m_DebugRx = value;
+
+					foreach (AsyncTcpClient client in m_Clients.Values)
+						client.DebugRx = m_DebugRx;
+				}
+				finally
+				{
+					m_ClientsSection.Leave();
+				}
+			}
+		}
+
+		/// <summary>
+		/// When enabled prints the transmitted data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugTx
+		{
+			get { return m_ClientsSection.Execute(() => m_DebugTx); }
+			set
+			{
+				m_ClientsSection.Enter();
+
+				try
+				{
+					if (value == m_DebugTx)
+						return;
+
+					m_DebugTx = value;
+
+					foreach (AsyncTcpClient client in m_Clients.Values)
+						client.DebugTx = m_DebugTx;
+				}
+				finally
+				{
+					m_ClientsSection.Leave();
+				}
+			}
+		}
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public TcpClientPool()
 		{
-			m_Clients = new Dictionary<string, AsyncTcpClient>();
+			m_Clients = new Dictionary<HostInfo, AsyncTcpClient>();
 			m_ClientDisposalTimers = new Dictionary<AsyncTcpClient, SafeTimer>();
 			m_ClientsSection = new SafeCriticalSection();
 		}
@@ -71,35 +141,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void Clear()
 		{
-			string[] keys = m_ClientsSection.Execute(() => m_Clients.Keys.ToArray());
-			foreach (string key in keys)
-				RemoveClient(key);
-		}
-
-		/// <summary>
-		/// Retrieves the existing client with the given address:port.
-		/// If no client exists, creates a new one.
-		/// </summary>
-		/// <param name="address"></param>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public AsyncTcpClient GetClient(string address, ushort port)
-		{
-			string key = GetKey(address, port);
-
 			m_ClientsSection.Enter();
 
 			try
 			{
-				// Create a new client
-				if (!m_Clients.ContainsKey(key))
-					return InstantiateClient(address, port);
-
-				// Return the cached client
-				AsyncTcpClient client = m_Clients[key];
-				StopDisposeTimer(client);
-				return client;
+				HostInfo[] keys = m_Clients.Keys.ToArray();
+				foreach (HostInfo key in keys)
+					RemoveClient(key);
 			}
 			finally
 			{
@@ -116,20 +164,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public AsyncTcpClient GetClient(HostInfo host)
 		{
-			return GetClient(host.AddressOrLocalhost, host.Port);
-		}
+			m_ClientsSection.Enter();
 
-		/// <summary>
-		/// Removes the TCP client with the given address and port.
-		/// </summary>
-		/// <param name="address"></param>
-		/// <param name="port"></param>
-		/// <returns>True if the client exists and was removed.</returns>
-		[PublicAPI]
-		public bool RemoveClient(string address, ushort port)
-		{
-			string key = GetKey(address, port);
-			return RemoveClient(key);
+			try
+			{
+				AsyncTcpClient client = LazyLoadClient(host);
+				StopDisposeTimer(client);
+				return client;
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -140,6 +186,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public bool RemoveClient(AsyncTcpClient client)
 		{
+			if (client == null)
+				throw new ArgumentNullException("client");
+
 			Unsubscribe(client);
 
 			m_ClientsSection.Enter();
@@ -165,14 +214,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Removes and disposes the TCP client from the pool.
 		/// </summary>
 		/// <param name="client">True if the client exists and was removed and disposed.</param>
-		[PublicAPI]
-		public bool DisposeClient(AsyncTcpClient client)
+		private void DisposeClient(AsyncTcpClient client)
 		{
-			bool output = RemoveClient(client);
-			if (client != null)
-				client.Dispose();
+			if (client == null)
+				throw new ArgumentNullException("client");
 
-			return output;
+			RemoveClient(client);
+			client.Dispose();
 		}
 
 		/// <summary>
@@ -186,33 +234,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void DisposeClient(AsyncTcpClient client, long keepAlive)
 		{
-			RestartDisposeTimer(client, keepAlive);
-		}
+			if (client == null)
+				throw new ArgumentNullException("client");
 
-		#endregion
-
-		#region Private Methods
-
-		/// <summary>
-		/// Instantiates/restarts the dispose timer for the given client.
-		/// </summary>
-		/// <param name="client"></param>
-		/// <param name="keepAlive"></param>
-		private void RestartDisposeTimer(AsyncTcpClient client, long keepAlive)
-		{
 			m_ClientsSection.Enter();
 
 			try
 			{
-				if (!m_ClientDisposalTimers.ContainsKey(client))
-					m_ClientDisposalTimers[client] = SafeTimer.Stopped(() => DisposeClient(client));
-				m_ClientDisposalTimers[client].Reset(keepAlive);
+				SafeTimer timer;
+				if (!m_ClientDisposalTimers.TryGetValue(client, out timer))
+				{
+					timer = SafeTimer.Stopped(() => DisposeClient(client));
+					m_ClientDisposalTimers.Add(client, timer);
+				}
+
+				timer.Reset(keepAlive);
 			}
 			finally
 			{
 				m_ClientsSection.Leave();
 			}
 		}
+
+		#endregion
+
+		#region Private Methods
 
 		/// <summary>
 		/// If the client is currently scheduled for disposal we end the timer.
@@ -224,10 +270,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				if (!m_ClientDisposalTimers.ContainsKey(client))
+				SafeTimer timer;
+				if (!m_ClientDisposalTimers.TryGetValue(client, out timer))
 					return;
 
-				m_ClientDisposalTimers[client].Dispose();
+				timer.Dispose();
 				m_ClientDisposalTimers.Remove(client);
 			}
 			finally
@@ -239,27 +286,28 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <summary>
 		/// Instantiates a new client for this given address:port.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <param name="port"></param>
+		/// <param name="host"></param>
 		/// <returns></returns>
-		private AsyncTcpClient InstantiateClient(string address, ushort port)
+		private AsyncTcpClient LazyLoadClient(HostInfo host)
 		{
-			string key = GetKey(address, port);
 			AsyncTcpClient output;
 
 			m_ClientsSection.Enter();
 
 			try
 			{
+				if (m_Clients.TryGetValue(host, out output))
+					return output;
+
 				// Instantiate the new client
 				output = new AsyncTcpClient
 				{
 					Name = GetType().Name,
-					Address = address,
-					Port = port
+					Address = host.Address,
+					Port = host.Port
 				};
 				Subscribe(output);
-				m_Clients[key] = output;
+				m_Clients.Add(host, output);
 			}
 			finally
 			{
@@ -278,21 +326,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns>True if the client exists and was removed.</returns>
-		private bool RemoveClient(string key)
+		private void RemoveClient(HostInfo key)
 		{
-			AsyncTcpClient client = m_ClientsSection.Execute(() => m_Clients.GetDefault(key, null));
-			return RemoveClient(client);
-		}
+			m_ClientsSection.Enter();
 
-		/// <summary>
-		/// Generates a key for storing/retrieving TCP clients from the collection.
-		/// </summary>
-		/// <param name="address"></param>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		private static string GetKey(string address, ushort port)
-		{
-			return string.Format("{0}:{1}", address, port);
+			try
+			{
+				AsyncTcpClient client;
+				if (m_Clients.TryGetValue(key, out client))
+					RemoveClient(client);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 		}
 
 		#endregion
@@ -305,9 +352,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="client"></param>
 		private void Subscribe(AsyncTcpClient client)
 		{
-			if (client == null)
-				return;
-
 			client.OnConnectedStateChanged += ClientOnConnectedStateChanged;
 			client.OnSerialDataReceived += ClientOnSerialDataReceived;
 		}
@@ -318,9 +362,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="client"></param>
 		private void Unsubscribe(AsyncTcpClient client)
 		{
-			if (client == null)
-				return;
-
 			client.OnConnectedStateChanged -= ClientOnConnectedStateChanged;
 			client.OnSerialDataReceived -= ClientOnSerialDataReceived;
 		}
@@ -347,6 +388,102 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			ClientSerialDataCallback handler = OnClientSerialDataReceived;
 			if (handler != null)
 				handler(this, sender as AsyncTcpClient, args.Data);
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the name of the node.
+		/// </summary>
+		public string ConsoleName { get { return GetType().Name; } }
+
+		/// <summary>
+		/// Gets the help information for the node.
+		/// </summary>
+		public string ConsoleHelp { get { return string.Empty; } }
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			yield break;
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			addRow("Count", Count);
+			addRow("Debug Rx", DebugRx);
+			addRow("Debug Tx", DebugTx);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
+			                                () =>
+			                                {
+				                                SetTxDebugMode(eDebugMode.Ascii);
+				                                SetRxDebugMode(eDebugMode.Ascii);
+			                                });
+
+			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",
+			                                () =>
+			                                {
+				                                SetTxDebugMode(eDebugMode.Off);
+				                                SetRxDebugMode(eDebugMode.Off);
+			                                });
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugMode",
+			                                                p =>
+			                                                {
+				                                                SetTxDebugMode(p);
+				                                                SetRxDebugMode(p);
+			                                                });
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+
+			yield return new ConsoleCommand("PrintClients", "Prints a table of the pooled TCP clients", () => PrintClients());
+		}
+
+		private string PrintClients()
+		{
+			TableBuilder builder = new TableBuilder("Host", "Client");
+
+			m_ClientsSection.Enter();
+
+			try
+			{
+				foreach (KeyValuePair<HostInfo, AsyncTcpClient> kvp in m_Clients)
+					builder.AddRow(kvp.Key, kvp.Value);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
+
+			return builder.ToString();
+		}
+
+		private void SetTxDebugMode(eDebugMode mode)
+		{
+			DebugTx = mode;
+		}
+
+		private void SetRxDebugMode(eDebugMode mode)
+		{
+			DebugRx = mode;
 		}
 
 		#endregion

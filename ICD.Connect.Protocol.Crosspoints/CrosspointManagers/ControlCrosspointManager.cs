@@ -3,6 +3,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -485,6 +486,27 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			yield return m_ClientPool;
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		/// <summary>

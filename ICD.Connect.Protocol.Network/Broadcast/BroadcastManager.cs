@@ -382,9 +382,9 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("System ID", m_SystemId);
+			addRow("Host Session Info", GetHostSessionInfo());
 			addRow("Active", m_UdpClient.IsConnected);
 			addRow("Addresses", StringUtils.ArrayFormat(GetAdvertisementAddresses().Order()));
-			addRow("Host Info", GetHostInfo());
 		}
 
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()

@@ -4,6 +4,8 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Broadcast;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Utils;
@@ -14,7 +16,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 {
 	public delegate void ClientBufferCallback(IReply response);
 
-	public sealed class DirectMessageManager : IDisposable
+	public sealed class DirectMessageManager : IDisposable, IConsoleNode
 	{
 		private readonly TcpClientPool m_ClientPool;
 
@@ -347,6 +349,36 @@ namespace ICD.Connect.Protocol.Network.Direct
 				throw new ArgumentNullException("reply");
 
 			Send(reply.MessageTo, reply);
+		}
+
+		#endregion
+
+		#region Console
+
+		public string ConsoleName { get { return GetType().Name; } }
+
+		public string ConsoleHelp
+		{
+			get { return "Handles direct communication between Cores."; }
+		}
+
+		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			yield return m_ClientPool;
+			yield return m_Server;
+		}
+
+		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			addRow("System ID", m_SystemId);
+			addRow("Host Session Info", GetHostSessionInfo());
+			addRow("Active", m_Server.Active);
+		}
+
+		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			yield return new ConsoleCommand("Start", "Resumes receiving messages", () => Start());
+			yield return new ConsoleCommand("Stop", "Stops receiving messages", () => Stop());
 		}
 
 		#endregion
