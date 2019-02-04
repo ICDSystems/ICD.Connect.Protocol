@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	/// <summary>
-	/// The TcpServerBufferManager is reponsible for creating buffers for each new
-	/// client, and firing an event when complete data is receieved.
+	/// The TcpServerBufferManager is responsible for creating buffers for each new
+	/// client, and firing an event when complete data is received.
 	/// </summary>
 	[PublicAPI]
 	public sealed class TcpServerBufferManager : IDisposable
@@ -26,7 +25,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		public event ClientCompletedSerialCallback OnClientCompletedSerial;
 
 		private readonly Func<ISerialBuffer> m_BufferFactory;
-		private readonly Dictionary<uint, ISerialBuffer> m_Buffers;
+		private readonly BiDictionary<uint, ISerialBuffer> m_Buffers;
 		private readonly SafeCriticalSection m_BufferSection;
 
 		private AsyncTcpServer m_Server;
@@ -37,9 +36,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="bufferFactory"></param>
 		public TcpServerBufferManager(Func<ISerialBuffer> bufferFactory)
 		{
-			m_BufferFactory = bufferFactory;
-			m_Buffers = new Dictionary<uint, ISerialBuffer>();
+			if (bufferFactory == null)
+				throw new ArgumentNullException("bufferFactory");
+
+			m_Buffers = new BiDictionary<uint, ISerialBuffer>();
 			m_BufferSection = new SafeCriticalSection();
+
+			m_BufferFactory = bufferFactory;
 		}
 
 		#region Methods
@@ -61,15 +64,24 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void SetServer(AsyncTcpServer server)
 		{
-			if (server == m_Server)
-				return;
+			m_BufferSection.Enter();
 
-			Unsubscribe(m_Server);
+			try
+			{
+				if (server == m_Server)
+					return;
 
-			Clear();
-			m_Server = server;
+				Unsubscribe(m_Server);
 
-			Subscribe(m_Server);
+				Clear();
+				m_Server = server;
+
+				Subscribe(m_Server);
+			}
+			finally
+			{
+				m_BufferSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -78,9 +90,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void Clear()
 		{
-			uint[] clientIds = m_BufferSection.Execute(() => m_Buffers.Keys.ToArray());
-			foreach (uint clientId in clientIds)
-				RemoveBuffer(clientId);
+			m_BufferSection.Enter();
+
+			try
+			{
+				foreach (uint clientId in m_Buffers.Keys.ToArray())
+					RemoveBuffer(clientId);
+			}
+			finally
+			{
+				m_BufferSection.Leave();
+			}
 		}
 
 		#endregion
@@ -98,14 +118,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				if (!m_Buffers.ContainsKey(clientId))
+				ISerialBuffer buffer;
+				if (!m_Buffers.TryGetValue(clientId, out buffer))
 				{
-					ISerialBuffer buffer = m_BufferFactory();
-					m_Buffers[clientId] = buffer;
+					buffer = m_BufferFactory();
+					m_Buffers.Add(clientId, buffer);
 					Subscribe(buffer);
 				}
 
-				return m_Buffers[clientId];
+				return buffer;
 			}
 			finally
 			{
@@ -123,11 +144,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				if (!m_Buffers.ContainsKey(clientId))
+				ISerialBuffer buffer;
+				if (!m_Buffers.TryGetValue(clientId, out buffer))
 					return;
 
-				Unsubscribe(m_Buffers[clientId]);
-				m_Buffers.Remove(clientId);
+				Unsubscribe(buffer);
+				m_Buffers.RemoveKey(clientId);
 			}
 			finally
 			{
@@ -166,7 +188,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		}
 
 		/// <summary>
-		/// Called when we receieve data from a client.
+		/// Called when we receive data from a client.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
@@ -176,7 +198,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		}
 
 		/// <summary>
-		/// Called when 
+		/// Called when a client connects/disconnects.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
