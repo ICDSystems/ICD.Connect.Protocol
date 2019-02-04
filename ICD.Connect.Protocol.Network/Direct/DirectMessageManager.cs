@@ -102,6 +102,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			try
 			{
+				foreach (KeyValuePair<Guid, ClientBufferCallbackInfo> kvp in m_MessageCallbacks)
+					kvp.Value.Dispose();
 				m_MessageCallbacks.Clear();
 
 				foreach (IMessageHandler handler in m_MessageHandlers.Values)
@@ -390,7 +392,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
 				{
 					m_MessageCallbacks.Remove(reply.MessageId);
+
+					callbackInfo.StopTimer();
 					callbackInfo.HandleReply(reply);
+					callbackInfo.Dispose();
 				}
 
 				// Message handlers

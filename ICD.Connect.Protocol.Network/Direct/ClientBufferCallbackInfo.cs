@@ -47,5 +47,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			m_Timer.Reset(timeout);
 		}
+
+		/// <summary>
+		/// Stops the timeout timer.
+		/// </summary>
+		public void StopTimer()
+		{
+			m_Timer.Stop();
+		}
 	}
 }
