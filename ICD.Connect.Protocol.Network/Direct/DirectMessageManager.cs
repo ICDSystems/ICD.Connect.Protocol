@@ -250,7 +250,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (message == null)
 				throw new ArgumentNullException("message");
 
-			Send(sendTo, message, null, 0);
+			Send<IMessage, IReply>(sendTo, message, null, null, 0);
 		}
 
 		/// <summary>
@@ -258,9 +258,12 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// </summary>
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
-		/// <param name="callback"></param>
+		/// <param name="replyCallback"></param>
+		/// <param name="timeoutCallback"></param>
 		/// <param name="timeout"></param>
-		public void Send(HostSessionInfo sendTo, IMessage message, Action<IReply> callback, long timeout)
+		public void Send<TMessage, TReply>(HostSessionInfo sendTo, TMessage message, Action<TReply> replyCallback, Action<TMessage> timeoutCallback, long timeout)
+			where TMessage : IMessage
+			where TReply : IReply
 		{
 			if (message == null)
 				throw new ArgumentNullException("message");
@@ -281,10 +284,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 				if (!client.IsConnected)
 					client.Connect();
 
-				if (callback != null)
+				if (replyCallback != null)
 				{
 					ClientBufferCallbackInfo callbackInfo =
-						new ClientBufferCallbackInfo(message, callback, HandleReplyTimeout);
+						new ClientBufferCallbackInfo(message,
+						                             r => replyCallback((TReply)r),
+						                             m => HandleReplyTimeout((TMessage)m, timeoutCallback));
+
 					m_MessageCallbacks.Add(messageId, callbackInfo);
 					callbackInfo.ResetTimer(timeout);
 				}
@@ -301,7 +307,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Called when a message times out with no reply.
 		/// </summary>
 		/// <param name="message"></param>
-		private void HandleReplyTimeout(IMessage message)
+		/// <param name="timeoutCallback"></param>
+		private void HandleReplyTimeout<TMessage>(TMessage message, Action<TMessage> timeoutCallback)
+			where TMessage : IMessage
 		{
 			m_MessageHandlersSection.Enter();
 
@@ -316,6 +324,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 				callbackInfo.Dispose();
 
 				Logger.AddEntry(eSeverity.Error, "{0} - Message timed out - {1}", GetType().Name, message);
+
+				if (timeoutCallback != null)
+					timeoutCallback(message);
 			}
 			finally
 			{
