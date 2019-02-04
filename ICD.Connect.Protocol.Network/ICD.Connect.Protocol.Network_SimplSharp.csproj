@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Devices\SerialPortServer\SerialPortServerDevice.cs" />
     <Compile Include="Devices\SerialPortServer\SerialPortServerDeviceSettings.cs" />
+    <Compile Include="Direct\ClientBufferCallbackInfo.cs" />
     <Compile Include="Ports\AbstractNetworkPort.cs" />
     <Compile Include="Attributes\Rpc\RpcAttribute.cs" />
     <Compile Include="Broadcast\BroadcastData.cs" />

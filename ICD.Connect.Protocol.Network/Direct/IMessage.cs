@@ -1,6 +1,5 @@
 ﻿using System;
 using ICD.Connect.Protocol.Data;
-using ICD.Connect.Protocol.Network.Broadcast;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Direct

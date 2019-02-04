@@ -14,8 +14,6 @@ using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Network.Direct
 {
-	public delegate void ClientBufferCallback(IReply response);
-
 	public sealed class DirectMessageManager : IDisposable, IConsoleNode
 	{
 		private readonly TcpClientPool m_ClientPool;
@@ -23,18 +21,28 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private readonly AsyncTcpServer m_Server;
 		private readonly TcpServerBufferManager m_ServerBuffer;
 
-		private readonly Dictionary<Guid, ClientBufferCallback> m_MessageCallbacks;
+		private readonly Dictionary<Guid, ClientBufferCallbackInfo> m_MessageCallbacks;
 		private readonly Dictionary<Type, IMessageHandler> m_MessageHandlers;
 		private readonly SafeCriticalSection m_MessageHandlersSection;
 
 		private readonly int m_SystemId;
 
 		private BroadcastManager m_BroadcastManager;
+		private ILoggerService m_CachedLogger;
+
+		#region Properties
 
 		private BroadcastManager BroadcastManager
 		{
 			get { return m_BroadcastManager ?? (m_BroadcastManager = ServiceProvider.GetService<BroadcastManager>()); }
 		}
+
+		private ILoggerService Logger
+		{
+			get { return m_CachedLogger = m_CachedLogger ?? ServiceProvider.TryGetService<ILoggerService>(); }
+		}
+
+		#endregion
 
 		#region Constructors
 
@@ -56,21 +64,27 @@ namespace ICD.Connect.Protocol.Network.Direct
 		public DirectMessageManager(int systemId)
 		{
 			m_MessageHandlers = new Dictionary<Type, IMessageHandler>();
-			m_MessageCallbacks = new Dictionary<Guid, ClientBufferCallback>();
+			m_MessageCallbacks = new Dictionary<Guid, ClientBufferCallbackInfo>();
 			m_MessageHandlersSection = new SafeCriticalSection();
 
 			m_SystemId = systemId;
 
 			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
 			{
-				Name = GetType().Name
+				Name = GetType().Name,
+				DebugRx = eDebugMode.Ascii,
+				DebugTx = eDebugMode.Ascii
 			};
 
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
 			Subscribe(m_ServerBuffer);
 
-			m_ClientPool = new TcpClientPool();
+			m_ClientPool = new TcpClientPool
+			{
+				DebugRx = eDebugMode.Ascii,
+				DebugTx = eDebugMode.Ascii
+			};
 		}
 
 		#endregion
@@ -84,15 +98,24 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_ServerBuffer.Dispose();
 
-			m_MessageCallbacks.Clear();
+			m_MessageHandlersSection.Enter();
 
-			foreach (IMessageHandler handler in m_MessageHandlers.Values)
+			try
 			{
-				Unsubscribe(handler);
-				handler.Dispose();
-			}
+				m_MessageCallbacks.Clear();
 
-			m_MessageHandlers.Clear();
+				foreach (IMessageHandler handler in m_MessageHandlers.Values)
+				{
+					Unsubscribe(handler);
+					handler.Dispose();
+				}
+
+				m_MessageHandlers.Clear();
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 
 			m_Server.Dispose();
 			m_ClientPool.Dispose();
@@ -227,7 +250,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (message == null)
 				throw new ArgumentNullException("message");
 
-			Send(sendTo, message, null);
+			Send(sendTo, message, null, 0);
 		}
 
 		/// <summary>
@@ -236,7 +259,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="sendTo"></param>
 		/// <param name="message"></param>
 		/// <param name="callback"></param>
-		public void Send(HostSessionInfo sendTo, IMessage message, ClientBufferCallback callback)
+		/// <param name="timeout"></param>
+		public void Send(HostSessionInfo sendTo, IMessage message, Action<IReply> callback, long timeout)
 		{
 			if (message == null)
 				throw new ArgumentNullException("message");
@@ -258,9 +282,40 @@ namespace ICD.Connect.Protocol.Network.Direct
 					client.Connect();
 
 				if (callback != null)
-					m_MessageCallbacks.Add(messageId, callback);
+				{
+					ClientBufferCallbackInfo callbackInfo =
+						new ClientBufferCallbackInfo(message, callback, HandleReplyTimeout);
+					m_MessageCallbacks.Add(messageId, callbackInfo);
+					callbackInfo.ResetTimer(timeout);
+				}
 
 				client.Send(data);
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Called when a message times out with no reply.
+		/// </summary>
+		/// <param name="message"></param>
+		private void HandleReplyTimeout(IMessage message)
+		{
+			m_MessageHandlersSection.Enter();
+
+			try
+			{
+				ClientBufferCallbackInfo callbackInfo;
+				if (!m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
+					return;
+
+				m_MessageCallbacks.Remove(message.MessageId);
+
+				callbackInfo.Dispose();
+
+				Logger.AddEntry(eSeverity.Error, "{0} - Message timed out - {1}", GetType().Name, message);
 			}
 			finally
 			{
@@ -320,11 +375,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				// Handle reply callback
 				IReply reply = message as IReply;
-				ClientBufferCallback callback;
-				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callback))
+				ClientBufferCallbackInfo callbackInfo;
+				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
 				{
 					m_MessageCallbacks.Remove(reply.MessageId);
-					callback(reply);
+					callbackInfo.HandleReply(reply);
 				}
 
 				// Message handlers
