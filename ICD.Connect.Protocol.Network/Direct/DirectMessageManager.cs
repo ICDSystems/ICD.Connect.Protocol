@@ -249,14 +249,23 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			string data = message.Serialize();
 
-			AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
-			if (!client.IsConnected)
-				client.Connect();
+			m_MessageHandlersSection.Enter();
 
-			if (callback != null)
-				m_MessageCallbacks.Add(messageId, callback);
+			try
+			{
+				AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
+				if (!client.IsConnected)
+					client.Connect();
 
-			client.Send(data);
+				if (callback != null)
+					m_MessageCallbacks.Add(messageId, callback);
+
+				client.Send(data);
+			}
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 		}
 
 		#endregion
@@ -305,28 +314,37 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (message == null)
 				return;
 
-			// Handle reply callback
-			IReply reply = message as IReply;
-			ClientBufferCallback callback;
-			if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callback))
+			m_MessageHandlersSection.Enter();
+
+			try
 			{
-				m_MessageCallbacks.Remove(reply.MessageId);
-				callback(reply);
+				// Handle reply callback
+				IReply reply = message as IReply;
+				ClientBufferCallback callback;
+				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callback))
+				{
+					m_MessageCallbacks.Remove(reply.MessageId);
+					callback(reply);
+				}
+
+				// Message handlers
+				IMessageHandler handler;
+				if (!m_MessageHandlers.TryGetValue(message.GetType(), out handler) || handler == null)
+					return;
+
+				IReply response = handler.HandleMessage(message);
+				if (response == null)
+					return;
+
+				response.MessageId = message.MessageId;
+
+				// Send the reply to the initial sender
+				Send(message.MessageFrom, response);
 			}
-
-			// Message handlers
-			IMessageHandler handler;
-			if (!m_MessageHandlers.TryGetValue(message.GetType(), out handler) || handler == null)
-				return;
-
-			IReply response = handler.HandleMessage(message);
-			if (response == null)
-				return;
-
-			response.MessageId = message.MessageId;
-
-			// Send the reply to the initial sender
-			Send(message.MessageFrom, response);
+			finally
+			{
+				m_MessageHandlersSection.Leave();
+			}
 		}
 
 		#endregion
