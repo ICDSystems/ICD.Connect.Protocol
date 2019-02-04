@@ -1,5 +1,5 @@
 ﻿using System;
-using ICD.Connect.Protocol.Network.Broadcast;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,7 +11,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 	{
 		public const char DELIMITER = (char)0xff;
 
-		public string Type { get { return GetType().AssemblyQualifiedName; } }
+		public string Type { get { return GetType().GetNameWithoutAssemblyDetails(); } }
 
 		public Guid MessageId { get; set; }
 
@@ -21,7 +21,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		public string Serialize()
 		{
-			return JsonConvert.SerializeObject(this, Formatting.None, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) + DELIMITER;
+			return
+				JsonConvert.SerializeObject(this, Formatting.None,
+				                            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) + DELIMITER;
 		}
 
 		public static AbstractMessage Deserialize(string serial)
@@ -32,7 +34,9 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (type == null)
 				return null;
 
-			return JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto}) as AbstractMessage;
+			return
+				JsonConvert.DeserializeObject(serial, type, new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto})
+				as AbstractMessage;
 		}
 	}
 }
