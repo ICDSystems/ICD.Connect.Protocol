@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -115,6 +116,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 			m_ClientPool.Dispose();
 		}
 
+		#endregion
+
+		#region Methods
+
 		public void Start()
 		{
 			m_Server.Start();
@@ -124,6 +129,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			m_Server.Stop();
 		}
+
+		#endregion
 
 		#region Server Methods
 
@@ -145,7 +152,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 				if (m_MessageHandlers.ContainsKey(messageType))
 					throw new InvalidOperationException("Message handler already registered for type");
 
-				m_MessageHandlers[messageType] = handler;
+				m_MessageHandlers.Add(messageType, handler);
 				Subscribe(handler);
 			}
 			finally
@@ -209,7 +216,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 				if (m_MessageHandlers.TryGetValue(type, out handler))
 					return handler;
 
-				throw new KeyNotFoundException();
+				throw new KeyNotFoundException(string.Format("No message handler registered for messages of type {0}", type.Name));
 			}
 			finally
 			{
@@ -268,28 +275,51 @@ namespace ICD.Connect.Protocol.Network.Direct
 			message.MessageFrom = GetHostSessionInfo();
 			message.MessageTo = sendTo;
 
+			// Called AFTER assigning a message id
+			if (replyCallback != null)
+				ExpectReply(message, replyCallback, timeoutCallback, timeout);
+
 			string data = message.Serialize();
+
+			AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
+			if (!client.IsConnected)
+				client.Connect();
+
+			client.Send(data);
+		}
+
+		/// <summary>
+		/// Registers a reply callback with the given timeout duration.
+		/// </summary>
+		/// <typeparam name="TMessage"></typeparam>
+		/// <typeparam name="TReply"></typeparam>
+		/// <param name="message"></param>
+		/// <param name="replyCallback"></param>
+		/// <param name="timeoutCallback"></param>
+		/// <param name="timeout"></param>
+		private void ExpectReply<TMessage, TReply>(TMessage message, Action<TReply> replyCallback, Action<TMessage> timeoutCallback, long timeout)
+			where TMessage : IMessage
+			where TReply : IReply
+		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
+			if (replyCallback == null)
+				throw new ArgumentNullException("replyCallback");
 
 			m_MessageHandlersSection.Enter();
 
 			try
 			{
-				AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
-				if (!client.IsConnected)
-					client.Connect();
+				ClientBufferCallbackInfo callbackInfo =
+					new ClientBufferCallbackInfo(message,
+					                             r => replyCallback((TReply)r),
+					                             m => HandleReplyTimeout((TMessage)m, timeoutCallback));
 
-				if (replyCallback != null)
-				{
-					ClientBufferCallbackInfo callbackInfo =
-						new ClientBufferCallbackInfo(message,
-						                             r => replyCallback((TReply)r),
-						                             m => HandleReplyTimeout((TMessage)m, timeoutCallback));
+				m_MessageCallbacks.Add(message.MessageId, callbackInfo);
 
-					m_MessageCallbacks.Add(messageId, callbackInfo);
+				if (timeout > 0)
 					callbackInfo.ResetTimer(timeout);
-				}
-
-				client.Send(data);
 			}
 			finally
 			{
@@ -305,27 +335,27 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private void HandleReplyTimeout<TMessage>(TMessage message, Action<TMessage> timeoutCallback)
 			where TMessage : IMessage
 		{
+			ClientBufferCallbackInfo callbackInfo;
+
 			m_MessageHandlersSection.Enter();
 
 			try
 			{
-				ClientBufferCallbackInfo callbackInfo;
 				if (!m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
 					return;
 
 				m_MessageCallbacks.Remove(message.MessageId);
-
-				callbackInfo.Dispose();
-
-				Logger.AddEntry(eSeverity.Error, "{0} - Message timed out - {1}", GetType().Name, message);
-
-				if (timeoutCallback != null)
-					timeoutCallback(message);
 			}
 			finally
 			{
 				m_MessageHandlersSection.Leave();
 			}
+
+			callbackInfo.Dispose();
+
+			Logger.AddEntry(eSeverity.Error, "{0} - Message timed out - {1}", GetType().Name, message);
+			if (timeoutCallback != null)
+				timeoutCallback(message);
 		}
 
 		#endregion
@@ -358,7 +388,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="data"></param>
 		private void ServerBufferOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
 		{
-			AbstractMessage message = null;
+			IMessage message = null;
 
 			try
 			{
@@ -371,43 +401,56 @@ namespace ICD.Connect.Protocol.Network.Direct
 				                         GetType().Name, m_Server.GetClientInfo(clientId), e.Message, IcdEnvironment.NewLine, data);
 			}
 
+			if (message != null)
+				HandleMessage(message);
+		}
+
+		/// <summary>
+		/// Handles the deserialized message from a remote endpoint.
+		/// </summary>
+		/// <param name="message"></param>
+		private void HandleMessage(IMessage message)
+		{
 			if (message == null)
-				return;
+				throw new ArgumentNullException("message");
+
+			IReply reply = message as IReply;
+			IMessageHandler handler;
+			ClientBufferCallbackInfo callbackInfo = null;
 
 			m_MessageHandlersSection.Enter();
 
 			try
 			{
-				// Handle reply callback
-				IReply reply = message as IReply;
-				ClientBufferCallbackInfo callbackInfo;
 				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
 				{
-					m_MessageCallbacks.Remove(reply.MessageId);
-
 					callbackInfo.StopTimer();
-					callbackInfo.HandleReply(reply);
-					callbackInfo.Dispose();
+					m_MessageCallbacks.Remove(reply.MessageId);
 				}
 
-				// Message handlers
-				IMessageHandler handler;
-				if (!m_MessageHandlers.TryGetValue(message.GetType(), out handler) || handler == null)
-					return;
-
-				IReply response = handler.HandleMessage(message);
-				if (response == null)
-					return;
-
-				response.MessageId = message.MessageId;
-
-				// Send the reply to the initial sender
-				Send(message.MessageFrom, response);
+				handler = m_MessageHandlers.GetDefault(message.GetType());
 			}
 			finally
 			{
 				m_MessageHandlersSection.Leave();
 			}
+
+			// Handle expected reply
+			if (callbackInfo != null)
+			{
+				callbackInfo.HandleReply(reply);
+				callbackInfo.Dispose();
+			}
+
+			// Handle message
+			IReply response = handler == null ? null : handler.HandleMessage(message);
+			if (response == null)
+				return;
+
+			response.MessageId = message.MessageId;
+
+			// Send the reply to the initial sender
+			Send(message.MessageFrom, response);
 		}
 
 		#endregion
