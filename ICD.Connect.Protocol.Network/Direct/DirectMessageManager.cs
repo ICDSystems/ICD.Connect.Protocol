@@ -71,23 +71,15 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
 			{
-				Name = GetType().Name,
-				DebugRx = eDebugMode.Ascii,
-				DebugTx = eDebugMode.Ascii
+				Name = GetType().Name
 			};
 
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(AbstractMessage.DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
 			Subscribe(m_ServerBuffer);
 
-			m_ClientPool = new TcpClientPool
-			{
-				DebugRx = eDebugMode.Ascii,
-				DebugTx = eDebugMode.Ascii
-			};
+			m_ClientPool = new TcpClientPool();
 		}
-
-		#endregion
 
 		/// <summary>
 		/// Release resources.
