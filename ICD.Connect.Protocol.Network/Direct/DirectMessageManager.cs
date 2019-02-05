@@ -444,8 +444,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 			if (response == null)
 				return;
 
-			response.MessageId = message.MessageId;
-
 			// Send the reply to the initial sender
 			Send(message.MessageFrom, response);
 		}
