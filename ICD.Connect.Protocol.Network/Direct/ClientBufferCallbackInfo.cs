@@ -8,6 +8,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private readonly SafeTimer m_Timer;
 
 		private Action<IReply> m_HandleReply;
+		private bool m_Handled;
 
 		/// <summary>
 		/// Constructor.
@@ -18,7 +19,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		public ClientBufferCallbackInfo(IMessage message, Action<IReply> handleReply, Action<IMessage> handleTimeout)
 		{
 			m_HandleReply = handleReply;
-			m_Timer = SafeTimer.Stopped(() => handleTimeout(message));
+			m_Timer = SafeTimer.Stopped(() => HandleTimeout(message, handleTimeout));
 		}
 
 		/// <summary>
@@ -36,7 +37,17 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="reply"></param>
 		public void HandleReply(IReply reply)
 		{
+			m_Handled = true;
 			m_HandleReply(reply);
+		}
+
+		private void HandleTimeout(IMessage message, Action<IMessage> handleTimeout)
+		{
+			// Don't timeout if the reply has already been handled.
+			if (m_Handled)
+				return;
+
+			handleTimeout(message);
 		}
 
 		/// <summary>
@@ -46,14 +57,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		public void ResetTimer(long timeout)
 		{
 			m_Timer.Reset(timeout);
-		}
-
-		/// <summary>
-		/// Stops the timeout timer.
-		/// </summary>
-		public void StopTimer()
-		{
-			m_Timer.Stop();
 		}
 	}
 }

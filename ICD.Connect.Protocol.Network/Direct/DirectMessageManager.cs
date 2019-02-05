@@ -423,10 +423,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			try
 			{
 				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
-				{
-					callbackInfo.StopTimer();
 					m_MessageCallbacks.Remove(reply.MessageId);
-				}
 
 				handler = m_MessageHandlers.GetDefault(message.GetType());
 			}
