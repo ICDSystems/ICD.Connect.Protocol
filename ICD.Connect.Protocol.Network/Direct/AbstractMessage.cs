@@ -12,12 +12,16 @@ namespace ICD.Connect.Protocol.Network.Direct
 	{
 		public const char DELIMITER = (char)0xff;
 
+		[JsonProperty("t")]
 		public string Type { get { return GetType().GetNameWithoutAssemblyDetails(); } }
 
+		[JsonProperty("mi")]
 		public Guid MessageId { get; set; }
 
+		[JsonProperty("mf")]
 		public HostSessionInfo MessageFrom { get; set; }
 
+		[JsonProperty("mt")]
 		public HostSessionInfo MessageTo { get; set; }
 
 		public override string ToString()
@@ -39,7 +43,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			JObject obj = JObject.Parse(serial);
 
-			Type type = System.Type.GetType(obj.SelectToken("Type").ToString());
+			Type type = System.Type.GetType(obj.SelectToken("t").ToString());
 			if (type == null)
 				return null;
 
