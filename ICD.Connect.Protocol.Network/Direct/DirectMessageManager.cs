@@ -422,8 +422,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			try
 			{
-				if (reply != null && m_MessageCallbacks.TryGetValue(message.MessageId, out callbackInfo))
-					m_MessageCallbacks.Remove(reply.MessageId);
+				if (reply != null && m_MessageCallbacks.TryGetValue(reply.OriginalMessageId, out callbackInfo))
+					m_MessageCallbacks.Remove(reply.OriginalMessageId);
 
 				handler = m_MessageHandlers.GetDefault(message.GetType());
 			}
@@ -445,6 +445,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 				return;
 
 			// Send the reply to the initial sender
+			response.OriginalMessageId = message.MessageId;
 			Send(message.MessageFrom, response);
 		}
 
