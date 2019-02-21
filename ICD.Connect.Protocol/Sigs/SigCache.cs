@@ -62,13 +62,18 @@ namespace ICD.Connect.Protocol.Sigs
 				sigTypes.Add(item.SmartObject, smartObjects);
 			}
 
-			if (smartObjects.ContainsKey(item.Number))
-				return false;
-
-			smartObjects.Add(item.Number, item.GetValue());
-			m_Count++;
-
-			return true;
+			if (!smartObjects.ContainsKey(item.Number))
+			{
+				smartObjects.Add(item.Number, item.GetValue());
+				m_Count++;
+				return true;
+			}
+			else if (smartObjects[item.Number] != item.GetValue())
+			{
+				smartObjects[item.Number] = item.GetValue();
+				return true;
+			}
+			return false;
 		}
 
 		public void AddRange(IEnumerable<SigInfo> sigs)
