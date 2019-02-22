@@ -46,6 +46,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private long m_Timeout = 3000;
 		private int m_MaxTimeoutCount = 5;
 		private int m_TimeoutCount;
+		private ISerialData m_CurrentCommand;
+		private bool m_IsCommandInProgress;
 
 		#region Properties
 
@@ -89,12 +91,26 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <summary>
 		/// Gets if the queue is currently waiting on the response to a command
 		/// </summary>
-		public bool IsCommandInProgress { get; private set; }
+		public bool IsCommandInProgress
+		{
+			get { return m_IsCommandInProgress; }
+			private set
+			{
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Command In Progress {0}", value);
+				m_IsCommandInProgress = value;
+			}
+		}
 
 		/// <summary>
 		/// Gets the command currently running
 		/// </summary>
-		public ISerialData CurrentCommand { get; protected set; }
+		public ISerialData CurrentCommand { get { return m_CurrentCommand; }
+			protected set
+			{
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Current Command {0}", value);
+				m_CurrentCommand = value;
+			} 
+		}
 
 		#endregion
 
@@ -331,6 +347,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 					if (Port != null)
 					{
 						bool output = Port.Send(CurrentCommand.Serialize());
+						IcdConsole.PrintLine(eConsoleColor.Magenta, "Send Command {0}", CurrentCommand);
 						if (!output)
 							return false;
 
@@ -372,6 +389,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			m_TimeoutCount++;
 
+			IcdConsole.PrintLine(eConsoleColor.Magenta, "Command Timed Out");
 			FinishCommand(command => OnTimeout.Raise(this, new SerialDataEventArgs(command)));
 		}
 
@@ -395,6 +413,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 			try
 			{
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Command Finished {0}", command);
 				// Fire the event to allow devices to prioritize commands.
 				callback(command);
 			}
