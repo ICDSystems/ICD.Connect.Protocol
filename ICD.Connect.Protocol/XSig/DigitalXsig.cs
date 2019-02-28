@@ -137,7 +137,19 @@ namespace ICD.Connect.Protocol.XSig
 		/// <returns>SigInfo for the XSig</returns>
 		public SigInfo ToSigInfo(ushort smartObjectId)
 		{
-			return new SigInfo(Index, smartObjectId, Value);
+			return ToSigInfo(smartObjectId, 0);
+		}
+
+		/// <summary>
+		/// Convert XSig to SigInfo
+		/// Using the given SmartObjectId and Offset
+		/// </summary>
+		/// <param name="smartObjectId">SmartObjectId</param>
+		/// <param name="offset"></param>
+		/// <returns>SigInfo for the XSig</returns>
+		public SigInfo ToSigInfo(ushort smartObjectId, int offset)
+		{
+			return new SigInfo((ushort)(Index + offset), smartObjectId, Value);
 		}
 
 		#region Private Methods

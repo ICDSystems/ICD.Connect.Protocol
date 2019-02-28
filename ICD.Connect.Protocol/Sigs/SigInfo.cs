@@ -276,21 +276,33 @@ namespace ICD.Connect.Protocol.Sigs
 		#region Serialization
 
 		/// <summary>
-		/// Serializes the sig to Crestron XSig format.
+		/// Serializes the sig to Crestron XSig format.  Name and SmartObjectId are ignored.
 		/// </summary>
 		/// <returns></returns>
 		public string ToXSig()
 		{
+			return ToXSig(0);
+		}
+
+		/// <summary>
+		/// Serializes the sig to Crestron XSig format.  Name and SmartObjectId are ignored.
+		/// Offset value is added to the sig number
+		/// Use a negative offset to remove from the sig number
+		/// </summary>
+		/// <param name="offset"></param>
+		/// <returns></returns>
+		public string ToXSig(int offset)
+		{
 			switch (m_Type)
 			{
 				case eSigType.Digital:
-					return new DigitalXSig(m_BoolValue, (ushort)m_Number).DataXSig;
+					return new DigitalXSig(m_BoolValue, (ushort)(m_Number + offset)).DataXSig;
 
 				case eSigType.Analog:
-					return new AnalogXSig(m_UshortValue, (ushort)m_Number).DataXSig;
+					return new AnalogXSig(m_UshortValue, (ushort)(m_Number + offset)).DataXSig;
 
 				case eSigType.Serial:
-					return new SerialXSig(m_StringValue, (ushort)m_Number).DataXSig;
+					return new SerialXSig(m_StringValue, (ushort)(m_Number + offset)).DataXSig;
 
 				default:
 					throw new ArgumentOutOfRangeException();

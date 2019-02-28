@@ -22,6 +22,8 @@ namespace ICD.Connect.Protocol.XSig
 		SigInfo ToSigInfo();
 
 		SigInfo ToSigInfo(ushort smartObjectId);
+
+		SigInfo ToSigInfo(ushort smartObjectId, int offset);
 	}
 
 	public interface IXSig<T> : IXSig
