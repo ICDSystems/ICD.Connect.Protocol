@@ -62,11 +62,17 @@ namespace ICD.Connect.Protocol.Sigs
 				sigTypes.Add(item.SmartObject, smartObjects);
 			}
 
-			if (smartObjects.ContainsKey(item.Number))
+			if (!smartObjects.ContainsKey(item.Number))
+			{
+				smartObjects.Add(item.Number, item.GetValue());
+				m_Count++;
+				return true;
+			}
+
+			if (smartObjects[item.Number] == item.GetValue())
 				return false;
 
-			smartObjects.Add(item.Number, item.GetValue());
-			m_Count++;
+			smartObjects[item.Number] = item.GetValue();
 
 			return true;
 		}
