@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.EventArguments;
-using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Nodes;
+﻿using ICD.Common.Utils;
 using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
@@ -15,36 +7,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 	/// EquipmentCrosspoints typically represent a piece of hardware like
 	/// a lighting system, or HVAC.
 	/// </summary>
-	public sealed class EquipmentCrosspoint : AbstractCrosspoint, IEquipmentCrosspoint
+	public sealed class EquipmentCrosspoint : AbstractEquipmentCrosspoint
 	{
-		private readonly IcdHashSet<int> m_ControlCrosspoints;
-		private readonly SafeCriticalSection m_ControlCrosspointsSection;
-
 		// We cache changed sigs to send to controls on connect.
 		private readonly SigCache m_SigCache;
 		private readonly SafeCriticalSection m_SigCacheSection;
-
-		public event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
-
-		#region Properties
-
-		/// <summary>
-		/// Gets the ids for the control crosspoints that are currently connected to this equipment.
-		/// </summary>
-		public IEnumerable<int> ControlCrosspoints
-		{
-			get { return m_ControlCrosspointsSection.Execute(() => m_ControlCrosspoints.Order().ToArray()); }
-		}
-
-		/// <summary>
-		/// Gets the number of connected control crosspoints.
-		/// </summary>
-		public int ControlCrosspointsCount
-		{
-			get { return m_ControlCrosspointsSection.Execute(() => m_ControlCrosspoints.Count); }
-		}
-
-		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -54,9 +21,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		public EquipmentCrosspoint(int id, string name)
 			: base(id, name)
 		{
-			m_ControlCrosspoints = new IcdHashSet<int>();
-			m_ControlCrosspointsSection = new SafeCriticalSection();
-
 			m_SigCache = new SigCache();
 			m_SigCacheSection = new SafeCriticalSection();
 		}
@@ -85,114 +49,22 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			base.PreSendInputData(data);
 		}
 
-		/// <summary>
-		/// Typically called once a control has connected to this equipment, Initialize
-		/// sets some initial values on the given control.
-		/// </summary>
-		/// <param name="controlId"></param>
-		public void Initialize(int controlId)
-		{
-			CrosspointData connect;
-
-			m_ControlCrosspointsSection.Enter();
-
-			try
-			{
-				if (!m_ControlCrosspoints.Add(controlId))
-					return;
-
-				Logger.AddEntry(eSeverity.Informational, "{0} added connected control {1}", this, controlId);
-
-				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
-				if (ControlCrosspointsCount > 0)
-					Status = eCrosspointStatus.Connected;
-
-				connect = CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
-			}
-			finally
-			{
-				m_ControlCrosspointsSection.Leave();
-			}
-
-			SendInputData(connect);
-		}
-
-		/// <summary>
-		/// Removes the control from the internal collection of control crosspoints.
-		/// </summary>
-		/// <param name="controlId"></param>
-		public void Deinitialize(int controlId)
-		{
-			CrosspointData disconnect;
-
-			m_ControlCrosspointsSection.Enter();
-
-			try
-			{
-				if (!m_ControlCrosspoints.Remove(controlId))
-					return;
-
-				Logger.AddEntry(eSeverity.Informational, "{0} removed connected control {1}", this, controlId);
-
-				OnControlCrosspointCountChanged.Raise(this, new IntEventArgs(ControlCrosspointsCount));
-				if (ControlCrosspointsCount <= 0)
-					Status = eCrosspointStatus.Idle;
-
-				disconnect = CrosspointData.EquipmentDisconnect(controlId, Id);
-			}
-			finally
-			{
-				m_ControlCrosspointsSection.Leave();
-			}
-
-			SendInputData(disconnect);
-		}
-
-		/// <summary>
-		/// Disconnects the equipment from all currently connected controls.
-		/// </summary>
-		public void Deinitialize()
-		{
-			int[] controls = ControlCrosspoints.ToArray();
-			foreach (int controlId in controls)
-				Deinitialize(controlId);
-		}
-
 		#endregion
 
 		#region Private Methods
 
-		/// <summary>
-		/// Gets the source control or the destination controls for a message originating from this crosspoint.
-		/// </summary>
-		/// <returns></returns>
-		protected override IEnumerable<int> GetControlsForMessage()
+		protected override CrosspointData GetConnectCrosspointData(int controlId)
 		{
-			return m_ControlCrosspointsSection.Execute(() => m_ControlCrosspoints.ToArray());
-		}
+			m_SigCacheSection.Enter();
 
-		/// <summary>
-		/// Gets the source equipment or destination equipment for a message originating from this crosspoint.
-		/// </summary>
-		/// <returns></returns>
-		protected override int GetEquipmentForMessage()
-		{
-			return Id;
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("Connected Equipment", StringUtils.ArrayFormat(ControlCrosspoints));
+			try
+			{
+				return CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
+			}
+			finally
+			{
+				m_SigCacheSection.Leave();
+			}
 		}
 
 		protected override string PrintSigs()

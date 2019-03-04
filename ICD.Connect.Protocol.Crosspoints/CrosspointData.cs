@@ -118,6 +118,18 @@ namespace ICD.Connect.Protocol.Crosspoints
 		}
 
 		/// <summary>
+		/// Creates an equipment connect message.
+		/// </summary>
+		/// <param name="controlId"></param>
+		/// <param name="equipmentId"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static CrosspointData EquipmentConnect(int controlId, int equipmentId)
+		{
+			return CreateMessage(controlId, equipmentId, eMessageType.EquipmentConnect);
+		}
+
+		/// <summary>
 		/// Creates an equipment connect message. Sends the current status of the equipment to the control.
 		/// </summary>
 		/// <param name="controlId"></param>

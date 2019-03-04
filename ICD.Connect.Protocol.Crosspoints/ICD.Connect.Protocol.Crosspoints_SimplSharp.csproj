@@ -76,6 +76,8 @@
     <Compile Include="Advertisements\AdvertisementManager.cs" />
     <Compile Include="Converters\CrosspointDataConverter.cs" />
     <Compile Include="CrosspointSystemEventArgs.cs" />
+    <Compile Include="Crosspoints\AbstractEquipmentCrosspoint.cs" />
+    <Compile Include="Crosspoints\NonCachingEquipmentCrosspoint.cs" />
     <Compile Include="EventArguments\CrosspointStatusEventArgs.cs" />
     <Compile Include="CrosspointManagers\AbstractCrosspointManager.cs" />
     <Compile Include="CrosspointManagers\ControlCrosspointManager.cs" />
