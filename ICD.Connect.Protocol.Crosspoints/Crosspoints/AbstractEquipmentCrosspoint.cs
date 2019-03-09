@@ -17,6 +17,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 		public event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
 
+		public event EventHandler<IntEventArgs> OnControlCrosspointConnected;
+
+		public event EventHandler<IntEventArgs> OnControlCrosspointDisconnected;
+
 		#region Properties
 
 		/// <summary>
@@ -42,7 +46,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="name"></param>
-		public AbstractEquipmentCrosspoint(int id, string name)
+		protected AbstractEquipmentCrosspoint(int id, string name)
 			: base(id, name)
 		{
 			m_ControlCrosspoints = new IcdHashSet<int>();
@@ -81,6 +85,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			}
 
 			SendInputData(connect);
+
+			OnControlCrosspointConnected.Raise(this, new IntEventArgs(controlId));
 		}
 
 		/// <summary>
@@ -112,6 +118,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			}
 
 			SendInputData(disconnect);
+
+			OnControlCrosspointDisconnected.Raise(this, new IntEventArgs(controlId));
 		}
 
 		/// <summary>
