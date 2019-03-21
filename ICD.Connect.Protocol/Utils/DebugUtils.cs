@@ -11,6 +11,16 @@ namespace ICD.Connect.Protocol.Utils
 		private const string RX = "RX";
 		private const string TX = "TX";
 
+		private static readonly SafeCriticalSection s_LoggingSection;
+
+		/// <summary>
+		/// Static constructor.
+		/// </summary>
+		static DebugUtils()
+		{
+			s_LoggingSection = new SafeCriticalSection();
+		}
+
 		/// <summary>
 		/// Formats and prints the received data to the console.
 		/// Does nothing if mode is off.
@@ -82,11 +92,20 @@ namespace ICD.Connect.Protocol.Utils
 			// Massage the data
 			data = FormatData(data, mode);
 
-			// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-			IcdConsole.Print("{0} {1}", instance, context);
-			IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
-			IcdConsole.Print("({0}) - {1}", modeString, data);
-			IcdConsole.PrintLine(string.Empty);
+			s_LoggingSection.Enter();
+
+			try
+			{
+				// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
+				IcdConsole.Print("{0} {1}", instance, context);
+				IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
+				IcdConsole.Print("({0}) - {1}", modeString, data);
+				IcdConsole.PrintLine(string.Empty);
+			}
+			finally
+			{
+				s_LoggingSection.Leave();
+			}
 		}
 
 		/// <summary>
