@@ -52,12 +52,10 @@ namespace ICD.Connect.Protocol
 			get { return m_IsConnected; }
 			private set
 			{
-				if(m_IsConnected == value)
+				if (m_IsConnected == value)
 					return;
 
 				m_IsConnected = value;
-
-				IcdConsole.PrintLine(eConsoleColor.Magenta, "{0} IsConnected set to {1}", this, m_IsConnected);
 
 				OnConnectedStateChanged.Raise(this, new BoolEventArgs(value));
 			}
