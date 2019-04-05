@@ -371,7 +371,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 
 			SetLastRequestSucceeded(success);
-			PrintRx(result);
+
+			if (!string.IsNullOrEmpty(result))
+				PrintRx(result);
 
 			return success;
 		}
