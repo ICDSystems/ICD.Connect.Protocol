@@ -119,6 +119,9 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			Password = settings.Password;
 			Username = settings.Username;
 			Accept = settings.Accept ?? DEFAULT_ACCEPT;
+
+			// Reset the online state
+			SetLastRequestSucceeded(true);
 		}
 
 		#endregion

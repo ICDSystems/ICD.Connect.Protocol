@@ -141,8 +141,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <param name="response"></param>
 		public bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
 		{
-			bool success;
-
 			m_ClientBusySection.Enter();
 
 			try
@@ -169,7 +167,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 						}	
 					}
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 				else
 				{
@@ -189,17 +187,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 						}
 					}
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
-
-			SetLastRequestSucceeded(success);
-			PrintRx(response);
-			return success;
 		}
 
 		/// <summary>
@@ -211,8 +205,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		public bool Post(string localUrl, byte[] data, out string response)
 		{
-			bool success;
-
 			m_ClientBusySection.Enter();
 
 			try
@@ -234,7 +226,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 				else
 				{
@@ -249,17 +241,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
-
-			SetLastRequestSucceeded(success);
-			PrintRx(response);
-			return success;
 		}
 
 		/// <summary>
@@ -271,8 +259,6 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		/// <returns></returns>
 		public bool DispatchSoap(string action, string content, out string response)
 		{
-			bool success;
-
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
@@ -293,7 +279,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 				else
 				{
@@ -306,18 +292,13 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 					};
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-					success = Dispatch(request, out response);
+					return Dispatch(request, out response);
 				}
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
-
-			SetLastRequestSucceeded(success);
-			PrintRx(response);
-
-			return success;
 		}
 
 		#endregion
@@ -358,6 +339,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private bool Dispatch(HttpsClientRequest request, out string result)
 		{
 			result = null;
+			bool success = false;
 
 			m_ClientBusySection.Enter();
 
@@ -368,21 +350,32 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
-					return false;
 				}
+				else
+				{
+					result = response.ContentString;
 
-				result = response.ContentString;
-
-				if (response.Code < 300)
-					return true;
-
-				Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
-				return false;
+					if (response.Code < 300)
+						success = true;
+					else
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+				}
+			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "{0} threw {0} - {1}", request.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(success);
+
+			if (!string.IsNullOrEmpty(result))
+				PrintRx(result);
+
+			return success;
 		}
 
 		/// <summary>
@@ -394,6 +387,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 		private bool Dispatch(HttpClientRequest request, out string result)
 		{
 			result = null;
+			bool success = false;
 
 			m_ClientBusySection.Enter();
 
@@ -404,22 +398,32 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 				if (response == null)
 				{
 					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
-					return false;
 				}
-
-				if (response.Code < 300)
+				else
 				{
 					result = response.ContentString;
-					return true;
-				}
 
-				Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
-				return false;
+					if (response.Code < 300)
+						success = true;
+					else
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+				}
+			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "{0} threw {0} - {1}", request.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(success);
+
+			if (!string.IsNullOrEmpty(result))
+				PrintRx(result);
+
+			return success;
 		}
 	}
 }
