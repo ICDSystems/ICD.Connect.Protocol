@@ -303,6 +303,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 		#endregion
 
+		#region Private Methods
+
 		/// <summary>
 		/// Returns true if the given address is a https url.
 		/// </summary>
@@ -363,7 +365,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {0} - {1}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
@@ -411,7 +413,7 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {0} - {1}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
@@ -425,6 +427,8 @@ namespace ICD.Connect.Protocol.Network.WebPorts
 
 			return success;
 		}
+
+		#endregion
 	}
 }
 
