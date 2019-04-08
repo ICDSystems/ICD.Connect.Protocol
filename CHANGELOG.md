@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed ComPortPlus and other unused code
 
+## [7.3.1] - 2019-04-05
+### Changed
+ - Better HttpPort online state tracking when a request dispatch fails
+ - Better thread safety for port debugging
+
 ## [7.3.0] - 2019-01-02
 ### Changed
  - AbstractSerialQueue clears IsCommandInProgress when clearing queue.

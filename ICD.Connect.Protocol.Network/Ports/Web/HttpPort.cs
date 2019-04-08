@@ -131,6 +131,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ApplySettingsFinal(settings, factory);
 
 			ApplyConfiguration();
+
+			// Reset the online state
+			SetLastRequestSucceeded(true);
 		}
 
 		#endregion
