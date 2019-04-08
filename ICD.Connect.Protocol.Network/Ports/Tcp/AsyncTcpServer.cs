@@ -17,6 +17,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 	public sealed partial class AsyncTcpServer : IConsoleNode, IDisposable
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
+		private const ushort DEFAULT_PORT = 23;
 		private const int DEFAULT_MAX_NUMBER_OF_CLIENTS = 1;
 		private const int DEFAULT_BUFFER_SIZE = 16384;
 
@@ -119,7 +120,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		[PublicAPI]
 		public AsyncTcpServer()
-			: this(0)
+			: this(DEFAULT_PORT)
 		{
 		}
 
