@@ -96,7 +96,7 @@ namespace ICD.Connect.Protocol.Utils
 
 			try
 			{
-				// "Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
+				// "[App 1] Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
 				IcdConsole.Print("[App {0}] {1} {2}", ProgramUtils.ProgramNumber, instance, context);
 				IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
 				IcdConsole.Print("({0}) - {1}", modeString, data);
