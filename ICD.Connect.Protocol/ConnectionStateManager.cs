@@ -86,11 +86,38 @@ namespace ICD.Connect.Protocol
 		#region Methods
 
 		/// <summary>
+		/// Start monitoring the state of the connection.
+		/// </summary>
+		public void Start()
+		{
+			m_Heartbeat.StartMonitoring();
+		}
+
+		/// <summary>
+		/// Stop monitoring the state of the connection.
+		/// </summary>
+		public void Stop()
+		{
+			m_Heartbeat.StopMonitoring();
+		}
+
+		/// <summary>
 		/// Sets the port for communicating with the remote endpoint.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
+		{
+			SetPort(port, true);
+		}
+
+		/// <summary>
+		/// Sets the port for communicating with the remote endpoint.
+		/// </summary>
+		/// <param name="port"></param>
+		/// <param name="monitor"></param>
+		[PublicAPI]
+		public void SetPort(ISerialPort port, bool monitor)
 		{
 			if (port == m_Port)
 				return;
@@ -98,7 +125,7 @@ namespace ICD.Connect.Protocol
 			if (ConfigurePort != null)
 				ConfigurePort(port);
 
-			m_Heartbeat.StopMonitoring();
+			Stop();
 
 			if (m_Port != null)
 				Disconnect();
@@ -107,8 +134,8 @@ namespace ICD.Connect.Protocol
 			m_Port = port;
 			Subscribe(m_Port);
 
-			if (m_Port != null)
-				m_Heartbeat.StartMonitoring();
+			if (monitor && m_Port != null)
+				Start();
 		}
 
 		[PublicAPI]
