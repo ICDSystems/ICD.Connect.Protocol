@@ -33,6 +33,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		private ConnectionInfo m_ConnectionInfo;
 		private ShellStream m_SshStream;
 		private SshClient m_SshClient;
+		private string m_Address;
 
 		#region Properties
 
@@ -57,7 +58,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// Gets/sets the address.
 		/// </summary>
 		[PublicAPI]
-		public override string Address { get; set; }
+		public override string Address
+		{
+			get { return m_Address; }
+			set
+			{
+				// Renci SSH doesn't resolve "localhost" properly
+				// https://stackoverflow.com/a/40715297/3058663
+				m_Address =
+					string.Equals(value, "localhost", StringComparison.OrdinalIgnoreCase)
+						? "127.0.0.1"
+						: value;
+			}
+		}
 
 		/// <summary>
 		/// Gets/sets the port.

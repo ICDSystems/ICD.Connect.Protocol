@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - SSH converts "localhost" address to "127.0.0.1" due to host resolution failing
+
 ## [8.1.0] - 2019-01-29
 ### Added
  - Added program number to port debug lines
