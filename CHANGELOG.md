@@ -6,8 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.2.0] - 2019-04-16
+### Added
+ - Broadcasts contain a session id
+ - Adding BufferSize property to AsyncTcpServer, setting large default
+ - Exposing features for starting/stopping ConnectionStateManager heartbeat
+
 ### Changed
+ - Better logging for malformed direct messages
+ - Fixed SigCache issue for existing keys with new values
+ - AsyncTcpServer has a default port
  - SSH converts "localhost" address to "127.0.0.1" due to host resolution failing
+
+### Removed
+ - Removing client disconnect hooks from message handlers, not relevant to consumers
 
 ## [8.1.0] - 2019-01-29
 ### Added
