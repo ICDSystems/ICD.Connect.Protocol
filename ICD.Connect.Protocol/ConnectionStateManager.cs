@@ -143,7 +143,7 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to connect, port is null");
+				Log(eSeverity.Critical, "Unable to connect - Port is null");
 				return;
 			}
 
@@ -155,7 +155,7 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to disconnect, port is null");
+				Log(eSeverity.Critical, "Unable to disconnect - Port is null");
 				return;
 			}
 
@@ -166,14 +166,14 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to send data, port is null");
+				Log(eSeverity.Critical, "Unable to send data - Port is null");
 				return false;
 			}
 
 			if (m_Port.IsConnected)
 				return m_Port.Send(data);
 
-			Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
+			Log(eSeverity.Error, "Unable to send command to {0} - Port is not connected", m_Parent);
 			return false;
 		}
 
