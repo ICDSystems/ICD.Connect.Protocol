@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - AsyncTcpServer on .NET Standard now properly removes disconnected clients when reading 0 byte packets
+ - Fixed mistake that was preventing URI paths from being applied to web ports
 
 ## [8.2.0] - 2019-04-16
 ### Added
