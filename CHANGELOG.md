@@ -5,9 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.2.1] - 2019-05-02
 ### Changed
  - AsyncTcpServer on .NET Standard now properly removes disconnected clients when reading 0 byte packets
  - Fixed mistake that was preventing URI paths from being applied to web ports
+ - Failing more gracefully when handling invalid URIs
+ - Treating empty URI XML elements as null
 
 ## [8.2.0] - 2019-04-16
 ### Added
