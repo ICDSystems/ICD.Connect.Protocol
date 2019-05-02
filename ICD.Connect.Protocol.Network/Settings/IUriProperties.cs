@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
@@ -149,6 +150,66 @@ namespace ICD.Connect.Protocol.Network.Settings
 									  other.UriFragment);
 
 			return output;
+		}
+
+		/// <summary>
+		/// Builds a URI from the configured URI properties.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static Uri GetUri(this IUriProperties extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			IcdUriBuilder builder = new IcdUriBuilder
+			{
+				Fragment = extends.UriFragment,
+				Host = extends.UriHost,
+				Password = extends.UriPassword,
+				Path = extends.UriPath,
+				Port = extends.UriPort ?? 0,
+				Query = extends.UriQuery,
+				Scheme = extends.UriScheme,
+				UserName = extends.UriUsername
+			};
+
+			return builder.Uri;
+		}
+
+		/// <summary>
+		/// Builds an address string from the configured URI information.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static string GetAddress(this IUriProperties extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetUri().ToString();
+		}
+
+		/// <summary>
+		/// Sets URI information from the given address.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="address"></param>
+		public static void SetUriFromAddress(this IUriProperties extends, string address)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			Uri uri = new Uri(address, UriKind.RelativeOrAbsolute);
+
+			extends.UriFragment = uri.Fragment;
+			extends.UriHost = uri.Host;
+			extends.UriPassword = uri.GetPassword();
+			extends.UriPath = uri.AbsolutePath;
+			extends.UriPort = (ushort)uri.Port;
+			extends.UriQuery = uri.Query;
+			extends.UriScheme = uri.Scheme;
+			extends.UriUsername = uri.GetUserName();
 		}
 
 		/// <summary>
