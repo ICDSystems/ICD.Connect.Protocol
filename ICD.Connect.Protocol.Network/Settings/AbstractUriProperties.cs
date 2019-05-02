@@ -120,14 +120,23 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out uri))
 				return;
 
-			UriScheme = XmlUtils.TryReadChildElementContentAsString(uri, URI_SCHEME_ELEMENT);
-			UriUsername = XmlUtils.TryReadChildElementContentAsString(uri, URI_USERNAME_ELEMENT);
-			UriPassword = XmlUtils.TryReadChildElementContentAsString(uri, URI_PASSWORD_ELEMENT);
-			UriHost = XmlUtils.TryReadChildElementContentAsString(uri, URI_HOST_ELEMENT);
 			UriPort = XmlUtils.TryReadChildElementContentAsUShort(uri, URI_PORT_ELEMENT);
-			UriPath = XmlUtils.TryReadChildElementContentAsString(uri, URI_PATH_ELEMENT);
-			UriQuery = XmlUtils.TryReadChildElementContentAsString(uri, URI_QUERY_ELEMENT);
-			UriFragment = XmlUtils.TryReadChildElementContentAsString(uri, URI_FRAGMENT_ELEMENT);
+
+			string uriScheme = XmlUtils.TryReadChildElementContentAsString(uri, URI_SCHEME_ELEMENT);
+			string uriUsername = XmlUtils.TryReadChildElementContentAsString(uri, URI_USERNAME_ELEMENT);
+			string uriPassword = XmlUtils.TryReadChildElementContentAsString(uri, URI_PASSWORD_ELEMENT);
+			string uriHost = XmlUtils.TryReadChildElementContentAsString(uri, URI_HOST_ELEMENT);
+			string uriPath = XmlUtils.TryReadChildElementContentAsString(uri, URI_PATH_ELEMENT);
+			string uriQuery = XmlUtils.TryReadChildElementContentAsString(uri, URI_QUERY_ELEMENT);
+			string uriFragment = XmlUtils.TryReadChildElementContentAsString(uri, URI_FRAGMENT_ELEMENT);
+
+			UriScheme = string.IsNullOrEmpty(uriScheme) ? null : uriScheme;
+			UriUsername = string.IsNullOrEmpty(uriUsername) ? null : uriUsername;
+			UriPassword = string.IsNullOrEmpty(uriPassword) ? null : uriPassword;
+			UriHost = string.IsNullOrEmpty(uriHost) ? null : uriHost;
+			UriPath = string.IsNullOrEmpty(uriPath) ? null : uriPath;
+			UriQuery = string.IsNullOrEmpty(uriQuery) ? null : uriQuery;
+			UriFragment = string.IsNullOrEmpty(uriFragment) ? null : uriFragment;
 		}
 
 		#endregion
