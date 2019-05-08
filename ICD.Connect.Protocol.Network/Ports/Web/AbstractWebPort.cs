@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
@@ -114,7 +115,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			IcdUriBuilder builder = new IcdUriBuilder(Uri);
+			IcdUriBuilder builder =
+				Uri == null
+					? new IcdUriBuilder()
+					: new IcdUriBuilder(Uri);
 			{
 				if (properties.UriFragment != null)
 					builder.Fragment = properties.UriFragment;
@@ -141,7 +145,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				if (properties.UriUsername != null)
 					builder.UserName = properties.UriUsername;
 			}
-			Uri = builder.Uri;
+
+			try
+			{
+				Uri = builder.Uri;
+			}
+			catch (UriFormatException e)
+			{
+				Log(eSeverity.Error, "Failed to set URI - {0}", e.Message);
+				Uri = null;
+			}
 		}
 
 		#endregion

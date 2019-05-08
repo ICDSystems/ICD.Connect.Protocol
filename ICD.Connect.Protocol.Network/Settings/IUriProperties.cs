@@ -145,7 +145,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 									  other.UriHost,
 									  other.UriPort,
 									  other.UriScheme,
-									  other.UriPassword,
+									  other.UriPath,
 									  other.UriQuery,
 									  other.UriFragment);
 

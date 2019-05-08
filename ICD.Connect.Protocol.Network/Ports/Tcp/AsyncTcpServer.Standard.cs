@@ -249,19 +249,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 					return false;
 				});
 			}
-
-			if (length > 0)
+			if (length <= 0)
 			{
-				TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, length);
-
-				PrintRx(clientId, eventArgs.Data);
-				OnDataReceived.Raise(null, eventArgs);
+				RemoveTcpClient(clientId);
+				return;
 			}
+
+			TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, length);
+
+			PrintRx(clientId, eventArgs.Data);
+			OnDataReceived.Raise(null, eventArgs);
 
 			if (!ClientConnected(clientId))
 			{
 				RemoveTcpClient(clientId);
-				
 				return;
 			}
 

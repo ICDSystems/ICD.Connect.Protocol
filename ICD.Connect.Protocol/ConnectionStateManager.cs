@@ -86,11 +86,38 @@ namespace ICD.Connect.Protocol
 		#region Methods
 
 		/// <summary>
+		/// Start monitoring the state of the connection.
+		/// </summary>
+		public void Start()
+		{
+			m_Heartbeat.StartMonitoring();
+		}
+
+		/// <summary>
+		/// Stop monitoring the state of the connection.
+		/// </summary>
+		public void Stop()
+		{
+			m_Heartbeat.StopMonitoring();
+		}
+
+		/// <summary>
 		/// Sets the port for communicating with the remote endpoint.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
+		{
+			SetPort(port, true);
+		}
+
+		/// <summary>
+		/// Sets the port for communicating with the remote endpoint.
+		/// </summary>
+		/// <param name="port"></param>
+		/// <param name="monitor"></param>
+		[PublicAPI]
+		public void SetPort(ISerialPort port, bool monitor)
 		{
 			if (port == m_Port)
 				return;
@@ -98,7 +125,7 @@ namespace ICD.Connect.Protocol
 			if (ConfigurePort != null)
 				ConfigurePort(port);
 
-			m_Heartbeat.StopMonitoring();
+			Stop();
 
 			if (m_Port != null)
 				Disconnect();
@@ -107,8 +134,8 @@ namespace ICD.Connect.Protocol
 			m_Port = port;
 			Subscribe(m_Port);
 
-			if (m_Port != null)
-				m_Heartbeat.StartMonitoring();
+			if (monitor && m_Port != null)
+				Start();
 		}
 
 		[PublicAPI]
@@ -116,7 +143,7 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to connect, port is null");
+				Log(eSeverity.Critical, "Unable to connect - Port is null");
 				return;
 			}
 
@@ -128,7 +155,7 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to disconnect, port is null");
+				Log(eSeverity.Critical, "Unable to disconnect - Port is null");
 				return;
 			}
 
@@ -139,14 +166,14 @@ namespace ICD.Connect.Protocol
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Critical, "Unable to send data, port is null");
+				Log(eSeverity.Critical, "Unable to send data - Port is null");
 				return false;
 			}
 
 			if (m_Port.IsConnected)
 				return m_Port.Send(data);
 
-			Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
+			Log(eSeverity.Error, "Unable to send command to {0} - Port is not connected", m_Parent);
 			return false;
 		}
 

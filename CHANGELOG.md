@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - XP3 NonCachingEquipmentCrosspoint
 
+## [8.2.1] - 2019-05-02
+### Changed
+ - AsyncTcpServer on .NET Standard now properly removes disconnected clients when reading 0 byte packets
+ - Fixed mistake that was preventing URI paths from being applied to web ports
+ - Failing more gracefully when handling invalid URIs
+ - Treating empty URI XML elements as null
+
+## [8.2.0] - 2019-04-16
+### Added
+ - Broadcasts contain a session id
+ - Adding BufferSize property to AsyncTcpServer, setting large default
+ - Exposing features for starting/stopping ConnectionStateManager heartbeat
+
+### Changed
+ - Better logging for malformed direct messages
+ - Fixed SigCache issue for existing keys with new values
+ - AsyncTcpServer has a default port
+ - SSH converts "localhost" address to "127.0.0.1" due to host resolution failing
+
+### Removed
+ - Removing client disconnect hooks from message handlers, not relevant to consumers
+
 ## [8.1.0] - 2019-01-29
 ### Added
  - Added program number to port debug lines
