@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
@@ -23,7 +22,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		public event ClientCompletedSerial OnClientCompletedSerial;
 
 		private readonly Func<ISerialBuffer> m_BufferFactory;
-		private readonly Dictionary<AsyncTcpClient, ISerialBuffer> m_Buffers;
+		private readonly BiDictionary<AsyncTcpClient, ISerialBuffer> m_Buffers;
 		private readonly SafeCriticalSection m_BufferSection;
 
 		private TcpClientPool m_Pool;
@@ -35,7 +34,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		public TcpClientPoolBufferManager(Func<ISerialBuffer> bufferFactory)
 		{
 			m_BufferFactory = bufferFactory;
-			m_Buffers = new Dictionary<AsyncTcpClient, ISerialBuffer>();
+			m_Buffers = new BiDictionary<AsyncTcpClient, ISerialBuffer>();
 			m_BufferSection = new SafeCriticalSection();
 		}
 
@@ -95,14 +94,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				if (!m_Buffers.ContainsKey(client))
+				ISerialBuffer buffer;
+				if (!m_Buffers.TryGetValue(client, out buffer))
 				{
-					ISerialBuffer buffer = m_BufferFactory();
-					m_Buffers[client] = buffer;
+					buffer = m_BufferFactory();
+					m_Buffers.Add(client, buffer);
 					Subscribe(buffer);
 				}
 
-				return m_Buffers[client];
+				return buffer;
 			}
 			finally
 			{
@@ -120,12 +120,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				if (!m_Buffers.ContainsKey(client))
+				ISerialBuffer buffer;
+				if (!m_Buffers.TryGetValue(client, out buffer))
 					return;
 
-				Unsubscribe(m_Buffers[client]);
+				Unsubscribe(buffer);
 
-				m_Buffers.Remove(client);
+				m_Buffers.RemoveKey(client);
 			}
 			finally
 			{
