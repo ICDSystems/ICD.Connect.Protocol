@@ -61,7 +61,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast.Converters
 			switch (property)
 			{
 				case PROPERTY_SESSION:
-					instance.HostSession = reader.ReadAsObject<HostSessionInfo>(serializer);
+					instance.HostSession = serializer.Deserialize<HostSessionInfo>(reader);
 					break;
 
 				case PROPERTY_TYPE:

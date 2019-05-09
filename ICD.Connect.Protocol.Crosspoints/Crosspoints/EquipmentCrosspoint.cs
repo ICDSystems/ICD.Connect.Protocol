@@ -55,16 +55,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 		protected override CrosspointData GetConnectCrosspointData(int controlId)
 		{
-			m_SigCacheSection.Enter();
-
-			try
-			{
-				return CrosspointData.EquipmentConnect(controlId, Id, m_SigCache);
-			}
-			finally
-			{
-				m_SigCacheSection.Leave();
-			}
+			return m_SigCacheSection.Execute(() => CrosspointData.EquipmentConnect(controlId, Id, m_SigCache));
 		}
 
 		protected override string PrintSigs()

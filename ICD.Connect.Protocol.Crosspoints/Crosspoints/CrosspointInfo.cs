@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Ports;
 using Newtonsoft.Json;
 
@@ -9,6 +11,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 	/// <summary>
 	/// Simple pairing of crosspoint id to host info.
 	/// </summary>
+	[JsonConverter(typeof(CrosspointInfoConverter))]
 	public struct CrosspointInfo : IEquatable<CrosspointInfo>
 	{
 		private readonly HostInfo m_Host;
@@ -37,18 +40,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		#endregion
 
 		#region Constructors
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="name"></param>
-		/// <param name="address"></param>
-		/// <param name="port"></param>
-		public CrosspointInfo(int id, string name, string address, ushort port)
-			: this(id, name, new HostInfo(address, port))
-		{
-		}
 
 		/// <summary>
 		/// Constructor.
@@ -115,7 +106,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			return m_Id == other.m_Id &&
 			       m_Name == other.m_Name &&
-				   m_Host == other.m_Host;
+			       m_Host == other.m_Host;
 		}
 
 		/// <summary>
@@ -136,5 +127,72 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		}
 
 		#endregion
+	}
+
+	public sealed class CrosspointInfoConverter : AbstractGenericJsonConverter<CrosspointInfo>
+	{
+		private const string ATTR_HOST = "h";
+		private const string ATTR_ID = "i";
+		private const string ATTR_NAME = "n";
+
+		/// <summary>
+		/// Override to write properties to the writer.
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="value"></param>
+		/// <param name="serializer"></param>
+		protected override void WriteProperties(JsonWriter writer, CrosspointInfo value, JsonSerializer serializer)
+		{
+			base.WriteProperties(writer, value, serializer);
+
+			if (value.Host != default(HostInfo))
+			{
+				writer.WritePropertyName(ATTR_HOST);
+				serializer.Serialize(writer, value.Host);
+			}
+
+			if (value.Id != 0)
+				writer.WriteProperty(ATTR_ID, value.Id);
+
+			if (value.Name != null)
+				writer.WriteProperty(ATTR_NAME, value.Name);
+		}
+
+		/// <summary>
+		/// Override to handle deserialization of the current StartObject token.
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="serializer"></param>
+		/// <returns></returns>
+		protected override CrosspointInfo ReadObject(JsonReader reader, JsonSerializer serializer)
+		{
+			HostInfo host = default(HostInfo);
+			int id = 0;
+			string name = null;
+
+			reader.ReadObject(serializer, (p, r, s) =>
+			                              {
+				                              switch (p)
+				                              {
+					                              case ATTR_HOST:
+						                              host = serializer.Deserialize<HostInfo>(reader);
+						                              break;
+
+					                              case ATTR_ID:
+						                              id = reader.GetValueAsInt();
+						                              break;
+
+					                              case ATTR_NAME:
+						                              name = reader.GetValueAsString();
+						                              break;
+
+					                              default:
+						                              r.Skip();
+						                              break;
+				                              }
+			                              });
+
+			return new CrosspointInfo(id, name, host);
+		}
 	}
 }

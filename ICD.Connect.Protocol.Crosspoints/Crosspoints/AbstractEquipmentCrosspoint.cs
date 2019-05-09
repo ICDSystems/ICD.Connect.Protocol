@@ -12,14 +12,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
 	public abstract class AbstractEquipmentCrosspoint : AbstractCrosspoint, IEquipmentCrosspoint
 	{
-		private readonly IcdHashSet<int> m_ControlCrosspoints;
-		private readonly SafeCriticalSection m_ControlCrosspointsSection;
-
 		public event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
 
 		public event EventHandler<IntEventArgs> OnControlCrosspointConnected;
 
 		public event EventHandler<IntEventArgs> OnControlCrosspointDisconnected;
+
+		private readonly IcdHashSet<int> m_ControlCrosspoints;
+		private readonly SafeCriticalSection m_ControlCrosspointsSection;
 
 		#region Properties
 
@@ -51,6 +51,18 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_ControlCrosspoints = new IcdHashSet<int>();
 			m_ControlCrosspointsSection = new SafeCriticalSection();
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public override void Dispose()
+		{
+			OnControlCrosspointCountChanged = null;
+			OnControlCrosspointConnected = null;
+			OnControlCrosspointDisconnected = null;
+
+			base.Dispose();
 		}
 
 		#region Methods
