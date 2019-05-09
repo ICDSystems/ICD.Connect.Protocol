@@ -3,7 +3,7 @@ using ICD.Common.Properties;
 
 namespace ICD.Connect.Protocol.Network.Direct
 {
-	public delegate void ReplyCallback(IMessageHandler sender, IReply reply);
+	public delegate void ReplyCallback(IMessageHandler sender, Message reply);
 
 	public interface IMessageHandler : IDisposable
 	{
@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		event ReplyCallback OnAsyncReply;
 
 		/// <summary>
-		/// Gets the message type for this handler;
+		/// Gets the message type that this handler is expecting.
 		/// </summary>
 		Type MessageType { get; }
 
@@ -23,17 +23,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="message"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		IReply HandleMessage(IMessage message);
-	}
-
-	public interface IMessageHandler<TMessage, TReply> : IMessageHandler
-	{
-		/// <summary>
-		/// Interprets the incoming message. Returns a reply or null if there is no reply.
-		/// </summary>
-		/// <param name="message"></param>
-		/// <returns></returns>
-		[CanBeNull]
-		TReply HandleMessage(TMessage message);
+		Message HandleMessage(Message message);
 	}
 }

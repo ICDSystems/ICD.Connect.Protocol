@@ -7,7 +7,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 	{
 		private readonly SafeTimer m_Timer;
 
-		private Action<IReply> m_HandleReply;
+		private Action<Message> m_HandleReply;
 		private bool m_Handled;
 
 		/// <summary>
@@ -16,7 +16,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="message"></param>
 		/// <param name="handleReply"></param>
 		/// <param name="handleTimeout"></param>
-		public ClientBufferCallbackInfo(IMessage message, Action<IReply> handleReply, Action<IMessage> handleTimeout)
+		public ClientBufferCallbackInfo(Message message, Action<Message> handleReply, Action<Message> handleTimeout)
 		{
 			m_HandleReply = handleReply;
 			m_Timer = SafeTimer.Stopped(() => HandleTimeout(message, handleTimeout));
@@ -35,13 +35,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Executes the callback for the given reply.
 		/// </summary>
 		/// <param name="reply"></param>
-		public void HandleReply(IReply reply)
+		public void HandleReply(Message reply)
 		{
 			m_Handled = true;
 			m_HandleReply(reply);
 		}
 
-		private void HandleTimeout(IMessage message, Action<IMessage> handleTimeout)
+		private void HandleTimeout(Message message, Action<Message> handleTimeout)
 		{
 			// Don't timeout if the reply has already been handled.
 			if (m_Handled)

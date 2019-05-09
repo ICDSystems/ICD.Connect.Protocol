@@ -2,10 +2,11 @@
 
 namespace ICD.Connect.Protocol.Network.Direct
 {
-	public abstract class AbstractMessageHandler<TMessage, TReply> : IMessageHandler<TMessage, TReply>
-		where TMessage : IMessage
-		where TReply : IReply
+	public abstract class AbstractMessageHandler : IMessageHandler
 	{
+		/// <summary>
+		/// Raised to send messages back to a connected endpoint.
+		/// </summary>
 		public event ReplyCallback OnAsyncReply;
 
 		/// <summary>
@@ -26,35 +27,22 @@ namespace ICD.Connect.Protocol.Network.Direct
 		}
 
 		/// <summary>
-		/// Gets the message type for this handler;
+		/// Gets the message type that this handler is expecting.
 		/// </summary>
-		public Type MessageType { get { return typeof(TMessage); } }
-
-		/// <summary>
-		/// Interprets the incoming message. Returns a reply or null if there is no reply.
-		/// </summary>
-		/// <param name="message"></param>
-		/// <returns></returns>
-		IReply IMessageHandler.HandleMessage(IMessage message)
-		{
-			if (message == null)
-				throw new ArgumentNullException("message");
-
-			return HandleMessage((TMessage)message);
-		}
+		public abstract Type MessageType { get; }
 
 		/// <summary>
 		/// Handles the message receieved from the remote core.
 		/// </summary>
 		/// <param name="message"></param>
 		/// <returns>Returns an AbstractMessage as a reply, or null for no reply</returns>
-		public abstract TReply HandleMessage(TMessage message);
+		public abstract Message HandleMessage(Message message);
 
 		/// <summary>
 		/// Returns a reply to the tagged client.
 		/// </summary>
 		/// <param name="reply"></param>
-		protected void RaiseReply(TReply reply)
+		protected void RaiseReply(Message reply)
 		{
 // ReSharper disable once CompareNonConstrainedGenericWithNull
 			if (reply == null)
