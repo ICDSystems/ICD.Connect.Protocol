@@ -219,10 +219,10 @@ namespace ICD.Connect.Protocol.Crosspoints
 
 			try
 			{
-				if (m_ControlCrosspointManager != null)
+				if (m_ControlCrosspointManager != null && args.Data.Equipment != null)
 					m_ControlCrosspointManager.RemoteCrosspoints.AddCrosspointInfo(args.Data.Equipment);
 
-				if (m_EquipmentCrosspointManager != null)
+				if (m_EquipmentCrosspointManager != null && args.Data.Controls != null)
 					m_EquipmentCrosspointManager.RemoteCrosspoints.AddCrosspointInfo(args.Data.Controls);
 			}
 			finally
