@@ -111,9 +111,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 			Subscribe(m_ServerBuffer);
 
 			m_ClientPool = new TcpClientPool();
-
-			DebugTx = eDebugMode.MixedAsciiHex;
-			DebugRx = eDebugMode.MixedAsciiHex;
 		}
 
 		/// <summary>
