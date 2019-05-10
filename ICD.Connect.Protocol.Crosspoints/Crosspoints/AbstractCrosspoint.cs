@@ -517,9 +517,23 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			yield return new ConsoleCommand("ToggleDebugOutput", "When enabled prints output sigs to console",
 			                                () => DebugOutput = !DebugOutput);
 
-
 			yield return new ConsoleCommand("Ping", "Sends a ping to the connected crosspoint/s", () => Ping());
 			yield return new ConsoleCommand("PrintSigs", "Prints the cached sigs", () => PrintSigs());
+
+			yield return
+				new GenericConsoleCommand<ushort, uint, ushort>("SendInputAnalog",
+				                                                "SendInputAnalog <SMARTOBJECT> <NUMBER> <0-65535>",
+				                                                (s, n, a) => SendInputSig(s, n, a));
+
+			yield return
+				new GenericConsoleCommand<ushort, uint, bool>("SendInputDigital",
+				                                              "SendInputDigital <SMARTOBJECT> <NUMBER> <true/false>",
+				                                              (s, n, b) => SendInputSig(s, n, b));
+
+			yield return
+				new GenericConsoleCommand<ushort, uint, string>("SendInputSerial",
+				                                                "SendInputSerial <SMARTOBJECT> <NUMBER> <SERIAL>",
+				                                                (s, n, v) => SendInputSig(s, n, v));
 		}
 
 		protected abstract string PrintSigs();
