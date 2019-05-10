@@ -453,6 +453,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				callbackInfo.HandleReply(message);
 				callbackInfo.Dispose();
+				return;
 			}
 
 			// Handle message
