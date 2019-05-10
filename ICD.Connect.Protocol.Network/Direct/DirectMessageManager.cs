@@ -457,7 +457,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 			}
 
 			// Handle message
-			Message response = handler == null ? null : handler.HandleMessage(message);
+			if (handler == null)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} - No handler found for message type {1}", GetType().Name, message.Type);
+				return;
+			}
+
+			Message response = handler.HandleMessage(message);
 			if (response == null)
 				return;
 
