@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 		[TestCase("127.0.0.1", (ushort)22)]
 		public void HostTest(string address, ushort port)
 		{
-			CrosspointInfo info = new CrosspointInfo(0, null, address, port);
+			CrosspointInfo info = new CrosspointInfo(0, null, new HostInfo(address, port));
 			Assert.AreEqual(address, info.Host.Address);
 			Assert.AreEqual(port, info.Host.Port);
 
@@ -27,7 +27,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 		[TestCase(1000)]
 		public void IdTest(int id)
 		{
-			CrosspointInfo info = new CrosspointInfo(id, null, null, 0);
+			CrosspointInfo info = new CrosspointInfo(id, null, new HostInfo(null, 0));
 			Assert.AreEqual(id, info.Id);
 		}
 
@@ -37,7 +37,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 		[TestCase("Test")]
 		public void NameTest(string name)
 		{
-			CrosspointInfo info = new CrosspointInfo(0, name, null, 0);
+			CrosspointInfo info = new CrosspointInfo(0, name, new HostInfo(null, 0));
 			Assert.AreEqual(name, info.Name);
 		}
 
@@ -46,8 +46,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 		[TestCase(1, "test", "localhost", (ushort)22)]
 		public void EqualsTest(int id, string name, string address, ushort port)
 		{
-			CrosspointInfo a = new CrosspointInfo(id, name, address, port);
-			CrosspointInfo b = new CrosspointInfo(id, name, address, port);
+			CrosspointInfo a = new CrosspointInfo(id, name, new HostInfo(address, port));
+			CrosspointInfo b = new CrosspointInfo(id, name, new HostInfo(address, port));
 
 			Assert.AreEqual(a, b);
 		}
@@ -56,8 +56,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.Crosspoints
 		[Test]
 		public void NotEqualTest()
 		{
-			CrosspointInfo a = new CrosspointInfo(1, "test", "localhost", 22);
-			CrosspointInfo b = new CrosspointInfo(0, null, null, 0);
+			CrosspointInfo a = new CrosspointInfo(1, "test", new HostInfo("localhost", 22));
+			CrosspointInfo b = new CrosspointInfo(0, null, new HostInfo(null, 0));
 
 			Assert.AreNotEqual(a, b);
 		}
