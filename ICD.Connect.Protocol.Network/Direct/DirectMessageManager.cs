@@ -46,6 +46,34 @@ namespace ICD.Connect.Protocol.Network.Direct
 			get { return m_CachedLogger = m_CachedLogger ?? ServiceProvider.TryGetService<ILoggerService>(); }
 		}
 
+		/// <summary>
+		/// When enabled prints the received data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugRx
+		{
+			get { return m_ClientPool.DebugRx; }
+			set
+			{
+				m_ClientPool.DebugRx = value;
+				m_Server.DebugRx = value;
+			}
+		}
+
+		/// <summary>
+		/// When enabled prints the transmitted data to the console.
+		/// </summary>
+		[PublicAPI]
+		public eDebugMode DebugTx
+		{
+			get { return m_ClientPool.DebugTx; }
+			set
+			{
+				m_ClientPool.DebugTx = value;
+				m_Server.DebugTx = value;
+			}
+		}
+
 		#endregion
 
 		#region Constructors
@@ -422,10 +450,17 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				callbackInfo.HandleReply(message);
 				callbackInfo.Dispose();
+				return;
 			}
 
 			// Handle message
-			Message response = handler == null ? null : handler.HandleMessage(message);
+			if (handler == null)
+			{
+				Logger.AddEntry(eSeverity.Error, "{0} - No handler found for message type {1}", GetType().Name, message.Type);
+				return;
+			}
+
+			Message response = handler.HandleMessage(message);
 			if (response == null)
 				return;
 
@@ -484,6 +519,40 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			yield return new ConsoleCommand("Start", "Resumes receiving messages", () => Start());
 			yield return new ConsoleCommand("Stop", "Stops receiving messages", () => Stop());
+
+			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
+											() =>
+											{
+												SetTxDebugMode(eDebugMode.Ascii);
+												SetRxDebugMode(eDebugMode.Ascii);
+											});
+
+			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",
+											() =>
+											{
+												SetTxDebugMode(eDebugMode.Off);
+												SetRxDebugMode(eDebugMode.Off);
+											});
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugMode",
+															p =>
+															{
+																SetTxDebugMode(p);
+																SetRxDebugMode(p);
+															});
+
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
+			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+		}
+
+		private void SetTxDebugMode(eDebugMode mode)
+		{
+			DebugTx = mode;
+		}
+
+		private void SetRxDebugMode(eDebugMode mode)
+		{
+			DebugRx = mode;
 		}
 
 		#endregion
