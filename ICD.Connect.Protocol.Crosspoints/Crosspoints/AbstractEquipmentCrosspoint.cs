@@ -7,6 +7,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 {
@@ -20,6 +21,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 		private readonly IcdHashSet<int> m_ControlCrosspoints;
 		private readonly SafeCriticalSection m_ControlCrosspointsSection;
+
+		/// <summary>
+		/// SmartObject -> Number -> ControlId
+		/// Tracks the digital sigs coming from controls to this equipment so we can clear button hold states on disconnect.
+		/// </summary>
+		private readonly Dictionary<ushort, Dictionary<uint, IcdHashSet<int>>> m_ControlDigitalSigs;
 
 		#region Properties
 
@@ -51,6 +58,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		{
 			m_ControlCrosspoints = new IcdHashSet<int>();
 			m_ControlCrosspointsSection = new SafeCriticalSection();
+
+			m_ControlDigitalSigs = new Dictionary<ushort, Dictionary<uint, IcdHashSet<int>>>();
 		}
 
 		/// <summary>
@@ -113,7 +122,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			try
 			{
-				if (!m_ControlCrosspoints.Remove(controlId))
+				if (!RemoveControlCrosspoint(controlId))
 					return;
 
 				Logger.AddEntry(eSeverity.Informational, "{0} removed connected control {1}", this, controlId);
@@ -135,6 +144,49 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		}
 
 		/// <summary>
+		/// Removes the control with the given id from the caches.
+		/// </summary>
+		/// <param name="controlId"></param>
+		/// <returns></returns>
+		private bool RemoveControlCrosspoint(int controlId)
+		{
+			CrosspointData data;
+
+			m_ControlCrosspointsSection.Enter();
+
+			try
+			{
+				if (!m_ControlCrosspoints.Remove(controlId))
+					return false;
+
+				// Remove the cached bools so we can release any held buttons
+				List<SigInfo> digitals = new List<SigInfo>();
+
+				foreach (KeyValuePair<ushort, Dictionary<uint, IcdHashSet<int>>> soKvp in m_ControlDigitalSigs)
+				{
+					foreach (var numKvp in soKvp.Value)
+					{
+						if (numKvp.Value.Remove(controlId) && numKvp.Value.Count == 0)
+							digitals.Add(new SigInfo(numKvp.Key, soKvp.Key, true));
+					}
+				}
+
+				if (digitals.Count == 0)
+					return true;
+
+				data = CrosspointData.ControlClear(controlId, Id, digitals);
+			}
+			finally
+			{
+				m_ControlCrosspointsSection.Leave();
+			}
+
+			SendOutputData(data);
+
+			return true;
+		}
+
+		/// <summary>
 		/// Disconnects the equipment from all currently connected controls.
 		/// </summary>
 		public void Deinitialize()
@@ -152,6 +204,48 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Override this method to handle data before it is sent to the program.
+		/// </summary>
+		/// <param name="data"></param>
+		protected override void PreSendOutputData(CrosspointData data)
+		{
+			base.PreSendOutputData(data);
+
+			CacheDigitalSigs(data);
+		}
+
+		/// <summary>
+		/// Cache digital sigs from the control crosspoint so we can clear on disconnect.
+		/// </summary>
+		/// <param name="data"></param>
+		private void CacheDigitalSigs(CrosspointData data)
+		{
+			m_ControlCrosspointsSection.Enter();
+
+			try
+			{
+				int[] controlIds = data.GetControlIds().ToArray();
+				if (controlIds.Length == 0)
+					return;
+
+				foreach (SigInfo item in data.GetSigs().Where(s => s.Type == eSigType.Digital))
+				{
+					IcdHashSet<int> cachedControlIds =
+						m_ControlDigitalSigs.GetOrAddNew(item.SmartObject).GetOrAddNew(item.Number);
+
+					if (item.GetBoolValue())
+						cachedControlIds.AddRange(controlIds);
+					else
+						cachedControlIds.RemoveRange(controlIds);
+				}
+			}
+			finally
+			{
+				m_ControlCrosspointsSection.Leave();
+			}
+		}
 
 		/// <summary>
 		/// Gets the source control or the destination controls for a message originating from this crosspoint.
