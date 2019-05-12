@@ -182,7 +182,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			PreSendInputData(data);
 
 			// Make sure the data is being sent to/from the correct place
-			if (!data.GetControlIds().Any())
+			if (data.ControlIdsCount == 0)
 				data.AddControlIds(GetControlsForMessage());
 			if (data.EquipmentId == 0)
 				data.EquipmentId = GetEquipmentForMessage();
