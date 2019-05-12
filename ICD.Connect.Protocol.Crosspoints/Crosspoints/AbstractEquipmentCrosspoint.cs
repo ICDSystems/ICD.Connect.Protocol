@@ -174,7 +174,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				if (digitals.Count == 0)
 					return true;
 
-				data = CrosspointData.ControlClear(controlId, Id, digitals);
+				data = CrosspointData.EquipmentClear(controlId, Id, digitals);
 			}
 			finally
 			{
