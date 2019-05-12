@@ -47,7 +47,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <param name="id"></param>
 		/// <param name="name"></param>
 		/// <param name="host"></param>
-		[JsonConstructor]
 		public CrosspointInfo(int id, string name, HostInfo host)
 		{
 			m_Id = id;
