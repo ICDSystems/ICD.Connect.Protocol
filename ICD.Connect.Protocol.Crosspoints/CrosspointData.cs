@@ -171,7 +171,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <returns></returns>
 		public static CrosspointData EquipmentClear(int controlId, int equipmentId, IEnumerable<SigInfo> sigs)
 		{
-			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.ControlClear);
+			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.EquipmentClear);
 
 			sigs = sigs.Select(s => s.ToClearSig());
 			output.AddSigs(sigs);
