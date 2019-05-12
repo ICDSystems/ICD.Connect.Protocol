@@ -10,7 +10,9 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.EventArguments;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Protocol.Utils;
 using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
@@ -36,6 +38,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// Raised when the status of this crosspoint changes.
 		/// </summary>
 		public event EventHandler<CrosspointStatusEventArgs> OnStatusChanged;
+
+		// Static so we can prevent crosspoints from chatting over each other
+		private static readonly SafeCriticalSection s_DebugSection;
 
 		private readonly Dictionary<string, DateTime> m_PingTimes;
 		private readonly SafeCriticalSection m_PingTimesSection;
@@ -104,6 +109,14 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		protected ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#endregion
+
+		/// <summary>
+		/// Static constructor.
+		/// </summary>
+		static AbstractCrosspoint()
+		{
+			s_DebugSection = new SafeCriticalSection();
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -294,7 +307,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		private void PrintInput(CrosspointData data)
 		{
 			if (DebugInput)
-				PrintData("Input", data);
+				PrintData("Input", eConsoleColor.Red, data);
 		}
 
 		/// <summary>
@@ -304,19 +317,29 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		private void PrintOutput(CrosspointData data)
 		{
 			if (DebugOutput)
-				PrintData("Output", data);
+				PrintData("Output", eConsoleColor.Green, data);
 		}
 
 		/// <summary>
 		/// Prints the given data to the console.
 		/// </summary>
-		/// <param name="context"></param>
+		/// <param name="direction"></param>
+		/// <param name="directionColor"></param>
 		/// <param name="data"></param>
-		private void PrintData(string context, CrosspointData data)
+		private void PrintData(string direction, eConsoleColor directionColor, CrosspointData data)
 		{
-			IcdConsole.PrintLine("{0} {1} - {2}", this, context, data);
-			foreach (SigInfo sig in data.GetSigs())
-				IcdConsole.PrintLine("{0} {1} - {2}", this, context, sig);
+			s_DebugSection.Enter();
+
+			try
+			{
+				DebugUtils.PrintData(this, null, data, direction, directionColor, eDebugMode.Ascii);
+				foreach (SigInfo sig in data.GetSigs())
+					IcdConsole.PrintLine("\t{0} ", sig);
+			}
+			finally
+			{
+				s_DebugSection.Leave();
+			}
 		}
 
 		/// <summary>
