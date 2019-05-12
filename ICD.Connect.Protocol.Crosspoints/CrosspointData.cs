@@ -113,6 +113,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		{
 			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.ControlClear);
 
+			sigs = sigs.Select(s => s.ToClearSig());
 			output.AddSigs(sigs);
 
 			return output;
@@ -172,6 +173,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		{
 			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.ControlClear);
 
+			sigs = sigs.Select(s => s.ToClearSig());
 			output.AddSigs(sigs);
 
 			return output;
