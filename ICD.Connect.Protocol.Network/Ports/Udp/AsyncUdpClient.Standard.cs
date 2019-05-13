@@ -11,17 +11,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 	public sealed partial class AsyncUdpClient
 	{
 		private UdpClient m_UdpClient;
+		private readonly SafeCriticalSection m_ClientSection = new SafeCriticalSection();
 
 		/// <summary>
 		/// Connects to the end point.
 		/// </summary>
 		public override void Connect()
 		{
-			Disconnect();
+			m_ClientSection.Enter();
 
 			try
 			{
-				m_UdpClient = new UdpClient(Port) { EnableBroadcast = true };
+				Disconnect();
+
+				m_UdpClient = new UdpClient(Port) {EnableBroadcast = true};
 
 				// Spawn new listening thread
 				m_ListeningRequested = true;
@@ -30,6 +33,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			catch (Exception e)
 			{
 				Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
+			}
+			finally
+			{
+				m_ClientSection.Leave();
 			}
 
 			UpdateIsConnectedState();
@@ -40,12 +47,21 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// </summary>
 		public override void Disconnect()
 		{
-			m_ListeningRequested = false;
+			m_ClientSection.Enter();
 
-			if (m_UdpClient != null)
-				m_UdpClient.Dispose();
+			try
+			{
+				m_ListeningRequested = false;
 
-			m_UdpClient = null;
+				if (m_UdpClient != null)
+					m_UdpClient.Dispose();
+
+				m_UdpClient = null;
+			}
+			finally
+			{
+				m_ClientSection.Leave();
+			}
 
 			UpdateIsConnectedState();
 		}
@@ -56,7 +72,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <returns></returns>
 		protected override bool GetIsConnectedState()
 		{
-			return m_UdpClient != null;
+			return m_ClientSection.Execute(() => m_UdpClient != null);
 		}
 
 		/// <summary>
@@ -66,8 +82,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			m_UdpClient.Send(bytes, bytes.Length, ipAddress, port);
-			PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
+			m_ClientSection.Enter();
+
+			try
+			{
+				m_UdpClient.Send(bytes, bytes.Length, ipAddress, port);
+				PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
+			}
+			finally
+			{
+				m_ClientSection.Leave();
+			}
 
 			return true;
 		}
@@ -79,8 +104,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 
-			m_UdpClient.Send(bytes, bytes.Length);
-			PrintTx(data);
+			m_ClientSection.Enter();
+
+			try
+			{
+				m_UdpClient.Send(bytes, bytes.Length);
+				PrintTx(data);
+			}
+			finally
+			{
+				m_ClientSection.Leave();
+			}
 
 			return true;
 		}
@@ -129,16 +163,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 
 			if (m_ListeningRequested)
 			{
-				if (!m_UdpClient.Client.Connected)
-					Connect();
+				m_ClientSection.Enter();
 
 				try
 				{
+					if (!m_UdpClient.Client.Connected)
+						Connect();
+
 					m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
 				}
 				catch (SocketException)
 				{
 					UpdateIsConnectedState();
+				}
+				finally
+				{
+					m_ClientSection.Leave();
 				}
 			}
 

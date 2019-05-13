@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
+using ICD.Connect.Protocol.Ports;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
@@ -17,9 +18,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 
 			Assert.AreEqual(0, tracker.Count);
 
-			tracker.AddCrosspointInfo(new CrosspointInfo(1, "Crosspoint 1", null, 0));
-			tracker.AddCrosspointInfo(new CrosspointInfo(1, "Crosspoint 1", null, 0));
-			tracker.AddCrosspointInfo(new CrosspointInfo(2, "Crosspoint 2", null, 0));
+			tracker.AddCrosspointInfo(new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)));
+			tracker.AddCrosspointInfo(new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)));
+			tracker.AddCrosspointInfo(new CrosspointInfo(2, "Crosspoint 2", new HostInfo(null, 0)));
 
 			Assert.AreEqual(2, tracker.Count);
 		}
@@ -28,7 +29,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		[TestCase(1)]
 		public void AddCrosspointInfoTest(int id)
 		{
-			CrosspointInfo info = new CrosspointInfo(id, null, null, 0);
+			CrosspointInfo info = new CrosspointInfo(id, null, new HostInfo(null, 0));
 
 			RemoteCrosspointTracker tracker = new RemoteCrosspointTracker();
 			tracker.AddCrosspointInfo(info);
@@ -41,9 +42,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		{
 			CrosspointInfo[] infos =
 			{
-				new CrosspointInfo(1, "Crosspoint 1", null, 0),
-				new CrosspointInfo(1, "Crosspoint 1", null, 0),
-				new CrosspointInfo(2, "Crosspoint 2", null, 0)
+				new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)),
+				new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)),
+				new CrosspointInfo(2, "Crosspoint 2", new HostInfo(null, 0))
 			};
 
 			RemoteCrosspointTracker tracker = new RemoteCrosspointTracker();
@@ -59,7 +60,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		public void RemoveCrosspointInfoTest(int id)
 		{
 			RemoteCrosspointTracker tracker = new RemoteCrosspointTracker();
-			tracker.AddCrosspointInfo(new CrosspointInfo(id, null, null, 0));
+			tracker.AddCrosspointInfo(new CrosspointInfo(id, null, new HostInfo(null, 0)));
 
 			Assert.AreEqual(1, tracker.Count);
 			tracker.RemoveCrosspointInfo(id);
@@ -71,9 +72,9 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		{
 			CrosspointInfo[] a =
 			{
-				new CrosspointInfo(1, "Crosspoint 1", null, 0),
-				new CrosspointInfo(1, "Crosspoint 1", null, 0),
-				new CrosspointInfo(2, "Crosspoint 2", null, 0)
+				new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)),
+				new CrosspointInfo(1, "Crosspoint 1", new HostInfo(null, 0)),
+				new CrosspointInfo(2, "Crosspoint 2", new HostInfo(null, 0))
 			};
 
 			RemoteCrosspointTracker tracker = new RemoteCrosspointTracker();
@@ -88,7 +89,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 		[TestCase(1)]
 		public void GetCrosspointInfoByIdTest(int id)
 		{
-			CrosspointInfo info = new CrosspointInfo(id, null, null, 0);
+			CrosspointInfo info = new CrosspointInfo(id, null, new HostInfo(null, 0));
 
 			RemoteCrosspointTracker tracker = new RemoteCrosspointTracker();
 			tracker.AddCrosspointInfo(info);
@@ -105,7 +106,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 			CrosspointInfo info;
 			Assert.IsFalse(tracker.TryGetCrosspointInfo(id, out info));
 
-			CrosspointInfo expected = new CrosspointInfo(id, null, null, 0);
+			CrosspointInfo expected = new CrosspointInfo(id, null, new HostInfo(null, 0));
 			tracker.AddCrosspointInfo(expected);
 
 			Assert.IsTrue(tracker.TryGetCrosspointInfo(id, out info));
@@ -120,7 +121,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Tests.CrosspointManagers
 
 			Assert.IsFalse(tracker.ContainsCrosspointInfo(id));
 
-			tracker.AddCrosspointInfo(new CrosspointInfo(id, null, null, 0));
+			tracker.AddCrosspointInfo(new CrosspointInfo(id, null, new HostInfo(null, 0)));
 
 			Assert.IsTrue(tracker.ContainsCrosspointInfo(id));
 		}

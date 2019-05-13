@@ -9,6 +9,10 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 	{
 		event EventHandler<IntEventArgs> OnControlCrosspointCountChanged;
 
+		event EventHandler<IntEventArgs> OnControlCrosspointConnected;
+
+		event EventHandler<IntEventArgs> OnControlCrosspointDisconnected;
+
 		/// <summary>
 		/// Gets the ids for the control crosspoints that are currently connected to this equipment.
 		/// </summary>

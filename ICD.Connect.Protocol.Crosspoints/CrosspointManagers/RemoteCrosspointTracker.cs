@@ -107,6 +107,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="crosspoints"></param>
 		public void AddCrosspointInfo(IEnumerable<CrosspointInfo> crosspoints)
 		{
+			if (crosspoints == null)
+				throw new ArgumentNullException("crosspoints");
+
 			foreach (CrosspointInfo info in crosspoints)
 				AddCrosspointInfo(info);
 		}

@@ -13,6 +13,7 @@ using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.Network.Ports.Udp;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 {
@@ -134,10 +135,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			if (controls.Length == 0 && equipment.Length == 0)
 				return;
 
+			Advertisement advertisement = new Advertisement
+			{
+				Source = GetHostInfo(),
+				Controls = controls,
+				Equipment = equipment
+			};
+
 			// Loop over the addressest to advertise to
 			foreach (KeyValuePair<string, eAdvertisementType> address in GetAdvertisementAddresses())
 			{
-				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, address.Value);
+				advertisement.AdvertisementType = address.Value;
 				string serial = advertisement.Serialize();
 
 				// Loop over the ports for the different program slots
@@ -155,7 +163,18 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			CrosspointInfo[] controls = GetCrosspointInfo(m_ControlManager).ToArray();
 			CrosspointInfo[] equipment = GetCrosspointInfo(m_EquipmentManager).ToArray();
 
-			Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment, eAdvertisementType.DirectedRemove);
+			// Don't bother advertising if we don't have any crosspoints.
+			if (controls.Length == 0 && equipment.Length == 0)
+				return;
+
+			Advertisement advertisement = new Advertisement
+			{
+				Source = GetHostInfo(),
+				Controls = controls,
+				Equipment = equipment,
+				AdvertisementType = eAdvertisementType.DirectedRemove
+			};
+
 			string serial = advertisement.Serialize();
 
 			foreach (ushort port in GetAdvertisementPorts())
@@ -406,31 +425,33 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <summary>
 		/// Called when a CrosspointManager unregisteres a crosspoint.
 		/// Sends an advertisement to remove the crosspoint immediately from all neighbors.
-		/// todo: Clean this up somehow
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="crosspoint"></param>
 		private void CrosspointManagerOnCrosspointUnregistered(ICrosspointManager sender, ICrosspoint crosspoint)
 		{
-			CrosspointInfo[] controls = new CrosspointInfo[1];
-			CrosspointInfo[] equipment = new CrosspointInfo[1];
-
 			CrosspointInfo crosspointInfo = new CrosspointInfo(crosspoint.Id, crosspoint.Name, GetHostInfo());
 
-			if (sender == m_ControlManager)
-				controls[0] = crosspointInfo;
-			else if (sender == m_EquipmentManager)
-				equipment[0] = crosspointInfo;
-			else
+			CrosspointInfo[] controls = sender == m_ControlManager ? new[] {crosspointInfo} : new CrosspointInfo[0];
+			CrosspointInfo[] equipment = sender == m_EquipmentManager ? new[] {crosspointInfo} : new CrosspointInfo[0];
+
+			// Don't bother advertising if we don't have any crosspoints.
+			if (controls.Length == 0 && equipment.Length == 0)
 				return;
 
-			// Loop over the addressest to advertise to
+			Advertisement advertisement = new Advertisement
+			{
+				Source = GetHostInfo(),
+				Controls = controls,
+				Equipment = equipment,
+				AdvertisementType = eAdvertisementType.CrosspointRemove
+			};
+
+			string serial = advertisement.Serialize();
+
+			// Loop over the addresses to advertise to
 			foreach (KeyValuePair<string, eAdvertisementType> address in GetAdvertisementAddresses())
 			{
-				Advertisement advertisement = new Advertisement(GetHostInfo(), controls, equipment,
-				                                                eAdvertisementType.CrosspointRemove);
-				string serial = advertisement.Serialize();
-
 				// Loop over the ports for the different program slots
 				foreach (ushort port in GetAdvertisementPorts())
 					m_UdpClient.SendToAddress(serial, address.Key, port);
@@ -498,10 +519,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <param name="args"></param>
 		private void BufferOnCompletedSerial(object sender, StringEventArgs args)
 		{
-			Advertisement advertisement = Advertisement.Deserialize(args.Data);
+			Advertisement advertisement;
 
-			if (advertisement == null)
+			try
+			{
+				advertisement = Advertisement.Deserialize(args.Data);
+			}
+			catch (JsonSerializationException e)
+			{
+				IcdErrorLog.Exception(e, "XP3: Exception deserializing advertisement");
 				return;
+			}
 
 			// Broadcast back to the place we got this advertisement from
 			switch (advertisement.AdvertisementType)

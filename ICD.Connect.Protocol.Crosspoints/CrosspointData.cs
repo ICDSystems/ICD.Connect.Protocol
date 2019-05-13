@@ -31,6 +31,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 			// Equipment messages
 			EquipmentConnect = 2000,
 			EquipmentDisconnect = 2001,
+			EquipmentClear = 2002,
 
 			// Debug Messages
 			Ping = 3000,
@@ -101,7 +102,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		}
 
 		/// <summary>
-		/// Creates a control clear message. Used by crosspoints to clear themselves.
+		/// Creates a control clear message. Used by control crosspoints to clear themselves.
 		/// </summary>
 		/// <param name="controlId"></param>
 		/// <param name="equipmentId"></param>
@@ -112,6 +113,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		{
 			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.ControlClear);
 
+			sigs = sigs.Select(s => s.ToClearSig());
 			output.AddSigs(sigs);
 
 			return output;
@@ -157,6 +159,24 @@ namespace ICD.Connect.Protocol.Crosspoints
 		public static CrosspointData EquipmentDisconnect(int controlId, int equipmentId)
 		{
 			return CreateMessage(controlId, equipmentId, eMessageType.EquipmentDisconnect);
+		}
+
+		/// <summary>
+		/// Creates an equipment clear message. This is used to clear high sigs when a control
+		/// crosspoint disconnects (e.g. release a held button).
+		/// </summary>
+		/// <param name="controlId"></param>
+		/// <param name="equipmentId"></param>
+		/// <param name="sigs"></param>
+		/// <returns></returns>
+		public static CrosspointData EquipmentClear(int controlId, int equipmentId, IEnumerable<SigInfo> sigs)
+		{
+			CrosspointData output = CreateMessage(controlId, equipmentId, eMessageType.EquipmentClear);
+
+			sigs = sigs.Select(s => s.ToClearSig());
+			output.AddSigs(sigs);
+
+			return output;
 		}
 
 		/// <summary>

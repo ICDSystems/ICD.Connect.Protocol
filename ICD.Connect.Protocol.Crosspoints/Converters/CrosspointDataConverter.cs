@@ -1,4 +1,4 @@
-﻿using ICD.Common.Utils.Collections;
+﻿using System.Collections.Generic;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Sigs;
@@ -25,6 +25,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Converters
 		/// <param name="serializer"></param>
 		protected override void WriteProperties(JsonWriter writer, CrosspointData value, JsonSerializer serializer)
 		{
+			base.WriteProperties(writer, value, serializer);
+
 			writer.WritePropertyName(MESSAGE_TYPE_PROPERTY);
 			writer.WriteValue(value.MessageType.ToString());
 
@@ -64,78 +66,43 @@ namespace ICD.Connect.Protocol.Crosspoints.Converters
 		}
 
 		/// <summary>
-		/// Reads the JSON representation of the object.
+		/// Override to handle the current property value with the given name.
 		/// </summary>
-		/// <param name="reader">The <see cref="T:Newtonsoft.Json.JsonReader"/> to read from.</param>
-		/// <param name="existingValue">The existing value of object being read.</param>
-		/// <param name="serializer">The calling serializer.</param>
-		/// <returns>
-		/// The object value.
-		/// </returns>
-		public override CrosspointData ReadJson(JsonReader reader, CrosspointData existingValue, JsonSerializer serializer)
+		/// <param name="property"></param>
+		/// <param name="reader"></param>
+		/// <param name="instance"></param>
+		/// <param name="serializer"></param>
+		protected override void ReadProperty(string property, JsonReader reader, CrosspointData instance, JsonSerializer serializer)
 		{
-			CrosspointData.eMessageType type = CrosspointData.eMessageType.Message;
-			int equipmentId = 0;
-			IcdHashSet<int> controlIds = new IcdHashSet<int>();
-			IcdHashSet<string> json = new IcdHashSet<string>();
-			SigCache sigs = new SigCache();
-
-			while (reader.Read())
+			switch (property)
 			{
-				if (reader.TokenType == JsonToken.Null)
-					return null;
-				
-				if (reader.TokenType == JsonToken.EndObject)
-				{
-					reader.Read();
+				case MESSAGE_TYPE_PROPERTY:
+					instance.MessageType = reader.GetValueAsEnum<CrosspointData.eMessageType>();
 					break;
-				}
 
-				if (reader.TokenType != JsonToken.PropertyName)
-					continue;
+				case EQUIPMENT_ID_PROPERTY:
+					instance.EquipmentId = reader.GetValueAsInt();
+					break;
 
-				string property = reader.Value as string;
+				case CONTROL_IDS_PROPERTY:
+					IEnumerable<int> controlIds = serializer.DeserializeArray<int>(reader);
+					instance.AddControlIds(controlIds);
+					break;
 
-				// Read to the value
-				reader.Read();
+				case JSON_PROPERTY:
+					IEnumerable<string> json = serializer.DeserializeArray<string>(reader);
+					instance.AddJson(json);
+					break;
 
-				switch (property)
-				{
-					case MESSAGE_TYPE_PROPERTY:
-						type = reader.GetValueAsEnum<CrosspointData.eMessageType>();
-						break;
+				case SIGS_PROPERTY:
+					SigCache sigs = serializer.Deserialize<SigCache>(reader);
+					instance.AddSigs(sigs);
+					break;
 
-					case EQUIPMENT_ID_PROPERTY:
-						equipmentId = reader.GetValueAsInt();
-						break;
-
-					case CONTROL_IDS_PROPERTY:
-						while (reader.Read() && reader.TokenType != JsonToken.EndArray)
-							controlIds.Add(reader.GetValueAsInt());
-						break;
-
-					case JSON_PROPERTY:
-						while (reader.Read() && reader.TokenType != JsonToken.EndArray)
-							json.Add(reader.GetValueAsString());
-						break;
-
-					case SIGS_PROPERTY:
-						sigs = reader.ReadAsObject<SigCache>(serializer);
-						break;
-				}
+				default:
+					base.ReadProperty(property, reader, instance, serializer);
+					break;
 			}
-
-			CrosspointData output = new CrosspointData
-			{
-				MessageType = type,
-				EquipmentId = equipmentId,
-			};
-
-			output.AddControlIds(controlIds);
-			output.AddJson(json);
-			output.AddSigs(sigs);
-
-			return output;
 		}
 
 		#endregion

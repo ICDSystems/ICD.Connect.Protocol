@@ -21,12 +21,16 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		public override string ToString()
 		{
-			return new ReprBuilder(this).AppendProperty("OriginalMessageId", OriginalMessageId)
-			                            .AppendProperty("Id", Id)
-			                            .AppendProperty("From", From)
-			                            .AppendProperty("To", To)
-			                            .AppendProperty("Type", Type)
-			                            .ToString();
+			ReprBuilder builder = new ReprBuilder(this);
+			
+			if (OriginalMessageId != default(Guid))
+				builder.AppendProperty("OriginalMessageId", OriginalMessageId);
+
+			return builder.AppendProperty("Id", Id)
+			              .AppendProperty("From", From)
+			              .AppendProperty("To", To)
+			              .AppendProperty("Type", Type)
+			              .ToString();
 		}
 
 		/// <summary>

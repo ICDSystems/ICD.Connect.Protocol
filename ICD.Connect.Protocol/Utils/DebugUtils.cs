@@ -28,7 +28,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="instance"></param>
 		/// <param name="mode"></param>
 		/// <param name="data"></param>
-		public static void PrintRx(object instance, eDebugMode mode, string data)
+		public static void PrintRx(object instance, eDebugMode mode, object data)
 		{
 			PrintRx(instance, mode, null, data);
 		}
@@ -41,9 +41,9 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="mode"></param>
 		/// <param name="context"></param>
 		/// <param name="data"></param>
-		public static void PrintRx(object instance, eDebugMode mode, string context, string data)
+		public static void PrintRx(object instance, eDebugMode mode, string context, object data)
 		{
-			PrintData(instance, context, data, RX, mode);
+			PrintData(instance, context, data, RX, eConsoleColor.Red, mode);
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="instance"></param>
 		/// <param name="mode"></param>
 		/// <param name="data"></param>
-		public static void PrintTx(object instance, eDebugMode mode, string data)
+		public static void PrintTx(object instance, eDebugMode mode, object data)
 		{
 			PrintTx(instance, mode, null, data);
 		}
@@ -66,9 +66,9 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="mode"></param>
 		/// <param name="context"></param>
 		/// <param name="data"></param>
-		public static void PrintTx(object instance, eDebugMode mode, string context, string data)
+		public static void PrintTx(object instance, eDebugMode mode, string context, object data)
 		{
-			PrintData(instance, context, data, TX, mode);
+			PrintData(instance, context, data, TX, eConsoleColor.Green, mode);
 		}
 
 		/// <summary>
@@ -78,8 +78,9 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="context"></param>
 		/// <param name="data"></param>
 		/// <param name="direction"></param>
+		/// <param name="directionColor"></param>
 		/// <param name="mode"></param>
-		private static void PrintData(object instance, string context, string data, string direction, eDebugMode mode)
+		public static void PrintData(object instance, string context, object data, string direction, eConsoleColor directionColor, eDebugMode mode)
 		{
 			if (mode == eDebugMode.Off)
 				return;
@@ -87,7 +88,7 @@ namespace ICD.Connect.Protocol.Utils
 			string modeString = GetModeString(mode);
 
 			// Pad context for readability
-			context = context == null ? string.Empty : context + " - ";
+			context = string.IsNullOrEmpty(context) ? string.Empty : " " + context + " - ";
 
 			// Massage the data
 			data = FormatData(data, mode);
@@ -97,8 +98,8 @@ namespace ICD.Connect.Protocol.Utils
 			try
 			{
 				// "[App 1] Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-				IcdConsole.Print("[App {0}] {1} {2}", ProgramUtils.ProgramNumber, instance, context);
-				IcdConsole.Print(direction == TX ? eConsoleColor.Green : eConsoleColor.Red, direction);
+				IcdConsole.Print("[App {0}] {1}{2} - ", ProgramUtils.ProgramNumber, instance, context);
+				IcdConsole.Print(directionColor, direction);
 				IcdConsole.Print("({0}) - {1}", modeString, data);
 				IcdConsole.PrintLine(string.Empty);
 			}
@@ -114,28 +115,32 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="data"></param>
 		/// <param name="mode"></param>
 		/// <returns></returns>
-		private static string FormatData(string data, eDebugMode mode)
+		private static string FormatData(object data, eDebugMode mode)
 		{
+			if (data == null)
+				return null;
+
 			switch (mode)
 			{
 				case eDebugMode.Off:
 					return null;
 
 				case eDebugMode.Ascii:
-					data = data.Replace("\n", "\\n");
-					data = data.Replace("\r", "\\r");
-					return data;
+					string dataString = data.ToString();
+					dataString = dataString.Replace("\n", "\\n");
+					dataString = dataString.Replace("\r", "\\r");
+					return dataString;
 
 				case eDebugMode.Hex:
-					return StringUtils.ToHexLiteral(data);
+					return StringUtils.ToHexLiteral(data.ToString());
 
 				case eDebugMode.MixedAsciiHex:
-					return StringUtils.ToMixedReadableHexLiteral(data);
+					return StringUtils.ToMixedReadableHexLiteral(data.ToString());
 
 				case eDebugMode.Xml:
 					try
 					{
-						return XmlUtils.Format(data);
+						return XmlUtils.Format(data.ToString());
 					}
 					catch (IcdXmlException)
 					{
