@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
@@ -32,9 +33,11 @@ namespace ICD.Connect.Protocol
 		private readonly object m_Parent;
 		private readonly Heartbeat.Heartbeat m_Heartbeat;
 
-		private ISerialPort m_Port;
-
 		private ILoggerService m_CachedLogger;
+
+		private bool m_IsConnected;
+
+		private bool m_IsOnline;
 
 		#region Properties
 
@@ -44,16 +47,42 @@ namespace ICD.Connect.Protocol
 
 		public Heartbeat.Heartbeat Heartbeat { get { return m_Heartbeat; } }
 
-		public bool IsConnected { get { return m_Port != null && m_Port.IsConnected; } }
+		public bool IsConnected
+		{
+			get { return m_IsConnected; }
+			private set
+			{
+				if(m_IsConnected == value)
+					return;
 
-		public bool IsOnline { get { return m_Port != null && m_Port.IsOnline; } }
+				m_IsConnected = value;
+
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "{0} IsConnected set to {1}", this, m_IsConnected);
+
+				OnConnectedStateChanged.Raise(this, new BoolEventArgs(value));
+			}
+		}
+
+		public bool IsOnline
+		{
+			get { return m_IsOnline; }
+			private set
+			{
+				if(m_IsOnline == value)
+					return;
+
+				m_IsOnline = value;
+
+				OnIsOnlineStateChanged.Raise(this, new BoolEventArgs(m_IsOnline));
+			}
+		}
 
 		/// <summary>
 		/// Gets the id of the current serial port.
 		/// </summary>
-		public int? PortNumber { get { return m_Port == null ? (int?)null : m_Port.Id; } }
+		public int? PortNumber { get { return Port == null ? (int?)null : Port.Id; } }
 
-		public ISerialPort Port { get { return m_Port; } }
+		public ISerialPort Port { get; private set; }
 
 		#endregion
 
@@ -92,7 +121,7 @@ namespace ICD.Connect.Protocol
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
 		{
-			if (port == m_Port)
+			if (port == Port)
 				return;
 
 			if (ConfigurePort != null)
@@ -100,51 +129,54 @@ namespace ICD.Connect.Protocol
 
 			m_Heartbeat.StopMonitoring();
 
-			if (m_Port != null)
+			if (Port != null)
 				Disconnect();
 
-			Unsubscribe(m_Port);
-			m_Port = port;
-			Subscribe(m_Port);
+			Unsubscribe(Port);
+			Port = port;
+			Subscribe(Port);
 
-			if (m_Port != null)
-				m_Heartbeat.StartMonitoring();
+			if (Port != null)
+				Heartbeat.StartMonitoring();
+
+			IsConnected = port.IsConnected;
+			IsOnline = port.IsOnline;
 		}
 
 		[PublicAPI]
 		public void Connect()
 		{
-			if (m_Port == null)
+			if (Port == null)
 			{
 				Log(eSeverity.Critical, "Unable to connect, port is null");
 				return;
 			}
 
-			m_Port.Connect();
+			Port.Connect();
 		}
 
 		[PublicAPI]
 		public void Disconnect()
 		{
-			if (m_Port == null)
+			if (Port == null)
 			{
 				Log(eSeverity.Critical, "Unable to disconnect, port is null");
 				return;
 			}
 
-			m_Port.Disconnect();
+			Port.Disconnect();
 		}
 
 		public bool Send(string data)
 		{
-			if (m_Port == null)
+			if (Port == null)
 			{
 				Log(eSeverity.Critical, "Unable to send data, port is null");
 				return false;
 			}
 
-			if (m_Port.IsConnected)
-				return m_Port.Send(data);
+			if (Port.IsConnected)
+				return Port.Send(data);
 
 			Log(eSeverity.Error, "Unable to send command to {0}, port is not connected", m_Parent);
 			return false;
@@ -212,12 +244,12 @@ namespace ICD.Connect.Protocol
 
 		private void WrappedPortOnConnectionStatusChanged(object sender, BoolEventArgs e)
 		{
-			OnConnectedStateChanged.Raise(this, new BoolEventArgs(e.Data));
+			IsConnected = Port.IsConnected;
 		}
 
 		private void WrappedPortOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs eventArgs)
 		{
-			OnIsOnlineStateChanged.Raise(this, new BoolEventArgs(eventArgs.Data));
+			IsOnline = Port.IsOnline;
 		}
 
 		#endregion
