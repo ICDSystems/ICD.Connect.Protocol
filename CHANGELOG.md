@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - ConnectionStateManager fails more gracefully when internal port is null
+
 ## [7.3.1] - 2019-04-05
 ### Changed
  - Better HttpPort online state tracking when a request dispatch fails
