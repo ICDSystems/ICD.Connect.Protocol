@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.4.0] - 2019-05-16
 ### Removed
  - Removed unused eSigIoMask enum 
 
