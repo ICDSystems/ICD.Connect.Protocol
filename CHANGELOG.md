@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.3.2] - 2019-05-16
 ### Changed
  - ConnectionStateManager fails more gracefully when internal port is null
+ - ConnectionStateManager does a better job of trapping errant feedback from the internal port
 
 ## [7.3.1] - 2019-04-05
 ### Changed

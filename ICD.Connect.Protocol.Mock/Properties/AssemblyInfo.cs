@@ -4,5 +4,5 @@ using System.Reflection;
 [assembly: AssemblyCompany("ICD Systems")]
 [assembly: AssemblyProduct("ICD.Connect.Protocol.Mock")]
 [assembly: AssemblyCopyright("Copyright © ICD Systems 2019")]
-[assembly: AssemblyVersion("7.3.1.0")]
+[assembly: AssemblyVersion("7.3.2.0")]
 
