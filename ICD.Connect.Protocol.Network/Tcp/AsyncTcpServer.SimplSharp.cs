@@ -28,6 +28,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				if (m_TcpListener != null)
 					throw new InvalidOperationException("TCP Server must be stopped before it is started again.");
 
+				Logger.AddEntry(eSeverity.Notice, "{0} - Starting server", this);
+
 				Enabled = true;
 
 				m_TcpListener = new TCPServer(AddressToAcceptConnectionFrom, Port, BufferSize,
@@ -35,7 +37,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
 				m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
 
-				UpdateListeningState();
+				// Hack - I think it takes a little while for the listening state to update
+				Listening = true;
 
 				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
 																MaxNumberOfClients));
@@ -65,7 +68,14 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			try
 			{
 				if (disable)
+				{
+					Logger.AddEntry(eSeverity.Notice, "{0} - Stopping server", this);
 					Enabled = false;
+				}
+				else
+				{
+					Logger.AddEntry(eSeverity.Notice, "{0} - Temporarily stopping server", this);
+				}
 
 				if (m_TcpListener != null)
 				{

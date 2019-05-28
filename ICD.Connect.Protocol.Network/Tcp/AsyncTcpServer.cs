@@ -202,7 +202,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		public void Restart()
 		{
-			Stop();
+			Stop(false);
 			Start();
 		}
 
@@ -271,20 +271,20 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			try
 			{
-				if (m_TcpListener == null)
-					return;
-
 #if SIMPLSHARP
-				IcdEnvironment.eEthernetAdapterType adapterType =
-					IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
-				if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
-					return;
+				if (m_TcpListener != null)
+				{
+					IcdEnvironment.eEthernetAdapterType adapterType =
+						IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
+					if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
+						return;
+				}
 #endif
 
 				switch (type)
 				{
 					case IcdEnvironment.eEthernetEventType.LinkUp:
-						if (Enabled)
+						if (Enabled && !Listening)
 						{
 							Logger.AddEntry(eSeverity.Notice, "{0} - Regained connection, restarting server", this);
 							Restart();
