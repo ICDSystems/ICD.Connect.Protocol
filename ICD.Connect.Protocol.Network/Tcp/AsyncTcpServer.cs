@@ -381,9 +381,23 @@ namespace ICD.Connect.Protocol.Network.Tcp
 																SetRxDebugMode(p);
 															});
 
-
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+
+			yield return new ConsoleCommand("PrintClients", "Prints a table of the active clients", () => ConsolePrintClients());
+		}
+
+		private string ConsolePrintClients()
+		{
+			TableBuilder builder = new TableBuilder();
+
+			foreach (uint client in GetClients().Order())
+			{
+				HostInfo clientInfo = GetClientInfo(client);
+				builder.AddRow(client, clientInfo);
+			}
+
+			return builder.ToString();
 		}
 
 		private void SetTxDebugMode(eDebugMode mode)
