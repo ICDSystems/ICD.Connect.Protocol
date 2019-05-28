@@ -88,7 +88,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 					m_Listening = value;
 
 					eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
-					Logger.AddEntry(severity, "Listening set to {0}", m_Listening);
+					Logger.AddEntry(severity, "{0} - Listening set to {1}", this, m_Listening);
 				}
 				finally
 				{
@@ -271,8 +271,6 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			try
 			{
-				Logger.AddEntry(eSeverity.Warning, "Ethernet Event: {0} {1}", adapter, type);
-
 				if (m_TcpListener == null)
 					return;
 
@@ -280,22 +278,21 @@ namespace ICD.Connect.Protocol.Network.Tcp
 				IcdEnvironment.eEthernetAdapterType adapterType =
 					IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
 				if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
-				{
-					Logger.AddEntry(eSeverity.Warning, "Does not match: {0} {1}", adapter, adapterType);
 					return;
-				}
 #endif
 
 				switch (type)
 				{
 					case IcdEnvironment.eEthernetEventType.LinkUp:
 						if (Enabled)
-							Logger.AddEntry(eSeverity.Notice, "{0} regained connection - Restarting server", adapter);
-						Restart();
+						{
+							Logger.AddEntry(eSeverity.Notice, "{0} - Regained connection, restarting server", this);
+							Restart();
+						}
 						break;
 
 					case IcdEnvironment.eEthernetEventType.LinkDown:
-						Logger.AddEntry(eSeverity.Notice, "{0} lost connection - Temporarily stopping server", adapter);
+						Logger.AddEntry(eSeverity.Warning, "{0} - Lost connection, temporarily stopping server", this);
 						Stop(false);
 						break;
 
