@@ -34,6 +34,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private readonly IcdOrderedDictionary<uint, string> m_Connections;
 		private readonly SafeCriticalSection m_ConnectionLock;
 
+		private ILoggerService m_CachedLogger;
+
 		private int m_MaxNumberOfClients;
 
 		#region Properties
@@ -41,7 +43,10 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <summary>
 		/// Logging service for all your logging needs
 		/// </summary>
-		private ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
+		private ILoggerService Logger
+		{
+			get { return m_CachedLogger ?? (m_CachedLogger = ServiceProvider.TryGetService<ILoggerService>()); }
+		}
 
 		/// <summary>
 		/// IP Address to accept connection from.
