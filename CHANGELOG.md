@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed a bug in Net Standard http port where it was not properly decoding extended ascii results
+
 ## [8.2.1] - 2019-05-02
 ### Changed
  - AsyncTcpServer on .NET Standard now properly removes disconnected clients when reading 0 byte packets
