@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -32,6 +34,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private readonly SafeCriticalSection m_CrosspointsSection;
 
 		private readonly SafeTimer m_ElapsedTimer;
+
+		private ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
 
 		#region Properties
 
@@ -88,8 +92,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				CrosspointInfo old;
 				if (m_Crosspoints.TryGetValue(crosspoint.Id, out old) && crosspoint.Host != old.Host)
 				{
-					IcdErrorLog.Warn("Discovered duplicate crosspoint with id {0}, possible id duplication? (old: {1}, new: {2})",
-					                 crosspoint.Id, old, crosspoint);
+					Logger.AddEntry(eSeverity.Warning,
+					                "Discovered duplicate crosspoint with id {0}, possible id duplication? (old: {1}, new: {2})",
+					                crosspoint.Id, old, crosspoint);
 				}
 
 				m_Crosspoints[crosspoint.Id] = crosspoint;

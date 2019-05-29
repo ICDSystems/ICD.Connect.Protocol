@@ -5,6 +5,8 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -61,6 +63,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// Gets the help information for the node.
 		/// </summary>
 		public string ConsoleHelp { get { return "Responsible for broadcasting local crosspoints to the network."; } }
+
+		private ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#endregion
 
@@ -339,6 +343,11 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 				SendRemoveDirected(address);
 		}
 
+		public override string ToString()
+		{
+			return new ReprBuilder(this).AppendProperty("SystemId", m_SystemId).ToString();
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -527,7 +536,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			}
 			catch (JsonSerializationException e)
 			{
-				IcdErrorLog.Exception(e, "XP3: Exception deserializing advertisement");
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception deserializing advertisement", this);
 				return;
 			}
 

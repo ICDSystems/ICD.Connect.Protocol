@@ -2,6 +2,7 @@
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
@@ -102,8 +103,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				IControlCrosspoint unused;
 				if (!TryGetCrosspoint(crosspointId, out unused))
 				{
-					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - No control with given id.",
-					                 crosspointId, equipmentId);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - Failed to connect ControlCrosspoint {1} to EquipmentCrosspoint {2} - No control with given id.",
+					                this, crosspointId, equipmentId);
 					return eCrosspointStatus.ControlNotFound;
 				}
 
@@ -111,8 +113,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				CrosspointInfo equipmentInfo;
 				if (!RemoteCrosspoints.TryGetCrosspointInfo(equipmentId, out equipmentInfo))
 				{
-					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - No equipment with given id.",
-									 crosspointId, equipmentId);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - Failed to connect ControlCrosspoint {1} to EquipmentCrosspoint {2} - No equipment with given id.",
+					                this, crosspointId, equipmentId);
 					return eCrosspointStatus.EquipmentNotFound;
 				}
 
@@ -123,8 +126,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 				if (!client.IsConnected)
 				{
-					IcdErrorLog.Warn("Failed to connect ControlCrosspoint {0} to EquipmentCrosspoint {1} - Client failed to connect.",
-					                 crosspointId, equipmentId);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - Failed to connect ControlCrosspoint {1} to EquipmentCrosspoint {2} - Client failed to connect.",
+					                this, crosspointId, equipmentId);
 					return eCrosspointStatus.ConnectFailed;
 				}
 
@@ -175,13 +179,17 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 				if (client == null)
 				{
-					IcdErrorLog.Warn("Failed to disconnect ControlCrosspoint {0} - No associated TCP Client.", crosspointId);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - Failed to disconnect ControlCrosspoint {1} - No associated TCP Client.",
+					                this, crosspointId);
 					return eCrosspointStatus.Idle;
 				}
 
 				if (equipmentId == 0)
 				{
-					IcdErrorLog.Warn("Failed to disconnect ControlCrosspoint {0} - No associated equipment.", crosspointId);
+					Logger.AddEntry(eSeverity.Warning,
+					                "{0} - Failed to disconnect ControlCrosspoint {1} - No associated equipment.",
+					                this, crosspointId);
 					return eCrosspointStatus.Idle;
 				}
 
