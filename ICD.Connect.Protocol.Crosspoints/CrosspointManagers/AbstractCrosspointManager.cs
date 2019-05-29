@@ -4,6 +4,8 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
@@ -69,6 +71,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		public abstract string ConsoleHelp { get; }
 
+		protected ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
+
 		#endregion
 
 		/// <summary>
@@ -81,6 +85,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			m_CrosspointsSection = new SafeCriticalSection();
 
 			m_RemoteCrosspoints = new RemoteCrosspointTracker();
+			Subscribe(m_RemoteCrosspoints);
 
 			m_SystemId = systemId;
 		}
@@ -93,6 +98,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			OnCrosspointRegistered = null;
 			OnCrosspointUnregistered = null;
 
+			Unsubscribe(m_RemoteCrosspoints);
 			m_RemoteCrosspoints.Dispose();
 
 			ClearCrosspoints();
@@ -304,9 +310,56 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			return new HostInfo(address, port);
 		}
 
+		public override string ToString()
+		{
+			return new ReprBuilder(this).AppendProperty("SystemId", SystemId).ToString();
+		}
+
 		#endregion
 
-		
+		#region Remote Crosspoint Callbacks
+
+		/// <summary>
+		/// Subscribe to the RemoteCrosspointTracker events.
+		/// </summary>
+		/// <param name="remoteCrosspoints"></param>
+		private void Subscribe(RemoteCrosspointTracker remoteCrosspoints)
+		{
+			remoteCrosspoints.OnCrosspointDiscovered += RemoteCrosspointsOnCrosspointDiscovered;
+			remoteCrosspoints.OnCrosspointLost += RemoteCrosspointsOnCrosspointLost;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the RemoteCrosspointTracker events.
+		/// </summary>
+		/// <param name="remoteCrosspoints"></param>
+		private void Unsubscribe(RemoteCrosspointTracker remoteCrosspoints)
+		{
+			remoteCrosspoints.OnCrosspointDiscovered -= RemoteCrosspointsOnCrosspointDiscovered;
+			remoteCrosspoints.OnCrosspointLost -= RemoteCrosspointsOnCrosspointLost;
+		}
+
+		/// <summary>
+		/// Called when a remote crosspoint is discovered.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspointInfo"></param>
+		private void RemoteCrosspointsOnCrosspointDiscovered(RemoteCrosspointTracker sender, CrosspointInfo crosspointInfo)
+		{
+			Logger.AddEntry(eSeverity.Informational, "{0} - Discovered remote crosspoint {1}", this, crosspointInfo);
+		}
+
+		/// <summary>
+		/// Called when a remote crosspoint is lost.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="crosspointInfo"></param>
+		private void RemoteCrosspointsOnCrosspointLost(RemoteCrosspointTracker sender, CrosspointInfo crosspointInfo)
+		{
+			Logger.AddEntry(eSeverity.Warning, "{0} - Lost remote crosspoint {1}", this, crosspointInfo);
+		}
+
+		#endregion
 
 		#region Crosspoint Callbacks
 

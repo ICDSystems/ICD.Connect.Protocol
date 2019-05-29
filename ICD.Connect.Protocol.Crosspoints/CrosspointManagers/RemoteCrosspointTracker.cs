@@ -13,6 +13,8 @@ using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 
 namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 {
+	public delegate void RemoteCrosspointDisoveryCallback(RemoteCrosspointTracker sender, CrosspointInfo crosspointInfo);
+
 	/// <summary>
 	/// Handles storage of crosspoints discovered via advertisement.
 	/// Crosspoints are removed after an elapsed period of time.
@@ -28,6 +30,16 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// How old crosspoint info must be to be considered elapsed.
 		/// </summary>
 		private const long ELAPSED_THRESHOLD = AdvertisementManager.BROADCAST_INTERVAL * 5;
+
+		/// <summary>
+		/// Raised when a remote crosspoint is discovered.
+		/// </summary>
+		public event RemoteCrosspointDisoveryCallback OnCrosspointDiscovered;
+
+		/// <summary>
+		/// Raised when a remote crosspoint is lost.
+		/// </summary>
+		public event RemoteCrosspointDisoveryCallback OnCrosspointLost;
 
 		private readonly Dictionary<int, CrosspointInfo> m_Crosspoints;
 		private readonly Dictionary<int, DateTime> m_AddTimeMap;
@@ -75,6 +87,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		public void Dispose()
 		{
+			OnCrosspointDiscovered = null;
+			OnCrosspointLost = null;
+
 			m_ElapsedTimer.Dispose();
 		}
 
@@ -95,15 +110,24 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					Logger.AddEntry(eSeverity.Warning,
 					                "Discovered duplicate crosspoint with id {0}, possible id duplication? (old: {1}, new: {2})",
 					                crosspoint.Id, old, crosspoint);
+					RemoveCrosspointInfo(crosspoint.Id);
 				}
 
-				m_Crosspoints[crosspoint.Id] = crosspoint;
 				m_AddTimeMap[crosspoint.Id] = IcdEnvironment.GetLocalTime();
+				m_Crosspoints[crosspoint.Id] = crosspoint;
+
+				// Don't re-raise the event for the same crosspoint
+				if (crosspoint == old)
+					return;
 			}
 			finally
 			{
 				m_CrosspointsSection.Leave();
 			}
+
+			RemoteCrosspointDisoveryCallback handler = OnCrosspointDiscovered;
+			if (handler != null)
+				handler(this, crosspoint);
 		}
 
 		/// <summary>
@@ -125,10 +149,15 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="id"></param>
 		public void RemoveCrosspointInfo(int id)
 		{
+			CrosspointInfo info;
+			bool removed;
+
 			m_CrosspointsSection.Enter();
 
 			try
 			{
+				removed = m_Crosspoints.TryGetValue(id, out info);
+
 				m_Crosspoints.Remove(id);
 				m_AddTimeMap.Remove(id);
 			}
@@ -136,6 +165,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			{
 				m_CrosspointsSection.Leave();
 			}
+
+			RemoteCrosspointDisoveryCallback handler = OnCrosspointLost;
+			if (removed && handler != null)
+				handler(this, info);
 		}
 
 		public void RemoveCrosspointInfo(IEnumerable<CrosspointInfo> crosspoints)
