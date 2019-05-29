@@ -69,7 +69,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			m_Client = new HttpClient(m_ClientHandler)
 			{
-				Timeout = TimeSpan.FromSeconds(2)
+				Timeout = TimeSpan.FromSeconds(5)
 			};
 
 			m_ClientBusySection = new SafeCriticalSection();
