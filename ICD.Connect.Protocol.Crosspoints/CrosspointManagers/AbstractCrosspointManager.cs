@@ -181,6 +181,51 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		}
 
 		/// <summary>
+		/// Creates a default crosspoint and adds it to the manager.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		ICrosspoint ICrosspointManager.CreateCrosspoint(int id, string name)
+		{
+			return CreateCrosspoint(id, name);
+		}
+
+		/// <summary>
+		/// Creates a default crosspoint and adds it to the manager.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public T CreateCrosspoint(int id, string name)
+		{
+			m_CrosspointsSection.Enter();
+
+			try
+			{
+				if (m_Crosspoints.ContainsKey(id))
+					throw new ArgumentOutOfRangeException("id", "Already contains a crosspoint with the given id");
+
+				T crosspoint = InstantiateCrosspoint(id, name);
+				RegisterCrosspoint(crosspoint);
+
+				return crosspoint;
+			}
+			finally
+			{
+				m_CrosspointsSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Instantiates a new crosspoint with the given id and name.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		protected abstract T InstantiateCrosspoint(int id, string name);
+
+		/// <summary>
 		/// Adds the crosspoint to the manager.
 		/// </summary>
 		/// <param name="crosspoint"></param>
@@ -357,6 +402,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
 			yield return new ConsoleCommand("ToggleDebug", "When enabled prints timing information.", () => Debug = !Debug);
+			yield return
+				new GenericConsoleCommand<int, string>("CreateCrosspoint", "CreateCrosspoint <ID> <NAME>",
+				                                       (i, s) => CreateCrosspoint(i, s));
 		}
 
 		#endregion

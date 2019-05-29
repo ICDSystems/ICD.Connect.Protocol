@@ -300,6 +300,17 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			return client;
 		}
 
+		/// <summary>
+		/// Instantiates a new crosspoint with the given id and name.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		protected override IControlCrosspoint InstantiateCrosspoint(int id, string name)
+		{
+			return new ControlCrosspoint(id, name);
+		}
+
 		#endregion
 
 		#region TCP Client Pool callbacks

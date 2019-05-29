@@ -39,6 +39,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		IEnumerable<ICrosspoint> GetCrosspoints();
 
+		/// <summary>
+		/// Creates a default crosspoint and adds it to the manager.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		ICrosspoint CreateCrosspoint(int id, string name);
+
 		void RegisterCrosspoint(ICrosspoint crosspoint);
 		void UnregisterCrosspoint(ICrosspoint crosspoint);
 	}
@@ -46,6 +54,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 	public interface ICrosspointManager<T> : ICrosspointManager
 		where T : ICrosspoint
 	{
+		/// <summary>
+		/// Creates a default crosspoint and adds it to the manager.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		new T CreateCrosspoint(int id, string name);
+
 		void RegisterCrosspoint(T crosspoint);
 		void UnregisterCrosspoint(T crosspoint);
 	}

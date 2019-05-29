@@ -162,6 +162,17 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 		}
 
+		/// <summary>
+		/// Instantiates a new crosspoint with the given id and name.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		protected override IEquipmentCrosspoint InstantiateCrosspoint(int id, string name)
+		{
+			return new EquipmentCrosspoint(id, name);
+		}
+
 		#endregion
 
 		#region Server Callbacks
