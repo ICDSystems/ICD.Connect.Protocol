@@ -58,6 +58,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			Subscribe(m_BufferManager);
 
 			m_BufferManager.SetPool(m_ClientPool);
+
+			AutoReconnect = true;
 		}
 
 		#region Methods
@@ -276,12 +278,12 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		/// <summary>
 		/// Gets the TCP client for the given control.
-		/// Returns null if no client found.
+		/// Returns null if the control is not configured with an equipment endpoint.
 		/// </summary>
 		/// <param name="controlId"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		private AsyncTcpClient GetClientForControl(int controlId)
+		private AsyncTcpClient LazyLoadClientForControl(int controlId)
 		{
 			AsyncTcpClient client;
 
@@ -290,7 +292,18 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			try
 			{
 				if (!m_ControlClientMap.TryGetValue(controlId, out client))
-					return null;
+				{
+					IControlCrosspoint controlCrosspoint = GetCrosspoint(controlId);
+					if (controlCrosspoint.EquipmentCrosspoint == 0)
+						return null;
+
+					CrosspointInfo equipmentInfo;
+					if (!RemoteCrosspoints.TryGetCrosspointInfo(controlCrosspoint.EquipmentCrosspoint, out equipmentInfo))
+						return null;
+
+					client = m_ClientPool.GetClient(equipmentInfo.Host);
+					m_ControlClientMap.Add(controlId, client);
+				}
 			}
 			finally
 			{
@@ -473,9 +486,21 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		protected override void CrosspointOnSendInputData(IControlCrosspoint crosspoint, CrosspointData data)
 		{
 			// If the crosspoint isn't currently connected just drop the data
-			AsyncTcpClient client = GetClientForControl(crosspoint.Id);
-			if (client == null || !client.IsConnected)
+			AsyncTcpClient client = LazyLoadClientForControl(crosspoint.Id);
+			if (client == null)
+			{
+				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control is not connected to an equipment");
 				return;
+			}
+
+			if (AutoReconnect && !client.IsConnected)
+				client.Connect();
+
+			if (!client.IsConnected)
+			{
+				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Unable to connect to remote endpoint");
+				return;
+			}
 
 			client.Send(data.Serialize());
 		}
