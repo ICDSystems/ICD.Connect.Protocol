@@ -77,6 +77,7 @@
     <Compile Include="Converters\CrosspointDataConverter.cs" />
     <Compile Include="CrosspointSystemEventArgs.cs" />
     <Compile Include="Crosspoints\AbstractEquipmentCrosspoint.cs" />
+    <Compile Include="Crosspoints\eCrosspointStatus.cs" />
     <Compile Include="Crosspoints\NonCachingEquipmentCrosspoint.cs" />
     <Compile Include="EventArguments\CrosspointStatusEventArgs.cs" />
     <Compile Include="CrosspointManagers\AbstractCrosspointManager.cs" />

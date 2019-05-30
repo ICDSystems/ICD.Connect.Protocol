@@ -25,6 +25,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		event CrosspointDataReceived OnSendOutputData;
 
 		/// <summary>
+		/// Raised when the status of this crosspoint changes.
+		/// </summary>
+		[PublicAPI]
+		event EventHandler<CrosspointStatusEventArgs> OnStatusChanged;
+
+		/// <summary>
 		/// The Id of this crosspoint.
 		/// </summary>
 		[PublicAPI]
@@ -35,6 +41,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// </summary>
 		[PublicAPI]
 		string Name { get; }
+
+		/// <summary>
+		/// Gets or sets the status of the crosspoint
+		/// </summary>
+		[PublicAPI]
+		eCrosspointStatus Status { get; }
 
 		/// <summary>
 		/// Called by XP3 to send data to this crosspoint.
@@ -49,17 +61,5 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// <param name="data"></param>
 		[PublicAPI]
 		void SendInputData(CrosspointData data);
-
-		/// <summary>
-		/// Gets or sets the status of the crosspoint
-		/// </summary>
-		[PublicAPI]
-		eCrosspointStatus Status { get; }
-
-		/// <summary>
-		/// Raised when the status of this crosspoint changes.
-		/// </summary>
-		[PublicAPI]
-		event EventHandler<CrosspointStatusEventArgs> OnStatusChanged;
 	}
 }
