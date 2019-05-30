@@ -214,7 +214,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Removes and disposes the TCP client from the pool.
 		/// </summary>
 		/// <param name="client">True if the client exists and was removed and disposed.</param>
-		private void DisposeClient(AsyncTcpClient client)
+		public void DisposeClient(AsyncTcpClient client)
 		{
 			if (client == null)
 				throw new ArgumentNullException("client");
