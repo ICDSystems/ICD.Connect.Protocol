@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -36,7 +37,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		#region Private Members
 
-		private readonly Dictionary<int, T> m_Crosspoints;
+		private readonly IcdOrderedDictionary<int, T> m_Crosspoints;
 		private readonly SafeCriticalSection m_CrosspointsSection;
 		private readonly RemoteCrosspointTracker m_RemoteCrosspoints;
 		private readonly int m_SystemId;
@@ -81,7 +82,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="systemId">The id of the parent system.</param>
 		protected AbstractCrosspointManager(int systemId)
 		{
-			m_Crosspoints = new Dictionary<int, T>();
+			m_Crosspoints = new IcdOrderedDictionary<int, T>();
 			m_CrosspointsSection = new SafeCriticalSection();
 
 			m_RemoteCrosspoints = new RemoteCrosspointTracker();
@@ -124,7 +125,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public IEnumerable<int> GetCrosspointIds()
 		{
-			return m_CrosspointsSection.Execute(() => m_Crosspoints.Keys.Order().ToArray());
+			return m_CrosspointsSection.Execute(() => m_Crosspoints.Keys.ToArray());
 		}
 
 		/// <summary>
@@ -134,7 +135,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public IEnumerable<T> GetCrosspoints()
 		{
-			return m_CrosspointsSection.Execute(() => m_Crosspoints.OrderValuesByKey().ToArray());
+			return m_CrosspointsSection.Execute(() => m_Crosspoints.Values.ToArray());
 		}
 		IEnumerable<ICrosspoint> ICrosspointManager.GetCrosspoints()
 		{
@@ -149,20 +150,12 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public T GetCrosspoint(int id)
 		{
-			m_CrosspointsSection.Enter();
+			T output;
+			if (TryGetCrosspoint(id, out output))
+				return output;
 
-			try
-			{
-				if (m_Crosspoints.ContainsKey(id))
-					return m_Crosspoints[id];
-
-				string message = string.Format("{0} does not contain {1} with id {2}", GetType().Name, typeof(T).Name, id);
-				throw new KeyNotFoundException(message);
-			}
-			finally
-			{
-				m_CrosspointsSection.Leave();
-			}
+			string message = string.Format("{0} does not contain {1} with id {2}", GetType().Name, typeof(T).Name, id);
+			throw new KeyNotFoundException(message);
 		}
 
 		/// <summary>

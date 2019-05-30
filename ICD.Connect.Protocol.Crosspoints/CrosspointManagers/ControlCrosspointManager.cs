@@ -25,7 +25,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		private readonly Dictionary<int, AsyncTcpClient> m_ControlClientMap;
 		private readonly Dictionary<int, int> m_ControlEquipmentMap;
-		private readonly SafeCriticalSection m_ControlClientMapSection;
+		private readonly SafeCriticalSection m_ControlMapsSection;
 
 		private readonly TcpClientPool m_ClientPool;
 		private readonly TcpClientPoolBufferManager m_BufferManager;
@@ -49,7 +49,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		{
 			m_ControlClientMap = new Dictionary<int, AsyncTcpClient>();
 			m_ControlEquipmentMap = new Dictionary<int, int>();
-			m_ControlClientMapSection = new SafeCriticalSection();
+			m_ControlMapsSection = new SafeCriticalSection();
 
 			m_ClientPool = new TcpClientPool();
 			Subscribe(m_ClientPool);
@@ -96,7 +96,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public eCrosspointStatus ConnectCrosspoint(int crosspointId, int equipmentId)
 		{
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -142,7 +142,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 
 			return eCrosspointStatus.Connected;
@@ -167,7 +167,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public eCrosspointStatus DisconnectCrosspoint(int crosspointId)
 		{
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -201,7 +201,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 
 			return eCrosspointStatus.Idle;
@@ -232,7 +232,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		[PublicAPI]
 		public bool TryGetEquipmentForControl(int controlId, out int equipmentId)
 		{
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -240,7 +240,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 		}
 
@@ -250,7 +250,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		private void RemoveControlFromDictionaries(int crosspointId)
 		{
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -270,7 +270,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 		}
 
@@ -285,7 +285,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		{
 			AsyncTcpClient client;
 
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -294,7 +294,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 
 			return client;
@@ -339,7 +339,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			if (client.IsConnected)
 				return;
 
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -353,7 +353,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 		}
 
@@ -537,7 +537,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			IControlCrosspoint[] controls = GetCrosspoints().ToArray();
 
-			m_ControlClientMapSection.Enter();
+			m_ControlMapsSection.Enter();
 
 			try
 			{
@@ -559,7 +559,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 			finally
 			{
-				m_ControlClientMapSection.Leave();
+				m_ControlMapsSection.Leave();
 			}
 
 			return builder.ToString();
