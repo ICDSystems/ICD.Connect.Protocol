@@ -25,6 +25,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private readonly TcpClientPool m_ClientPool;
 		private readonly TcpClientPoolBufferManager m_BufferManager;
 
+		private bool m_AutoReconnect;
+
 		/// <summary>
 		/// Gets the help information for the node.
 		/// </summary>
@@ -34,7 +36,37 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// When true, attempts to reconnect to equipment on disconnect.
 		/// </summary>
 		[PublicAPI]
-		public bool AutoReconnect { get; set; }
+		public bool AutoReconnect
+		{
+			get
+			{
+				return m_ControlMapsSection.Execute(() => m_AutoReconnect);
+			}
+			set
+			{
+				m_ControlMapsSection.Enter();
+
+				try
+				{
+					if (value == m_AutoReconnect)
+						return;
+
+					m_AutoReconnect = value;
+
+					foreach (ConnectionStateManager manager in m_ControlClientMap.Values)
+					{
+						if (m_AutoReconnect)
+							manager.Start();
+						else
+							manager.Stop();
+					}
+				}
+				finally
+				{
+					m_ControlMapsSection.Leave();
+				}
+			}
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -503,6 +535,17 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		#region Console
 
 		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("AutoReconnect", AutoReconnect);
+		}
+
+		/// <summary>
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>
@@ -514,6 +557,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			yield return
 				new ConsoleCommand("PrintConnections", "Prints the controls that are currently connected to equipment",
 				                   () => PrintConnections());
+
+			yield return new ConsoleCommand("EnableAutoReconnect", "Turns on automatic reconnection attempts", () => AutoReconnect = true);
+			yield return new ConsoleCommand("DisableAutoReconnect", "Turns off automatic reconnection attempts", () => AutoReconnect = false);
 		}
 
 		/// <summary>
