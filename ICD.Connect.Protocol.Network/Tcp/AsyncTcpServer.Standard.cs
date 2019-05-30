@@ -30,7 +30,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public void Start()
 		{
-			Active = true;
+			Enabled = true;
 
 			try
 			{
@@ -74,7 +74,17 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public void Stop()
 		{
-			Active = false;
+			Stop(true);
+		}
+
+		/// <summary>
+		/// Stops the TCP server.
+		/// </summary>
+		/// <param name="disable">When true disables the TCP server.</param>
+		[PublicAPI]
+		private void Stop(bool disable)
+		{
+			Enabled = false;
 
 			if (m_TcpListener != null)
 			{
