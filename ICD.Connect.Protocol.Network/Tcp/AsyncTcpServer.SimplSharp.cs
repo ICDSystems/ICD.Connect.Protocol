@@ -20,11 +20,13 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public void Start()
 		{
-			Active = true;
+			Enabled = true;
 
 			m_TcpListener = new TCPServer(Port, MaxNumberOfClients);
 			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
 			m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+
+			UpdateListeningState();
 
 			Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
 			                                                MaxNumberOfClients));
@@ -35,7 +37,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		public void Stop()
 		{
-			Active = false;
+			Enabled = false;
 
 			if (m_TcpListener != null)
 			{
@@ -56,8 +58,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 					if (!e.Message.Contains("Object not initialized"))
 						throw;
 				}
-
-				Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
+				finally
+				{
+					UpdateListeningState();
+					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
+				}
 			}
 
 			m_TcpListener = null;
@@ -148,30 +153,32 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="status"></param>
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
-			if (clientId == 0)
-				return;
+			if (clientId != 0)
+			{
+				// Client disconnected
+				if (!ClientConnected(clientId))
+				{
+					RemoveClient(clientId);
+				}
+				// Client connected
+				else if (!ContainsClient(clientId))
+				{
+					AddClient(clientId);
+					tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+				}
 
-			// Client disconnected
-			if (!ClientConnected(clientId))
-			{
-				RemoveClient(clientId);
-			}
-			// Client connected
-			else if (!ContainsClient(clientId))
-			{
-				AddClient(clientId);
-				tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+				try
+				{
+					SocketStateEventArgs.eSocketStatus socketStatus = GetSocketStatus(status);
+					OnSocketStateChange.Raise(this, new SocketStateEventArgs(socketStatus, clientId));
+				}
+				catch (Exception e)
+				{
+					Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
+				}
 			}
 
-			try
-			{
-				SocketStateEventArgs.eSocketStatus socketStatus = GetSocketStatus(status);
-				OnSocketStateChange.Raise(this, new SocketStateEventArgs(socketStatus, clientId));
-			}
-			catch (Exception e)
-			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
-			}
+			UpdateListeningState();
 		}
 
 		private static SocketStateEventArgs.eSocketStatus GetSocketStatus(SocketStatus status)
@@ -257,6 +264,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 			// Spawn a new listening thread
 			SocketErrorCodes socketError = tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+			UpdateListeningState();
+
 			if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				return;
 
@@ -277,6 +286,11 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			return string.Format("{0}:{1}",
 			                     m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId),
 			                     m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId));
+		}
+
+		private void UpdateListeningState()
+		{
+			Listening = m_TcpListener != null && m_TcpListener.State > ServerState.SERVER_NOT_LISTENING;
 		}
 	}
 }

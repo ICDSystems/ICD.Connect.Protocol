@@ -37,6 +37,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private ILoggerService m_CachedLogger;
 
 		private int m_MaxNumberOfClients;
+		private bool m_Listening;
 
 		#region Properties
 
@@ -61,10 +62,31 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		public ushort Port { get; set; }
 
 		/// <summary>
-		/// Returns true if the TCP Server actively listening for connections.
+		/// Tracks the enabled state of the TCP Server between getting/losing network connection.
 		/// </summary>
 		[PublicAPI]
-		public bool Active { get; private set; }
+		public bool Enabled { get; private set; }
+
+		public int BufferSize { get; set; }
+
+		/// <summary>
+		/// Gets the listening state of the TCP Server.
+		/// </summary>
+		[PublicAPI]
+		public bool Listening
+		{
+			get { return m_Listening; }
+			private set
+			{
+				if (value == m_Listening)
+					return;
+
+				m_Listening = value;
+
+				eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
+				Logger.AddEntry(severity, "Listening set to {0}", m_Listening);
+			}
+		}
 
 		/// <summary>
 		/// Max number of connections supported by the TcpServer.
@@ -248,7 +270,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			switch (type)
 			{
 				case IcdEnvironment.eEthernetEventType.LinkUp:
-					if (Active)
+					if (Enabled)
 						Start();
 					break;
 
@@ -346,7 +368,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			addRow("Name", Name);
 			addRow("Port", Port);
 			addRow("Active Clients", string.Format("{0}/{1}", NumberOfClients, MaxNumberOfClients));
-			addRow("Active", Active);
+			addRow("Listening", Listening);
+			addRow("Enabled", Enabled);
 			addRow("Debug Rx", DebugRx);
 			addRow("Debug Tx", DebugTx);
 		}

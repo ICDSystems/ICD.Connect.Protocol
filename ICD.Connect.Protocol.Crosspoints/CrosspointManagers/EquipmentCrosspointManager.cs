@@ -262,7 +262,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="data"></param>
 		protected override void CrosspointOnSendInputData(IEquipmentCrosspoint crosspoint, CrosspointData data)
 		{
-			if (!m_Server.Active)
+			if (m_Server.NumberOfClients == 0)
 				return;
 
 			if (crosspoint.ControlCrosspointsCount == 0)
