@@ -1,5 +1,6 @@
 ﻿#if SIMPLSHARP
 using System;
+using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -20,16 +21,29 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public void Start()
 		{
-			Enabled = true;
+			m_ConnectionLock.Enter();
 
-			m_TcpListener = new TCPServer(Port, MaxNumberOfClients);
-			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
-			m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			try
+			{
+				if (m_TcpListener != null)
+					throw new InvalidOperationException("TCP Server must be stopped before it is started again.");
 
-			UpdateListeningState();
+				Enabled = true;
 
-			Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
-			                                                MaxNumberOfClients));
+				m_TcpListener = new TCPServer(AddressToAcceptConnectionFrom, Port, BufferSize,
+											  EthernetAdapterType.EthernetUnknownAdapter, MaxNumberOfClients);
+				m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
+				m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+
+				UpdateListeningState();
+
+				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
+																MaxNumberOfClients));
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -37,38 +51,57 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// </summary>
 		public void Stop()
 		{
-			Enabled = false;
+			Stop(true);
+		}
 
-			if (m_TcpListener != null)
+		/// <summary>
+		/// Stops the TCP server.
+		/// </summary>
+		/// <param name="disable">When true disables the TCP server.</param>
+		private void Stop(bool disable)
+		{
+			m_ConnectionLock.Enter();
+
+			try
 			{
-				m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
+				if (disable)
+					Enabled = false;
 
-				try
+				if (m_TcpListener != null)
 				{
-					m_TcpListener.DisconnectAll();
+					m_TcpListener.SocketStatusChange -= HandleSocketStatusChange;
+
+					try
+					{
+						m_TcpListener.DisconnectAll();
+					}
+					catch (Exception e)
+					{
+						// Handling some internal Crestron exception that occurs when the stream is disposed.
+						// SimplSharpPro: Got unhandled exception System.Exception:  Object not initialized
+						//	at Crestron.SimplSharp.CEvent.Set()
+						//	at Crestron.SimplSharp.AsyncStream.Close()
+						//	at Crestron.SimplSharp.CrestronIO.Stream.Dispose()
+						//	at Crestron.SimplSharp.CrestronSockets.TCPServer.DisconnectAll()
+						if (!e.Message.Contains("Object not initialized"))
+							throw;
+					}
+					finally
+					{
+						Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
+
+						m_TcpListener = null;
+						UpdateListeningState();
+					}
 				}
-				catch (Exception e)
-				{
-					// Handling some internal Crestron exception that occurs when the stream is disposed.
-					// SimplSharpPro: Got unhandled exception System.Exception:  Object not initialized
-					//	at Crestron.SimplSharp.CEvent.Set()
-					//	at Crestron.SimplSharp.AsyncStream.Close()
-					//	at Crestron.SimplSharp.CrestronIO.Stream.Dispose()
-					//	at Crestron.SimplSharp.CrestronSockets.TCPServer.DisconnectAll()
-					if (!e.Message.Contains("Object not initialized"))
-						throw;
-				}
-				finally
-				{
-					UpdateListeningState();
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
-				}
+
+				foreach (uint client in GetClients())
+					RemoveClient(client);
 			}
-
-			m_TcpListener = null;
-
-			foreach (uint client in GetClients())
-				RemoveClient(client);
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -77,12 +110,15 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="data"></param>
 		public void Send(string data)
 		{
-			byte[] byteData = StringUtils.ToBytes(data);
-
 			m_ConnectionLock.Enter();
 
 			try
 			{
+				if (m_Connections.Count == 0)
+					return;
+
+				byte[] byteData = StringUtils.ToBytes(data);
+
 				foreach (uint clientId in m_Connections.Keys)
 				{
 					PrintTx(clientId, data);
@@ -103,17 +139,26 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public void Send(uint clientId, string data)
 		{
-			if (!ClientConnected(clientId))
+			m_ConnectionLock.Enter();
+
+			try
 			{
-				Logger.AddEntry(eSeverity.Notice, "{0} - Unable to send data to unconnected client {1}", this, clientId);
-				RemoveClient(clientId);
-				return;
+				if (!ClientConnected(clientId))
+				{
+					Logger.AddEntry(eSeverity.Notice, "{0} - Unable to send data to unconnected client {1}", this, clientId);
+					RemoveClient(clientId);
+					return;
+				}
+
+				byte[] byteData = StringUtils.ToBytes(data);
+
+				PrintTx(clientId, data);
+				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
 			}
-
-			byte[] byteData = StringUtils.ToBytes(data);
-
-			PrintTx(clientId, data);
-			m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -124,10 +169,19 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public HostInfo GetClientInfo(uint client)
 		{
-			string address = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(client);
-			ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(client);
+			m_ConnectionLock.Enter();
 
-			return new HostInfo(address, port);
+			try
+			{
+				string address = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(client);
+				ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(client);
+
+				return new HostInfo(address, port);
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -137,12 +191,21 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public bool ClientConnected(uint client)
 		{
-			// This is a hack. We have no way of determining if a client id is still valid,
-			// so if we get a null address we know the client is invalid.
-			if (m_TcpListener.GetLocalAddressServerAcceptedConnectionFromForSpecificClient(client) == null)
-				return false;
+			m_ConnectionLock.Enter();
 
-			return m_TcpListener.ClientConnected(client);
+			try
+			{
+				// This is a hack. We have no way of determining if a client id is still valid,
+				// so if we get a null address we know the client is invalid.
+				if (m_TcpListener.GetLocalAddressServerAcceptedConnectionFromForSpecificClient(client) == null)
+					return false;
+
+				return m_TcpListener.ClientConnected(client);
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -153,32 +216,41 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="status"></param>
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
-			if (clientId != 0)
+			m_ConnectionLock.Enter();
+
+			try
 			{
-				// Client disconnected
-				if (!ClientConnected(clientId))
+				if (clientId != 0)
 				{
-					RemoveClient(clientId);
-				}
-				// Client connected
-				else if (!ContainsClient(clientId))
-				{
-					AddClient(clientId);
-					tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+					// Client disconnected
+					if (!ClientConnected(clientId))
+					{
+						RemoveClient(clientId);
+					}
+					// Client connected
+					else if (!ContainsClient(clientId))
+					{
+						AddClient(clientId);
+						tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+					}
+
+					try
+					{
+						SocketStateEventArgs.eSocketStatus socketStatus = GetSocketStatus(status);
+						OnSocketStateChange.Raise(this, new SocketStateEventArgs(socketStatus, clientId));
+					}
+					catch (Exception e)
+					{
+						Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
+					}
 				}
 
-				try
-				{
-					SocketStateEventArgs.eSocketStatus socketStatus = GetSocketStatus(status);
-					OnSocketStateChange.Raise(this, new SocketStateEventArgs(socketStatus, clientId));
-				}
-				catch (Exception e)
-				{
-					Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
-				}
+				UpdateListeningState();
 			}
-
-			UpdateListeningState();
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		private static SocketStateEventArgs.eSocketStatus GetSocketStatus(SocketStatus status)
@@ -231,49 +303,58 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="bytesReceived"></param>
 		private void TcpClientReceiveHandler(TCPServer tcpListener, uint clientId, int bytesReceived)
 		{
+			m_ConnectionLock.Enter();
+
 			try
 			{
-				if (clientId == 0)
-					return;
-
-				byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
-
-				// Buffer is null if there is no client with the given id connected
-				if (buffer == null)
+				try
 				{
-					RemoveClient(clientId);
-					return;
+					if (clientId == 0)
+						return;
+
+					byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
+
+					// Buffer is null if there is no client with the given id connected
+					if (buffer == null)
+					{
+						RemoveClient(clientId);
+						return;
+					}
+
+					TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, bytesReceived);
+					PrintRx(clientId, eventArgs.Data);
+
+					OnDataReceived.Raise(null, eventArgs);
+
+					// Would this ever happen?
+					if (!ClientConnected(clientId))
+					{
+						RemoveClient(clientId);
+						return;
+					}
+				}
+				catch (Exception e)
+				{
+					Logger.AddEntry(eSeverity.Error, e, "{0} - Exception occurred while processing received data", this);
 				}
 
-				TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, bytesReceived);
-				PrintRx(clientId, eventArgs.Data);
+				// Spawn a new listening thread
+				SocketErrorCodes socketError = tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
+				UpdateListeningState();
 
-				OnDataReceived.Raise(null, eventArgs);
-
-				// Would this ever happen?
-				if (!ClientConnected(clientId))
-				{
-					RemoveClient(clientId);
+				if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
 					return;
-				}
+
+				Logger.AddEntry(eSeverity.Error,
+								"{0} - ClientId {1} hostname {2} failed to ReceiveDataAsync: {3}",
+								this, clientId, GetHostnameForClientId(clientId), socketError);
+
+				RemoveClient(clientId);
 			}
-			catch (Exception e)
+			finally
 			{
-				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception occurred while processing received data", this);
+				m_ConnectionLock.Leave();
 			}
-
-			// Spawn a new listening thread
-			SocketErrorCodes socketError = tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
-			UpdateListeningState();
-
-			if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
-				return;
-
-			Logger.AddEntry(eSeverity.Error,
-			                "{0} - ClientId {1} hostname {2} failed to ReceiveDataAsync: {3}",
-			                this, clientId, GetHostnameForClientId(clientId), socketError);
-
-			RemoveClient(clientId);
 		}
 
 		/// <summary>
@@ -283,14 +364,32 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		private string GetHostnameForClientId(uint clientId)
 		{
-			return string.Format("{0}:{1}",
-			                     m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId),
-			                     m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId));
+			m_ConnectionLock.Enter();
+
+			try
+			{
+				return string.Format("{0}:{1}",
+					 m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId),
+					 m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId));
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		private void UpdateListeningState()
 		{
-			Listening = m_TcpListener != null && m_TcpListener.State > ServerState.SERVER_NOT_LISTENING;
+			m_ConnectionLock.Enter();
+
+			try
+			{
+				Listening = m_TcpListener != null && m_TcpListener.State > ServerState.SERVER_NOT_LISTENING;
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 	}
 }

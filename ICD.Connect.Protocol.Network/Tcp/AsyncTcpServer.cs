@@ -78,13 +78,22 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			get { return m_Listening; }
 			private set
 			{
-				if (value == m_Listening)
-					return;
+				m_ConnectionLock.Enter();
 
-				m_Listening = value;
+				try
+				{
+					if (value == m_Listening)
+						return;
 
-				eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
-				Logger.AddEntry(severity, "Listening set to {0}", m_Listening);
+					m_Listening = value;
+
+					eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
+					Logger.AddEntry(severity, "Listening set to {0}", m_Listening);
+				}
+				finally
+				{
+					m_ConnectionLock.Leave();
+				}
 			}
 		}
 
@@ -258,28 +267,45 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		private void IcdEnvironmentOnEthernetEvent(IcdEnvironment.eEthernetAdapterType adapter,
 		                                           IcdEnvironment.eEthernetEventType type)
 		{
-			if (m_TcpListener == null)
-				return;
-#if SIMPLSHARP
-			IcdEnvironment.eEthernetAdapterType adapterType =
-				IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
-			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
-				return;
+			m_ConnectionLock.Enter();
 
-#endif
-			switch (type)
+			try
 			{
-				case IcdEnvironment.eEthernetEventType.LinkUp:
-					if (Enabled)
-						Start();
-					break;
+				Logger.AddEntry(eSeverity.Warning, "Ethernet Event: {0} {1}", adapter, type);
 
-				case IcdEnvironment.eEthernetEventType.LinkDown:
-					Stop();
-					break;
+				if (m_TcpListener == null)
+					return;
 
-				default:
-					throw new ArgumentOutOfRangeException();
+#if SIMPLSHARP
+				IcdEnvironment.eEthernetAdapterType adapterType =
+					IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
+				if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
+				{
+					Logger.AddEntry(eSeverity.Warning, "Does not match: {0} {1}", adapter, adapterType);
+					return;
+				}
+#endif
+
+				switch (type)
+				{
+					case IcdEnvironment.eEthernetEventType.LinkUp:
+						if (Enabled)
+							Logger.AddEntry(eSeverity.Notice, "{0} regained connection - Restarting server", adapter);
+						Restart();
+						break;
+
+					case IcdEnvironment.eEthernetEventType.LinkDown:
+						Logger.AddEntry(eSeverity.Notice, "{0} lost connection - Temporarily stopping server", adapter);
+						Stop(false);
+						break;
+
+					default:
+						throw new ArgumentOutOfRangeException("type");
+				}
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
 			}
 		}
 
