@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - XP3 NonCachingEquipmentCrosspoint
 
+## [8.2.2] - 2019-05-31
+### Changed
+ - Fixed a bug in Net Standard http port where it was not properly decoding extended ascii results
+ - Changed HttpClient Timeout from 2 seconds to 5 seconds
+
 ## [8.2.1] - 2019-05-02
 ### Changed
  - AsyncTcpServer on .NET Standard now properly removes disconnected clients when reading 0 byte packets
@@ -53,6 +58,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
  - Removed ComPortPlus and other unused code
+
+## [7.5.0] - 2019-05-30
+### Changed
+ - Significant improvements to AsyncTcpServer recovery after network outages
 
 ## [7.4.0] - 2019-05-16
 ### Removed
