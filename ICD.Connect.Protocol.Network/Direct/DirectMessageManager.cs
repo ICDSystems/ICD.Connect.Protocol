@@ -512,7 +512,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			addRow("System ID", m_SystemId);
 			addRow("Host Session Info", GetHostSessionInfo());
-			addRow("Active", m_Server.Active);
+			addRow("Enabled", m_Server.Enabled);
+			addRow("Listening", m_Server.Listening);
 		}
 
 		public IEnumerable<IConsoleCommand> GetConsoleCommands()
