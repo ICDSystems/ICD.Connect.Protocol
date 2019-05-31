@@ -36,14 +36,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private readonly IcdOrderedDictionary<uint, string> m_Connections;
 		private readonly SafeCriticalSection m_ConnectionLock;
 
+		private ILoggerService m_CachedLogger;
+
 		private int m_MaxNumberOfClients;
+		private bool m_Listening;
 
 		#region Properties
 
 		/// <summary>
 		/// Logging service for all your logging needs
 		/// </summary>
-		private ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
+		private ILoggerService Logger
+		{
+			get { return m_CachedLogger ?? (m_CachedLogger = ServiceProvider.TryGetService<ILoggerService>()); }
+		}
 
 		/// <summary>
 		/// IP Address to accept connection from.
@@ -64,10 +70,38 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		public int BufferSize { get; set; }
 
 		/// <summary>
-		/// Returns true if the TCP Server actively listening for connections.
+		/// Tracks the enabled state of the TCP Server between getting/losing network connection.
 		/// </summary>
 		[PublicAPI]
-		public bool Active { get; private set; }
+		public bool Enabled { get; private set; }
+
+		/// <summary>
+		/// Gets the listening state of the TCP Server.
+		/// </summary>
+		[PublicAPI]
+		public bool Listening
+		{
+			get { return m_Listening; }
+			private set
+			{
+				m_ConnectionLock.Enter();
+
+				try
+				{
+					if (value == m_Listening)
+						return;
+
+					m_Listening = value;
+
+					eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
+					Logger.AddEntry(severity, "{0} - Listening set to {1}", this, m_Listening);
+				}
+				finally
+				{
+					m_ConnectionLock.Leave();
+				}
+			}
+		}
 
 		/// <summary>
 		/// Max number of connections supported by the TcpServer.
@@ -187,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public void Restart()
 		{
-			Stop();
+			Stop(false);
 			Start();
 		}
 
@@ -252,28 +286,42 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void IcdEnvironmentOnEthernetEvent(IcdEnvironment.eEthernetAdapterType adapter,
 		                                           IcdEnvironment.eEthernetEventType type)
 		{
-			if (m_TcpListener == null)
-				return;
-#if SIMPLSHARP
-			IcdEnvironment.eEthernetAdapterType adapterType =
-				IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
-			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
-				return;
+			m_ConnectionLock.Enter();
 
-#endif
-			switch (type)
+			try
 			{
-				case IcdEnvironment.eEthernetEventType.LinkUp:
-					if (Active)
-						Start();
-					break;
+#if SIMPLSHARP
+				if (m_TcpListener != null)
+				{
+					IcdEnvironment.eEthernetAdapterType adapterType =
+						IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
+					if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
+						return;
+				}
+#endif
 
-				case IcdEnvironment.eEthernetEventType.LinkDown:
-					Stop();
-					break;
+				switch (type)
+				{
+					case IcdEnvironment.eEthernetEventType.LinkUp:
+						if (Enabled && !Listening)
+						{
+							Logger.AddEntry(eSeverity.Notice, "{0} - Regained connection, restarting server", this);
+							Restart();
+						}
+						break;
 
-				default:
-					throw new ArgumentOutOfRangeException();
+					case IcdEnvironment.eEthernetEventType.LinkDown:
+						Logger.AddEntry(eSeverity.Warning, "{0} - Lost connection, temporarily stopping server", this);
+						Stop(false);
+						break;
+
+					default:
+						throw new ArgumentOutOfRangeException("type");
+				}
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
 			}
 		}
 
@@ -362,7 +410,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			addRow("Name", Name);
 			addRow("Port", Port);
 			addRow("Active Clients", string.Format("{0}/{1}", NumberOfClients, MaxNumberOfClients));
-			addRow("Active", Active);
+			addRow("Listening", Listening);
+			addRow("Enabled", Enabled);
 			addRow("Debug Rx", DebugRx);
 			addRow("Debug Tx", DebugTx);
 		}
@@ -397,9 +446,23 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 																SetRxDebugMode(p);
 															});
 
-
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+
+			yield return new ConsoleCommand("PrintClients", "Prints a table of the active clients", () => ConsolePrintClients());
+		}
+
+		private string ConsolePrintClients()
+		{
+			TableBuilder builder = new TableBuilder();
+
+			foreach (uint client in GetClients().Order())
+			{
+				HostInfo clientInfo = GetClientInfo(client);
+				builder.AddRow(client, clientInfo);
+			}
+
+			return builder.ToString();
 		}
 
 		private void SetTxDebugMode(eDebugMode mode)
