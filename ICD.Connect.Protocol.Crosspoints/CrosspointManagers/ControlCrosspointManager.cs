@@ -304,9 +304,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				m_ControlClientMap.Remove(crosspointId);
 				m_ControlEquipmentMap.Remove(crosspointId);
 
-				// If there are no other controls using this client we can remove it.
-				if (m_ControlClientMap.Values.All(c => c != manager))
-					m_ClientPool.DisposeClient(manager.Port as AsyncTcpClient);
+				// If there are no other controls using this client we can dispose it.
+// ReSharper disable AccessToDisposedClosure
+				if (manager == null || m_ControlClientMap.Values.Any(m => m == manager))
+// ReSharper restore AccessToDisposedClosure
+					return;
+
+				m_ClientPool.DisposeClient(manager.Port as AsyncTcpClient);
+				manager.Dispose();
 			}
 			finally
 			{
