@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class AsyncTcpServer
 	{
-		private TcpListener m_TcpListener;
+		private TcpListenerEx m_TcpListener;
 
 		private readonly Dictionary<uint, TcpClient> m_Clients = new Dictionary<uint, TcpClient>();
 		private readonly SafeCriticalSection m_ClientsSection = new SafeCriticalSection();
@@ -30,12 +30,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void Start()
 		{
-			Active = true;
+			Enabled = true;
 
 			try
 			{
-				m_TcpListener = new TcpListener(IPAddress.Any, Port);
+				m_TcpListener = new TcpListenerEx(IPAddress.Any, Port);
 				m_TcpListener.Server.ReceiveBufferSize = BufferSize;
+
 				try
 				{
 					m_TcpListener.Start();
@@ -51,7 +52,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
-				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
+				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this,
+				                                                Port,
 				                                                MaxNumberOfClients));
 			}
 			catch (Exception e)
@@ -59,6 +61,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				m_TcpListener = null;
 
 				Logger.AddEntry(eSeverity.Error, string.Format("{0} - Failed to start listening - {1}", this, e.Message));
+			}
+			finally
+			{
+				UpdateListeningState();
 			}
 		}
 
@@ -68,7 +74,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void Stop()
 		{
-			Active = false;
+			Stop(true);
+		}
+
+		/// <summary>
+		/// Stops the TCP server.
+		/// </summary>
+		/// <param name="disable">When true disables the TCP server.</param>
+		[PublicAPI]
+		private void Stop(bool disable)
+		{
+			Enabled = false;
 
 			if (m_TcpListener != null)
 			{
@@ -85,6 +101,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			foreach (uint client in GetClients())
 				RemoveTcpClient(client);
+
+			UpdateListeningState();
 		}
 
 		/// <summary>
@@ -211,9 +229,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
 			// let the rest of the application know a new client connected
-			if(clientId != 0)
+			if (clientId != 0)
 				OnSocketStateChange.Raise(this,
 					new SocketStateEventArgs(SocketStateEventArgs.eSocketStatus.SocketStatusConnected, clientId));
+
+			UpdateListeningState();
 		}
 
 		/// <summary>
@@ -270,6 +290,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_Clients[clientId].GetStream()
 			                   .ReadAsync(buffer, 0, 16384)
 			                   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+
+			UpdateListeningState();
 		}
 
 		private void RemoveTcpClient(uint clientId)
@@ -301,6 +323,37 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private string GetHostnameForClientId(uint clientId)
 		{
 			return GetClientInfo(clientId).ToString();
+		}
+
+		private void UpdateListeningState()
+		{
+			Listening = m_TcpListener != null && m_TcpListener.Active;
+		}
+	}
+
+	public sealed class TcpListenerEx : TcpListener
+	{
+		public new bool Active
+		{
+			get { return base.Active; }
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:System.Net.Sockets.TcpListener"/> class with the specified local endpoint.
+		/// </summary>
+		/// <param name="localEP">An <see cref="T:System.Net.IPEndPoint"/> that represents the local endpoint to which to bind the listener <see cref="T:System.Net.Sockets.Socket"/>. </param><exception cref="T:System.ArgumentNullException"><paramref name="localEP"/> is null. </exception>
+		public TcpListenerEx(IPEndPoint localEP)
+			: base(localEP)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:System.Net.Sockets.TcpListener"/> class that listens for incoming connection attempts on the specified local IP address and port number.
+		/// </summary>
+		/// <param name="localaddr">An <see cref="T:System.Net.IPAddress"/> that represents the local IP address. </param><param name="port">The port on which to listen for incoming connection attempts. </param><exception cref="T:System.ArgumentNullException"><paramref name="localaddr"/> is null. </exception><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="port"/> is not between <see cref="F:System.Net.IPEndPoint.MinPort"/> and <see cref="F:System.Net.IPEndPoint.MaxPort"/>. </exception>
+		public TcpListenerEx(IPAddress localaddr, int port)
+			: base(localaddr, port)
+		{
 		}
 	}
 }
