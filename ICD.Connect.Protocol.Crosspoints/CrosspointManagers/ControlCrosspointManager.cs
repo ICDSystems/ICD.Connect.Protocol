@@ -400,8 +400,17 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					                  .Select(c => GetCrosspoint(c.Key))
 					                  .OfType<ControlCrosspoint>();
 
+				// Send a fresh connection message
 				foreach (ControlCrosspoint control in controls)
+				{
 					control.Status = connected ? eCrosspointStatus.Connected : eCrosspointStatus.ConnectionDropped;
+
+					if (connected)
+					{
+						CrosspointData message = CrosspointData.ControlConnect(control.Id, control.EquipmentCrosspoint);
+						client.Send(message.Serialize());
+					}
+				}
 			}
 			finally
 			{
