@@ -202,7 +202,7 @@ namespace ICD.Connect.Protocol
 			if (Port.IsConnected)
 				return Port.Send(data);
 
-			Log(eSeverity.Error, "Unable to send command to {0} - Port is not connected", m_Parent);
+			Log(eSeverity.Error, "Unable to send command - {0} is not connected", Port);
 			return false;
 		}
 
