@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - XP3 NonCachingEquipmentCrosspoint
+ - XP3 ControlCrosspointManager AutoReconnect behaviour tries to reconnect beyond the initial disconnect
 
 ## [8.2.2] - 2019-05-31
 ### Changed
