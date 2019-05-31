@@ -217,6 +217,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					return eCrosspointStatus.Idle;
 				}
 
+				if (!manager.IsConnected)
+				{
+					Logger.AddEntry(eSeverity.Warning,
+									"{0} - Failed to disconnect ControlCrosspoint {1} - TCP Client is not connected.",
+									this, crosspointId);
+					return eCrosspointStatus.Idle;
+				}
+
 				if (equipmentId == 0)
 				{
 					Logger.AddEntry(eSeverity.Warning,
