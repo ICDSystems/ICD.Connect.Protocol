@@ -88,6 +88,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			IcdUriBuilder builder = new IcdUriBuilder(Uri);
 			builder.AppendPath(localAddress);
 
+#if SIMPLSHARP
+			// Crestron tries to strip out encoded spaces (and possibly other encodings?) from the path
+			// so we doubly-escape to prevent this from happening.
+			builder.Path = string.IsNullOrEmpty(builder.Path)
+				? builder.Path
+				: builder.Path.Replace("%", "%25");
+#endif
+
 			return builder.ToString();
 		}
 
