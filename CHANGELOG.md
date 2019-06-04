@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Doubly-escaping HTTP/S paths for Crestron due to path encodings being stripped
+
 ## [8.2.2] - 2019-05-31
 ### Changed
  - Fixed a bug in Net Standard http port where it was not properly decoding extended ascii results
