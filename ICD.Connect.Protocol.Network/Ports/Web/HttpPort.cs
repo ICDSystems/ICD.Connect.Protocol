@@ -28,7 +28,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the configured URI properties.
 		/// </summary>
-		public override IUriProperties UriProperties { get { return m_UriProperties; } }
+		public override IUriProperties UriProperties
+		{
+			get { return m_UriProperties; }
+		}
 
 		/// <summary>
 		/// The base URI for requests.
@@ -164,8 +167,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
 			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
-            yield return new GenericConsoleCommand<string>("Post", "Performs a request at the given path", a => ConsolePost(a));
-        }
+			yield return new GenericConsoleCommand<string>("Post", "Performs a request at the given path", a => ConsolePost(a));
+		}
 
 		/// <summary>
 		/// Shim to avoid "unverifiable code" warning.
@@ -176,28 +179,28 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			return base.GetConsoleCommands();
 		}
 
-        /// <summary>
-        /// Shim to perform a get request from the console.
-        /// </summary>
-        /// <param name="path"></param>
-        private string ConsoleGet(string path)
-        {
-            string output;
-            Get(path, out output);
-            return output;
-        }
+		/// <summary>
+		/// Shim to perform a get request from the console.
+		/// </summary>
+		/// <param name="path"></param>
+		private string ConsoleGet(string path)
+		{
+			string output;
+			Get(path, out output);
+			return output;
+		}
 
-        /// <summary>
-        /// Shim to perform a get request from the console.
-        /// </summary>
-        /// <param name="path"></param>
-        private string ConsolePost(string path)
-        {
-            string output;
-            Post(path, "", out output);
-            return output;
-        }
+		/// <summary>
+		/// Shim to perform a get request from the console.
+		/// </summary>
+		/// <param name="path"></param>
+		private string ConsolePost(string path)
+		{
+			string output;
+			Post(path, "", out output);
+			return output;
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

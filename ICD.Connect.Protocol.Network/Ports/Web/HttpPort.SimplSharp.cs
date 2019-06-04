@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
-#region Properties
+		#region Properties
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
@@ -32,11 +32,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public override bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
+		public override bool Busy
+		{
+			get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; }
+		}
 
-#endregion
+		#endregion
 
-#region Constructors
+		#region Constructors
 
 		/// <summary>
 		/// Constructor.
@@ -64,9 +67,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			UpdateCachedOnlineStatus();
 		}
 
-#endregion
+		#endregion
 
-#region Methods
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -133,7 +136,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 						foreach (var value in header.Value)
 						{
 							request.Header.SetHeaderValue(header.Key, value);
-						}	
+						}
 					}
 
 					return Dispatch(request, out response);
@@ -147,7 +150,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
-					
+
 					foreach (var header in headers)
 					{
 						foreach (var value in header.Value)
@@ -273,7 +276,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 		}
 
-#endregion
+		#endregion
 
 		#region Private Methods
 
