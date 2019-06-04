@@ -308,7 +308,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
 				}
 				else
 				{
@@ -317,12 +317,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					if (response.Code < 300)
 						success = true;
 					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
 				}
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
@@ -356,7 +356,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
 				}
 				else
 				{
@@ -365,12 +365,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					if (response.Code < 300)
 						success = true;
 					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
 				}
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
