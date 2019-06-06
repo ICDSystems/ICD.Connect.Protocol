@@ -16,7 +16,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	public sealed partial class HttpPort : AbstractWebPort<HttpPortSettings>
 	{
 		private const string SOAP_ACCEPT = "application/xml";
-		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
 		private const string SOAP_ACTION_HEADER = "SOAPAction";
 
 		private readonly UriProperties m_UriProperties = new UriProperties();

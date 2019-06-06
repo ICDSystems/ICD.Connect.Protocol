@@ -10,6 +10,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{
+		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
+
 		private readonly HttpClient m_HttpClient;
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
@@ -235,6 +237,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			Accept = SOAP_ACCEPT;
 			m_HttpsClient.IncludeHeaders = false;
+			response = null;
 
 			m_ClientBusySection.Enter();
 
@@ -270,10 +273,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					return Dispatch(request, out response);
 				}
 			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(false);
+			return false;
 		}
 
 		#endregion

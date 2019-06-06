@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.2.4] - 2019-06-06
+### Added
+ - Added better HTTPRequestException handling
+
+### Changed
+ - Fixed encoding issues with username and passwords
+ - Fixed Invalid Soap Content Type
+ - Fixed case where HTTP/S port would not go offline if a SOAP request fails to dispatch
+
 ## [8.2.3] - 2019-06-04
 ### Changed
  - Doubly-escaping HTTP/S paths for Crestron due to path encodings being stripped
