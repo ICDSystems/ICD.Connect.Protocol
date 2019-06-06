@@ -172,6 +172,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
+			response = null;
 
 			m_ClientBusySection.Enter();
 
@@ -186,10 +187,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				return Dispatch(request, out response);
 			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(false);
+			return false;
 		}
 
 		/// <summary>
