@@ -10,6 +10,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{
+		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
+
 		private readonly HttpClient m_HttpClient;
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
