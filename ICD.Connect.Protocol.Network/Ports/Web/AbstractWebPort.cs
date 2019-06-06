@@ -92,7 +92,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			// Port supercedes device configuration
+			// Port supersedes device configuration
 			IUriProperties config = UriProperties.Superimpose(properties);
 
 			ApplyConfiguration(config);
@@ -127,7 +127,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					builder.Host = properties.UriHost;
 
 				if (properties.UriPassword != null)
-					builder.Password = properties.UriPassword;
+					builder.Password = Uri.EscapeDataString(properties.UriPassword);
 
 				if (properties.UriPath != null)
 					builder.Path = properties.UriPath;
@@ -143,7 +143,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					builder.Query = properties.UriQuery;
 
 				if (properties.UriUsername != null)
-					builder.UserName = properties.UriUsername;
+					builder.UserName = Uri.EscapeDataString(properties.UriUsername);
 			}
 
 			try
