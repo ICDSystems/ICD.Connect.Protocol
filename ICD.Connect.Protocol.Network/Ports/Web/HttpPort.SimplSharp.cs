@@ -10,11 +10,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{
+		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
+
 		private readonly HttpClient m_HttpClient;
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
-#region Properties
+		#region Properties
 
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
@@ -32,11 +34,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public override bool Busy { get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; } }
+		public override bool Busy
+		{
+			get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; }
+		}
 
-#endregion
+		#endregion
 
-#region Constructors
+		#region Constructors
 
 		/// <summary>
 		/// Constructor.
@@ -64,9 +69,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			UpdateCachedOnlineStatus();
 		}
 
-#endregion
+		#endregion
 
-#region Methods
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -133,7 +138,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 						foreach (var value in header.Value)
 						{
 							request.Header.SetHeaderValue(header.Key, value);
-						}	
+						}
 					}
 
 					return Dispatch(request, out response);
@@ -147,7 +152,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
-					
+
 					foreach (var header in headers)
 					{
 						foreach (var value in header.Value)
@@ -232,6 +237,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			Accept = SOAP_ACCEPT;
 			m_HttpsClient.IncludeHeaders = false;
+			response = null;
 
 			m_ClientBusySection.Enter();
 
@@ -267,13 +273,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					return Dispatch(request, out response);
 				}
 			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(false);
+			return false;
 		}
 
-#endregion
+		#endregion
 
 		#region Private Methods
 
@@ -305,7 +318,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
 				}
 				else
 				{
@@ -314,12 +327,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					if (response.Code < 300)
 						success = true;
 					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
 				}
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{
@@ -353,7 +366,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
 				}
 				else
 				{
@@ -362,12 +375,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					if (response.Code < 300)
 						success = true;
 					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url, response.Code);
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
 				}
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
 			}
 			finally
 			{

@@ -14,6 +14,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{
+		private const string SOAP_CONTENT_TYPE = "text/xml";
+
 		private readonly HttpClient m_Client;
 		private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
@@ -172,6 +174,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
+			response = null;
 
 			m_ClientBusySection.Enter();
 
@@ -179,17 +182,24 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			{
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, m_UriProperties.GetUri())
 				{
-					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
+					Content = new StringContent(content, Encoding.GetEncoding(28591), SOAP_CONTENT_TYPE)
 				};
 
 				request.Headers.Add(SOAP_ACTION_HEADER, action);
 
 				return Dispatch(request, out response);
 			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+			}
 			finally
 			{
 				m_ClientBusySection.Leave();
 			}
+
+			SetLastRequestSucceeded(false);
+			return false;
 		}
 
 		/// <summary>
@@ -218,24 +228,35 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					byte[] bytes = response.Content.ReadAsByteArrayAsync().Result;
 					result = Encoding.GetEncoding(28591).GetString(bytes);
 
-					if ((int) response.StatusCode < 300)
+					if ((int)response.StatusCode < 300)
 						success = true;
 					else
 						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri,
-							response.StatusCode);
+						    response.StatusCode);
 				}
 			}
 			catch (AggregateException ae)
 			{
 				ae.Handle(x =>
-				{
-					if (x is TaskCanceledException)
-						Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
-					else
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name, x.Message);
+				          {
+					          if (x is TaskCanceledException)
+						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
+							  else if (x is HttpRequestException)
+					          {
+						          Exception inner = x.GetBaseException();
+						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
+							  }
+							  else
+						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name,
+						              x.Message);
 
-					return true;
-				});
+					          return true;
+				          });
+			}
+			catch (HttpRequestException e)
+			{
+				Exception inner = e.GetBaseException();
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
 			}
 			catch (Exception e)
 			{

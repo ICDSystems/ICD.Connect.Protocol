@@ -12,7 +12,7 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Settings;
+using ICD.Connect.Settings.Utils;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
