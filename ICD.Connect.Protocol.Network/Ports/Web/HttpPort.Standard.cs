@@ -228,24 +228,35 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					byte[] bytes = response.Content.ReadAsByteArrayAsync().Result;
 					result = Encoding.GetEncoding(28591).GetString(bytes);
 
-					if ((int) response.StatusCode < 300)
+					if ((int)response.StatusCode < 300)
 						success = true;
 					else
 						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri,
-							response.StatusCode);
+						    response.StatusCode);
 				}
 			}
 			catch (AggregateException ae)
 			{
 				ae.Handle(x =>
-				{
-					if (x is TaskCanceledException)
-						Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
-					else
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name, x.Message);
+				          {
+					          if (x is TaskCanceledException)
+						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
+							  else if (x is HttpRequestException)
+					          {
+						          Exception inner = x.GetBaseException();
+						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
+							  }
+							  else
+						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name,
+						              x.Message);
 
-					return true;
-				});
+					          return true;
+				          });
+			}
+			catch (HttpRequestException e)
+			{
+				Exception inner = e.GetBaseException();
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
 			}
 			catch (Exception e)
 			{
