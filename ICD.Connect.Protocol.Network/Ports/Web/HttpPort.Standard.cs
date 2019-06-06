@@ -14,6 +14,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public sealed partial class HttpPort
 	{
+		private const string SOAP_CONTENT_TYPE = "text/xml";
+
 		private readonly HttpClient m_Client;
 		private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
@@ -180,7 +182,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			{
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, m_UriProperties.GetUri())
 				{
-					Content = new StringContent(content, Encoding.ASCII, SOAP_CONTENT_TYPE)
+					Content = new StringContent(content, Encoding.GetEncoding(28591), SOAP_CONTENT_TYPE)
 				};
 
 				request.Headers.Add(SOAP_ACTION_HEADER, action);
