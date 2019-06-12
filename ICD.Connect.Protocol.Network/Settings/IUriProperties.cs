@@ -166,12 +166,12 @@ namespace ICD.Connect.Protocol.Network.Settings
 			{
 				Fragment = extends.UriFragment,
 				Host = extends.UriHost,
-				Password = Uri.EscapeDataString(extends.UriPassword),
+				Password = extends.UriPassword == null ? null : Uri.EscapeDataString(extends.UriPassword),
 				Path = extends.UriPath,
 				Port = extends.UriPort ?? 0,
 				Query = extends.UriQuery,
 				Scheme = extends.UriScheme,
-				UserName = Uri.EscapeDataString(extends.UriUsername)
+				UserName = extends.UriUsername == null ? null : Uri.EscapeDataString(extends.UriUsername)
 			};
 
 			return builder.Uri;
