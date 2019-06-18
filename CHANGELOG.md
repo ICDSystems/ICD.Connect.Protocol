@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.5.1] - 2019-06-18
 ### Changed
  - Failing gracefully when a JSON debug logging fails to parse cleanly
  - Thread safety improvements for Net Standard TCP server
