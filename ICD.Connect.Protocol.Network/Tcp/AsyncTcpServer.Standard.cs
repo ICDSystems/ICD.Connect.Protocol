@@ -30,7 +30,7 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		public void Start()
 		{
-			Enabled = true;
+			m_ConnectionLock.Enter();
 
 			try
 			{
@@ -52,6 +52,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 
 				m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
+				Enabled = true;
+
 				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this,
 				                                                Port,
 				                                                MaxNumberOfClients));
@@ -66,6 +68,8 @@ namespace ICD.Connect.Protocol.Network.Tcp
 			{
 				UpdateListeningState();
 			}
+
+			m_ConnectionLock.Leave();
 		}
 
 		/// <summary>
@@ -84,25 +88,34 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		[PublicAPI]
 		private void Stop(bool disable)
 		{
-			Enabled = false;
+			m_ConnectionLock.Enter();
 
-			if (m_TcpListener != null)
+			try
 			{
-				m_TcpListener.Stop();
+				Enabled = false;
 
-				IPEndPoint endpoint = m_TcpListener.LocalEndpoint as IPEndPoint;
-				if (endpoint == null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening", this);
-				else
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, endpoint.Port);
+				if (m_TcpListener != null)
+				{
+					m_TcpListener.Stop();
+
+					IPEndPoint endpoint = m_TcpListener.LocalEndpoint as IPEndPoint;
+					if (endpoint == null)
+						Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening", this);
+					else
+						Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, endpoint.Port);
+				}
+
+				m_TcpListener = null;
+
+				foreach (uint client in GetClients())
+					RemoveTcpClient(client);
+
+				UpdateListeningState();
 			}
-
-			m_TcpListener = null;
-
-			foreach (uint client in GetClients())
-				RemoveTcpClient(client);
-
-			UpdateListeningState();
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		/// <summary>
@@ -111,12 +124,21 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <param name="data"></param>
 		public void Send(string data)
 		{
-			byte[] byteData = StringUtils.ToBytes(data);
+			m_ConnectionLock.Enter();
 
-			foreach (uint clientId in GetClients())
+			try
 			{
-				PrintTx(clientId, data);
-				Send(clientId, byteData);
+				byte[] byteData = StringUtils.ToBytes(data);
+
+				foreach (uint clientId in GetClients())
+				{
+					PrintTx(clientId, data);
+					Send(clientId, byteData);
+				}
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
 			}
 		}
 
@@ -128,32 +150,48 @@ namespace ICD.Connect.Protocol.Network.Tcp
 		/// <returns></returns>
 		public void Send(uint clientId, string data)
 		{
-			byte[] byteData = StringUtils.ToBytes(data);
+			m_ConnectionLock.Enter();
 
-			PrintTx(clientId, data);
-			Send(clientId, byteData);
+			try
+			{
+				byte[] byteData = StringUtils.ToBytes(data);
+
+				PrintTx(clientId, data);
+				Send(clientId, byteData);
+			}
+			finally
+			{
+				m_ConnectionLock.Leave();
+			}
 		}
 
 		public void Send(uint clientId, byte[] data)
 		{
-			if (!ClientConnected(clientId))
-			{
-				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send data to unconnected client {1}", this, clientId);
-				return;
-			}
+			m_ConnectionLock.Enter();
 
 			try
 			{
-				m_Clients[clientId].Client.Send(data, 0, data.Length, SocketFlags.None);
-			}
-			catch (SocketException ex)
-			{
-				Logger.AddEntry(eSeverity.Error, ex, "Failed to send data to client {0}", GetHostnameForClientId(clientId));
-			}
+				if (!ClientConnected(clientId))
+				{
+					Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send data to unconnected client {1}", this, clientId);
+					return;
+				}
 
-			if (!ClientConnected(clientId))
+				try
+				{
+					m_Clients[clientId].Client.Send(data, 0, data.Length, SocketFlags.None);
+				}
+				catch (SocketException ex)
+				{
+					Logger.AddEntry(eSeverity.Error, ex, "Failed to send data to client {0}", GetHostnameForClientId(clientId));
+				}
+
+				if (!ClientConnected(clientId))
+					RemoveTcpClient(clientId);
+			}
+			finally
 			{
-				RemoveTcpClient(clientId);
+				m_ConnectionLock.Leave();
 			}
 		}
 
