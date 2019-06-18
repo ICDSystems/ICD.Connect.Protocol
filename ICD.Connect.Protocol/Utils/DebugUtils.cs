@@ -143,7 +143,14 @@ namespace ICD.Connect.Protocol.Utils
 					}
 
 				case eDebugMode.Json:
-					return JsonUtils.Format(data);
+					try
+					{
+						return JsonUtils.Format(data);
+					}
+					catch (Exception)
+					{
+						return FormatData("(Invalid JSON)" + data, eDebugMode.Ascii);
+					}
 
 				default:
 					throw new ArgumentOutOfRangeException();
