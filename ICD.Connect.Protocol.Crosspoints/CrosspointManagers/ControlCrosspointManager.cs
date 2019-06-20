@@ -314,8 +314,13 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 // ReSharper restore AccessToDisposedClosure
 					return;
 
+				// Get the client before disposing the manager
+				AsyncTcpClient client = manager.Port as AsyncTcpClient;
+
 				manager.Dispose();
-				m_ClientPool.DisposeClient(manager.Port as AsyncTcpClient);
+
+				if (client != null)
+					m_ClientPool.DisposeClient(client);
 			}
 			finally
 			{
