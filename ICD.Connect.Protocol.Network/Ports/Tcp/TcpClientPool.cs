@@ -195,6 +195,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
+				StopDisposeTimer(client);
+
 				if (!m_Clients.RemoveValue(client))
 					return false;
 			}
@@ -261,29 +263,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		#region Private Methods
 
 		/// <summary>
-		/// If the client is currently scheduled for disposal we end the timer.
-		/// </summary>
-		/// <param name="client"></param>
-		private void StopDisposeTimer(AsyncTcpClient client)
-		{
-			m_ClientsSection.Enter();
-
-			try
-			{
-				SafeTimer timer;
-				if (!m_ClientDisposalTimers.TryGetValue(client, out timer))
-					return;
-
-				timer.Dispose();
-				m_ClientDisposalTimers.Remove(client);
-			}
-			finally
-			{
-				m_ClientsSection.Leave();
-			}
-		}
-
-		/// <summary>
 		/// Instantiates a new client for this given address:port.
 		/// </summary>
 		/// <param name="host"></param>
@@ -335,8 +314,34 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			try
 			{
 				AsyncTcpClient client;
-				if (m_Clients.TryGetValue(key, out client))
-					RemoveClient(client);
+				if (!m_Clients.TryGetValue(key, out client))
+					return;
+
+				RemoveClient(client);
+				StopDisposeTimer(client);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// If the client is currently scheduled for disposal we end the timer.
+		/// </summary>
+		/// <param name="client"></param>
+		private void StopDisposeTimer(AsyncTcpClient client)
+		{
+			m_ClientsSection.Enter();
+
+			try
+			{
+				SafeTimer timer;
+				if (!m_ClientDisposalTimers.TryGetValue(client, out timer))
+					return;
+
+				timer.Dispose();
+				m_ClientDisposalTimers.Remove(client);
 			}
 			finally
 			{
