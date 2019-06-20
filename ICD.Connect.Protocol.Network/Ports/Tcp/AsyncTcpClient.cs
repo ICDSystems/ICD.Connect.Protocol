@@ -136,18 +136,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 		}
 
-		/// <summary>
-		/// Override to add additional properties to the ToString representation.
-		/// </summary>
-		/// <param name="addPropertyAndValue"></param>
-		protected override void BuildStringRepresentationProperties(Action<string, object> addPropertyAndValue)
-		{
-			base.BuildStringRepresentationProperties(addPropertyAndValue);
-
-			addPropertyAndValue("Address", Address);
-			addPropertyAndValue("Port", Port);
-		}
-
 		#endregion
 
 		#region Settings
@@ -161,7 +149,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			ApplyConfiguration();
 
-			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
 		}
 

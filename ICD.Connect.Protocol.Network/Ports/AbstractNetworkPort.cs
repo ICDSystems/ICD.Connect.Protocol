@@ -71,6 +71,17 @@ namespace ICD.Connect.Protocol.Network.Ports
 				Port = properties.NetworkPort.Value;
 		}
 
+		/// <summary>
+		/// Override to add additional properties to the ToString representation.
+		/// </summary>
+		/// <param name="addPropertyAndValue"></param>
+		protected override void BuildStringRepresentationProperties(Action<string, object> addPropertyAndValue)
+		{
+			base.BuildStringRepresentationProperties(addPropertyAndValue);
+
+			addPropertyAndValue("Host", new HostInfo(Address, Port));
+		}
+
 		#endregion
 
 		#region Settings

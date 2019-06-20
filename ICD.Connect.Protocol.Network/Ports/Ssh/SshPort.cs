@@ -582,17 +582,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			return m_SshClient != null && m_SshClient.IsConnected && m_SshStream != null;
 		}
 
-		/// <summary>
-		/// Override to add additional properties to the ToString representation.
-		/// </summary>
-		/// <param name="addPropertyAndValue"></param>
-		protected override void BuildStringRepresentationProperties(Action<string, object> addPropertyAndValue)
-		{
-			base.BuildStringRepresentationProperties(addPropertyAndValue);
-
-			addPropertyAndValue("Host", new HostInfo(Address, Port));
-		}
-
 		#endregion
 	}
 }
