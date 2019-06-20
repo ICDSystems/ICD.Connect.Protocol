@@ -218,33 +218,30 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					Logger.AddEntry(eSeverity.Warning,
 					                "{0} - Failed to send disconnect message for ControlCrosspoint {1} - No associated TCP Client.",
 					                this, crosspointId);
-					return eCrosspointStatus.Idle;
 				}
-
-				if (!manager.IsConnected)
+				else if (!manager.IsConnected)
 				{
 					Logger.AddEntry(eSeverity.Warning,
 									"{0} - Failed to send disconnect message for  ControlCrosspoint {1} - TCP Client is not connected.",
 									this, crosspointId);
-					return eCrosspointStatus.Idle;
 				}
-
-				if (equipmentId == 0)
+				else if (equipmentId == 0)
 				{
 					Logger.AddEntry(eSeverity.Warning,
 					                "{0} - Failed to send disconnect message for  ControlCrosspoint {1} - No associated equipment.",
 					                this, crosspointId);
-					return eCrosspointStatus.Idle;
+				}
+				else
+				{
+					// Send the disconnect message
+					CrosspointData message = CrosspointData.ControlDisconnect(crosspointId, equipmentId);
+					manager.Send(message.Serialize());
 				}
 
-				// Send the disconnect message
-				CrosspointData message = CrosspointData.ControlDisconnect(crosspointId, equipmentId);
-				manager.Send(message.Serialize());
+				RemoveControlFromDictionaries(crosspointId);
 			}
 			finally
 			{
-				RemoveControlFromDictionaries(crosspointId);
-
 				m_ControlMapsSection.Leave();
 			}
 
