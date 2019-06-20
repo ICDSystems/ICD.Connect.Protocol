@@ -161,7 +161,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					return eCrosspointStatus.ConnectFailed;
 				}
 
-				ConnectionStateManager manager = new ConnectionStateManager(this);
+				ConnectionStateManager manager =
+					m_ControlClientMap.TryGetValue(crosspointId, out manager)
+						? manager
+						: new ConnectionStateManager(this);
 				manager.SetPort(client, AutoReconnect);
 
 				// Add everything to the map
