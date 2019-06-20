@@ -215,7 +215,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				if (manager == null)
 				{
 					Logger.AddEntry(eSeverity.Warning,
-					                "{0} - Failed to disconnect ControlCrosspoint {1} - No associated TCP Client.",
+					                "{0} - Failed to send disconnect message for ControlCrosspoint {1} - No associated TCP Client.",
 					                this, crosspointId);
 					return eCrosspointStatus.Idle;
 				}
@@ -223,7 +223,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				if (!manager.IsConnected)
 				{
 					Logger.AddEntry(eSeverity.Warning,
-									"{0} - Failed to disconnect ControlCrosspoint {1} - TCP Client is not connected.",
+									"{0} - Failed to send disconnect message for  ControlCrosspoint {1} - TCP Client is not connected.",
 									this, crosspointId);
 					return eCrosspointStatus.Idle;
 				}
@@ -231,7 +231,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				if (equipmentId == 0)
 				{
 					Logger.AddEntry(eSeverity.Warning,
-					                "{0} - Failed to disconnect ControlCrosspoint {1} - No associated equipment.",
+					                "{0} - Failed to send disconnect message for  ControlCrosspoint {1} - No associated equipment.",
 					                this, crosspointId);
 					return eCrosspointStatus.Idle;
 				}
