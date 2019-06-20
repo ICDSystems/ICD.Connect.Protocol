@@ -239,11 +239,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				// Send the disconnect message
 				CrosspointData message = CrosspointData.ControlDisconnect(crosspointId, equipmentId);
 				manager.Send(message.Serialize());
-
-				RemoveControlFromDictionaries(crosspointId);
 			}
 			finally
 			{
+				RemoveControlFromDictionaries(crosspointId);
+
 				m_ControlMapsSection.Leave();
 			}
 
