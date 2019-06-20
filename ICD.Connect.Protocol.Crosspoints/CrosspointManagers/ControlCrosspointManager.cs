@@ -150,6 +150,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 				// Get the TCP client from the pool
 				AsyncTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
 				if (!client.IsConnected)
 					client.Connect();
 
@@ -348,6 +349,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 						return null;
 
 					AsyncTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
+
 					manager = new ConnectionStateManager(this);
 					manager.SetPort(client, AutoReconnect);
 
