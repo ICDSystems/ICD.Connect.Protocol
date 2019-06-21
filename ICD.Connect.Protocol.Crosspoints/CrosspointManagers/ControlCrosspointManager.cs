@@ -2,6 +2,7 @@
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -18,7 +19,13 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 	/// </summary>
 	public sealed class ControlCrosspointManager : AbstractCrosspointManager<IControlCrosspoint>
 	{
-		private readonly Dictionary<int, ConnectionStateManager> m_ControlClientMap;
+		/// <summary>
+		/// How long, in milliseconds, to keep a TCP client alive after all controls are done with it.
+		/// </summary>
+		private const long CLIENT_KEEP_ALIVE = 60 * 1000;
+
+		private readonly BiDictionary<AsyncTcpClient, ConnectionStateManager> m_ClientToCsm;
+		private readonly Dictionary<int, AsyncTcpClient> m_ControlClientMap;
 		private readonly Dictionary<int, int> m_ControlEquipmentMap;
 		private readonly SafeCriticalSection m_ControlMapsSection;
 
@@ -53,7 +60,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 					m_AutoReconnect = value;
 
-					foreach (ConnectionStateManager manager in m_ControlClientMap.Values)
+					foreach (ConnectionStateManager manager in m_ClientToCsm.Values)
 					{
 						if (m_AutoReconnect)
 							manager.Start();
@@ -74,7 +81,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		public ControlCrosspointManager(int systemId)
 			: base(systemId)
 		{
-			m_ControlClientMap = new Dictionary<int, ConnectionStateManager>();
+			m_ClientToCsm = new BiDictionary<AsyncTcpClient, ConnectionStateManager>();
+			m_ControlClientMap = new Dictionary<int, AsyncTcpClient>();
 			m_ControlEquipmentMap = new Dictionary<int, int>();
 			m_ControlMapsSection = new SafeCriticalSection();
 
@@ -162,14 +170,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					return eCrosspointStatus.ConnectFailed;
 				}
 
-				ConnectionStateManager manager =
-					m_ControlClientMap.TryGetValue(crosspointId, out manager)
-						? manager
-						: m_ControlClientMap.Values.FirstOrDefault(csm => csm.Port == client) ?? new ConnectionStateManager(this);
-				manager.SetPort(client, AutoReconnect);
-
 				// Add everything to the map
-				m_ControlClientMap[crosspointId] = manager;
+				m_ControlClientMap[crosspointId] = client;
 				m_ControlEquipmentMap[crosspointId] = equipmentId;
 
 				// Send a connect message to the equipment
@@ -207,19 +209,19 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			try
 			{
-				ConnectionStateManager manager;
-				m_ControlClientMap.TryGetValue(crosspointId, out manager);
+				AsyncTcpClient client;
+				m_ControlClientMap.TryGetValue(crosspointId, out client);
 
 				int equipmentId;
 				m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
 
-				if (manager == null)
+				if (client == null)
 				{
 					Logger.AddEntry(eSeverity.Warning,
 					                "{0} - Failed to send disconnect message for ControlCrosspoint {1} - No associated TCP Client.",
 					                this, crosspointId);
 				}
-				else if (!manager.IsConnected)
+				else if (!client.IsConnected)
 				{
 					Logger.AddEntry(eSeverity.Warning,
 									"{0} - Failed to send disconnect message for  ControlCrosspoint {1} - TCP Client is not connected.",
@@ -235,7 +237,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				{
 					// Send the disconnect message
 					CrosspointData message = CrosspointData.ControlDisconnect(crosspointId, equipmentId);
-					manager.Send(message.Serialize());
+					client.Send(message.Serialize());
 				}
 
 				RemoveControlFromDictionaries(crosspointId);
@@ -295,8 +297,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			try
 			{
-				ConnectionStateManager manager;
-				m_ControlClientMap.TryGetValue(crosspointId, out manager);
+				AsyncTcpClient client;
+				m_ControlClientMap.TryGetValue(crosspointId, out client);
 
 				int equipmentId;
 				m_ControlEquipmentMap.TryGetValue(crosspointId, out equipmentId);
@@ -307,17 +309,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 				// If there are no other controls using this client we can dispose it.
 // ReSharper disable AccessToDisposedClosure
-				if (manager == null || m_ControlClientMap.Values.Any(m => m == manager))
+				if (client == null || m_ControlClientMap.Values.Any(m => m == client))
 // ReSharper restore AccessToDisposedClosure
 					return;
 
-				// Get the client before disposing the manager
-				AsyncTcpClient client = manager.Port as AsyncTcpClient;
-
-				manager.Dispose();
-
-				if (client != null)
-					m_ClientPool.DisposeClient(client);
+				m_ClientPool.DisposeClient(client, CLIENT_KEEP_ALIVE);
 			}
 			finally
 			{
@@ -332,15 +328,15 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="controlId"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		private ConnectionStateManager LazyLoadClientForControl(int controlId)
+		private AsyncTcpClient LazyLoadClientForControl(int controlId)
 		{
-			ConnectionStateManager manager;
+			AsyncTcpClient client;
 
 			m_ControlMapsSection.Enter();
 
 			try
 			{
-				if (!m_ControlClientMap.TryGetValue(controlId, out manager))
+				if (!m_ControlClientMap.TryGetValue(controlId, out client))
 				{
 					IControlCrosspoint controlCrosspoint = GetCrosspoint(controlId);
 					if (controlCrosspoint.EquipmentCrosspoint == 0)
@@ -350,13 +346,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					if (!RemoteCrosspoints.TryGetCrosspointInfo(controlCrosspoint.EquipmentCrosspoint, out equipmentInfo))
 						return null;
 
-					AsyncTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
+					client = m_ClientPool.GetClient(equipmentInfo.Host);
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
 
-					manager = m_ControlClientMap.Values.FirstOrDefault(csm => csm.Port == client) ?? new ConnectionStateManager(this);
-					manager.SetPort(client, AutoReconnect);
-
-					m_ControlClientMap.Add(controlId, manager);
+					m_ControlClientMap.Add(controlId, client);
 				}
 			}
 			finally
@@ -364,7 +357,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				m_ControlMapsSection.Leave();
 			}
 
-			return manager;
+			return client;
 		}
 
 		/// <summary>
@@ -389,6 +382,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private void Subscribe(TcpClientPool pool)
 		{
 			pool.OnClientConnectionStateChanged += PoolOnClientConnectionStateChanged;
+			pool.OnClientAdded += PoolOnClientAdded;
+			pool.OnClientRemoved += PoolOnClientRemoved;
 		}
 
 		/// <summary>
@@ -404,7 +399,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			try
 			{
 				IEnumerable<ControlCrosspoint> controls =
-					m_ControlClientMap.Where(c => c.Value.Port == client)
+					m_ControlClientMap.Where(kvp => kvp.Value == client)
 					                  .Select(c => GetCrosspoint(c.Key))
 					                  .OfType<ControlCrosspoint>();
 
@@ -419,6 +414,54 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 						client.Send(message.Serialize());
 					}
 				}
+			}
+			finally
+			{
+				m_ControlMapsSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// When a new client is spun up we create a ConnectionStateManager for it.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="client"></param>
+		private void PoolOnClientAdded(TcpClientPool sender, AsyncTcpClient client)
+		{
+			m_ControlMapsSection.Enter();
+
+			try
+			{
+				ConnectionStateManager csm = new ConnectionStateManager(this);
+				m_ControlMapsSection.Execute(() => m_ClientToCsm.Add(client, csm));
+
+				csm.SetPort(client, AutoReconnect);
+			}
+			finally
+			{
+				m_ControlMapsSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// When a client is removed we destroy the associated ConnectionStateManager as
+		/// well as the client itself.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="client"></param>
+		private void PoolOnClientRemoved(TcpClientPool sender, AsyncTcpClient client)
+		{
+			m_ControlMapsSection.Enter();
+
+			try
+			{
+				ConnectionStateManager csm;
+				if (m_ClientToCsm.TryGetValue(client, out csm))
+					csm.Dispose();
+
+				m_ClientToCsm.RemoveKey(client);
+
+				client.Dispose();
 			}
 			finally
 			{
@@ -541,23 +584,23 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="data"></param>
 		protected override void CrosspointOnSendInputData(IControlCrosspoint crosspoint, CrosspointData data)
 		{
-			ConnectionStateManager manager = LazyLoadClientForControl(crosspoint.Id);
-			if (manager == null)
+			AsyncTcpClient client = LazyLoadClientForControl(crosspoint.Id);
+			if (client == null)
 			{
 				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control is not connected to an equipment");
 				return;
 			}
 
-			if (AutoReconnect && !manager.IsConnected)
-				manager.Connect();
+			if (AutoReconnect && !client.IsConnected)
+				client.Connect();
 
-			if (!manager.IsConnected)
+			if (!client.IsConnected)
 			{
 				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Unable to connect to remote endpoint");
 				return;
 			}
 
-			manager.Send(data.Serialize());
+			client.Send(data.Serialize());
 		}
 
 		#endregion
@@ -641,14 +684,14 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					if (!TryGetEquipmentInfoForControl(control.Id, out equipmentInfo))
 						continue;
 
-					ConnectionStateManager manager;
-					if (!m_ControlClientMap.TryGetValue(control.Id, out manager))
+					AsyncTcpClient client;
+					if (!m_ControlClientMap.TryGetValue(control.Id, out client))
 						continue;
 
 					string controlLabel = string.Format("{0} ({1})", control.Id, control.Name);
 					string equipmentLabel = string.Format("{0} ({1})", equipmentInfo.Id, equipmentInfo.Name);
 
-					builder.AddRow(controlLabel, equipmentLabel, equipmentInfo.Host, manager.IsConnected);
+					builder.AddRow(controlLabel, equipmentLabel, equipmentInfo.Host, client.IsConnected);
 				}
 			}
 			finally

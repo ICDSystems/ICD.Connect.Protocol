@@ -132,6 +132,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public void Dispose()
 		{
+			OnClientAdded = null;
+			OnClientRemoved = null;
+			OnClientAdded = null;
+			OnClientSerialDataReceived = null;
+
 			Clear();
 		}
 
@@ -147,7 +152,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			{
 				HostInfo[] keys = m_Clients.Keys.ToArray();
 				foreach (HostInfo key in keys)
-					RemoveClient(key);
+					DisposeClient(key);
 			}
 			finally
 			{
@@ -179,50 +184,47 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		}
 
 		/// <summary>
-		/// Removes the TCP client from the pool.
+		/// Removes the TCP client with the given key.
 		/// </summary>
-		/// <param name="client"></param>
-		/// <returns>True if the client exists and was removed.</returns>
+		/// <param name="key"></param>
 		[PublicAPI]
-		public bool RemoveClient(AsyncTcpClient client)
+		public void DisposeClient(HostInfo key)
 		{
-			if (client == null)
-				throw new ArgumentNullException("client");
-
-			Unsubscribe(client);
+			AsyncTcpClient client;
 
 			m_ClientsSection.Enter();
 
 			try
 			{
-				StopDisposeTimer(client);
-
-				if (!m_Clients.RemoveValue(client))
-					return false;
+				if (!m_Clients.TryGetValue(key, out client))
+					return;
 			}
 			finally
 			{
 				m_ClientsSection.Leave();
 			}
 
-			ClientCallback handler = OnClientRemoved;
-			if (handler != null)
-				handler(this, client);
-
-			return true;
+			DisposeClient(client);
 		}
 
 		/// <summary>
 		/// Removes and disposes the TCP client from the pool.
 		/// </summary>
-		/// <param name="client">True if the client exists and was removed and disposed.</param>
+		/// <param name="client"></param>
+		[PublicAPI]
 		public void DisposeClient(AsyncTcpClient client)
 		{
 			if (client == null)
 				throw new ArgumentNullException("client");
 
-			RemoveClient(client);
-			client.Dispose();
+			StopDisposeTimer(client);
+
+			Unsubscribe(client);
+			m_ClientsSection.Execute(() => m_Clients.RemoveValue(client));
+
+			ClientCallback handler = OnClientRemoved;
+			if (handler != null)
+				handler(this, client);
 		}
 
 		/// <summary>
@@ -300,30 +302,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				handler(this, output);
 
 			return output;
-		}
-
-		/// <summary>
-		/// Removes the TCP client with the given key.
-		/// </summary>
-		/// <param name="key"></param>
-		/// <returns>True if the client exists and was removed.</returns>
-		private void RemoveClient(HostInfo key)
-		{
-			m_ClientsSection.Enter();
-
-			try
-			{
-				AsyncTcpClient client;
-				if (!m_Clients.TryGetValue(key, out client))
-					return;
-
-				RemoveClient(client);
-				StopDisposeTimer(client);
-			}
-			finally
-			{
-				m_ClientsSection.Leave();
-			}
 		}
 
 		/// <summary>
