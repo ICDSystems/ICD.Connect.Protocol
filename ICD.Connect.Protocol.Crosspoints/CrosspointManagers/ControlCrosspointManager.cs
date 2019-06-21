@@ -165,7 +165,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				ConnectionStateManager manager =
 					m_ControlClientMap.TryGetValue(crosspointId, out manager)
 						? manager
-						: new ConnectionStateManager(this);
+						: m_ControlClientMap.Values.FirstOrDefault(csm => csm.Port == client) ?? new ConnectionStateManager(this);
 				manager.SetPort(client, AutoReconnect);
 
 				// Add everything to the map
@@ -353,7 +353,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					AsyncTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
 
-					manager = new ConnectionStateManager(this);
+					manager = m_ControlClientMap.Values.FirstOrDefault(csm => csm.Port == client) ?? new ConnectionStateManager(this);
 					manager.SetPort(client, AutoReconnect);
 
 					m_ControlClientMap.Add(controlId, manager);
