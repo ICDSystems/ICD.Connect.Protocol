@@ -153,9 +153,6 @@ namespace ICD.Connect.Protocol
 
 			Stop();
 
-			if (Port != null)
-				Disconnect();
-
 			Unsubscribe(Port);
 			Port = port;
 			Subscribe(Port);
