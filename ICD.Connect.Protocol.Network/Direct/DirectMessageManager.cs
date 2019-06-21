@@ -111,6 +111,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			Subscribe(m_ServerBuffer);
 
 			m_ClientPool = new TcpClientPool();
+			m_ClientPool.OnClientRemoved += ClientPoolOnClientRemoved;
 		}
 
 		/// <summary>
@@ -370,6 +371,11 @@ namespace ICD.Connect.Protocol.Network.Direct
 			Logger.AddEntry(eSeverity.Error, "{0} - Message timed out - {1}", GetType().Name, message);
 			if (timeoutCallback != null)
 				timeoutCallback(message);
+		}
+
+		private void ClientPoolOnClientRemoved(TcpClientPool sender, AsyncTcpClient client)
+		{
+			client.Dispose();
 		}
 
 		#endregion
