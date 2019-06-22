@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - ConnectionStateManager clarifies which port is not connected on send
 
+## [8.2.5] - 2019-06-21
+### Changed
+ - Fixed a bug where configured URI queries would gain additional '?' prefixes
+
 ## [8.2.4] - 2019-06-06
 ### Added
  - Added better HTTPRequestException handling

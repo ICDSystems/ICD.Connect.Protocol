@@ -169,7 +169,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 				Password = extends.UriPassword == null ? null : Uri.EscapeDataString(extends.UriPassword),
 				Path = extends.UriPath,
 				Port = extends.UriPort ?? 0,
-				Query = extends.UriQuery,
+				Query = extends.UriQuery == null ? null : extends.UriQuery.TrimStart('?'),
 				Scheme = extends.UriScheme,
 				UserName = extends.UriUsername == null ? null : Uri.EscapeDataString(extends.UriUsername)
 			};
