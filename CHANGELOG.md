@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed a bug where configured URI queries would gain additional '?' prefixes
+
 ## [8.2.4] - 2019-06-06
 ### Added
  - Added better HTTPRequestException handling
