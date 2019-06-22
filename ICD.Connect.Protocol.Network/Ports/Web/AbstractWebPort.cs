@@ -140,7 +140,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					builder.Port = properties.UriPort.Value;
 
 				if (properties.UriQuery != null)
-					builder.Query = properties.UriQuery;
+					builder.Query = properties.UriQuery.TrimStart('?');
 
 				if (properties.UriUsername != null)
 					builder.UserName = Uri.EscapeDataString(properties.UriUsername);
