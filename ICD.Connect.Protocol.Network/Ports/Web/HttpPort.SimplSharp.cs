@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using System.Linq;
+#if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
@@ -100,26 +101,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		public override bool Get(string localUrl, out string response)
-		{
-			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
+		/// <param name="body"></param>
 		/// <param name="response"></param>
-		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
+		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, IDictionary<string, List<string>> body, out string response)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
 				if (UseHttps())
@@ -132,14 +124,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+					request.ContentString = GetBody(body);
 
-					foreach (var header in headers)
-					{
-						foreach (var value in header.Value)
-						{
-							request.Header.SetHeaderValue(header.Key, value);
-						}
-					}
+					foreach (KeyValuePair<string, List<string>> header in headers)
+						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
 					return Dispatch(request, out response);
 				}
@@ -152,14 +140,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
+					request.ContentString = GetBody(body);
 
-					foreach (var header in headers)
-					{
-						foreach (var value in header.Value)
-						{
-							request.Header.SetHeaderValue(header.Key, value);
-						}
-					}
+					foreach (KeyValuePair<string, List<string>> header in headers)
+						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
 					return Dispatch(request, out response);
 				}
@@ -171,19 +155,49 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
+		/// Given a mapping of keys to multiple values, generates a & delimited string.
+		/// 
+		/// E.g.
+		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&grant_type=client_credentials&client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
+		/// </summary>
+		/// <param name="body"></param>
+		/// <returns></returns>
+		private static string GetBody(IEnumerable<KeyValuePair<string, List<string>>> body)
+		{
+			string[] items = body.Select(kvp => GetBodyItem(kvp.Key, kvp.Value)).ToArray();
+			return string.Join("&", items);
+		}
+
+		/// <summary>
+		/// Given a key and multiple values, generates a ; delimited and escaped string.
+		/// 
+		/// E.g.
+		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="values"></param>
+		/// <returns></returns>
+		private static string GetBodyItem(string key, IEnumerable<string> values)
+		{
+			string[] valuesEscaped = values.Select(v => Uri.EscapeDataString(v)).ToArray();
+			string valuesString = string.Join(";", valuesEscaped);
+			return string.Format("{0}={1}", key, valuesString);
+		}
+
+		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool Post(string localUrl, byte[] data, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
 				if (UseHttps())

@@ -44,29 +44,50 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a POST request to the server. Assumes data is ASCII.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public bool Post(string localUrl, string data, out string response)
+		public bool Post(string relativeOrAbsoluteUri, string data, out string response)
 		{
-			return Post(localUrl, data, new ASCIIEncoding(), out response);
+			return Post(relativeOrAbsoluteUri, data, new ASCIIEncoding(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="response"></param>
+		public override bool Get(string relativeOrAbsoluteUri, out string response)
+		{
+			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), out response);
+		}
+
+		/// <summary>
+		/// Sends a GET request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
+		/// <param name="response"></param>
+		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
+		{
+			return Get(relativeOrAbsoluteUri, headers, null, out response);
 		}
 
 		/// <summary>
 		/// Sends a POST request to the server using the given encoding for data.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
 		/// <param name="encoding"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public override bool Post(string localUrl, string data, Encoding encoding, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, string data, Encoding encoding, out string response)
 		{
 			byte[] bytes = encoding.GetBytes(data);
-			return Post(localUrl, bytes, out response);
+			return Post(relativeOrAbsoluteUri, bytes, out response);
 		}
 
 		#endregion
@@ -74,18 +95,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		#region Private Methods
 
 		/// <summary>
-		/// Builds a request url from the given path.
+		/// Builds a request url from the given relative or absolute uri.
 		/// e.g.
 		///		"Test/Path"
 		/// May result in
 		///		https://10.3.14.15/Test/Path
 		/// </summary>
-		/// <param name="localAddress"></param>
+		/// <param name="relativeOrAbsolute"></param>
 		/// <returns></returns>
-		private string GetRequestUrl(string localAddress)
+		private string GetRequestUrl(string relativeOrAbsolute)
 		{
 			IcdUriBuilder builder = new IcdUriBuilder(Uri);
-			builder.AppendPath(localAddress);
+
+			if (Uri.IsWellFormedUriString(relativeOrAbsolute, UriKind.Absolute))
+				builder = new IcdUriBuilder(relativeOrAbsolute);
+			else
+				builder.AppendPath(relativeOrAbsolute);
 
 #if SIMPLSHARP
 			// Crestron tries to strip out encoded spaces (and possibly other encodings?) from the path

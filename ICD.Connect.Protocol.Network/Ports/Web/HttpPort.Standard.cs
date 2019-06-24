@@ -98,19 +98,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		public override bool Get(string localUrl, out string response)
-		{
-			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
 		/// <param name="headers"></param>
+		/// <param name="body"></param>
 		/// <param name="response"></param>
-		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
+		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, IDictionary<string, List<string>> body, out string response)
 		{
 			m_ClientBusySection.Enter();
 
@@ -120,10 +111,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				PrintTx(uri.AbsolutePath);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				
 				foreach (KeyValuePair<string, List<string>> header in headers)
-				{
 					request.Headers.Add(header.Key, header.Value);
-				}
+
+				foreach (KeyValuePair<string, List<string>> header in body)
+					request.Content.Headers.Add(header.Key, header.Value);
 
 				return Dispatch(request, out response);
 			}
