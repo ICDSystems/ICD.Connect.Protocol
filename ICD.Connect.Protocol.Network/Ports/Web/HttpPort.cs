@@ -42,19 +42,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		#region Methods
 
 		/// <summary>
-		/// Sends a POST request to the server. Assumes data is ASCII.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="data"></param>
-		/// <param name="response"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public bool Post(string relativeOrAbsoluteUri, string data, out string response)
-		{
-			return Post(relativeOrAbsoluteUri, data, new ASCIIEncoding(), out response);
-		}
-
-		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
@@ -65,29 +52,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="headers"></param>
-		/// <param name="response"></param>
-		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
-		{
-			return Get(relativeOrAbsoluteUri, headers, null, out response);
-		}
-
-		/// <summary>
-		/// Sends a POST request to the server using the given encoding for data.
+		/// Sends a POST request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
-		/// <param name="encoding"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		[PublicAPI]
-		public override bool Post(string relativeOrAbsoluteUri, string data, Encoding encoding, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
 		{
-			byte[] bytes = encoding.GetBytes(data);
-			return Post(relativeOrAbsoluteUri, bytes, out response);
+			return Post(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data, out response);
 		}
 
 		#endregion
@@ -229,7 +202,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private string ConsolePost(string path)
 		{
 			string output;
-			Post(path, "", out output);
+			Post(path, new byte[0], out output);
 			return output;
 		}
 

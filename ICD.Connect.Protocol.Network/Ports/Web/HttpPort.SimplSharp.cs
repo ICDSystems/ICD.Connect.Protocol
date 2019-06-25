@@ -1,11 +1,12 @@
-﻿using System.Linq;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
+using ContentSource = Crestron.SimplSharp.Net.Https.ContentSource;
+using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -51,14 +52,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			m_HttpClient = new HttpClient
 			{
-				KeepAlive = false,
+				KeepAlive = true,
 				TimeoutEnabled = true,
 				Timeout = 5
 			};
 
 			m_HttpsClient = new HttpsClient
 			{
-				KeepAlive = false,
+				KeepAlive = true,
 				TimeoutEnabled = true,
 				Timeout = 5,
 				HostVerification = false,
@@ -103,9 +104,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		/// <param name="body"></param>
 		/// <param name="response"></param>
-		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, IDictionary<string, List<string>> body, out string response)
+		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
 		{
 			m_ClientBusySection.Enter();
 
@@ -118,13 +118,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive
+						KeepAlive = m_HttpsClient.KeepAlive,
+						RequestType = RequestType.Get
 					};
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
-					request.ContentString = GetBody(body);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -140,7 +139,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
-					request.ContentString = GetBody(body);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -155,43 +153,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
-		/// Given a mapping of keys to multiple values, generates a & delimited string.
-		/// 
-		/// E.g.
-		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&grant_type=client_credentials&client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
-		/// </summary>
-		/// <param name="body"></param>
-		/// <returns></returns>
-		private static string GetBody(IEnumerable<KeyValuePair<string, List<string>>> body)
-		{
-			string[] items = body.Select(kvp => GetBodyItem(kvp.Key, kvp.Value)).ToArray();
-			return string.Join("&", items);
-		}
-
-		/// <summary>
-		/// Given a key and multiple values, generates a ; delimited and escaped string.
-		/// 
-		/// E.g.
-		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e
-		/// </summary>
-		/// <param name="key"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		private static string GetBodyItem(string key, IEnumerable<string> values)
-		{
-			string[] valuesEscaped = values.Select(v => Uri.EscapeDataString(v)).ToArray();
-			string valuesString = string.Join(";", valuesEscaped);
-			return string.Format("{0}={1}", key, valuesString);
-		}
-
-		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="dictionary"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> dictionary, byte[] data, out string response)
 		{
 			m_ClientBusySection.Enter();
 
@@ -205,9 +174,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					HttpsClientRequest request = new HttpsClientRequest
 					{
 						ContentSource = Crestron.SimplSharp.Net.Https.ContentSource.ContentNone,
+						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
-						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
-						KeepAlive = m_HttpsClient.KeepAlive
+						ContentSource = ContentSource.ContentBytes,
+						RequestType = RequestType.Post
 					};
 
 					request.Url.Parse(url);
@@ -222,6 +192,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
 						ContentBytes = data,
+						ContentSource = Crestron.SimplSharp.Net.Http.ContentSource.ContentBytes,
 						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post
 					};
 
@@ -264,7 +235,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
+						RequestType = RequestType.Post,
 						Url = urlParser,
 						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
