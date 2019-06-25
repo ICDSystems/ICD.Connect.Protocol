@@ -173,7 +173,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						ContentSource = Crestron.SimplSharp.Net.Https.ContentSource.ContentNone,
 						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
 						ContentSource = ContentSource.ContentBytes,
