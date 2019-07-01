@@ -54,14 +54,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			{
 				KeepAlive = true,
 				TimeoutEnabled = true,
-				Timeout = 5
+				Timeout = 60
 			};
 
 			m_HttpsClient = new HttpsClient
 			{
 				KeepAlive = true,
 				TimeoutEnabled = true,
-				Timeout = 5,
+				Timeout = 60,
 				HostVerification = false,
 				PeerVerification = false
 			};
