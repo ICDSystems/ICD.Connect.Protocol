@@ -39,40 +39,40 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="headers"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="response"></param>
 		[PublicAPI]
-		bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response);
+		bool Get(string relativeOrAbsoluteUri, out string response);
 
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
 		/// <param name="response"></param>
 		[PublicAPI]
-		bool Get(string localUrl, out string response);
+		bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response);
 
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		bool Post(string localUrl, byte[] data, out string response);
+		bool Post(string relativeOrAbsoluteUri, byte[] data, out string response);
 
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
 		/// <param name="data"></param>
-		/// <param name="encoding"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		bool Post(string localUrl, string data, Encoding encoding, out string response);
+		bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data, out string response);
 
 		/// <summary>
 		/// Sends a SOAP request to the server.

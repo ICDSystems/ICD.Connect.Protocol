@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - ConnectionStateManager clarifies which port is not connected on send
 
+## [8.3.0] - 2019-07-03
+### Added
+ - Added HttpUtils for generating URL encoded content bodies
+ - Added overloads for POST methods for accepting headers
+
+### Changed
+ - Crestron HTTP/S timeout increased to 60 seconds
+
 ## [8.2.5] - 2019-06-21
 ### Changed
  - Fixed a bug where configured URI queries would gain additional '?' prefixes
