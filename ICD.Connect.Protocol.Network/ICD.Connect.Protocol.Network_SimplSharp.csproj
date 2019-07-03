@@ -134,6 +134,7 @@
     <Compile Include="Ports\Udp\AsyncUdpClient.SimplSharp.cs" />
     <Compile Include="Ports\Udp\AsyncUdpClient.Standard.cs" />
     <Compile Include="Ports\Udp\AsyncUdpClientSettings.cs" />
+    <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Ports\Web\HttpPort.cs" />
     <Compile Include="Ports\Web\HttpPort.SimplSharp.cs" />

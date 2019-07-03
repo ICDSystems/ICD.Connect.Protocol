@@ -97,33 +97,25 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		public override bool Get(string localUrl, out string response)
-		{
-			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
 		/// <param name="response"></param>
-		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
+		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
 		{
+			if (headers == null)
+				throw new ArgumentNullException("headers");
+
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				Uri uri = new Uri(m_UriProperties.GetUri(), localUrl);
-				PrintTx(uri.AbsolutePath);
-
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url);
+				
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+				
 				foreach (KeyValuePair<string, List<string>> header in headers)
-				{
 					request.Headers.Add(header.Key, header.Value);
-				}
 
 				return Dispatch(request, out response);
 			}
@@ -136,23 +128,27 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool Post(string localUrl, byte[] data, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data, out string response)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				Uri uri = new Uri(m_UriProperties.GetUri(), localUrl);
-				PrintTx(uri.AbsolutePath);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url);
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri)
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url)
 				{
 					Content = new ByteArrayContent(data)
 				};
+
+				foreach (KeyValuePair<string, List<string>> header in headers)
+					request.Headers.Add(header.Key, header.Value);
 
 				return Dispatch(request, out response);
 			}
