@@ -5,6 +5,8 @@ using ICD.Common.Utils.Services.Logging;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
+using ContentSource = Crestron.SimplSharp.Net.Https.ContentSource;
+using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -50,16 +52,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			m_HttpClient = new HttpClient
 			{
-				KeepAlive = false,
+				KeepAlive = true,
 				TimeoutEnabled = true,
-				Timeout = 5
+				Timeout = 60
 			};
 
 			m_HttpsClient = new HttpsClient
 			{
-				KeepAlive = false,
+				KeepAlive = true,
 				TimeoutEnabled = true,
-				Timeout = 5,
+				Timeout = 60,
 				HostVerification = false,
 				PeerVerification = false
 			};
@@ -100,46 +102,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
-		/// <param name="response"></param>
-		public override bool Get(string localUrl, out string response)
-		{
-			return Get(localUrl, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
 		/// <param name="response"></param>
-		public override bool Get(string localUrl, IDictionary<string, List<string>> headers, out string response)
+		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
 				if (UseHttps())
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive
+						KeepAlive = m_HttpsClient.KeepAlive,
+						RequestType = RequestType.Get
 					};
 
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
-					foreach (var header in headers)
-					{
-						foreach (var value in header.Value)
-						{
-							request.Header.SetHeaderValue(header.Key, value);
-						}
-					}
+					foreach (KeyValuePair<string, List<string>> header in headers)
+						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
 					return Dispatch(request, out response);
 				}
@@ -153,13 +140,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					request.Url.Parse(url);
 					request.Header.SetHeaderValue("Accept", Accept);
 
-					foreach (var header in headers)
-					{
-						foreach (var value in header.Value)
-						{
-							request.Header.SetHeaderValue(header.Key, value);
-						}
-					}
+					foreach (KeyValuePair<string, List<string>> header in headers)
+						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
 					return Dispatch(request, out response);
 				}
@@ -173,27 +155,28 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
-		/// <param name="localUrl"></param>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="dictionary"></param>
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool Post(string localUrl, byte[] data, out string response)
+		public override bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> dictionary, byte[] data, out string response)
 		{
 			m_ClientBusySection.Enter();
 
 			try
 			{
-				string url = GetRequestUrl(localUrl);
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
 				if (UseHttps())
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						ContentSource = Crestron.SimplSharp.Net.Https.ContentSource.ContentNone,
+						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
-						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
-						KeepAlive = m_HttpsClient.KeepAlive
+						ContentSource = ContentSource.ContentBytes,
+						RequestType = RequestType.Post
 					};
 
 					request.Url.Parse(url);
@@ -208,6 +191,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
 						ContentBytes = data,
+						ContentSource = Crestron.SimplSharp.Net.Http.ContentSource.ContentBytes,
 						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post
 					};
 
@@ -250,7 +234,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						RequestType = Crestron.SimplSharp.Net.Https.RequestType.Post,
+						RequestType = RequestType.Post,
 						Url = urlParser,
 						Header = {ContentType = SOAP_CONTENT_TYPE},
 						ContentString = content
