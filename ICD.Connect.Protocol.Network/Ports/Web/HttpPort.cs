@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -39,32 +37,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 		#endregion
 
-		#region Methods
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="response"></param>
-		public override bool Get(string relativeOrAbsoluteUri, out string response)
-		{
-			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a POST request to the server.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="data"></param>
-		/// <param name="response"></param>
-		/// <returns></returns>
-		public override bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
-		{
-			return Post(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data, out response);
-		}
-
-		#endregion
-
 		#region Private Methods
 
 		/// <summary>
@@ -79,6 +51,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private string GetRequestUrl(string relativeOrAbsolute)
 		{
 			IcdUriBuilder builder = new IcdUriBuilder(Uri);
+
+			// When no relative or absolute path is specified we return the URI configured on the port.
+			if (relativeOrAbsolute == null)
+				return builder.ToString();
 
 			if (Uri.IsWellFormedUriString(relativeOrAbsolute, UriKind.Absolute))
 				builder = new IcdUriBuilder(relativeOrAbsolute);
