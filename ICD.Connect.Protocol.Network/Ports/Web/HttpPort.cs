@@ -52,6 +52,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			IcdUriBuilder builder = new IcdUriBuilder(Uri);
 
+			// When no relative or absolute path is specified we return the URI configured on the port.
+			if (relativeOrAbsolute == null)
+				return builder.ToString();
+
 			if (Uri.IsWellFormedUriString(relativeOrAbsolute, UriKind.Absolute))
 				builder = new IcdUriBuilder(relativeOrAbsolute);
 			else
