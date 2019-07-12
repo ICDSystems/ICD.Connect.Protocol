@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -36,32 +34,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// The base URI for requests.
 		/// </summary>
 		public override Uri Uri { get; set; }
-
-		#endregion
-
-		#region Methods
-
-		/// <summary>
-		/// Sends a GET request to the server.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="response"></param>
-		public override bool Get(string relativeOrAbsoluteUri, out string response)
-		{
-			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), out response);
-		}
-
-		/// <summary>
-		/// Sends a POST request to the server.
-		/// </summary>
-		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="data"></param>
-		/// <param name="response"></param>
-		/// <returns></returns>
-		public override bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
-		{
-			return Post(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data, out response);
-		}
 
 		#endregion
 

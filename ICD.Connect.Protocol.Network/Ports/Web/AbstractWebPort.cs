@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
@@ -44,16 +43,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="headers"></param>
 		/// <param name="response"></param>
-		public abstract bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response);
+		public bool Get(string relativeOrAbsoluteUri, out string response)
+		{
+			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), out response);
+		}
 
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
 		/// <param name="response"></param>
-		public abstract bool Get(string relativeOrAbsoluteUri, out string response);
+		public abstract bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response);
 
 		/// <summary>
 		/// Sends a POST request to the server.
@@ -62,7 +64,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="data"></param>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public abstract bool Post(string relativeOrAbsoluteUri, byte[] data, out string response);
+		public bool Post(string relativeOrAbsoluteUri, byte[] data, out string response)
+		{
+			return Post(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data, out response);
+		}
 
 		/// <summary>
 		/// Sends a POST request to the server.
