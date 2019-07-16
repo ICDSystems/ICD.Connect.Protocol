@@ -29,15 +29,23 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private readonly SafeCriticalSection m_ConnectSection;
 
 		private int m_ConnectAttempts;
-		private bool m_MonitoringActive;
 		private IConnectable m_Instance;
 
-		public ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
+		#region Properties
+
+		private ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
 
 		/// <summary>
 		/// Returns true if this instance has been disposed.
 		/// </summary>
 		public bool IsDisposed { get; private set; }
+
+		/// <summary>
+		/// Returns true if currently monitoring connection state.
+		/// </summary>
+		public bool MonitoringActive { get; private set; }
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -110,7 +118,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 		/// </summary>
 		public void StartMonitoring()
 		{
-			m_MonitoringActive = true;
+			MonitoringActive = true;
 			
 			// Check after the first interval to see if we are connected
 			m_Timer.Reset(s_RampMsDefault[0]);
@@ -121,7 +129,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 		/// </summary>
 		public void StopMonitoring()
 		{
-			m_MonitoringActive = false;
+			MonitoringActive = false;
 
 			m_Timer.Stop();
 		}
@@ -170,7 +178,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 				Logger.AddEntry(eSeverity.Warning, "{0} lost connection.", m_Instance);
 
 			// Check after the first interval to start 
-			if (m_MonitoringActive)
+			if (MonitoringActive)
 				m_Timer.Reset(s_RampMsDefault[0]);
 		}
 
