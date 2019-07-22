@@ -176,12 +176,12 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				if (callback == null)
 					return false;
 
-				eCrosspointStatus connectStatus = RequestConnectCallback(this, equipmentId);
+				eCrosspointStatus connectStatus = callback(this, equipmentId);
 				if (connectStatus != eCrosspointStatus.Connected)
 					ClearSigs();
 
-				Status = connectStatus;
 				EquipmentCrosspoint = connectStatus == eCrosspointStatus.Connected ? equipmentId : Xp3Utils.NULL_EQUIPMENT;
+				Status = connectStatus;
 
 				return connectStatus == eCrosspointStatus.Connected;
 			}
