@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - The ConnectionStateManager will try to connect to the port if it is not already connected before it sends data.
+ - Added a JWT generator.
 
 ## [8.3.0] - 2019-07-03
 ### Added
