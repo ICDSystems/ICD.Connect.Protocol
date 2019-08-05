@@ -115,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 				
 				foreach (KeyValuePair<string, List<string>> header in headers)
-					request.Headers.Add(header.Key, header.Value);
+					AddHeader(request, header.Key, header.Value);
 
 				return Dispatch(request, out response);
 			}
@@ -148,7 +148,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				};
 
 				foreach (KeyValuePair<string, List<string>> header in headers)
-					request.Headers.Add(header.Key, header.Value);
+					AddHeader(request, header.Key, header.Value);
 
 				return Dispatch(request, out response);
 			}
@@ -181,7 +181,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					Content = new StringContent(content, Encoding.GetEncoding(28591), SOAP_CONTENT_TYPE)
 				};
 
-				request.Headers.Add(SOAP_ACTION_HEADER, action);
+				AddHeader(request, SOAP_ACTION_HEADER, action);
 
 				return Dispatch(request, out response);
 			}
@@ -269,6 +269,29 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				PrintRx(result);
 
 			return success;
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		private void AddHeader(HttpRequestMessage request, string header, string action)
+		{
+			AddHeader(request, header, new[] {action});
+		}
+
+		private static void AddHeader(HttpRequestMessage message, string header, IEnumerable<string> values)
+		{
+			switch (header)
+			{
+				case "Content-Type":
+					message.Content.Headers.ContentType = new MediaTypeHeaderValue(values.Single());
+					break;
+
+				default:
+					message.Headers.Add(header, values);
+					break;
+			}
 		}
 
 		#endregion
