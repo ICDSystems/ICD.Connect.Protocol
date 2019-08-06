@@ -94,15 +94,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (m_TcpClient == null)
 				return;
 
-			try
-			{
-				throw new Exception();
-			}
-			catch (Exception e)
-			{
-				IcdConsole.PrintLine(eConsoleColor.Magenta, "{0} - Disposing TCP Client\n{1}", this, e.StackTrace);
-			}
-
 			Unsubscribe(m_TcpClient);
 
 			m_TcpClient.DisconnectFromServer();
