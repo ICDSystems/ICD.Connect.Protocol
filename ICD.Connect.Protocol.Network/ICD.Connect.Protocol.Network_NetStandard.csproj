@@ -38,15 +38,11 @@
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
     <PackageReference Include="SSH.NET" Version="2016.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="ICD.Common.BouncyCastle_NetStandard">
-      <HintPath>..\..\..\..\Users\Laura Gomez\.nuget\packages\icd.common.bouncycastle_netstandard\1.0.0\lib\netstandard1.6\ICD.Common.BouncyCastle_NetStandard.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
