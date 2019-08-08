@@ -38,6 +38,7 @@
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
     <PackageReference Include="SSH.NET" Version="2016.1.0" />
   </ItemGroup>
   <ItemGroup>

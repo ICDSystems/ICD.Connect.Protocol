@@ -48,6 +48,10 @@
     <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICD.Common.BouncyCastle_SimplSharp, Version=1.0.0.24447, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\ICD.Common.BouncyCastle_SimplSharp.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="SimplSharpCustomAttributesInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -135,6 +139,7 @@
     <Compile Include="Ports\Udp\AsyncUdpClient.Standard.cs" />
     <Compile Include="Ports\Udp\AsyncUdpClientSettings.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
+    <Compile Include="Utils\JwtUtils.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Ports\Web\HttpPort.cs" />
     <Compile Include="Ports\Web\HttpPort.SimplSharp.cs" />
