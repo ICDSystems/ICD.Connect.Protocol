@@ -26,7 +26,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\ICD.Common.Logging\ICD.Common.Logging.Console\ICD.Common.Logging.Console_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils.Tests\ICD.Common.Utils.Tests_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_NetStandard.csproj" />

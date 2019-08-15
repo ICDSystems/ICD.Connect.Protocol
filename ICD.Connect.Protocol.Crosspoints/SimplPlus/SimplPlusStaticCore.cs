@@ -1,8 +1,8 @@
-﻿using ICD.Common.Utils.Services;
+﻿using ICD.Common.Logging;
+using ICD.Common.Logging.Loggers;
+using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API;
-using ICD.Common.Logging.Console;
-using ICD.Common.Logging.Console.Loggers;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 {
