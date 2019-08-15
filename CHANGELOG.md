@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.4.0] - 2019-08-15
 ### Added
  - XP3 NonCachingEquipmentCrosspoint
  - XP3 ControlCrosspointManager AutoReconnect behaviour tries to reconnect beyond the initial disconnect
@@ -13,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - ConnectionStateManager clarifies which port is not connected on send
  - The ConnectionStateManager will try to connect to the port if it is not already connected before it sends data.
  - Added a JWT generator.
+ - Fixed HTTP header compatibility in .Net Standard
 
 ## [8.3.0] - 2019-07-03
 ### Added
