@@ -454,7 +454,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		private string ConsolePrintClients()
 		{
-			TableBuilder builder = new TableBuilder();
+			TableBuilder builder = new TableBuilder("Client ID", "HostInfo");
 
 			foreach (uint client in GetClients().Order())
 			{
