@@ -109,7 +109,7 @@ namespace ICD.Connect.Protocol.Ports
 		{
 			HostSessionInfo output;
 			if (!TryParse(data, out output))
-				throw new FormatException();
+				throw new FormatException("Expected data in HOST:PORT:GUID format, got " + StringUtils.ToRepresentation(data));
 
 			return output;
 		}

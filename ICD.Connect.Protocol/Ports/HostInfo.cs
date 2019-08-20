@@ -132,7 +132,7 @@ namespace ICD.Connect.Protocol.Ports
 		{
 			HostInfo output;
 			if (!TryParse(data, out output))
-				throw new FormatException();
+				throw new FormatException("Expected data in HOST:PORT format, got " + StringUtils.ToRepresentation(data));
 
 			return output;
 		}
