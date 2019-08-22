@@ -69,12 +69,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			{
 				if (disable)
 				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - Stopping server", this);
+					if (m_TcpListener != null)
+						Logger.AddEntry(eSeverity.Notice, "{0} - Stopping server", this);
 					Enabled = false;
 				}
 				else
 				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - Temporarily stopping server", this);
+					if (m_TcpListener != null)
+						Logger.AddEntry(eSeverity.Notice, "{0} - Temporarily stopping server", this);
 				}
 
 				if (m_TcpListener != null)
