@@ -14,7 +14,7 @@ using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
-	public sealed partial class AsyncTcpServer : IConsoleNode, IDisposable
+	public sealed partial class IcdTcpServer : IConsoleNode, IDisposable
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
 		private const ushort DEFAULT_PORT = 23;
@@ -153,40 +153,40 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Default constructor.
 		/// </summary>
 		[PublicAPI]
-		public AsyncTcpServer()
+		public IcdTcpServer()
 			: this(DEFAULT_PORT)
 		{
 		}
 
 		/// <summary>
-		/// Initializes the AsyncTcpServer
+		/// Constructor.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public AsyncTcpServer(ushort port)
+		public IcdTcpServer(ushort port)
 			: this(port, DEFAULT_MAX_NUMBER_OF_CLIENTS)
 		{
 		}
 
 		/// <summary>
-		/// Initializes the AsyncTcpServer
+		/// Constructor.
 		/// </summary>
 		/// <param name="port">Port number to listen on</param>
 		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
 		[PublicAPI]
-		public AsyncTcpServer(ushort port, int maxNumberOfClients)
+		public IcdTcpServer(ushort port, int maxNumberOfClients)
 			: this(port, maxNumberOfClients, DEFAULT_BUFFER_SIZE)
 		{
 		}
 
 		/// <summary>
-		/// Initializes the AsyncTcpServer
+		/// Constructor.
 		/// </summary>
 		/// <param name="port">Port number to listen on</param>
 		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
 		/// <param name="bufferSize"></param>
 		[PublicAPI]
-		public AsyncTcpServer(ushort port, int maxNumberOfClients, ushort bufferSize)
+		public IcdTcpServer(ushort port, int maxNumberOfClients, ushort bufferSize)
 		{
 			m_Connections = new IcdOrderedDictionary<uint, string>();
 			m_ConnectionLock = new SafeCriticalSection();

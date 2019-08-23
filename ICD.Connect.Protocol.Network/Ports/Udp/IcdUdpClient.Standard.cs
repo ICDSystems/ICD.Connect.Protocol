@@ -8,7 +8,7 @@ using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	public sealed partial class AsyncUdpClient
+	public sealed partial class IcdUdpClient
 	{
 		private UdpClient m_UdpClient;
 		private readonly SafeCriticalSection m_ClientSection = new SafeCriticalSection();

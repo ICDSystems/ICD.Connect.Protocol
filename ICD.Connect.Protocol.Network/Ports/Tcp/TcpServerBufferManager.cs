@@ -28,7 +28,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private readonly BiDictionary<uint, ISerialBuffer> m_Buffers;
 		private readonly SafeCriticalSection m_BufferSection;
 
-		private AsyncTcpServer m_Server;
+		private IcdTcpServer m_Server;
 
 		/// <summary>
 		/// Constructor.
@@ -62,7 +62,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="server"></param>
 		[PublicAPI]
-		public void SetServer(AsyncTcpServer server)
+		public void SetServer(IcdTcpServer server)
 		{
 			m_BufferSection.Enter();
 
@@ -165,7 +165,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Subscribe to the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Subscribe(AsyncTcpServer server)
+		private void Subscribe(IcdTcpServer server)
 		{
 			if (server == null)
 				return;
@@ -178,7 +178,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Unsubscribe from the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Unsubscribe(AsyncTcpServer server)
+		private void Unsubscribe(IcdTcpServer server)
 		{
 			if (server == null)
 				return;

@@ -9,7 +9,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		/// <summary>
 		/// Max number of clients accepted by the EquipmentCrosspointManager TCP Server.
 		/// </summary>
-		public const int MAX_NUMBER_OF_CLIENTS = AsyncTcpServer.MAX_NUMBER_OF_CLIENTS_SUPPORTED;
+		public const int MAX_NUMBER_OF_CLIENTS = IcdTcpServer.MAX_NUMBER_OF_CLIENTS_SUPPORTED;
 
 		/// <summary>
 		/// A Equipment id of 0 is invalid, so represents no equipment connected.

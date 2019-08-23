@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - AsyncTcpClient and AsyncTcpServer renamed to IcdTcpClient and IcdTcpServer
+
 ## [9.0.0] - 2019-08-15
 ### Added
  - XP3 NonCachingEquipmentCrosspoint

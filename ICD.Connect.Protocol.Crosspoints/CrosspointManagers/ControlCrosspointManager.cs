@@ -24,8 +24,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		private const long CLIENT_KEEP_ALIVE = 60 * 1000;
 
-		private readonly BiDictionary<AsyncTcpClient, ConnectionStateManager> m_ClientToCsm;
-		private readonly Dictionary<int, AsyncTcpClient> m_ControlClientMap;
+		private readonly BiDictionary<IcdTcpClient, ConnectionStateManager> m_ClientToCsm;
+		private readonly Dictionary<int, IcdTcpClient> m_ControlClientMap;
 		private readonly Dictionary<int, int> m_ControlEquipmentMap;
 		private readonly SafeCriticalSection m_ControlMapsSection;
 
@@ -81,8 +81,8 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		public ControlCrosspointManager(int systemId)
 			: base(systemId)
 		{
-			m_ClientToCsm = new BiDictionary<AsyncTcpClient, ConnectionStateManager>();
-			m_ControlClientMap = new Dictionary<int, AsyncTcpClient>();
+			m_ClientToCsm = new BiDictionary<IcdTcpClient, ConnectionStateManager>();
+			m_ControlClientMap = new Dictionary<int, IcdTcpClient>();
 			m_ControlEquipmentMap = new Dictionary<int, int>();
 			m_ControlMapsSection = new SafeCriticalSection();
 
@@ -157,7 +157,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				}
 
 				// Get the TCP client from the pool
-				AsyncTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
+				IcdTcpClient client = m_ClientPool.GetClient(equipmentInfo.Host);
 				IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
 				if (!client.IsConnected)
 					client.Connect();
@@ -209,7 +209,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			try
 			{
-				AsyncTcpClient client;
+				IcdTcpClient client;
 				m_ControlClientMap.TryGetValue(crosspointId, out client);
 
 				int equipmentId;
@@ -297,7 +297,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			try
 			{
-				AsyncTcpClient client;
+				IcdTcpClient client;
 				m_ControlClientMap.TryGetValue(crosspointId, out client);
 
 				int equipmentId;
@@ -328,9 +328,9 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="controlId"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		private AsyncTcpClient LazyLoadClientForControl(int controlId)
+		private IcdTcpClient LazyLoadClientForControl(int controlId)
 		{
-			AsyncTcpClient client;
+			IcdTcpClient client;
 
 			m_ControlMapsSection.Enter();
 
@@ -392,7 +392,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="sender"></param>
 		/// <param name="client"></param>
 		/// <param name="connected"></param>
-		private void PoolOnClientConnectionStateChanged(TcpClientPool sender, AsyncTcpClient client, bool connected)
+		private void PoolOnClientConnectionStateChanged(TcpClientPool sender, IcdTcpClient client, bool connected)
 		{
 			m_ControlMapsSection.Enter();
 
@@ -426,7 +426,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="client"></param>
-		private void PoolOnClientAdded(TcpClientPool sender, AsyncTcpClient client)
+		private void PoolOnClientAdded(TcpClientPool sender, IcdTcpClient client)
 		{
 			m_ControlMapsSection.Enter();
 
@@ -449,7 +449,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="client"></param>
-		private void PoolOnClientRemoved(TcpClientPool sender, AsyncTcpClient client)
+		private void PoolOnClientRemoved(TcpClientPool sender, IcdTcpClient client)
 		{
 			m_ControlMapsSection.Enter();
 
@@ -497,7 +497,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="sender"></param>
 		/// <param name="client"></param>
 		/// <param name="data"></param>
-		private void BufferManagerOnClientCompletedSerial(TcpClientPoolBufferManager sender, AsyncTcpClient client,
+		private void BufferManagerOnClientCompletedSerial(TcpClientPoolBufferManager sender, IcdTcpClient client,
 		                                                  string data)
 		{
 			CrosspointData crosspointData = JsonConvert.DeserializeObject<CrosspointData>(data);
@@ -584,7 +584,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="data"></param>
 		protected override void CrosspointOnSendInputData(IControlCrosspoint crosspoint, CrosspointData data)
 		{
-			AsyncTcpClient client = LazyLoadClientForControl(crosspoint.Id);
+			IcdTcpClient client = LazyLoadClientForControl(crosspoint.Id);
 			if (client == null)
 			{
 				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control is not connected to an equipment");
@@ -684,7 +684,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					if (!TryGetEquipmentInfoForControl(control.Id, out equipmentInfo))
 						continue;
 
-					AsyncTcpClient client;
+					IcdTcpClient client;
 					if (!m_ControlClientMap.TryGetValue(control.Id, out client))
 						continue;
 

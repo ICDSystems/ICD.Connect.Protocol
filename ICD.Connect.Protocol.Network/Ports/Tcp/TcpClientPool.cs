@@ -17,11 +17,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 	/// </summary>
 	public sealed class TcpClientPool : IDisposable, IConsoleNode
 	{
-		public delegate void ClientCallback(TcpClientPool sender, AsyncTcpClient client);
+		public delegate void ClientCallback(TcpClientPool sender, IcdTcpClient client);
 
-		public delegate void ClientConnectionStateCallback(TcpClientPool sender, AsyncTcpClient client, bool connected);
+		public delegate void ClientConnectionStateCallback(TcpClientPool sender, IcdTcpClient client, bool connected);
 
-		public delegate void ClientSerialDataCallback(TcpClientPool sender, AsyncTcpClient client, string data);
+		public delegate void ClientSerialDataCallback(TcpClientPool sender, IcdTcpClient client, string data);
 
 		/// <summary>
 		/// Raised when a client is added to the pool.
@@ -43,8 +43,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public event ClientSerialDataCallback OnClientSerialDataReceived;
 
-		private readonly Dictionary<HostInfo, AsyncTcpClient> m_Clients;
-		private readonly Dictionary<AsyncTcpClient, SafeTimer> m_ClientDisposalTimers;
+		private readonly Dictionary<HostInfo, IcdTcpClient> m_Clients;
+		private readonly Dictionary<IcdTcpClient, SafeTimer> m_ClientDisposalTimers;
 		private readonly SafeCriticalSection m_ClientsSection;
 
 		private eDebugMode m_DebugRx;
@@ -75,7 +75,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 					m_DebugRx = value;
 
-					foreach (AsyncTcpClient client in m_Clients.Values)
+					foreach (IcdTcpClient client in m_Clients.Values)
 						client.DebugRx = m_DebugRx;
 				}
 				finally
@@ -103,7 +103,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 					m_DebugTx = value;
 
-					foreach (AsyncTcpClient client in m_Clients.Values)
+					foreach (IcdTcpClient client in m_Clients.Values)
 						client.DebugTx = m_DebugTx;
 				}
 				finally
@@ -120,8 +120,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public TcpClientPool()
 		{
-			m_Clients = new Dictionary<HostInfo, AsyncTcpClient>();
-			m_ClientDisposalTimers = new Dictionary<AsyncTcpClient, SafeTimer>();
+			m_Clients = new Dictionary<HostInfo, IcdTcpClient>();
+			m_ClientDisposalTimers = new Dictionary<IcdTcpClient, SafeTimer>();
 			m_ClientsSection = new SafeCriticalSection();
 		}
 
@@ -167,13 +167,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="host"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public AsyncTcpClient GetClient(HostInfo host)
+		public IcdTcpClient GetClient(HostInfo host)
 		{
 			m_ClientsSection.Enter();
 
 			try
 			{
-				AsyncTcpClient client = LazyLoadClient(host);
+				IcdTcpClient client = LazyLoadClient(host);
 				StopDisposeTimer(client);
 				return client;
 			}
@@ -190,7 +190,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public void DisposeClient(HostInfo key)
 		{
-			AsyncTcpClient client;
+			IcdTcpClient client;
 
 			m_ClientsSection.Enter();
 
@@ -212,7 +212,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="client"></param>
 		[PublicAPI]
-		public void DisposeClient(AsyncTcpClient client)
+		public void DisposeClient(IcdTcpClient client)
 		{
 			if (client == null)
 				throw new ArgumentNullException("client");
@@ -236,7 +236,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="client"></param>
 		/// <param name="keepAlive"></param>
 		[PublicAPI]
-		public void DisposeClient(AsyncTcpClient client, long keepAlive)
+		public void DisposeClient(IcdTcpClient client, long keepAlive)
 		{
 			if (client == null)
 				throw new ArgumentNullException("client");
@@ -269,9 +269,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="host"></param>
 		/// <returns></returns>
-		private AsyncTcpClient LazyLoadClient(HostInfo host)
+		private IcdTcpClient LazyLoadClient(HostInfo host)
 		{
-			AsyncTcpClient output;
+			IcdTcpClient output;
 
 			m_ClientsSection.Enter();
 
@@ -281,7 +281,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 					return output;
 
 				// Instantiate the new client
-				output = new AsyncTcpClient
+				output = new IcdTcpClient
 				{
 					Name = string.Format("{0} ({1})", GetType().Name, host),
 					Address = host.Address,
@@ -308,7 +308,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// If the client is currently scheduled for disposal we end the timer.
 		/// </summary>
 		/// <param name="client"></param>
-		private void StopDisposeTimer(AsyncTcpClient client)
+		private void StopDisposeTimer(IcdTcpClient client)
 		{
 			m_ClientsSection.Enter();
 
@@ -335,7 +335,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Subscribe to the client events.
 		/// </summary>
 		/// <param name="client"></param>
-		private void Subscribe(AsyncTcpClient client)
+		private void Subscribe(IcdTcpClient client)
 		{
 			client.OnConnectedStateChanged += ClientOnConnectedStateChanged;
 			client.OnSerialDataReceived += ClientOnSerialDataReceived;
@@ -345,7 +345,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Unsubscribe from the client events.
 		/// </summary>
 		/// <param name="client"></param>
-		private void Unsubscribe(AsyncTcpClient client)
+		private void Unsubscribe(IcdTcpClient client)
 		{
 			client.OnConnectedStateChanged -= ClientOnConnectedStateChanged;
 			client.OnSerialDataReceived -= ClientOnSerialDataReceived;
@@ -360,7 +360,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			ClientConnectionStateCallback handler = OnClientConnectionStateChanged;
 			if (handler != null)
-				handler(this, sender as AsyncTcpClient, args.Data);
+				handler(this, sender as IcdTcpClient, args.Data);
 		}
 
 		/// <summary>
@@ -372,7 +372,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			ClientSerialDataCallback handler = OnClientSerialDataReceived;
 			if (handler != null)
-				handler(this, sender as AsyncTcpClient, args.Data);
+				handler(this, sender as IcdTcpClient, args.Data);
 		}
 
 		#endregion
@@ -450,7 +450,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				foreach (KeyValuePair<HostInfo, AsyncTcpClient> kvp in m_Clients)
+				foreach (KeyValuePair<HostInfo, IcdTcpClient> kvp in m_Clients)
 					builder.AddRow(kvp.Key, kvp.Value);
 			}
 			finally

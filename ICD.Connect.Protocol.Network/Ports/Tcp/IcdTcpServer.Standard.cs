@@ -16,7 +16,7 @@ using ICD.Connect.Settings.Utils;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
-	public sealed partial class AsyncTcpServer
+	public sealed partial class IcdTcpServer
 	{
 		private TcpListenerEx m_TcpListener;
 

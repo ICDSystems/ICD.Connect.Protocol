@@ -22,7 +22,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 		private readonly TcpClientPool m_ClientPool;
 
-		private readonly AsyncTcpServer m_Server;
+		private readonly IcdTcpServer m_Server;
 		private readonly TcpServerBufferManager m_ServerBuffer;
 
 		private readonly Dictionary<Guid, ClientBufferCallbackInfo> m_MessageCallbacks;
@@ -101,7 +101,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_SystemId = systemId;
 
-			m_Server = new AsyncTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
+			m_Server = new IcdTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
 			{
 				Name = GetType().Name
 			};
@@ -302,7 +302,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			string data = JsonConvert.SerializeObject(message);
 
-			AsyncTcpClient client = m_ClientPool.GetClient(sendTo.Host);
+			IcdTcpClient client = m_ClientPool.GetClient(sendTo.Host);
 			if (!client.IsConnected)
 				client.Connect();
 
@@ -373,7 +373,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 				timeoutCallback(message);
 		}
 
-		private void ClientPoolOnClientRemoved(TcpClientPool sender, AsyncTcpClient client)
+		private void ClientPoolOnClientRemoved(TcpClientPool sender, IcdTcpClient client)
 		{
 			client.Dispose();
 		}

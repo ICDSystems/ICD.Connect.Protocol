@@ -8,14 +8,14 @@ using TcpReceiveEventArgs = ICD.Connect.Protocol.Network.Ports.Tcp.TcpReceiveEve
 namespace ICD.Connect.Protocol.Network.Tests.Tcp
 {
 	[TestFixture]
-	public sealed class AsyncTcpServerTest
+	public sealed class IcdTcpServerTest
 	{
 		[Test]
 		public void DataReceivedEventTest()
 		{
 			List<TcpReceiveEventArgs> feedback = new List<TcpReceiveEventArgs>();
 
-			AsyncTcpServer server = new AsyncTcpServer
+			IcdTcpServer server = new IcdTcpServer
 			{
 				AddressToAcceptConnectionFrom = "localhost",
 				Port = 12345,
@@ -23,7 +23,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 			};
 			server.OnDataReceived += (sender, args) => feedback.Add(args);
 
-			AsyncTcpClient client = new AsyncTcpClient
+			IcdTcpClient client = new IcdTcpClient
 			{
 				Address = "localhost",
 				Port = 12345
@@ -54,7 +54,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 		[TestCase("test")]
 		public void AddressToAcceptConnectionFromTest(string address)
 		{
-			AsyncTcpServer server = new AsyncTcpServer
+			IcdTcpServer server = new IcdTcpServer
 			{
 				AddressToAcceptConnectionFrom = address
 			};
@@ -65,7 +65,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 		[TestCase((ushort)3000)]
 		public void PortTest(ushort port)
 		{
-			AsyncTcpServer server = new AsyncTcpServer
+			IcdTcpServer server = new IcdTcpServer
 			{
 				Port = port
 			};
@@ -84,7 +84,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 		[TestCase(65, 64)]
 		public void MaxNumberOfClientsTest(int clients, int expected)
 		{
-			AsyncTcpServer server = new AsyncTcpServer
+			IcdTcpServer server = new IcdTcpServer
 			{
 				MaxNumberOfClients = clients
 			};

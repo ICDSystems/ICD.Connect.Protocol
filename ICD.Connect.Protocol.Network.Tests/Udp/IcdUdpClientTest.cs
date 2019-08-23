@@ -6,16 +6,16 @@ using NUnit.Framework;
 namespace ICD.Connect.Protocol.Network.Tests.Udp
 {
 	[TestFixture]
-	public sealed class AsyncUdpClientTest
+	public sealed class IcdUdpClientTest
 	{
 		[TestCase("127.0.0.1")]
 		[TestCase("localhost")]
 		[TestCase("test.com")]
 		public void AddressTest(string address)
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient())
+			using (IcdUdpClient client = new IcdUdpClient())
 			{
-				Assert.AreEqual(AsyncUdpClient.ACCEPT_ALL, client.Address);
+				Assert.AreEqual(IcdUdpClient.ACCEPT_ALL, client.Address);
 
 				client.Address = address;
 				Assert.AreEqual(address, client.Address);
@@ -26,7 +26,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[TestCase((ushort)10)]
 		public void PortTest(ushort port)
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient {Port = port})
+			using (IcdUdpClient client = new IcdUdpClient { Port = port})
 			{
 				Assert.AreEqual(port, client.Port);
 			}
@@ -35,7 +35,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[TestCase(10000)]
 		public void BufferSizeTest(int bufferSize)
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient {BufferSize = bufferSize})
+			using (IcdUdpClient client = new IcdUdpClient { BufferSize = bufferSize})
 			{
 				Assert.AreEqual(bufferSize, client.BufferSize);
 			}
@@ -44,7 +44,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[Test]
 		public void ConnectTest()
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient())
+			using (IcdUdpClient client = new IcdUdpClient())
 			{
 				List<bool> feedback = new List<bool>();
 
@@ -63,7 +63,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[Test]
 		public void DisconnectTest()
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient())
+			using (IcdUdpClient client = new IcdUdpClient())
 			{
 				List<bool> feedback = new List<bool>();
 
@@ -88,7 +88,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[Test]
 		public void DisposeTest()
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient())
+			using (IcdUdpClient client = new IcdUdpClient())
 			{
 				client.Connect();
 				Assert.DoesNotThrow(() => client.Dispose());
@@ -101,7 +101,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Udp
 		[TestCase("test2")]
 		public void SendToAddressTest(string data)
 		{
-			using (AsyncUdpClient client = new AsyncUdpClient { Port = 12345 })
+			using (IcdUdpClient client = new IcdUdpClient { Port = 12345 })
 			{
 				List<string> feedback = new List<string>();
 

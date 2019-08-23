@@ -4,19 +4,20 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
-using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol.Network.Ports.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	public sealed partial class AsyncTcpClient : AbstractNetworkPort<AsyncTcpClientSettings>
+	public sealed partial class IcdUdpClient : AbstractNetworkPort<IcdUdpClientSettings>
 	{
-		public const ushort DEFAULT_PORT = 23;
-		private const ushort DEFAULT_BUFFER_SIZE = 16384;
+		public const ushort DEFAULT_BUFFER_SIZE = 16384;
+		public const string ACCEPT_ALL = "0.0.0.0";
 
-		private readonly SafeMutex m_SocketMutex;
 		private readonly NetworkProperties m_NetworkProperties;
+
+		private bool m_ListeningRequested;
 
 		#region Properties
 
@@ -26,13 +27,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		public override INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
-		/// Get or set the hostname of the remote TCP server.
+		/// Address to accept connections from.
 		/// </summary>
 		[PublicAPI]
 		public override string Address { get; set; }
 
 		/// <summary>
-		/// Get or set the port of the remote TCP server.
+		/// Port to accept connections from.
 		/// </summary>
 		[PublicAPI]
 		public override ushort Port { get; set; }
@@ -41,27 +42,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Get or set the receive buffer size.
 		/// </summary>
 		[PublicAPI]
-		public ushort BufferSize { get; set; }
+		public int BufferSize { get; set; }
 
 		#endregion
 
-		#region Constructors
-
 		/// <summary>
-		/// Constructor
+		/// Constructor.
 		/// </summary>
-		public AsyncTcpClient()
+		public IcdUdpClient()
 		{
 			m_NetworkProperties = new NetworkProperties();
-			m_SocketMutex = new SafeMutex();
 
-			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
+			Address = ACCEPT_ALL;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
 		}
-
-		#endregion
 
 		#region Methods
 
@@ -73,38 +69,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			IcdEnvironment.OnEthernetEvent -= IcdEnvironmentOnEthernetEvent;
 
 			base.DisposeFinal(disposing);
-		}
 
-		public void Connect(HostInfo info)
-		{
-			Address = info.Address;
-			Port = info.Port;
-			Connect();
+			Disconnect();
 		}
 
 		/// <summary>
-		/// Disconnects from the remote end point
+		/// Sends serial data to a specific endpoint.
 		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="ipAddress"></param>
+		/// <param name="port"></param>
 		/// <returns></returns>
-		public override void Disconnect()
+		[PublicAPI]
+		public bool SendToAddress(string data, string ipAddress, int port)
 		{
-			if (!m_SocketMutex.WaitForMutex(1000))
-			{
-				Log(eSeverity.Error, "Failed to obtain SocketMutex for disconnect");
-				return;
-			}
-
 			try
 			{
-				DisposeTcpClient();
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Error, e, "Failed to disconnect from host {0}:{1}", Address, Port);
+				if (IsConnected)
+					return SendToAddressFinal(data, ipAddress, port);
+
+				Log(eSeverity.Error, "Unable to send to address - Port is not connected.");
+				return false;
 			}
 			finally
 			{
-				m_SocketMutex.ReleaseMutex();
+				UpdateIsConnectedState();
 			}
 		}
 
@@ -113,27 +102,44 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		#region Private Methods
 
 		/// <summary>
-		/// Called when the processor ethernet adapter changes state.
-		/// We connect/disconnect to the endpoint accordingly.
+		/// Handle Ethernet events
 		/// </summary>
 		/// <param name="adapter"></param>
 		/// <param name="type"></param>
 		private void IcdEnvironmentOnEthernetEvent(IcdEnvironment.eEthernetAdapterType adapter,
 		                                           IcdEnvironment.eEthernetEventType type)
 		{
-			if (m_TcpClient == null)
-				return;
-
 #if SIMPLSHARP
-			if (adapter != IcdEnvironment.GetEthernetAdapterType(m_TcpClient.EthernetAdapter))
+			IcdEnvironment.eEthernetAdapterType adapterType =
+				m_UdpClient == null
+					? IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter
+					: IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
+
+			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
 				return;
 #endif
 			switch (type)
 			{
-				case IcdEnvironment.eEthernetEventType.LinkDown:
-					Disconnect();
+				case IcdEnvironment.eEthernetEventType.LinkUp:
+					if (m_ListeningRequested)
+						Connect();
 					break;
+
+				case IcdEnvironment.eEthernetEventType.LinkDown:
+					if (m_UdpClient == null)
+						break;
+#if SIMPLSHARP
+					m_UdpClient.DisableUDPServer();
+#else
+                    m_UdpClient.Dispose();
+#endif
+					break;
+
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
+
+			UpdateIsConnectedState();
 		}
 
 		#endregion
@@ -148,8 +154,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			base.ClearSettingsFinal();
 
 			ApplyConfiguration();
-
-			BufferSize = DEFAULT_BUFFER_SIZE;
 		}
 
 		/// <summary>
@@ -157,7 +161,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(AsyncTcpClientSettings settings, IDeviceFactory factory)
+		protected override void ApplySettingsFinal(IcdUdpClientSettings settings, IDeviceFactory factory)
 		{
 			base.ApplySettingsFinal(settings, factory);
 
@@ -167,6 +171,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		#endregion
 
 		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Buffer Size", BufferSize);
+#if SIMPLSHARP
+			addRow("Server Status", m_UdpClient == null ? string.Empty : m_UdpClient.ServerStatus.ToString());
+#endif
+		}
 
 		/// <summary>
 		/// Gets the child console commands.

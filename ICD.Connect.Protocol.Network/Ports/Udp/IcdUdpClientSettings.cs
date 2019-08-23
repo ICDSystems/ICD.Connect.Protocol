@@ -2,10 +2,10 @@ using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.Network.Ports.Tcp
+namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	[KrangSettings("TCP", typeof(AsyncTcpClient))]
-	public sealed class AsyncTcpClientSettings : AbstractNetworkPortSettings
+	[KrangSettings("UDP", typeof(IcdUdpClient))]
+	public sealed class IcdUdpClientSettings : AbstractNetworkPortSettings
 	{
 		private readonly NetworkProperties m_NetworkProperties;
 
@@ -34,11 +34,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public AsyncTcpClientSettings()
+		public IcdUdpClientSettings()
 		{
 			m_NetworkProperties = new NetworkProperties
 			{
-				NetworkPort = AsyncTcpClient.DEFAULT_PORT
+				NetworkAddress = IcdUdpClient.ACCEPT_ALL
 			};
 		}
 

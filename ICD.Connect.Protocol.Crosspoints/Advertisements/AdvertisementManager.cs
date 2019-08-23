@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		private readonly Dictionary<string, eAdvertisementType> m_Addresses;
 		private readonly SafeCriticalSection m_AddressesSection;
 
-		private readonly AsyncUdpClient m_UdpClient;
+		private readonly IcdUdpClient m_UdpClient;
 		private readonly JsonSerialBuffer m_Buffer;
 
 		private readonly SafeTimer m_BroadcastTimer;
@@ -91,7 +91,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 			m_SystemId = systemId;
 
-			m_UdpClient = new AsyncUdpClient
+			m_UdpClient = new IcdUdpClient
 			{
 				Address = Xp3Utils.MULTICAST_ADDRESS,
 				Port = Xp3Utils.GetPortForSystem(systemId),
@@ -475,7 +475,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// Subscribe to the UDP Client events.
 		/// </summary>
 		/// <param name="udpClient"></param>
-		private void Subscribe(AsyncUdpClient udpClient)
+		private void Subscribe(IcdUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
 		}
@@ -484,7 +484,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// Unsubscribe from the UDP Client events.
 		/// </summary>
 		/// <param name="udpClient"></param>
-		private void Unsubscribe(AsyncUdpClient udpClient)
+		private void Unsubscribe(IcdUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
 		}

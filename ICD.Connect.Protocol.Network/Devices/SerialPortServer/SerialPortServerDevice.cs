@@ -24,7 +24,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		private readonly SecureNetworkProperties m_NetworkProperties;
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 
-		private AsyncTcpServer m_TcpServer;
+		private IcdTcpServer m_TcpServer;
 
 		#endregion
 
@@ -121,7 +121,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 
 		#region TCP Server
 
-		private void Subscribe(AsyncTcpServer tcpServer)
+		private void Subscribe(IcdTcpServer tcpServer)
 		{
 			if (tcpServer == null)
 				return;
@@ -129,7 +129,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 			tcpServer.OnDataReceived += IncomingServerOnDataReceived;
 		}
 
-		private void Unsubscribe(AsyncTcpServer tcpServer)
+		private void Unsubscribe(IcdTcpServer tcpServer)
 		{
 			if (tcpServer == null)
 				return;
@@ -221,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 			}
 			else
 			{
-				m_TcpServer = new AsyncTcpServer();
+				m_TcpServer = new IcdTcpServer();
 				Subscribe(m_TcpServer);
 				m_TcpServer.Name = String.Format("{0} TCP Server", settings.Name);
 				m_TcpServer.MaxNumberOfClients = 10;

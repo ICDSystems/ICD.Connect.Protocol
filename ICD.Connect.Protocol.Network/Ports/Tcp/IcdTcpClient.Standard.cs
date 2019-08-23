@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
-	public sealed partial class AsyncTcpClient
+	public sealed partial class IcdTcpClient
 	{
 		private TcpClient m_TcpClient;
 		private NetworkStream m_Stream;
@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private CancellationTokenSource m_Cancellation;
 
 		/// <summary>
-		/// Connects to the remote end point Asyncrohnously
+		/// Connects to the remote end point.
 		/// </summary>
 		/// <returns></returns>
 		public override void Connect()

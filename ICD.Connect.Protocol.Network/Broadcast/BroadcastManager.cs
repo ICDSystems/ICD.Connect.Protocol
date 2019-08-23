@@ -21,7 +21,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 {
 	public sealed class BroadcastManager : IDisposable, IConsoleNode
 	{
-		private readonly AsyncUdpClient m_UdpClient;
+		private readonly IcdUdpClient m_UdpClient;
 		private readonly JsonSerialBuffer m_Buffer;
 
 		private readonly IcdHashSet<string> m_Addresses;
@@ -53,7 +53,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_SystemId = systemId;
 			m_Session = Guid.NewGuid();
 
-			m_UdpClient = new AsyncUdpClient
+			m_UdpClient = new IcdUdpClient
 			{
 				Name = GetType().Name,
 				Address = NetworkUtils.MULTICAST_ADDRESS,
@@ -267,7 +267,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// Subscribe to the UDP Client events.
 		/// </summary>
 		/// <param name="udpClient"></param>
-		private void Subscribe(AsyncUdpClient udpClient)
+		private void Subscribe(IcdUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
 			udpClient.OnConnectedStateChanged += UdpClientOnConnectedStateChanged;
@@ -277,7 +277,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// Unsubscribe from the UDP Client events.
 		/// </summary>
 		/// <param name="udpClient"></param>
-		private void Unsubscribe(AsyncUdpClient udpClient)
+		private void Unsubscribe(IcdUdpClient udpClient)
 		{
 			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
 			udpClient.OnConnectedStateChanged -= UdpClientOnConnectedStateChanged;

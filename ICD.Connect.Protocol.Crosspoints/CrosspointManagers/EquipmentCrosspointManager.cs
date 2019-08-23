@@ -23,7 +23,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		private readonly SafeCriticalSection m_ControlClientMapSection;
 
-		private readonly AsyncTcpServer m_Server;
+		private readonly IcdTcpServer m_Server;
 		private readonly TcpServerBufferManager m_Buffers;
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			ushort port = Xp3Utils.GetPortForSystem(systemId);
 
-			m_Server = new AsyncTcpServer(port, Xp3Utils.MAX_NUMBER_OF_CLIENTS);
+			m_Server = new IcdTcpServer(port, Xp3Utils.MAX_NUMBER_OF_CLIENTS);
 			m_Buffers = new TcpServerBufferManager(() => new DelimiterSerialBuffer(CrosspointData.MESSAGE_TERMINATOR));
 			m_Buffers.SetServer(m_Server);
 
@@ -181,7 +181,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Subscribe to the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Subscribe(AsyncTcpServer server)
+		private void Subscribe(IcdTcpServer server)
 		{
 			server.OnSocketStateChange += ServerOnSocketStateChange;
 		}
@@ -190,7 +190,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Unsubscribe from the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Unsubscribe(AsyncTcpServer server)
+		private void Unsubscribe(IcdTcpServer server)
 		{
 			server.OnSocketStateChange += ServerOnSocketStateChange;
 		}
