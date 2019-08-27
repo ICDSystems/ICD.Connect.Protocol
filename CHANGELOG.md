@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - The ConnectionStateManager will try to connect to the port if it is not already connected before it sends data.
  - Added a JWT generator.
  - Fixed HTTP header compatibility in .Net Standard
+ - Added table headers to AsyncTcpServer print clients console command
 
 ## [8.3.0] - 2019-07-03
 ### Added

@@ -1,5 +1,7 @@
+using System;
 using System.Text;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Ports.Web;
 using ICD.Connect.Protocol.Network.Settings;
 using Newtonsoft.Json;
@@ -54,9 +56,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 
 			HttpPort port = new HttpPort
 			{
-				Accept = "application/json"
+				Accept = "application/json",
+				Uri = new Uri(address)
 			};
-			port.UriProperties.SetUriFromAddress(address);
 
 			string result;
 			Assert.IsTrue(port.Get(request, out result));
@@ -79,9 +81,9 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 
 			HttpPort port = new HttpPort
 			{
-				Accept = "application/json"
+				Accept = "application/json",
+				Uri = new Uri(address)
 			};
-			port.UriProperties.SetUriFromAddress(address);
 
 			const string dataString = @"{title: 'foo', body: 'bar', userId: 1}";
 			byte[] data = Encoding.ASCII.GetBytes(dataString);
