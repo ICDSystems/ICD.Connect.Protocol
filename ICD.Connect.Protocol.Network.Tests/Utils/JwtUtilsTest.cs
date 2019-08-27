@@ -1,7 +1,7 @@
 ﻿using ICD.Connect.Protocol.Network.Utils;
 using NUnit.Framework;
 
-namespace ICD.Connect.Calendaring.Google.Tests
+namespace ICD.Connect.Protocol.Network.Tests.Utils
 {
 	[TestFixture]
 	public sealed class JwtUtilsTest
