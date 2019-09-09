@@ -196,9 +196,6 @@ namespace ICD.Connect.Protocol
 				return false;
 			}
 
-			if (!Port.IsConnected && m_Heartbeat.MonitoringActive)
-				Port.Connect();
-
 			if (Port.IsConnected)
 				return Port.Send(data);
 
@@ -207,7 +204,7 @@ namespace ICD.Connect.Protocol
 		}
 
 		/// <summary>
-		/// Overrides ToString to provide context as to what device this is wrapping, for logging.
+		/// Overrides tostring to provide context as to what device this is wrapping, for logging.
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString()
