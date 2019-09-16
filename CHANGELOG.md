@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.0.0] - 2019-09-16
 ### Changed
  - AsyncTcpClient and AsyncTcpServer renamed to IcdTcpClient and IcdTcpServer
  - CSM no longer tries to reconnect on send - fixes synchronous UI problems
