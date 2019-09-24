@@ -11,6 +11,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	/// </summary>
 	public interface IWebPort : IPort
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the URI configuration for the web port.
 		/// </summary>
@@ -34,6 +36,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		[PublicAPI]
 		bool Busy { get; }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Sends a GET request to the server.
@@ -99,5 +105,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="properties"></param>
 		void ApplyConfiguration(IUriProperties properties);
+
+		#endregion
 	}
 }
