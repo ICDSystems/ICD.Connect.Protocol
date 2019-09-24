@@ -14,7 +14,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	{
 		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
 
-		private readonly HttpClient m_HttpClient;
 		private readonly HttpsClient m_HttpsClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
 
@@ -23,23 +22,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
-		public override string Accept
-		{
-			get { return m_HttpClient.Accept; }
-			set
-			{
-				m_HttpClient.Accept = value;
-				m_HttpsClient.Accept = value;
-			}
-		}
+		public override string Accept { get { return m_HttpsClient.Accept; } set { m_HttpsClient.Accept = value; } }
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public override bool Busy
-		{
-			get { return m_HttpClient.ProcessBusy || m_HttpsClient.ProcessBusy; }
-		}
+		public override bool Busy { get { return m_HttpsClient.ProcessBusy; } }
 
 		#endregion
 
@@ -50,13 +38,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		public HttpPort()
 		{
-			m_HttpClient = new HttpClient
-			{
-				KeepAlive = true,
-				TimeoutEnabled = true,
-				Timeout = 60
-			};
-
 			m_HttpsClient = new HttpsClient
 			{
 				KeepAlive = true,
@@ -84,14 +65,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				m_HttpClient.Abort();
-			}
-			catch
-			{
-			}
-
-			try
-			{
 				m_HttpsClient.Abort();
 			}
 			catch
@@ -114,37 +87,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
-				if (UseHttps())
+				HttpsClientRequest request = new HttpsClientRequest
 				{
-					HttpsClientRequest request = new HttpsClientRequest
-					{
-						KeepAlive = m_HttpsClient.KeepAlive,
-						RequestType = RequestType.Get
-					};
+					KeepAlive = m_HttpsClient.KeepAlive,
+					RequestType = RequestType.Get
+				};
 
-					request.Url.Parse(url);
-					request.Header.SetHeaderValue("Accept", Accept);
+				request.Url.Parse(url);
+				request.Header.SetHeaderValue("Accept", Accept);
 
-					foreach (KeyValuePair<string, List<string>> header in headers)
-						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
+				foreach (KeyValuePair<string, List<string>> header in headers)
+					request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
-					return Dispatch(request, out response);
-				}
-				else
-				{
-					HttpClientRequest request = new HttpClientRequest
-					{
-						KeepAlive = m_HttpClient.KeepAlive
-					};
-
-					request.Url.Parse(url);
-					request.Header.SetHeaderValue("Accept", Accept);
-
-					foreach (KeyValuePair<string, List<string>> header in headers)
-						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
-
-					return Dispatch(request, out response);
-				}
+				return Dispatch(request, out response);
 			}
 			finally
 			{
@@ -169,38 +124,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
 
-				if (UseHttps())
+				HttpsClientRequest request = new HttpsClientRequest
 				{
-					HttpsClientRequest request = new HttpsClientRequest
-					{
-						KeepAlive = m_HttpsClient.KeepAlive,
-						ContentBytes = data,
-						ContentSource = ContentSource.ContentBytes,
-						RequestType = RequestType.Post
-					};
+					KeepAlive = m_HttpsClient.KeepAlive,
+					ContentBytes = data,
+					ContentSource = ContentSource.ContentBytes,
+					RequestType = RequestType.Post
+				};
 
-					request.Url.Parse(url);
-					request.Header.SetHeaderValue("Accept", Accept);
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+				request.Url.Parse(url);
+				request.Header.SetHeaderValue("Accept", Accept);
+				request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
-					return Dispatch(request, out response);
-				}
-				else
-				{
-					HttpClientRequest request = new HttpClientRequest
-					{
-						KeepAlive = m_HttpClient.KeepAlive,
-						ContentBytes = data,
-						ContentSource = Crestron.SimplSharp.Net.Http.ContentSource.ContentBytes,
-						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post
-					};
-
-					request.Url.Parse(url);
-					request.Header.SetHeaderValue("Accept", Accept);
-					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
-
-					return Dispatch(request, out response);
-				}
+				return Dispatch(request, out response);
 			}
 			finally
 			{
@@ -230,32 +166,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				string url = Uri == null ? null : Uri.ToString();
 				UrlParser urlParser = new UrlParser(url);
 
-				if (UseHttps())
+				HttpsClientRequest request = new HttpsClientRequest
 				{
-					HttpsClientRequest request = new HttpsClientRequest
-					{
-						RequestType = RequestType.Post,
-						Url = urlParser,
-						Header = {ContentType = SOAP_CONTENT_TYPE},
-						ContentString = content
-					};
-					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
+					RequestType = RequestType.Post,
+					Url = urlParser,
+					Header = {ContentType = SOAP_CONTENT_TYPE},
+					ContentString = content
+				};
+				request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 
-					return Dispatch(request, out response);
-				}
-				else
-				{
-					HttpClientRequest request = new HttpClientRequest
-					{
-						RequestType = Crestron.SimplSharp.Net.Http.RequestType.Post,
-						Url = urlParser,
-						Header = {ContentType = SOAP_CONTENT_TYPE},
-						ContentString = content
-					};
-					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
-
-					return Dispatch(request, out response);
-				}
+				return Dispatch(request, out response);
 			}
 			catch (Exception e)
 			{
@@ -275,15 +195,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		#region Private Methods
 
 		/// <summary>
-		/// Returns true if the configured URI scheme is https.
-		/// </summary>
-		/// <returns></returns>
-		private bool UseHttps()
-		{
-			return Uri != null && Uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-		}
-
-		/// <summary>
 		/// Dispatches the request and returns the result.
 		/// </summary>
 		/// <param name="request"></param>
@@ -299,54 +210,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				HttpsClientResponse response = m_HttpsClient.Dispatch(request);
-
-				if (response == null)
-				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
-				}
-				else
-				{
-					result = response.ContentString;
-
-					if (response.Code < 300)
-						success = true;
-					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
-				}
-			}
-			catch (Exception e)
-			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
-			}
-			finally
-			{
-				m_ClientBusySection.Leave();
-			}
-
-			SetLastRequestSucceeded(success);
-
-			if (!string.IsNullOrEmpty(result))
-				PrintRx(result);
-
-			return success;
-		}
-
-		/// <summary>
-		/// Dispatches the request and returns the result.
-		/// </summary>
-		/// <param name="request"></param>
-		/// <param name="result"></param>
-		/// <returns></returns>
-		private bool Dispatch(HttpClientRequest request, out string result)
-		{
-			result = null;
-			bool success = false;
-
-			m_ClientBusySection.Enter();
-
-			try
-			{
-				HttpClientResponse response = m_HttpClient.Dispatch(request);
 
 				if (response == null)
 				{
