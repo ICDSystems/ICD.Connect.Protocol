@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+#if SIMPLSHARP
 using Crestron.SimplSharp.Net;
+#endif
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 

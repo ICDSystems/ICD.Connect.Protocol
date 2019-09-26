@@ -1,4 +1,6 @@
-﻿using Crestron.SimplSharp.Net;
+﻿#if SIMPLSHARP
+using Crestron.SimplSharp.Net;
+#endif
 using ICD.Common.Utils.Collections;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
