@@ -12,7 +12,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		private const string PROXY_PASSWORD_ELEMENT = "Password";
 		private const string PROXY_HOST_ELEMENT = "Host";
 		private const string PROXY_PORT_ELEMENT = "Port";
-		private const string PROXY_TYPE_ELEMENT = "Type";
+		private const string PROXY_SCHEME_ELEMENT = "Scheme";
 		private const string PROXY_METHOD_ELEMENT = "Method";
 
 		#region Properties
@@ -38,9 +38,9 @@ namespace ICD.Connect.Protocol.Network.Settings
 		public ushort? ProxyPort { get; set; }
 
 		/// <summary>
-		/// Gets/sets the configurable proxy type.
+		/// Gets/sets the configurable proxy scheme.
 		/// </summary>
-		public eProxyType? ProxyType { get; set; }
+		public string ProxyScheme { get; set; }
 
 		/// <summary>
 		/// Gets/sets the configurable proxy authentication method.
@@ -60,7 +60,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			ProxyPassword = null;
 			ProxyHost = null;
 			ProxyPort = null;
-			ProxyType = null;
+			ProxyScheme = null;
 			ProxyAuthenticationMethod = null;
 		}
 
@@ -79,7 +79,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 				writer.WriteElementString(PROXY_PASSWORD_ELEMENT, ProxyPassword);
 				writer.WriteElementString(PROXY_HOST_ELEMENT, ProxyHost);
 				writer.WriteElementString(PROXY_PORT_ELEMENT, IcdXmlConvert.ToString(ProxyPort));
-				writer.WriteElementString(PROXY_TYPE_ELEMENT, IcdXmlConvert.ToString(ProxyType));
+				writer.WriteElementString(PROXY_SCHEME_ELEMENT, IcdXmlConvert.ToString(ProxyScheme));
 				writer.WriteElementString(PROXY_METHOD_ELEMENT, IcdXmlConvert.ToString(ProxyAuthenticationMethod));
 			}
 			writer.WriteEndElement();
@@ -101,7 +101,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			ProxyPassword = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_PASSWORD_ELEMENT);
 			ProxyHost = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_HOST_ELEMENT);
 			ProxyPort = XmlUtils.TryReadChildElementContentAsUShort(proxy, PROXY_PORT_ELEMENT);
-			ProxyType = XmlUtils.TryReadChildElementContentAsEnum<eProxyType>(proxy, PROXY_TYPE_ELEMENT, true);
+			ProxyScheme = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_SCHEME_ELEMENT);
 			ProxyAuthenticationMethod = XmlUtils.TryReadChildElementContentAsEnum<eProxyAuthenticationMethod>(proxy, PROXY_METHOD_ELEMENT, true);
 		}
 

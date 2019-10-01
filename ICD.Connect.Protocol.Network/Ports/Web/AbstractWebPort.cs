@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
@@ -20,13 +22,29 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		public abstract IUriProperties UriProperties { get; }
 
 		/// <summary>
-		/// The base URI for requests.
+		/// Gets the proxy configuration for the web port.
+		/// </summary>
+		public abstract IProxyProperties ProxyProperties { get; }
+
+		/// <summary>
+		/// Gets/sets the base URI for requests.
 		/// </summary>
 		[CanBeNull]
 		public abstract Uri Uri { get; set; }
 
 		/// <summary>
-		/// Content type for the server to respond with. See HttpClient.Accept.
+		/// Gets/sets the proxy URI.
+		/// </summary>
+		[CanBeNull]
+		public abstract Uri ProxyUri { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy authentication method.
+		/// </summary>
+		public abstract eProxyAuthenticationMethod ProxyAuthenticationMethod { get; set; }
+
+		/// <summary>
+		/// Gets/sets the content type for the server to respond with.
 		/// </summary>
 		public abstract string Accept { get; set; }
 
@@ -104,11 +122,27 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
+		/// Applies the given device configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyDeviceConfiguration(IProxyProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			// Port supersedes device configuration
+			IProxyProperties config = ProxyProperties.Superimpose(properties);
+
+			ApplyConfiguration(config);
+		}
+
+		/// <summary>
 		/// Applies the configuration properties to the port.
 		/// </summary>
 		public void ApplyConfiguration()
 		{
 			ApplyConfiguration(UriProperties);
+			ApplyConfiguration(ProxyProperties);
 		}
 
 		/// <summary>
@@ -162,6 +196,48 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 		}
 
+		/// <summary>
+		/// Applies the given configuration properties to the port.
+		/// </summary>
+		/// <param name="properties"></param>
+		public void ApplyConfiguration(IProxyProperties properties)
+		{
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			IcdUriBuilder builder =
+				ProxyUri == null
+					? new IcdUriBuilder()
+					: new IcdUriBuilder(ProxyUri);
+			{
+				if (properties.ProxyHost != null)
+					builder.Host = properties.ProxyHost;
+
+				if (properties.ProxyPassword != null)
+					builder.Password = Uri.EscapeDataString(properties.ProxyPassword);
+
+				// Set scheme before setting port
+				if (properties.ProxyScheme != null)
+					SetSchemeAndUpdatePort(builder, properties.ProxyScheme);
+
+				if (properties.ProxyPort.HasValue)
+					builder.Port = properties.ProxyPort.Value;
+
+				if (properties.ProxyUsername != null)
+					builder.UserName = Uri.EscapeDataString(properties.ProxyUsername);
+			}
+
+			try
+			{
+				ProxyUri = builder.Uri;
+			}
+			catch (UriFormatException e)
+			{
+				Log(eSeverity.Error, "Failed to set Proxy URI - {0}", e.Message);
+				ProxyUri = null;
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -189,6 +265,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.CopySettingsFinal(settings);
 
 			settings.Copy(UriProperties);
+			settings.Copy(ProxyProperties);
 		}
 
 		/// <summary>
@@ -198,7 +275,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.ClearSettingsFinal();
 
-			UriProperties.Clear();
+			UriProperties.ClearUriProperties();
+			ProxyProperties.ClearProxyProperties();
 		}
 
 		/// <summary>
@@ -211,6 +289,70 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ApplySettingsFinal(settings, factory);
 
 			UriProperties.Copy(settings);
+			ProxyProperties.Copy(settings);
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("URI", Uri);
+			addRow("Proxy URI", ProxyUri);
+			addRow("Accept", Accept);
+			addRow("Busy", Busy);
+		}
+
+		/// <summary>
+		/// Gets the console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
+			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
+			yield return new GenericConsoleCommand<string>("Post", "Performs a request at the given path", a => ConsolePost(a));
+		}
+
+		/// <summary>
+		/// Shim to avoid "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Shim to perform a get request from the console.
+		/// </summary>
+		/// <param name="path"></param>
+		private string ConsoleGet(string path)
+		{
+			string output;
+			Get(path, out output);
+			return output;
+		}
+
+		/// <summary>
+		/// Shim to perform a get request from the console.
+		/// </summary>
+		/// <param name="path"></param>
+		private string ConsolePost(string path)
+		{
+			string output;
+			Post(path, new byte[0], out output);
+			return output;
 		}
 
 		#endregion

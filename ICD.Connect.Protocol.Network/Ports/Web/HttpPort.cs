@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings;
 
@@ -17,6 +14,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private const string SOAP_ACTION_HEADER = "SOAPAction";
 
 		private readonly UriProperties m_UriProperties = new UriProperties();
+		private readonly ProxyProperties m_ProxyProperties = new ProxyProperties();
 
 		private bool m_LastRequestSucceeded;
 
@@ -25,15 +23,27 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the configured URI properties.
 		/// </summary>
-		public override IUriProperties UriProperties
-		{
-			get { return m_UriProperties; }
-		}
+		public override IUriProperties UriProperties { get { return m_UriProperties; } }
+
+		/// <summary>
+		/// Gets the proxy configuration for the web port.
+		/// </summary>
+		public override IProxyProperties ProxyProperties { get { return m_ProxyProperties; } }
 
 		/// <summary>
 		/// The base URI for requests.
 		/// </summary>
 		public override Uri Uri { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy URI.
+		/// </summary>
+		public override Uri ProxyUri { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy authentication method.
+		/// </summary>
+		public override eProxyAuthenticationMethod ProxyAuthenticationMethod { get; set; }
 
 		#endregion
 
@@ -118,68 +128,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			// Reset the online state
 			SetLastRequestSucceeded(true);
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("URI", Uri);
-			addRow("Accept", Accept);
-			addRow("Busy", Busy);
-		}
-
-		/// <summary>
-		/// Gets the console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new GenericConsoleCommand<string>("SetAccept", "Sets the accept for requests", s => Accept = s);
-			yield return new GenericConsoleCommand<string>("Get", "Performs a request at the given path", a => ConsoleGet(a));
-			yield return new GenericConsoleCommand<string>("Post", "Performs a request at the given path", a => ConsolePost(a));
-		}
-
-		/// <summary>
-		/// Shim to avoid "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
-		/// <summary>
-		/// Shim to perform a get request from the console.
-		/// </summary>
-		/// <param name="path"></param>
-		private string ConsoleGet(string path)
-		{
-			string output;
-			Get(path, out output);
-			return output;
-		}
-
-		/// <summary>
-		/// Shim to perform a get request from the console.
-		/// </summary>
-		/// <param name="path"></param>
-		private string ConsolePost(string path)
-		{
-			string output;
-			Post(path, new byte[0], out output);
-			return output;
 		}
 
 		#endregion

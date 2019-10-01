@@ -104,7 +104,6 @@
     <Compile Include="Ports\Web\AbstractWebPort.cs" />
     <Compile Include="Ports\Web\AbstractWebPortSettings.cs" />
     <Compile Include="Ports\Web\eProxyAuthenticationMethod.cs" />
-    <Compile Include="Ports\Web\eProxyType.cs" />
     <Compile Include="Ports\Web\IWebPortSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteProcedure\ClientSerialRpcController.cs" />

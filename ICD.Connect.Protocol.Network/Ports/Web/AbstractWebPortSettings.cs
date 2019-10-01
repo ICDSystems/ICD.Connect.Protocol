@@ -6,9 +6,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 {
 	public abstract class AbstractWebPortSettings : AbstractPortSettings, IWebPortSettings
 	{
-		private readonly UriProperties m_UriProperties;
-
 		#region URI
+
+		private readonly UriProperties m_UriProperties;
 
 		/// <summary>
 		/// Gets/sets the configurable URI username.
@@ -53,9 +53,57 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void IUriProperties.Clear()
+		void IUriProperties.ClearUriProperties()
 		{
-			m_UriProperties.Clear();
+			m_UriProperties.ClearUriProperties();
+		}
+
+		#endregion
+
+		#region Proxy
+
+		private readonly ProxyProperties m_ProxyProperties;
+
+		/// <summary>
+		/// Gets/sets the configurable proxy username.
+		/// </summary>
+		public string ProxyUsername { get { return m_ProxyProperties.ProxyUsername; } set { m_ProxyProperties.ProxyUsername = value; } }
+
+		/// <summary>
+		/// Gets/sets the configurable proxy password.
+		/// </summary>
+		public string ProxyPassword { get { return m_ProxyProperties.ProxyPassword; } set { m_ProxyProperties.ProxyPassword = value; } }
+
+		/// <summary>
+		/// Gets/sets the configurable proxy host.
+		/// </summary>
+		public string ProxyHost { get { return m_ProxyProperties.ProxyHost; } set { m_ProxyProperties.ProxyHost = value; } }
+
+		/// <summary>
+		/// Gets/sets the configurable proxy port.
+		/// </summary>
+		public ushort? ProxyPort { get { return m_ProxyProperties.ProxyPort; } set { m_ProxyProperties.ProxyPort = value; } }
+
+		/// <summary>
+		/// Gets/sets the configurable proxy scheme.
+		/// </summary>
+		public string ProxyScheme { get { return m_ProxyProperties.ProxyScheme; } set { m_ProxyProperties.ProxyScheme = value; } }
+
+		/// <summary>
+		/// Gets/sets the configurable proxy authentication method.
+		/// </summary>
+		public eProxyAuthenticationMethod? ProxyAuthenticationMethod
+		{
+			get { return m_ProxyProperties.ProxyAuthenticationMethod; }
+			set { m_ProxyProperties.ProxyAuthenticationMethod = value; }
+		}
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		public void ClearProxyProperties()
+		{
+			m_ProxyProperties.ClearProxyProperties();
 		}
 
 		#endregion
@@ -66,6 +114,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		protected AbstractWebPortSettings()
 		{
 			m_UriProperties = new UriProperties();
+			m_ProxyProperties = new ProxyProperties();
 		}
 
 		/// <summary>
@@ -77,6 +126,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.WriteElements(writer);
 
 			m_UriProperties.WriteElements(writer);
+			m_ProxyProperties.WriteElements(writer);
 		}
 
 		/// <summary>
@@ -88,6 +138,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ParseXml(xml);
 
 			m_UriProperties.ParseXml(xml);
+			m_ProxyProperties.ParseXml(xml);
 		}
 	}
 }

@@ -65,7 +65,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		protected AbstractUriProperties()
 		{
-			Clear();
+			ClearUriProperties();
 		}
 
 		#region Methods
@@ -73,7 +73,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Clears the configured properties.
 		/// </summary>
-		public void Clear()
+		public void ClearUriProperties()
 		{
 			UriUsername = null;
 			UriPassword = null;
@@ -114,7 +114,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="xml"></param>
 		public void ParseXml(string xml)
 		{
-			Clear();
+			ClearUriProperties();
 
 			string uri;
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out uri))

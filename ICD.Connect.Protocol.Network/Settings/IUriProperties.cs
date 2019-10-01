@@ -51,7 +51,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void Clear();
+		void ClearUriProperties();
 	}
 
 	public static class UriPropertiesExtensions

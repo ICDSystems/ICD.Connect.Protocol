@@ -20,13 +20,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		IUriProperties UriProperties { get; }
 
 		/// <summary>
-		/// The base URI for requests.
+		/// Gets the proxy configuration for the web port.
+		/// </summary>
+		[PublicAPI]
+		IProxyProperties ProxyProperties { get; }
+
+		/// <summary>
+		/// Gets/sets the base URI for requests.
 		/// </summary>
 		[CanBeNull]
 		Uri Uri { get; set; }
 
 		/// <summary>
-		/// Content type for the server to respond with. See HttpClient.Accept.
+		/// Gets/sets the proxy URI.
+		/// </summary>
+		[CanBeNull]
+		Uri ProxyUri { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy authentication method.
+		/// </summary>
+		[PublicAPI]
+		eProxyAuthenticationMethod ProxyAuthenticationMethod { get; set; }
+
+		/// <summary>
+		/// Gets/sets the content type for the server to respond with.
 		/// </summary>
 		[PublicAPI]
 		string Accept { get; set; }
@@ -96,15 +114,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		void ApplyDeviceConfiguration(IUriProperties properties);
 
 		/// <summary>
-		/// Applies the configuration properties to the port.
-		/// </summary>
-		void ApplyConfiguration();
-
-		/// <summary>
-		/// Applies the given configuration properties to the port.
+		/// Applies the given device configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
-		void ApplyConfiguration(IUriProperties properties);
+		void ApplyDeviceConfiguration(IProxyProperties properties);
 
 		#endregion
 	}
