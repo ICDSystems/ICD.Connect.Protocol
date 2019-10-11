@@ -1,7 +1,9 @@
 ﻿#if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using Crestron.SimplSharp.Net;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using ICD.Common.Utils;
@@ -209,6 +211,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
+				ConfigureProxySettings();
+
 				HttpsClientResponse response = m_HttpsClient.Dispatch(request);
 
 				if (response == null)
@@ -240,6 +244,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				PrintRx(result);
 
 			return success;
+		}
+
+		private void ConfigureProxySettings()
+		{
+			string urlOrHost = ProxyUri == null ? string.Empty : ProxyUri.ToString();
+
+			ProxySettings settings = m_HttpsClient.Proxy ?? (m_HttpsClient.Proxy = new ProxySettings(urlOrHost));
+
+			settings.Port = ProxyUri == null ? 0 : ProxyUri.Port;
+			settings.AuthenticationMethod = ProxyAuthenticationMethod.ToCrestron();
+			settings.UserName = ProxyUri == null ? string.Empty : ProxyUri.GetUserName();
+			settings.UserPassword = ProxyUri == null ? string.Empty : ProxyUri.GetPassword();
+			settings.HostOrUrl = urlOrHost;
 		}
 
 		#endregion
