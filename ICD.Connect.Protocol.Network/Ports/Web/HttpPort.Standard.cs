@@ -1,12 +1,15 @@
-﻿#if STANDARD
+﻿
+#if STANDARD
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Settings;
 
@@ -66,6 +69,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			m_ClientHandler = new HttpClientHandler
 			{
+				Proxy = new WebProxy(),
+				UseProxy = true,
 				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 			};
 
@@ -198,6 +203,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			return false;
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		/// <summary>
 		/// Dispatches the request and returns the result.
 		/// </summary>
@@ -213,6 +222,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
+				ConfigureProxySettings();
+
 				HttpResponseMessage response = m_Client.SendAsync(request).Result;
 
 				if (response == null)
@@ -234,20 +245,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			catch (AggregateException ae)
 			{
 				ae.Handle(x =>
-				          {
-					          if (x is TaskCanceledException)
-						          Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
-							  else if (x is HttpRequestException)
-					          {
-						          Exception inner = x.GetBaseException();
-						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
-							  }
-							  else
-						          Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name,
-						              x.Message);
+				{
+					if (x is TaskCanceledException)
+						Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
+					else if (x is HttpRequestException)
+					{
+						Exception inner = x.GetBaseException();
+						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
+					}
+					else
+						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name,
+						    x.Message);
 
-					          return true;
-				          });
+					return true;
+				});
 			}
 			catch (HttpRequestException e)
 			{
@@ -271,9 +282,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			return success;
 		}
 
-		#endregion
+		private void ConfigureProxySettings()
+		{
+			WebProxy proxy = m_ClientHandler.Proxy as WebProxy;
+			if (proxy == null)
+				throw new InvalidOperationException("Client handler is configured with an unexpected proxy");
 
-		#region Private Methods
+			proxy.Address = ProxyUri;
+			proxy.Credentials = new NetworkCredential
+			{
+				UserName = ProxyUri == null ? null : ProxyUri.GetUserName(),
+				Password = ProxyUri == null ? null : ProxyUri.GetPassword(),
+			};
+		}
 
 		private void AddHeader(HttpRequestMessage request, string header, string action)
 		{
