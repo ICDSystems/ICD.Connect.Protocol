@@ -70,7 +70,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			m_ClientHandler = new HttpClientHandler
 			{
 				Proxy = new WebProxy(),
-				UseProxy = true,
 				ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 			};
 
@@ -294,6 +293,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				UserName = ProxyUri == null ? null : ProxyUri.GetUserName(),
 				Password = ProxyUri == null ? null : ProxyUri.GetPassword(),
 			};
+
+			m_ClientHandler.UseProxy = true;
 		}
 
 		private void AddHeader(HttpRequestMessage request, string header, string action)

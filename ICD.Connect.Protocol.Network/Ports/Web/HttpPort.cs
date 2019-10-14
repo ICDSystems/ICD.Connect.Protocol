@@ -112,20 +112,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.ClearSettingsFinal();
 
-			ApplyConfiguration();
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(HttpPortSettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			ApplyConfiguration();
-
 			// Reset the online state
 			SetLastRequestSucceeded(true);
 		}

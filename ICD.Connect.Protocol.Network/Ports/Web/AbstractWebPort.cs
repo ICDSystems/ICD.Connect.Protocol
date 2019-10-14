@@ -275,8 +275,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.ClearSettingsFinal();
 
+			Uri = null;
+			ProxyUri = null;
+			ProxyAuthenticationMethod = eProxyAuthenticationMethod.None;
+
 			UriProperties.ClearUriProperties();
 			ProxyProperties.ClearProxyProperties();
+
+			ApplyConfiguration();
 		}
 
 		/// <summary>
@@ -290,6 +296,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			UriProperties.Copy(settings);
 			ProxyProperties.Copy(settings);
+			
+			ApplyConfiguration();
 		}
 
 		#endregion
