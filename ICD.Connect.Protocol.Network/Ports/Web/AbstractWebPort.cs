@@ -24,7 +24,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the proxy configuration for the web port.
 		/// </summary>
-		public abstract IProxyProperties ProxyProperties { get; }
+		public abstract IWebProxyProperties WebProxyProperties { get; }
 
 		/// <summary>
 		/// Gets/sets the base URI for requests.
@@ -125,13 +125,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Applies the given device configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
-		public void ApplyDeviceConfiguration(IProxyProperties properties)
+		public void ApplyDeviceConfiguration(IWebProxyProperties properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
 			// Port supersedes device configuration
-			IProxyProperties config = ProxyProperties.Superimpose(properties);
+			IWebProxyProperties config = WebProxyProperties.Superimpose(properties);
 
 			ApplyConfiguration(config);
 		}
@@ -142,7 +142,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		public void ApplyConfiguration()
 		{
 			ApplyConfiguration(UriProperties);
-			ApplyConfiguration(ProxyProperties);
+			ApplyConfiguration(WebProxyProperties);
 		}
 
 		/// <summary>
@@ -200,7 +200,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Applies the given configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
-		public void ApplyConfiguration(IProxyProperties properties)
+		public void ApplyConfiguration(IWebProxyProperties properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException("properties");
@@ -265,7 +265,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.CopySettingsFinal(settings);
 
 			settings.Copy(UriProperties);
-			settings.Copy(ProxyProperties);
+			settings.Copy(WebProxyProperties);
 		}
 
 		/// <summary>
@@ -280,7 +280,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			ProxyAuthenticationMethod = eProxyAuthenticationMethod.None;
 
 			UriProperties.ClearUriProperties();
-			ProxyProperties.ClearProxyProperties();
+			WebProxyProperties.ClearProxyProperties();
 
 			ApplyConfiguration();
 		}
@@ -295,7 +295,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			base.ApplySettingsFinal(settings, factory);
 
 			UriProperties.Copy(settings);
-			ProxyProperties.Copy(settings);
+			WebProxyProperties.Copy(settings);
 			
 			ApplyConfiguration();
 		}

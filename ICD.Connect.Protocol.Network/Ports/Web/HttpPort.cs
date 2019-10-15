@@ -14,7 +14,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private const string SOAP_ACTION_HEADER = "SOAPAction";
 
 		private readonly UriProperties m_UriProperties = new UriProperties();
-		private readonly ProxyProperties m_ProxyProperties = new ProxyProperties();
+		private readonly WebProxyProperties m_WebProxyProperties = new WebProxyProperties();
 
 		private bool m_LastRequestSucceeded;
 
@@ -28,7 +28,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Gets the proxy configuration for the web port.
 		/// </summary>
-		public override IProxyProperties ProxyProperties { get { return m_ProxyProperties; } }
+		public override IWebProxyProperties WebProxyProperties { get { return m_WebProxyProperties; } }
 
 		/// <summary>
 		/// The base URI for requests.

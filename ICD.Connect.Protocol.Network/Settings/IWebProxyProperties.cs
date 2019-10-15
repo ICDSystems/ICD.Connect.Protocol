@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Network.Ports.Web;
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface IProxyProperties
+	public interface IWebProxyProperties
 	{
 		/// <summary>
 		/// Gets/sets the configurable proxy username.
@@ -43,14 +43,14 @@ namespace ICD.Connect.Protocol.Network.Settings
 		void ClearProxyProperties();
 	}
 
-	public static class ProxyPropertiesExtensions
+	public static class WebProxyPropertiesExtensions
 	{
 		/// <summary>
 		/// Copies the configured properties from the given Network Properties instance.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <param name="other"></param>
-		public static void Copy(this IProxyProperties extends, IProxyProperties other)
+		public static void Copy(this IWebProxyProperties extends, IWebProxyProperties other)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -76,7 +76,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="port"></param>
 		/// <param name="scheme"></param>
 		/// <param name="authMethod"></param>
-		public static void ApplyDefaultValues(this IProxyProperties extends, string username, string password, string host,
+		public static void ApplyDefaultValues(this IWebProxyProperties extends, string username, string password, string host,
 		                                      ushort? port, string scheme, eProxyAuthenticationMethod? authMethod)
 		{
 			if (extends == null)
@@ -107,7 +107,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="extends"></param>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public static IProxyProperties Superimpose(this IProxyProperties extends, IProxyProperties other)
+		public static IWebProxyProperties Superimpose(this IWebProxyProperties extends, IWebProxyProperties other)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -115,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (other == null)
 				throw new ArgumentNullException("other");
 
-			ProxyProperties output = new ProxyProperties();
+			WebProxyProperties output = new WebProxyProperties();
 
 			output.Copy(extends);
 			output.ApplyDefaultValues(other.ProxyUsername,
@@ -133,7 +133,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static Uri GetUri(this IProxyProperties extends)
+		public static Uri GetUri(this IWebProxyProperties extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -155,7 +155,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static string GetAddress(this IProxyProperties extends)
+		public static string GetAddress(this IWebProxyProperties extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -168,7 +168,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <param name="address"></param>
-		public static void SetUriFromAddress(this IProxyProperties extends, string address)
+		public static void SetUriFromAddress(this IWebProxyProperties extends, string address)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -188,7 +188,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="extends"></param>
 		/// <param name="address"></param>
 		/// <param name="authMethod"></param>
-		public static void ApplyDefaultValuesFromAddress(this IProxyProperties extends, string address,
+		public static void ApplyDefaultValuesFromAddress(this IWebProxyProperties extends, string address,
 		                                                 eProxyAuthenticationMethod? authMethod)
 		{
 			Uri uri = new Uri(address, UriKind.RelativeOrAbsolute);

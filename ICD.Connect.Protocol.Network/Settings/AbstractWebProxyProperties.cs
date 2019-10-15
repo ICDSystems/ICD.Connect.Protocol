@@ -4,7 +4,7 @@ using ICD.Connect.Protocol.Network.Ports.Web;
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public abstract class AbstractProxyProperties : IProxyProperties
+	public abstract class AbstractWebProxyProperties : IWebProxyProperties
 	{
 		private const string ELEMENT = "Proxy";
 

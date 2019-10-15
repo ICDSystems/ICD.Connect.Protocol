@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public interface IProxySettings : ISettings, IProxyProperties
+	public interface IWebProxySettings : ISettings, IWebProxyProperties
 	{
 	}
 }

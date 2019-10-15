@@ -23,7 +23,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Gets the proxy configuration for the web port.
 		/// </summary>
 		[PublicAPI]
-		IProxyProperties ProxyProperties { get; }
+		IWebProxyProperties WebProxyProperties { get; }
 
 		/// <summary>
 		/// Gets/sets the base URI for requests.
@@ -117,7 +117,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Applies the given device configuration properties to the port.
 		/// </summary>
 		/// <param name="properties"></param>
-		void ApplyDeviceConfiguration(IProxyProperties properties);
+		void ApplyDeviceConfiguration(IWebProxyProperties properties);
 
 		#endregion
 	}
