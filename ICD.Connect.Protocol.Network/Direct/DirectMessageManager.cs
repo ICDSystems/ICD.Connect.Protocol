@@ -418,7 +418,8 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
 				               .AddEntry(eSeverity.Error, "{0} - Failed to deserialize message from {1} - {2}{3}{4}",
-				                         GetType().Name, m_Server.GetClientInfo(clientId), e.Message, IcdEnvironment.NewLine, data);
+				                         GetType().Name, m_Server.GetHostInfoForClientId(clientId), e.Message,
+				                         IcdEnvironment.NewLine, data);
 			}
 
 			if (message != null)

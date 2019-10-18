@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -33,8 +34,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public event EventHandler<SocketStateEventArgs> OnSocketStateChange;
 
-		private readonly IcdOrderedDictionary<uint, string> m_Connections;
-		private readonly SafeCriticalSection m_ConnectionLock;
+		/// <summary>
+		/// Raised when the server starts/stops listening.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnListeningStateChanged; 
+
+		private readonly IcdOrderedDictionary<uint, HostInfo> m_Clients;
+		private readonly SafeCriticalSection m_ClientsSection;
 
 		private ILoggerService m_CachedLogger;
 
@@ -84,22 +90,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			get { return m_Listening; }
 			private set
 			{
-				m_ConnectionLock.Enter();
+				if (value == m_Listening)
+					return;
 
-				try
-				{
-					if (value == m_Listening)
-						return;
+				m_Listening = value;
 
-					m_Listening = value;
+				eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
+				Logger.AddEntry(severity, "{0} - Listening set to {1}", this, m_Listening);
 
-					eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
-					Logger.AddEntry(severity, "{0} - Listening set to {1}", this, m_Listening);
-				}
-				finally
-				{
-					m_ConnectionLock.Leave();
-				}
+				OnListeningStateChanged.Raise(this, new BoolEventArgs(m_Listening));
 			}
 		}
 
@@ -126,7 +125,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <summary>
 		/// Number of active connections.
 		/// </summary>
-		public int NumberOfClients { get { return m_ConnectionLock.Execute(() => m_Connections.Count); } }
+		public int NumberOfClients { get { return m_ClientsSection.Execute(() => m_Clients.Count); } }
 
 		/// <summary>
 		/// Assigns a name to the server for use with logging.
@@ -175,25 +174,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
 		[PublicAPI]
 		public IcdTcpServer(ushort port, int maxNumberOfClients)
-			: this(port, maxNumberOfClients, DEFAULT_BUFFER_SIZE)
 		{
-		}
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="port">Port number to listen on</param>
-		/// <param name="maxNumberOfClients">Max number of connected clients to support</param>
-		/// <param name="bufferSize"></param>
-		[PublicAPI]
-		public IcdTcpServer(ushort port, int maxNumberOfClients, ushort bufferSize)
-		{
-			m_Connections = new IcdOrderedDictionary<uint, string>();
-			m_ConnectionLock = new SafeCriticalSection();
+			m_Clients = new IcdOrderedDictionary<uint, HostInfo>();
+			m_ClientsSection = new SafeCriticalSection();
 
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 			Port = port;
-			BufferSize = bufferSize;
+			BufferSize = DEFAULT_BUFFER_SIZE;
 			MaxNumberOfClients = maxNumberOfClients;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
@@ -210,6 +197,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			OnDataReceived = null;
 			OnSocketStateChange = null;
+			OnListeningStateChanged = null;
 
 			IcdEnvironment.OnEthernetEvent -= IcdEnvironmentOnEthernetEvent;
 
@@ -232,7 +220,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public IEnumerable<uint> GetClients()
 		{
-			return m_ConnectionLock.Execute(() => m_Connections.Keys.ToArray(m_Connections.Count));
+			return m_ClientsSection.Execute(() => m_Clients.Keys.ToArray(m_Clients.Count));
 		}
 
 		/// <summary>
@@ -259,22 +247,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <summary>
 		/// Formats and prints the received data to the console.
 		/// </summary>
-		/// <param name="clientId"></param>
+		/// <param name="client"></param>
 		/// <param name="data"></param>
-		private void PrintRx(uint clientId, string data)
+		private void PrintRx(HostInfo client, string data)
 		{
-			string context = string.Format("ClientId:{0}", clientId);
+			string context = string.Format("Client:{0}", client);
 			DebugUtils.PrintRx(this, DebugRx, context, data);
 		}
 
 		/// <summary>
 		/// Formats and prints the transmitted data to the console.
 		/// </summary>
-		/// <param name="clientId"></param>
+		/// <param name="client"></param>
 		/// <param name="data"></param>
-		private void PrintTx(uint clientId, string data)
+		private void PrintTx(HostInfo client, string data)
 		{
-			string context = string.Format("ClientId:{0}", clientId);
+			string context = string.Format("Client:{0}", client);
 			DebugUtils.PrintTx(this, DebugTx, context, data);
 		}
 
@@ -286,42 +274,33 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void IcdEnvironmentOnEthernetEvent(IcdEnvironment.eEthernetAdapterType adapter,
 		                                           IcdEnvironment.eEthernetEventType type)
 		{
-			m_ConnectionLock.Enter();
-
-			try
-			{
 #if SIMPLSHARP
-				if (m_TcpListener != null)
-				{
-					IcdEnvironment.eEthernetAdapterType adapterType =
-						IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
-					if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
-						return;
-				}
+			if (m_TcpListener != null)
+			{
+				IcdEnvironment.eEthernetAdapterType adapterType =
+					IcdEnvironment.GetEthernetAdapterType(m_TcpListener.EthernetAdapterToBindTo);
+				if (adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter && adapter != adapterType)
+					return;
+			}
 #endif
 
-				switch (type)
-				{
-					case IcdEnvironment.eEthernetEventType.LinkUp:
-						if (Enabled && !Listening)
-						{
-							Logger.AddEntry(eSeverity.Notice, "{0} - Regained connection, restarting server", this);
-							Restart();
-						}
-						break;
-
-					case IcdEnvironment.eEthernetEventType.LinkDown:
-						Logger.AddEntry(eSeverity.Warning, "{0} - Lost connection, temporarily stopping server", this);
-						Stop(false);
-						break;
-
-					default:
-						throw new ArgumentOutOfRangeException("type");
-				}
-			}
-			finally
+			switch (type)
 			{
-				m_ConnectionLock.Leave();
+				case IcdEnvironment.eEthernetEventType.LinkUp:
+					if (Enabled && !Listening)
+					{
+						Logger.AddEntry(eSeverity.Notice, "{0} - Regained connection, restarting server", this);
+						Restart();
+					}
+					break;
+
+				case IcdEnvironment.eEthernetEventType.LinkDown:
+					Logger.AddEntry(eSeverity.Warning, "{0} - Lost connection, temporarily stopping server", this);
+					Stop(false);
+					break;
+
+				default:
+					throw new ArgumentOutOfRangeException("type");
 			}
 		}
 
@@ -329,43 +308,54 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Called when a client connects.
 		/// </summary>
 		/// <param name="clientId"></param>
-		private void AddClient(uint clientId)
+		/// <param name="reason"></param>
+		private void AddClient(uint clientId, SocketStateEventArgs.eSocketStatus reason)
 		{
-			RemoveClient(clientId);
-
-			m_ConnectionLock.Enter();
+			m_ClientsSection.Enter();
 
 			try
 			{
-				m_Connections[clientId] = GetHostnameForClientId(clientId);
-				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) connected", this, clientId, m_Connections[clientId]);
+				if (m_Clients.ContainsKey(clientId))
+					return;
+
+				HostInfo hostInfo = GetHostInfoForClientId(clientId);
+				m_Clients.Add(clientId, hostInfo);
+
+				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) connected", this, clientId, hostInfo);
 			}
 			finally
 			{
-				m_ConnectionLock.Leave();
+				m_ClientsSection.Leave();
 			}
+
+			RaiseSocketStateChange(new SocketStateEventArgs(reason, clientId));
 		}
 
 		/// <summary>
 		/// Called when a client disconnects.
 		/// </summary>
 		/// <param name="clientId"></param>
-		private void RemoveClient(uint clientId)
+		/// <param name="reason"></param>
+		private void RemoveClient(uint clientId, SocketStateEventArgs.eSocketStatus reason)
 		{
-			m_ConnectionLock.Enter();
+			m_ClientsSection.Enter();
 
 			try
 			{
-				if (!m_Connections.ContainsKey(clientId))
+				HostInfo hostInfo;
+				if (!m_Clients.TryGetValue(clientId, out hostInfo))
 					return;
 
-				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) disconnected", this, clientId, m_Connections[clientId]);
-				m_Connections.Remove(clientId);
+				m_Clients.Remove(clientId);
+
+				Logger.AddEntry(eSeverity.Notice, "{0} - Client {1} ({2}) disconnected", this, clientId, hostInfo);
 			}
 			finally
 			{
-				m_ConnectionLock.Leave();
+				m_ClientsSection.Leave();
 			}
+
+			RaiseSocketStateChange(new SocketStateEventArgs(reason, clientId));
 		}
 
 		/// <summary>
@@ -375,7 +365,39 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <returns></returns>
 		private bool ContainsClient(uint clientId)
 		{
-			return m_ConnectionLock.Execute(() => m_Connections.ContainsKey(clientId));
+			return m_ClientsSection.Execute(() => m_Clients.ContainsKey(clientId));
+		}
+
+		/// <summary>
+		/// Raises the OnSocketStateChange event and logs any handler exceptions.
+		/// </summary>
+		/// <param name="eventArgs"></param>
+		private void RaiseSocketStateChange(SocketStateEventArgs eventArgs)
+		{
+			try
+			{
+				OnSocketStateChange.Raise(this, eventArgs);
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnSocketStateChange callback - {1}", this, e.Message);
+			}
+		}
+
+		/// <summary>
+		/// Raises the OnDataReceived event and logs any handler exceptions.
+		/// </summary>
+		/// <param name="eventArgs"></param>
+		private void RaiseOnDataReceived(TcpReceiveEventArgs eventArgs)
+		{
+			try
+			{
+				OnDataReceived.Raise(this, eventArgs);
+			}
+			catch (Exception e)
+			{
+				Logger.AddEntry(eSeverity.Error, e, "{0} - Exception in OnDataReceived callback - {1}", this, e.Message);
+			}
 		}
 
 		#endregion
@@ -458,7 +480,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			foreach (uint client in GetClients().Order())
 			{
-				HostInfo clientInfo = GetClientInfo(client);
+				HostInfo clientInfo = GetHostInfoForClientId(client);
 				builder.AddRow(client, clientInfo);
 			}
 
