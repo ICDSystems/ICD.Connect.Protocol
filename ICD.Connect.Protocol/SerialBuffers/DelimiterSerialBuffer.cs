@@ -21,6 +21,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		private readonly SafeCriticalSection m_ParseSection;
 
 		private readonly char m_Delimiter;
+		private readonly bool m_PassEmptyResponse;
 
 		#region Constructors
 
@@ -29,7 +30,16 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// </summary>
 		/// <param name="delimiter"></param>
 		public DelimiterSerialBuffer(byte delimiter)
-			: this((char)delimiter)
+			: this((char)delimiter, false)
+		{
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="delimiter"></param>
+		public DelimiterSerialBuffer(byte delimiter, bool passEmptyResponse)
+			: this((char)delimiter, passEmptyResponse)
 		{
 		}
 
@@ -37,6 +47,13 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// Constructor.
 		/// </summary>
 		public DelimiterSerialBuffer(char delimiter)
+			: this(delimiter, false)
+		{
+		}
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public DelimiterSerialBuffer(char delimiter, bool passEmptyResponse)
 		{
 			m_RxData = new StringBuilder();
 			m_Queue = new Queue<string>();
@@ -45,6 +62,8 @@ namespace ICD.Connect.Protocol.SerialBuffers
 			m_ParseSection = new SafeCriticalSection();
 
 			m_Delimiter = delimiter;
+
+			m_PassEmptyResponse = passEmptyResponse;
 		}
 
 		#endregion
@@ -112,7 +131,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 						data = data.Substring(index + 1);
 
 						string output = m_RxData.Pop();
-						if (string.IsNullOrEmpty(output))
+						if (!m_PassEmptyResponse && string.IsNullOrEmpty(output))
 							continue;
 
 						OnCompletedSerial.Raise(this, new StringEventArgs(output));
