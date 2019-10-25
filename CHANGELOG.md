@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Added extensions for setting relay open/closed state
+ - Added WebProxySettings and WebProxyProperties
+ - Added web proxy features to existing web ports
+ 
+### Changed
+ - Greatly simplified IcdTcpServer, potential fixes for deadlocks
 
 ## [10.0.0] - 2019-09-16
 ### Changed
