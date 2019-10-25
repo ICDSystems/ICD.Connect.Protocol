@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added extensions for setting relay open/closed state
+
 ## [10.0.0] - 2019-09-16
 ### Changed
  - AsyncTcpClient and AsyncTcpServer renamed to IcdTcpClient and IcdTcpServer

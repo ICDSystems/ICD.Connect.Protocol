@@ -30,4 +30,36 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 		[PublicAPI]
 		void Close();
 	}
+
+	public static class RelayPortExtensions
+	{
+		/// <summary>
+		/// Sets the closed state of the relay port.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="closed"></param>
+		public static void SetClosed([NotNull] this IRelayPort extends, bool closed)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			extends.SetOpen(!closed);
+		}
+
+		/// <summary>
+		/// Sets the open state of the relay port.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="open"></param>
+		public static void SetOpen([NotNull] this IRelayPort extends, bool open)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (open)
+				extends.Open();
+			else
+				extends.Close();
+		}
+	}
 }
