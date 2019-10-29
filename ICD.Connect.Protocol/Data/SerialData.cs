@@ -1,4 +1,6 @@
-﻿namespace ICD.Connect.Protocol.Data
+﻿using ICD.Common.Utils;
+
+namespace ICD.Connect.Protocol.Data
 {
 	/// <summary>
 	/// Simply wraps serialized data.
@@ -28,6 +30,13 @@
 		public override string Serialize()
 		{
 			return m_Data;
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this);
+			builder.AppendProperty("Data", m_Data);
+			return builder.ToString();
 		}
 	}
 }
