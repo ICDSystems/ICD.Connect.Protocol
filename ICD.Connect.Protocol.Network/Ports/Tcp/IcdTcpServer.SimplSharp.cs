@@ -13,6 +13,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class IcdTcpServer
 	{
+		[CanBeNull]
 		private TCPServer m_TcpListener;
 
 		#region Methods
@@ -85,7 +86,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 					//	at Crestron.SimplSharp.AsyncStream.Close()
 					//	at Crestron.SimplSharp.CrestronIO.Stream.Dispose()
 					//	at Crestron.SimplSharp.CrestronSockets.TCPServer.DisconnectAll()
-					if (!e.Message.Contains("Object not initialized"))
+					if (e.Message == null || !e.Message.Contains("Object not initialized"))
 						throw;
 				}
 				finally
@@ -152,6 +153,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		[PublicAPI]
 		public HostInfo GetClientInfo(uint client)
 		{
+			if (m_TcpListener == null)
+				throw new InvalidOperationException("Server is not connected");
+
 			string address = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(client);
 			ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(client);
 
@@ -165,6 +169,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <returns></returns>
 		public bool ClientConnected(uint client)
 		{
+			if (m_TcpListener == null)
+				return false;
+
 			// This is a hack. We have no way of determining if a client id is still valid,
 			// so if we get a null address we know the client is invalid.
 			if (m_TcpListener.GetLocalAddressServerAcceptedConnectionFromForSpecificClient(client) == null)
@@ -301,6 +308,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <returns></returns>
 		public HostInfo GetHostInfoForClientId(uint clientId)
 		{
+			if (m_TcpListener == null)
+				throw new InvalidOperationException("Server is not connected");
+
 			string host = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId);
 			ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId);
 
