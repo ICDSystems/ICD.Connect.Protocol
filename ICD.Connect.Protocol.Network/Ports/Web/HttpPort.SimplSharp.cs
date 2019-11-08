@@ -248,7 +248,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 		private void ConfigureProxySettings()
 		{
-			string urlOrHost = ProxyUri == null ? string.Empty : ProxyUri.ToString();
+			string urlOrHost =
+				ProxyUri == null || ProxyUri.GetIsDefault()
+					? null
+					: ProxyUri.ToString();
+
+			if (urlOrHost == null)
+			{
+				m_HttpsClient.Proxy = null;
+				return;
+			}
 
 			ProxySettings settings = m_HttpsClient.Proxy ?? (m_HttpsClient.Proxy = new ProxySettings(urlOrHost));
 

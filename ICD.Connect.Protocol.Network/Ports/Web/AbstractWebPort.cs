@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -187,7 +188,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				Uri = builder.Uri;
+				Uri = builder.Uri.GetIsDefault() ? null : builder.Uri;
 			}
 			catch (UriFormatException e)
 			{
@@ -229,7 +230,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				ProxyUri = builder.Uri;
+				ProxyUri = builder.Uri.GetIsDefault() ? null : builder.Uri;
 			}
 			catch (UriFormatException e)
 			{
