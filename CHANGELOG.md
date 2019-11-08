@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - Greatly simplified IcdTcpServer, potential fixes for deadlocks
+ - DelimiterSerialBuffer now optionally returns empty responses, defaults to off
 
 ## [10.0.0] - 2019-09-16
 ### Changed
