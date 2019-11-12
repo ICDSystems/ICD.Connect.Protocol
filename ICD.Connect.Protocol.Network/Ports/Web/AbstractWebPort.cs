@@ -160,29 +160,29 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					? new IcdUriBuilder()
 					: new IcdUriBuilder(Uri);
 			{
-				if (properties.UriFragment != null)
+				if (!string.IsNullOrEmpty(properties.UriFragment))
 					builder.Fragment = properties.UriFragment;
 
-				if (properties.UriHost != null)
+				if (!string.IsNullOrEmpty(properties.UriHost))
 					builder.Host = properties.UriHost;
 
-				if (properties.UriPassword != null)
+				if (!string.IsNullOrEmpty(properties.UriPassword))
 					builder.Password = Uri.EscapeDataString(properties.UriPassword);
 
-				if (properties.UriPath != null)
+				if (!string.IsNullOrEmpty(properties.UriPath))
 					builder.Path = properties.UriPath;
 
 				// Set scheme before setting port
-				if (properties.UriScheme != null)
+				if (!string.IsNullOrEmpty(properties.UriScheme))
 					SetSchemeAndUpdatePort(builder, properties.UriScheme);
 
 				if (properties.UriPort.HasValue)
 					builder.Port = properties.UriPort.Value;
 
-				if (properties.UriQuery != null)
+				if (!string.IsNullOrEmpty(properties.UriQuery))
 					builder.Query = properties.UriQuery.TrimStart('?');
 
-				if (properties.UriUsername != null)
+				if (!string.IsNullOrEmpty(properties.UriUsername))
 					builder.UserName = Uri.EscapeDataString(properties.UriUsername);
 			}
 
@@ -211,20 +211,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					? new IcdUriBuilder()
 					: new IcdUriBuilder(ProxyUri);
 			{
-				if (properties.ProxyHost != null)
+				if (!string.IsNullOrEmpty(properties.ProxyHost))
 					builder.Host = properties.ProxyHost;
 
-				if (properties.ProxyPassword != null)
+				if (!string.IsNullOrEmpty(properties.ProxyPassword))
 					builder.Password = Uri.EscapeDataString(properties.ProxyPassword);
 
 				// Set scheme before setting port
-				if (properties.ProxyScheme != null)
+				if (!string.IsNullOrEmpty(properties.ProxyScheme))
 					SetSchemeAndUpdatePort(builder, properties.ProxyScheme);
 
 				if (properties.ProxyPort.HasValue)
 					builder.Port = properties.ProxyPort.Value;
 
-				if (properties.ProxyUsername != null)
+				if (!string.IsNullOrEmpty(properties.ProxyUsername))
 					builder.UserName = Uri.EscapeDataString(properties.ProxyUsername);
 			}
 
