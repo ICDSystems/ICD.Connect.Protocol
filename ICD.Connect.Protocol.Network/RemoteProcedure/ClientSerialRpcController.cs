@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -13,10 +14,57 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 	[PublicAPI]
 	public sealed class ClientSerialRpcController : IDisposable
 	{
+		/// <summary>
+		/// Raised when the connection state changes.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
+
+		/// <summary>
+		/// Raised when the online state changes.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnIsOnlineStateChanged;
+
 		private readonly ISerialBuffer m_Buffer;
 		private readonly object m_Parent;
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
+
+		private bool m_IsConnected;
+
+		private bool m_IsOnline;
+
+		public bool IsConnected
+		{
+			get { return m_IsConnected; }
+			private set
+			{
+				if (m_IsConnected == value)
+					return;
+
+				m_IsConnected = value;
+
+				OnConnectedStateChanged.Raise(this, new BoolEventArgs(value));
+			}
+		}
+
+		public bool IsOnline
+		{
+			get { return m_IsOnline; }
+			private set
+			{
+				if (m_IsOnline == value)
+					return;
+
+				m_IsOnline = value;
+
+				OnIsOnlineStateChanged.Raise(this, new BoolEventArgs(m_IsOnline));
+			}
+		}
+
+		/// <summary>
+		/// Gets the id of the current serial port.
+		/// </summary>
+		public int? PortNumber { get { return m_ConnectionStateManager.PortNumber; } }
 
 		/// <summary>
 		/// Constructor.
@@ -28,21 +76,34 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			m_Parent = parent;
 
 			m_ConnectionStateManager = new ConnectionStateManager(this){ConfigurePort = ConfigurePort};
-			m_ConnectionStateManager.OnSerialDataReceived += PortOnSerialDataReceived;
+			Subscribe(m_ConnectionStateManager);
 
 			Subscribe(m_Buffer);
 		}
 
 		#region Methods
 
+		public void Connect()
+		{
+			m_ConnectionStateManager.Connect();
+		}
+
+		public void Disconnect()
+		{
+			m_ConnectionStateManager.Disconnect();
+		}
+
 		/// <summary>
 		/// Release resources.
 		/// </summary>
 		public void Dispose()
 		{
-			Unsubscribe(m_Buffer);
+			OnConnectedStateChanged = null;
+			OnIsOnlineStateChanged = null;
 
-			m_ConnectionStateManager.OnSerialDataReceived -= PortOnSerialDataReceived;
+			Unsubscribe(m_Buffer);
+			
+			Unsubscribe(m_ConnectionStateManager);
 			m_ConnectionStateManager.Dispose();
 		}
 
@@ -94,16 +155,41 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 
 		#endregion
 
-		#region Port Callbacks
+		#region ConnectionStateManager Callbacks
 
-		/// <summary>
-		/// Called when the port receieves some serial data.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		private void PortOnSerialDataReceived(object sender, StringEventArgs args)
+		private void Subscribe(ConnectionStateManager connectionStateManger)
+		{
+			if (connectionStateManger == null)
+				return;
+
+			connectionStateManger.OnConnectedStateChanged += ConnectionStateMangerOnConnectedStateChanged;
+			connectionStateManger.OnIsOnlineStateChanged += ConnectionStateMangerOnIsOnlineStateChanged;
+			connectionStateManger.OnSerialDataReceived += ConnectionStateMangerOnSerialDataReceived;
+		}
+
+		private void Unsubscribe(ConnectionStateManager connectionStateManger)
+		{
+			if (connectionStateManger == null)
+				return;
+
+			connectionStateManger.OnConnectedStateChanged -= ConnectionStateMangerOnConnectedStateChanged;
+			connectionStateManger.OnIsOnlineStateChanged -= ConnectionStateMangerOnIsOnlineStateChanged;
+			connectionStateManger.OnSerialDataReceived -= ConnectionStateMangerOnSerialDataReceived;
+		}
+
+		private void ConnectionStateMangerOnSerialDataReceived(object sender, StringEventArgs args)
 		{
 			m_Buffer.Enqueue(args.Data);
+		}
+
+		private void ConnectionStateMangerOnIsOnlineStateChanged(object sender, BoolEventArgs args)
+		{
+			IsOnline = args.Data;
+		}
+
+		private void ConnectionStateMangerOnConnectedStateChanged(object sender, BoolEventArgs args)
+		{
+			IsConnected = args.Data;
 		}
 
 		#endregion
