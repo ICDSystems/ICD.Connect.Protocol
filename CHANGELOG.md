@@ -89,6 +89,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed ComPortPlus and other unused code
 
+## [7.6.0] - 2019-11-18
+### Added
+ - Added hooks to ClientSerialRpcController to access ConnectionStateManager states
+
 ## [7.5.2] - 2019-10-29
 ### Added
  - Added a ToString() override for SerialData for clearer debugging
