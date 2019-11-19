@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.0.0] - 2019-11-19
 ### Added
  - Added extensions for setting relay open/closed state
  - Added WebProxySettings and WebProxyProperties
