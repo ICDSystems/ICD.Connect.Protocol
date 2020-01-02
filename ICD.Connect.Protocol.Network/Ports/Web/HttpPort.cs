@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Settings;
 

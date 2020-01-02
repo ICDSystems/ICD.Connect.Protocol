@@ -270,7 +270,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(output.Success);
-			PrintRx(output.ToString());
+			PrintRx(output.DataAsString);
 
 			return output;
 		}
@@ -288,7 +288,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				Password = ProxyUri == null ? null : ProxyUri.GetPassword(),
 			};
 
-			m_ClientHandler.UseProxy = true;
+			if (!m_ClientHandler.UseProxy)
+				m_ClientHandler.UseProxy = true;
 		}
 
 		private void AddHeader(HttpRequestMessage request, string header, string action)

@@ -19,10 +19,5 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			get { return Data == null ? null : Encoding.GetEncoding(28591).GetString(Data, 0, Data.Length); }
 		}
-
-		public override string ToString()
-		{
-			return DataAsString ?? "NULL";
-		}
 	}
 }

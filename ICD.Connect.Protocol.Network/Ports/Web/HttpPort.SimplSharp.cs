@@ -238,7 +238,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(output.Success);
-			PrintRx(output.ToString());
+			PrintRx(output.DataAsString);
 
 			return output;
 		}

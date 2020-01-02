@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added WebPortResponse to help IWebPort return byte arrays and headers instad of just strings.
+ 
+### Changed
+ - Fixed CongureProxySettings allowing to make more than one request.
 ###Changed 
  - Fixed web requests to use new web port response.
 
