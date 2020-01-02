@@ -103,8 +103,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		/// <param name="response"></param>
-		public override bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response)
+		public override WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers)
 		{
 			if (headers == null)
 				throw new ArgumentNullException("headers");
@@ -121,7 +120,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					AddHeader(request, header.Key, header.Value);
 
-				return Dispatch(request, out response);
+				return Dispatch(request);
 			}
 			finally
 			{
@@ -135,9 +134,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
 		/// <param name="data"></param>
-		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data, out string response)
+		public override WebPortResponse Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
 		{
 			m_ClientBusySection.Enter();
 
@@ -154,7 +152,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					AddHeader(request, header.Key, header.Value);
 
-				return Dispatch(request, out response);
+				return Dispatch(request);
 			}
 			finally
 			{
@@ -167,14 +165,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="content"></param>
-		/// <param name="response"></param>
 		/// <returns></returns>
-		public override bool DispatchSoap(string action, string content, out string response)
+		public override WebPortResponse DispatchSoap(string action, string content)
 		{
 			PrintTx(action);
 
 			Accept = SOAP_ACCEPT;
-			response = null;
 
 			m_ClientBusySection.Enter();
 
@@ -187,7 +183,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				AddHeader(request, SOAP_ACTION_HEADER, action);
 
-				return Dispatch(request, out response);
+				return Dispatch(request);
 			}
 			catch (Exception e)
 			{
@@ -199,7 +195,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(false);
-			return false;
+			return WebPortResponse.Failed;
 		}
 
 		#endregion
@@ -210,12 +206,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Dispatches the request and returns the result.
 		/// </summary>
 		/// <param name="request"></param>
-		/// <param name="result"></param>
 		/// <returns></returns>
-		private bool Dispatch(HttpRequestMessage request, out string result)
+		private WebPortResponse Dispatch(HttpRequestMessage request)
 		{
-			result = null;
-			bool success = false;
+			WebPortResponse output = WebPortResponse.Failed;
 
 			m_ClientBusySection.Enter();
 
@@ -231,14 +225,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				}
 				else
 				{
-					byte[] bytes = response.Content.ReadAsByteArrayAsync().Result;
-					result = Encoding.GetEncoding(28591).GetString(bytes);
+					if ((int)response.StatusCode >= 300)
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri, response.StatusCode);
 
-					if ((int)response.StatusCode < 300)
-						success = true;
-					else
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri,
-						    response.StatusCode);
+					output = new WebPortResponse
+					{
+						Success = (int)response.StatusCode < 300,
+						StatusCode = (int)response.StatusCode,
+						Data = response.Content.ReadAsByteArrayAsync().Result,
+						Headers = response.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray())
+					};
 				}
 			}
 			catch (AggregateException ae)
@@ -273,12 +269,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				m_ClientBusySection.Leave();
 			}
 
-			SetLastRequestSucceeded(success);
+			SetLastRequestSucceeded(output.Success);
+			PrintRx(output.ToString());
 
-			if (!string.IsNullOrEmpty(result))
-				PrintRx(result);
-
-			return success;
+			return output;
 		}
 
 		private void ConfigureProxySettings()

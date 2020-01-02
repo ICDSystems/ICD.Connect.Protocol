@@ -1,9 +1,7 @@
 using System;
 using System.Text;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Ports.Web;
-using ICD.Connect.Protocol.Network.Settings;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -60,10 +58,10 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 				Uri = new Uri(address)
 			};
 
-			string result;
-			Assert.IsTrue(port.Get(request, out result));
+			WebPortResponse response = port.Get(request);
+			Assert.IsTrue(response.Success);
 
-			Post post = JsonConvert.DeserializeObject<Post>(result);
+			Post post = JsonConvert.DeserializeObject<Post>(response.DataAsString);
 
 			Assert.AreEqual(1, post.Id);
 			Assert.AreEqual(1, post.UserId);
@@ -88,10 +86,10 @@ namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
 			const string dataString = @"{title: 'foo', body: 'bar', userId: 1}";
 			byte[] data = Encoding.ASCII.GetBytes(dataString);
 
-			string result;
-			Assert.IsTrue(port.Post(request, data, out result));
+			var response = port.Post(request, data);
+			Assert.IsTrue(response.Success);
 
-			Post post = JsonConvert.DeserializeObject<Post>(result);
+			Post post = JsonConvert.DeserializeObject<Post>(response.DataAsString);
 
 			Assert.AreEqual(101, post.Id);
 

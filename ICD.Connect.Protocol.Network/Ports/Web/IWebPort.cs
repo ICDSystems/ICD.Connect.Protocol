@@ -63,28 +63,25 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
-		/// <param name="response"></param>
 		[PublicAPI]
-		bool Get(string relativeOrAbsoluteUri, out string response);
+		WebPortResponse Get(string relativeOrAbsoluteUri);
 
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		/// <param name="response"></param>
 		[PublicAPI]
-		bool Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, out string response);
+		WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers);
 
 		/// <summary>
 		/// Sends a POST request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="data"></param>
-		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		bool Post(string relativeOrAbsoluteUri, byte[] data, out string response);
+		WebPortResponse Post(string relativeOrAbsoluteUri, byte[] data);
 
 		/// <summary>
 		/// Sends a POST request to the server.
@@ -92,20 +89,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
 		/// <param name="data"></param>
-		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		bool Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data, out string response);
+		WebPortResponse Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data);
 
 		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="content"></param>
-		/// <param name="response"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		bool DispatchSoap(string action, string content, out string response);
+		WebPortResponse DispatchSoap(string action, string content);
 
 		/// <summary>
 		/// Applies the given device configuration properties to the port.

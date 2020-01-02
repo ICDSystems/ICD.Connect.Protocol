@@ -1,7 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Settings;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {

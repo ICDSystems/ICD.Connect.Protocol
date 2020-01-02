@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Added WebPortResponse to help IWebPort return byte arrays and headers instad of just strings.
+###Changed 
+ - Fixed web requests to use new web port response.
 
 ## [11.0.0] - 2019-11-19
 ### Added
