@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Settings;
 
@@ -33,11 +33,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// The base URI for requests.
 		/// </summary>
+		[CanBeNull]
 		public override Uri Uri { get; set; }
 
 		/// <summary>
 		/// Gets/sets the proxy URI.
 		/// </summary>
+		[CanBeNull]
 		public override Uri ProxyUri { get; set; }
 
 		/// <summary>
@@ -60,7 +62,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		private string GetRequestUrl(string relativeOrAbsolute)
 		{
-			IcdUriBuilder builder = new IcdUriBuilder(Uri);
+			IcdUriBuilder builder =
+				Uri == null
+					? new IcdUriBuilder()
+					: new IcdUriBuilder(Uri);
 
 			// When no relative or absolute path is specified we return the URI configured on the port.
 			if (relativeOrAbsolute == null)

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - SSHPort supports configurable private keys with pass-phrases
 
 ### Changed
+ - For HTTP ports the URI builder will not try to use the ports URI if it is null when getting the request URL.
  - Greatly simplified IcdTcpServer, potential fixes for deadlocks
  - DelimiterSerialBuffer now optionally returns empty responses, defaults to off
 
