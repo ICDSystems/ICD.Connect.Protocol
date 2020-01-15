@@ -33,6 +33,16 @@ namespace ICD.Connect.Protocol.SerialQueues
 		int TimeoutCount { get; }
 
 		/// <summary>
+		/// Gets/sets the number of times to timeout in a row before clearing the queue.
+		/// </summary>
+		int MaxTimeoutCount { get; set; }
+
+		/// <summary>
+		/// Wait time between sending commands, defaults to 0.
+		/// </summary>
+		long CommandDelayTime { get; set; }
+
+		/// <summary>
 		/// Gets the current port.
 		/// </summary>
 		ISerialPort Port { get; }
