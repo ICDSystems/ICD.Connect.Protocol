@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Protocol.Ports.IoPort;
+﻿using System;
+using ICD.Connect.Protocol.Ports.IoPort;
 
 namespace ICD.Connect.Protocol.Mock.Ports.IoPort
 {
@@ -18,6 +19,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.IoPort
 		/// </summary>
 		public override void SetConfiguration(eIoPortConfiguration configuration)
 		{
+			Configuration = configuration;
 		}
 
 		/// <summary>
@@ -26,6 +28,10 @@ namespace ICD.Connect.Protocol.Mock.Ports.IoPort
 		/// <param name="digitalOut"></param>
 		public override void SetDigitalOut(bool digitalOut)
 		{
+			if (Configuration != eIoPortConfiguration.DigitalOut)
+				throw new InvalidOperationException("Not in digital output mode");
+
+			DigitalOut = digitalOut;
 		}
 	}
 }
