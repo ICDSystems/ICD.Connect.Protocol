@@ -114,8 +114,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				m_TcpClient.SendData(bytes, bytes.Length);
 				PrintTx(data);
+				m_TcpClient.SendData(bytes, bytes.Length);
 				return true;
 			}
 			finally

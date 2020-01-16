@@ -106,8 +106,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 				PrintTx(data);
+				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 				return true;
 			}
 			catch (SocketException e)
