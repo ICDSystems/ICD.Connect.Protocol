@@ -208,7 +208,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				throw new ArgumentNullException("data");
 			}
 
-			EnqueuePriority(data, comparer, int.MaxValue);
+			EnqueuePriority(data, comparer, int.MaxValue, false);
 		}
 
 		/// <summary>
@@ -237,7 +237,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				throw new ArgumentNullException("data");
 			}
 
-			EnqueuePriority(data, (a, b) => false, priority);
+			EnqueuePriority(data, (a, b) => false, priority, false);
 		}
 
 		///  <summary>
@@ -260,8 +260,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  </summary>
 		///  <param name="data"></param>
 		///  <param name="comparer"></param>
-		/// <param name="priority"></param>
-		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority)
+		///  <param name="priority"></param>
+		///  <param name="deDuplicateToEndOfQueue"></param>
+		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority, bool deDuplicateToEndOfQueue)
 			where T : class, ISerialData
 		{
 			if (data == null)
@@ -269,7 +270,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				throw new ArgumentNullException("data");
 			}
 
-			m_CommandLock.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority));
+			m_CommandLock.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority, deDuplicateToEndOfQueue));
 			SendNextCommand();
 		}
 
