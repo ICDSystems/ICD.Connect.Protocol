@@ -29,6 +29,18 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 		/// </summary>
 		[PublicAPI]
 		void Close();
+
+		/// <summary>
+		/// Closes the relay, waits the given duration, then opens the relay.
+		/// </summary>
+		/// <param name="duration"></param>
+		void PulseOpen(long duration);
+
+		/// <summary>
+		/// Opens the relay, waits the given duration, then opens the relay.
+		/// </summary>
+		/// <param name="duration"></param>
+		void PulseClose(long duration);
 	}
 
 	public static class RelayPortExtensions

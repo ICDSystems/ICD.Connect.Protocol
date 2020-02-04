@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
@@ -13,7 +14,12 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 	{
 		public event EventHandler<BoolEventArgs> OnClosedStateChanged;
 
+		private readonly SafeTimer m_PulseTimer;
+
 		private bool m_Closed;
+		private bool m_PulseResult;
+
+		#region Properties
 
 		/// <summary>
 		/// Get the state of the relay.
@@ -28,11 +34,23 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 
 				m_Closed = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} closed changed to {1}", this, m_Closed);
+				Log(eSeverity.Informational, "Closed changed to {0}", m_Closed);
 
 				OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
 			}
 		}
+
+		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractRelayPort()
+		{
+			m_PulseTimer = SafeTimer.Stopped(PulseCallback);
+		}
+
+		#region Methods
 
 		/// <summary>
 		/// Open the relay
@@ -43,6 +61,47 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 		/// Close the relay
 		/// </summary>
 		public abstract void Close();
+
+		/// <summary>
+		/// Closes the relay, waits the given duration, then opens the relay.
+		/// </summary>
+		/// <param name="duration"></param>
+		public void PulseOpen(long duration)
+		{
+			m_PulseResult = true;
+
+			Close();
+			m_PulseTimer.Reset(duration);
+		}
+
+		/// <summary>
+		/// Opens the relay, waits the given duration, then opens the relay.
+		/// </summary>
+		/// <param name="duration"></param>
+		public void PulseClose(long duration)
+		{
+			m_PulseResult = false;
+
+			Open();
+			m_PulseTimer.Reset(duration);
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Called at the end of a pulse.
+		/// </summary>
+		private void PulseCallback()
+		{
+			if (m_PulseResult)
+				Open();
+			else
+				Close();
+		}
+
+		#endregion
 
 		#region Console
 
