@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added WebPortResponse to help IWebPort return byte arrays and headers instad of just strings.
  - MockIoPort sets configuration and digital out
  - Added PulseOpen and PulseClose methods for toggling relays
+ - Added ConsoleServerDevice to host the ICD console as a TCP server
  
 ### Changed
  - Fixed CongureProxySettings allowing to make more than one request.
