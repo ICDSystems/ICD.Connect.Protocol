@@ -113,6 +113,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed ComPortPlus and other unused code
 
+## [7.7.0] - 2020-02-14
+### Added
+ - Serial queue allows configuration of de-duplication behaviour
+
+### Changed
+ - Rate limiting features moved into Serial Queue
+ - Thread safety improvements for serial queue
+
 ## [7.6.0] - 2019-11-18
 ### Added
  - Added hooks to ClientSerialRpcController to access ConnectionStateManager states
