@@ -245,11 +245,39 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void EnqueuePriority(ISerialData data, int priority)
 		{
 			if (data == null)
-			{
 				throw new ArgumentNullException("data");
-			}
 
-			EnqueuePriority(data, (a, b) => false, priority, false);
+			EnqueuePriority(data, (a, b) => false, priority);
+		}
+
+		///  <summary>
+		///  Enqueues the given data with the given priority (lower value is higher priority) 
+		/// 
+		///  Uses the comparer to determine if a matching command is already queued.
+		///  If true, replace the original command with the new one.
+		///  
+		///  This is useful in cases such as ramping volume, where we can collapse:
+		/// 		PowerOn
+		/// 		Volume11
+		/// 		Volume12
+		/// 		MuteOn
+		/// 		Volume13
+		///  
+		///  To:
+		/// 		PowerOn
+		/// 		Volume13
+		/// 		MuteOn
+		///  </summary>
+		///  <param name="data"></param>
+		///  <param name="comparer"></param>
+		///  <param name="priority"></param>
+		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority)
+			where T : class, ISerialData
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			EnqueuePriority(data, comparer, priority, false);
 		}
 
 		///  <summary>
