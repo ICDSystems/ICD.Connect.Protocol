@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Properties;
+﻿using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
@@ -11,6 +10,7 @@ using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
+using System;
 
 namespace ICD.Connect.Protocol.SerialQueues
 {
@@ -39,13 +39,16 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private ISerialBuffer m_Buffer;
 
 		private readonly PriorityQueue<ISerialData> m_CommandQueue;
-		private readonly SafeCriticalSection m_CommandLock;
+
+		/// <summary>
+		/// This acts as thread syncronization for both m_CommandQueue and m_CurrentCommand
+		/// </summary>
+		private readonly SafeCriticalSection m_CommandSection;
 		private readonly SafeTimer m_TimeoutTimer;
 		private readonly IcdStopwatch m_DisconnectedTimer;
+		private readonly IcdTimer m_DelayTimer;
 
-		private long m_Timeout = 3000;
-		private int m_MaxTimeoutCount = 5;
-		private int m_TimeoutCount;
+		private ISerialData m_CurrentCommand;
 
 		#region Properties
 
@@ -62,39 +65,38 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <summary>
 		/// Gets/sets the length of the timeout timer.
 		/// </summary>
-		public long Timeout { get { return m_Timeout; } set { m_Timeout = value; } }
+		public long Timeout { get; set; }
 
 		/// <summary>
-		/// Gets/sets the numer of times to timeout in a row before clearing the queue.
+		/// Gets/sets the number of times to timeout in a row before clearing the queue.
 		/// </summary>
-		public int MaxTimeoutCount { get { return m_MaxTimeoutCount; } set { m_MaxTimeoutCount = value; } }
+		public int MaxTimeoutCount { get; set; }
 
 		/// <summary>
 		/// Gets the number of times in a row the queue has raised a timeout.
 		/// </summary>
-		public int TimeoutCount { get { return m_TimeoutCount; } }
+		public int TimeoutCount { get; private set; }
 
 		/// <summary>
-		/// DisconnectedTime is the number of milliseconds since the last timeout.
-		/// DisconnectedTime is reset when data is received from the port.
-		/// Returns 0 if no command has timed-out yet.
+		/// Wait time between sending commands
 		/// </summary>
-		public long DisconnectedTime { get { return m_DisconnectedTimer.ElapsedMilliseconds; } }
+		public long CommandDelayTime { get; set; }
 
 		/// <summary>
 		/// Returns the number of queued commands.
 		/// </summary>
-		public int CommandCount { get { return m_CommandLock.Execute(() => m_CommandQueue.Count); } }
+		public int CommandCount
+		{
+			get { return m_CommandSection.Execute(() => m_CommandQueue.Count); }
+		}
 
 		/// <summary>
 		/// Gets if the queue is currently waiting on the response to a command
 		/// </summary>
-		public bool IsCommandInProgress { get; private set; }
-
-		/// <summary>
-		/// Gets the command currently running
-		/// </summary>
-		public ISerialData CurrentCommand { get; protected set; }
+		protected bool IsCommandInProgress
+		{
+			get { return m_CommandSection.Execute(() => m_CurrentCommand != null); }
+		}
 
 		#endregion
 
@@ -105,10 +107,17 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		protected AbstractSerialQueue()
 		{
+			m_DelayTimer = new IcdTimer();
 			m_CommandQueue = new PriorityQueue<ISerialData>();
-			m_CommandLock = new SafeCriticalSection();
+			m_CommandSection = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
+
+			MaxTimeoutCount = 5;
+			Timeout = 3000;
+			CommandDelayTime = 0;
+
+			m_DelayTimer.OnElapsed += CommandDelayCallback;
 		}
 
 		/// <summary>
@@ -158,18 +167,17 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public void Clear()
 		{
-			m_CommandLock.Enter();
-
+			m_CommandSection.Enter();
 			try
 			{
 				m_CommandQueue.Clear();
-				StopTimeoutTimer();
-				IsCommandInProgress = false;
+				m_CurrentCommand = null;
 			}
 			finally
 			{
-				m_CommandLock.Leave();
+				m_CommandSection.Leave();
 			}
+			StopTimeoutTimer();
 		}
 
 		/// <summary>
@@ -179,7 +187,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void Enqueue(ISerialData data)
 		{
 			if (data == null)
+			{
 				throw new ArgumentNullException("data");
+			}
 
 			EnqueuePriority(data, int.MaxValue);
 		}
@@ -206,9 +216,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 			where T : class, ISerialData
 		{
 			if (data == null)
+			{
 				throw new ArgumentNullException("data");
+			}
 
-			EnqueuePriority(data, comparer, int.MaxValue);
+			EnqueuePriority(data, comparer, int.MaxValue, false);
 		}
 
 		/// <summary>
@@ -218,7 +230,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void EnqueuePriority(ISerialData data)
 		{
 			if (data == null)
+			{
 				throw new ArgumentNullException("data");
+			}
 
 			EnqueuePriority(data, 0);
 		}
@@ -233,17 +247,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if (data == null)
 				throw new ArgumentNullException("data");
 
-			m_CommandLock.Enter();
-
-			try
-			{
-				m_CommandQueue.Enqueue(data, priority);
-				CommandAdded();
-			}
-			finally
-			{
-				m_CommandLock.Leave();
-			}
+			EnqueuePriority(data, (a, b) => false, priority);
 		}
 
 		///  <summary>
@@ -266,95 +270,116 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  </summary>
 		///  <param name="data"></param>
 		///  <param name="comparer"></param>
-		/// <param name="priority"></param>
+		///  <param name="priority"></param>
 		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority)
 			where T : class, ISerialData
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
 
-			m_CommandLock.Enter();
+			EnqueuePriority(data, comparer, priority, false);
+		}
 
-			try
+		///  <summary>
+		///  Enqueues the given data with the given priority (lower value is higher priority) 
+		/// 
+		///  Uses the comparer to determine if a matching command is already queued.
+		///  If true, replace the original command with the new one.
+		///  
+		///  This is useful in cases such as ramping volume, where we can collapse:
+		/// 		PowerOn
+		/// 		Volume11
+		/// 		Volume12
+		/// 		MuteOn
+		/// 		Volume13
+		///  
+		///  To:
+		/// 		PowerOn
+		/// 		Volume13
+		/// 		MuteOn
+		///  </summary>
+		///  <param name="data"></param>
+		///  <param name="comparer"></param>
+		///  <param name="priority"></param>
+		///  <param name="deDuplicateToEndOfQueue"></param>
+		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority, bool deDuplicateToEndOfQueue)
+			where T : class, ISerialData
+		{
+			if (data == null)
 			{
-				Func<ISerialData, bool> removeCallback = d => (d is T) && comparer(data, d as T);
-				m_CommandQueue.EnqueueRemove(data, removeCallback, priority);
-				CommandAdded();
+				throw new ArgumentNullException("data");
 			}
-			finally
-			{
-				m_CommandLock.Leave();
-			}
+
+			m_CommandSection.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority, deDuplicateToEndOfQueue));
+			SendNextCommand();
 		}
 
 		#endregion
 
 		#region Private Methods
 
-		protected virtual void CommandAdded()
-		{
-			if (!IsCommandInProgress)
-				SendImmediate();
-		}
-
-		protected virtual void CommandFinished()
-		{
-			m_CommandLock.Enter();
-
-			try
-			{
-				if (!IsCommandInProgress && m_CommandQueue.Count > 0)
-					SendImmediate();
-			}
-			finally
-			{
-				m_CommandLock.Leave();
-			}
-		}
-
 		/// <summary>
-		/// Bypasses the queue and sends the data immediately.
+		/// Dequeues the next command and sends it.
 		/// </summary>
-		protected bool SendImmediate()
+		private void SendNextCommand()
 		{
-			m_CommandLock.Enter();
+			IcdConsole.PrintLine(eConsoleColor.Magenta, "Send Next Command");
 
+			m_CommandSection.Enter();
 			try
 			{
-				StartTimeoutTimer();
-
-				CurrentCommand = m_CommandQueue.Dequeue();
-				IsCommandInProgress = true;
-
-				try
+				if (IsCommandInProgress || CommandCount == 0 || m_DelayTimer.RemainingSeconds != 0)
 				{
-					if (Port != null)
-					{
-						bool output = Port.Send(CurrentCommand.Serialize());
-						if (!output)
-							return false;
-
-						OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(CurrentCommand));
-						if (Trust)
-							FinishCommand(command => { });
-
-						return true;
-					}
-
-					ServiceProvider.GetService<ILoggerService>()
-					               .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null", GetType().Name);
-					Clear();
-					return false;
+					string reason = IsCommandInProgress
+										? "Command In Progress"
+										: CommandCount == 0
+											  ? "0 Commands in Queue"
+											  : "Timer Not Ready";
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Command Not Sent {0}", reason);
+					return;
 				}
-				catch (ObjectDisposedException)
-				{
-					Clear();
-					return false;
-				}
+
+				m_CurrentCommand = m_CommandQueue.Dequeue();
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Dequeued Command {0}", m_CurrentCommand.Serialize());
 			}
 			finally
 			{
-				m_CommandLock.Leave();
+				m_CommandSection.Leave();
+			}
+
+			StartTimeoutTimer();
+
+			try
+			{
+				if (Port == null)
+				{
+					ServiceProvider.GetService<ILoggerService>()
+								   .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null",
+											 GetType().Name);
+					Clear();
+					return;
+				}
+
+				bool sendSuccessful = Port.Send(m_CurrentCommand.Serialize());
+
+				if (!sendSuccessful)
+				{
+					return;
+				}
+
+				if (CommandDelayTime != 0)
+					m_DelayTimer.Restart(CommandDelayTime);
+
+				OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(m_CurrentCommand));
+
+				if (Trust)
+				{
+					FinishCommand(command => { });
+				}
+			}
+			catch (ObjectDisposedException)
+			{
+				Clear();
 			}
 		}
 
@@ -365,12 +390,16 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			// Don't care about timeouts in trust mode
 			if (Trust)
+			{
 				return;
+			}
 
 			if (!m_DisconnectedTimer.IsRunning)
+			{
 				m_DisconnectedTimer.Start();
+			}
 
-			m_TimeoutCount++;
+			TimeoutCount++;
 
 			FinishCommand(command => OnTimeout.Raise(this, new SerialDataEventArgs(command)));
 		}
@@ -378,38 +407,26 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void FinishCommand(Action<ISerialData> callback)
 		{
 			StopTimeoutTimer();
-			ISerialData command;
-
-			m_CommandLock.Enter();
-
-			try
-			{
-				command = CurrentCommand;
-				CurrentCommand = null;
-				IsCommandInProgress = false;
-			}
-			finally
-			{
-				m_CommandLock.Leave();
-			}
 
 			try
 			{
 				// Fire the event to allow devices to prioritize commands.
-				callback(command);
+				callback(m_CurrentCommand);
 			}
 			catch (Exception e)
 			{
 				ServiceProvider.GetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
+							   .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
 			}
 
-			CommandFinished();
+			m_CommandSection.Execute(() => m_CurrentCommand = null);
+
+			SendNextCommand();
 		}
 
 		private void StartTimeoutTimer()
 		{
-			m_TimeoutTimer.Reset(m_Timeout);
+			m_TimeoutTimer.Reset(Timeout);
 		}
 
 		private void StopTimeoutTimer()
@@ -428,7 +445,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Subscribe(ISerialPort port)
 		{
 			if (port == null)
+			{
 				return;
+			}
 
 			port.OnConnectedStateChanged += PortOnConnectedStateChanged;
 			port.OnSerialDataReceived += PortSerialDataReceived;
@@ -441,7 +460,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Unsubscribe(ISerialPort port)
 		{
 			if (port == null)
+			{
 				return;
+			}
 
 			port.OnConnectedStateChanged -= PortOnConnectedStateChanged;
 			port.OnSerialDataReceived -= PortSerialDataReceived;
@@ -470,11 +491,15 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void PortSerialDataReceived(object port, StringEventArgs args)
 		{
 			if (m_DisconnectedTimer.IsRunning)
+			{
 				m_DisconnectedTimer.Reset();
+			}
 
 			// Ignore buffer feedback
 			if (Trust)
+			{
 				return;
+			}
 
 			m_Buffer.Enqueue(args.Data);
 		}
@@ -490,7 +515,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Subscribe(ISerialBuffer buffer)
 		{
 			if (buffer == null)
+			{
 				return;
+			}
 
 			buffer.OnCompletedSerial += BufferCompletedSerial;
 		}
@@ -502,7 +529,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Unsubscribe(ISerialBuffer buffer)
 		{
 			if (buffer == null)
+			{
 				return;
+			}
 
 			buffer.OnCompletedSerial -= BufferCompletedSerial;
 		}
@@ -512,16 +541,36 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		/// <param name="buffer"></param>
 		/// <param name="args"></param>
-		protected virtual void BufferCompletedSerial(object buffer, StringEventArgs args)
+		private void BufferCompletedSerial(object buffer, StringEventArgs args)
 		{
 			// Ignore buffer feedback
 			if (Trust)
+			{
 				return;
+			}
 
-			m_TimeoutCount = 0;
+			TimeoutCount = 0;
 
 			string data = args.Data;
 			FinishCommand(command => OnSerialResponse.Raise(this, new SerialResponseEventArgs(command, data)));
+		}
+
+		#endregion
+
+
+		#region Rate Limit Callbacks
+
+		private void CommandDelayCallback(object sender, EventArgs e)
+		{
+			if(CommandDelayTime == 0)
+				return;
+
+			bool sendNextCommand = false;
+
+			m_CommandSection.Execute(() => sendNextCommand = !IsCommandInProgress && CommandCount > 0);
+
+			if(sendNextCommand)
+				SendNextCommand();
 		}
 
 		#endregion

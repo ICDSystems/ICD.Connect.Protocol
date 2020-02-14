@@ -33,6 +33,16 @@ namespace ICD.Connect.Protocol.SerialQueues
 		int TimeoutCount { get; }
 
 		/// <summary>
+		/// Gets/sets the number of times to timeout in a row before clearing the queue.
+		/// </summary>
+		int MaxTimeoutCount { get; set; }
+
+		/// <summary>
+		/// Wait time between sending commands, defaults to 0.
+		/// </summary>
+		long CommandDelayTime { get; set; }
+
+		/// <summary>
 		/// Gets the current port.
 		/// </summary>
 		ISerialPort Port { get; }
@@ -106,8 +116,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  </summary>
 		///  <param name="data"></param>
 		///  <param name="comparer"></param>
-		/// <param name="priority"></param>
-		void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority) where T : class, ISerialData;
+		///  <param name="priority"></param>
+		///  <param name="deDuplicateToEndOfQueue"></param>
+		void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority, bool deDuplicateToEndOfQueue) where T : class, ISerialData;
 	}
 
 	public static class SerialQueueExtensions
