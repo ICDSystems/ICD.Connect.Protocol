@@ -39,7 +39,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private ISerialBuffer m_Buffer;
 
 		private readonly PriorityQueue<ISerialData> m_CommandQueue;
-		private readonly SafeCriticalSection m_CommandLock;
+
+		/// <summary>
+		/// This acts as thread syncronization for both m_CommandQueue and m_CurrentCommand
+		/// </summary>
+		private readonly SafeCriticalSection m_CommandSection;
 		private readonly SafeTimer m_TimeoutTimer;
 		private readonly IcdStopwatch m_DisconnectedTimer;
 		private readonly IcdTimer m_DelayTimer;
@@ -83,7 +87,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public int CommandCount
 		{
-			get { return m_CommandLock.Execute(() => m_CommandQueue.Count); }
+			get { return m_CommandSection.Execute(() => m_CommandQueue.Count); }
 		}
 
 		/// <summary>
@@ -91,7 +95,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		protected bool IsCommandInProgress
 		{
-			get { return m_CurrentCommand != null; }
+			get { return m_CommandSection.Execute(() => m_CurrentCommand != null); }
 		}
 
 		#endregion
@@ -105,7 +109,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			m_DelayTimer = new IcdTimer();
 			m_CommandQueue = new PriorityQueue<ISerialData>();
-			m_CommandLock = new SafeCriticalSection();
+			m_CommandSection = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
 
@@ -163,9 +167,17 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public void Clear()
 		{
-			m_CommandLock.Execute(() => m_CommandQueue.Clear());
+			m_CommandSection.Enter();
+			try
+			{
+				m_CommandQueue.Clear();
+				m_CurrentCommand = null;
+			}
+			finally
+			{
+				m_CommandSection.Leave();
+			}
 			StopTimeoutTimer();
-			m_CurrentCommand = null;
 		}
 
 		/// <summary>
@@ -270,7 +282,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				throw new ArgumentNullException("data");
 			}
 
-			m_CommandLock.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority, deDuplicateToEndOfQueue));
+			m_CommandSection.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority, deDuplicateToEndOfQueue));
 			SendNextCommand();
 		}
 
@@ -283,14 +295,31 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		private void SendNextCommand()
 		{
-			if (IsCommandInProgress || CommandCount == 0  || m_DelayTimer.RemainingSeconds != 0)
+			IcdConsole.PrintLine(eConsoleColor.Magenta, "Send Next Command");
+
+			m_CommandSection.Enter();
+			try
 			{
-				return;
+				if (IsCommandInProgress || CommandCount == 0 || m_DelayTimer.RemainingSeconds != 0)
+				{
+					string reason = IsCommandInProgress
+										? "Command In Progress"
+										: CommandCount == 0
+											  ? "0 Commands in Queue"
+											  : "Timer Not Ready";
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Command Not Sent {0}", reason);
+					return;
+				}
+
+				m_CurrentCommand = m_CommandQueue.Dequeue();
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Dequeued Command {0}", m_CurrentCommand.Serialize());
+			}
+			finally
+			{
+				m_CommandSection.Leave();
 			}
 
 			StartTimeoutTimer();
-
-			m_CurrentCommand = m_CommandLock.Execute(() => m_CommandQueue.Dequeue());
 
 			try
 			{
@@ -310,7 +339,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 					return;
 				}
 
-				if(CommandDelayTime != 0)
+				if (CommandDelayTime != 0)
 					m_DelayTimer.Restart(CommandDelayTime);
 
 				OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(m_CurrentCommand));
@@ -362,7 +391,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 							   .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
 			}
 
-			m_CurrentCommand = null;
+			m_CommandSection.Execute(() => m_CurrentCommand = null);
 
 			SendNextCommand();
 		}
@@ -508,7 +537,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 			if(CommandDelayTime == 0)
 				return;
 
-			if(!IsCommandInProgress && CommandCount > 0)
+			bool sendNextCommand = false;
+
+			m_CommandSection.Execute(() => sendNextCommand = !IsCommandInProgress && CommandCount > 0);
+
+			if(sendNextCommand)
 				SendNextCommand();
 		}
 
