@@ -58,7 +58,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// False when the delay hasn't elapsed yet
 		/// </summary>
 		private bool m_CommandDelayRunning;
-		private readonly SafeCriticalSection m_CommandDelaySection;
 
 		private ISerialData m_CurrentCommand;
 
@@ -113,7 +112,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 		protected AbstractSerialQueue()
 		{
 			m_CommandDelayTimer = SafeTimer.Stopped(ComandDelayTimerElapesed);
-			m_CommandDelaySection = new SafeCriticalSection();
 			m_CommandQueue = new PriorityQueue<ISerialData>();
 			m_CommandSection = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
@@ -605,7 +603,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				if (Debug)
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Resetting Delay Timer");
-				m_CommandDelaySection.Enter();
+				m_CommandSection.Enter();
 				try
 				{
 					if (!m_CommandDelayRunning)
@@ -613,21 +611,21 @@ namespace ICD.Connect.Protocol.SerialQueues
 						m_CommandDelayRunning = true;
 						m_CommandDelayTimer.Reset(CommandDelayTime);
 					}
-					else if (Debug)
+					else
 					{
-						IcdConsole.PrintLine(eConsoleColor.Magenta, "Delay Timer Already Running!");
+						IcdConsole.PrintLine(eConsoleColor.Magenta, "Delay Timer Already Running! Possible Threading Issue?");
 					}
 				}
 				finally
 				{
-					m_CommandDelaySection.Leave();
+					m_CommandSection.Leave();
 				}		
 			}
 		}
 
 		private void ComandDelayTimerElapesed()
 		{
-			m_CommandDelaySection.Execute(() => m_CommandDelayRunning = false);
+			m_CommandSection.Execute(() => m_CommandDelayRunning = false);
 
 			SendNextCommand();
 		}
