@@ -44,13 +44,29 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// This acts as thread syncronization for both m_CommandQueue and m_CurrentCommand
 		/// </summary>
 		private readonly SafeCriticalSection m_CommandSection;
+
 		private readonly SafeTimer m_TimeoutTimer;
 		private readonly IcdStopwatch m_DisconnectedTimer;
-		private readonly IcdTimer m_DelayTimer;
+
+		/// <summary>
+		/// Timer for handling command delay
+		/// </summary>
+		private readonly SafeTimer m_CommandDelayTimer;
+
+		/// <summary>
+		/// True when command is ok to send from the command delay (or if there is no delay)
+		/// False when the delay hasn't elapsed yet
+		/// </summary>
+		private bool m_CommandDelayRunning;
+		private readonly SafeCriticalSection m_CommandDelaySection;
 
 		private ISerialData m_CurrentCommand;
 
+		private bool m_CommandIsRunning;
+
 		#region Properties
+
+		public bool Debug { get; set; }
 
 		/// <summary>
 		/// Gets the current port.
@@ -85,18 +101,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <summary>
 		/// Returns the number of queued commands.
 		/// </summary>
-		public int CommandCount
-		{
-			get { return m_CommandSection.Execute(() => m_CommandQueue.Count); }
-		}
-
-		/// <summary>
-		/// Gets if the queue is currently waiting on the response to a command
-		/// </summary>
-		protected bool IsCommandInProgress
-		{
-			get { return m_CommandSection.Execute(() => m_CurrentCommand != null); }
-		}
+		public int CommandCount { get { return m_CommandSection.Execute(() => m_CommandQueue.Count); } }
 
 		#endregion
 
@@ -107,7 +112,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		protected AbstractSerialQueue()
 		{
-			m_DelayTimer = new IcdTimer();
+			m_CommandDelayTimer = SafeTimer.Stopped(ComandDelayTimerElapesed);
+			m_CommandDelaySection = new SafeCriticalSection();
 			m_CommandQueue = new PriorityQueue<ISerialData>();
 			m_CommandSection = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
@@ -116,8 +122,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 			MaxTimeoutCount = 5;
 			Timeout = 3000;
 			CommandDelayTime = 0;
-
-			m_DelayTimer.OnElapsed += CommandDelayCallback;
 		}
 
 		/// <summary>
@@ -167,11 +171,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public void Clear()
 		{
+			if (Debug)
+				IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "Clearing Queue!");
 			m_CommandSection.Enter();
 			try
 			{
 				m_CommandQueue.Clear();
 				m_CurrentCommand = null;
+				m_CommandIsRunning = false;
 			}
 			finally
 			{
@@ -310,7 +317,10 @@ namespace ICD.Connect.Protocol.SerialQueues
 				throw new ArgumentNullException("data");
 			}
 
-			m_CommandSection.Execute(() => m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority, deDuplicateToEndOfQueue));
+			m_CommandSection.Execute(
+			                         () =>
+			                         m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority,
+			                                                      deDuplicateToEndOfQueue));
 			SendNextCommand();
 		}
 
@@ -323,24 +333,30 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		private void SendNextCommand()
 		{
-			IcdConsole.PrintLine(eConsoleColor.Magenta, "Send Next Command");
+			if (Debug)
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Send Next Command");
 
 			m_CommandSection.Enter();
 			try
 			{
-				if (IsCommandInProgress || CommandCount == 0 || m_DelayTimer.RemainingSeconds != 0)
+				if (m_CommandIsRunning || CommandCount == 0 || m_CommandDelayRunning)
 				{
-					string reason = IsCommandInProgress
-										? "Command In Progress"
-										: CommandCount == 0
-											  ? "0 Commands in Queue"
-											  : "Timer Not Ready";
+					if (!Debug)
+						return;
+					string reason = m_CommandIsRunning
+						                ? "Command In Progress"
+						                : CommandCount == 0
+							                  ? "0 Commands in Queue"
+							                  : "Timer Not Ready";
+					
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Command Not Sent {0}", reason);
 					return;
 				}
 
 				m_CurrentCommand = m_CommandQueue.Dequeue();
-				IcdConsole.PrintLine(eConsoleColor.Magenta, "Dequeued Command {0}", m_CurrentCommand.Serialize());
+				m_CommandIsRunning = true;
+				if (Debug)
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Dequeued Command {0}", m_CurrentCommand.Serialize());
 			}
 			finally
 			{
@@ -354,8 +370,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 				if (Port == null)
 				{
 					ServiceProvider.GetService<ILoggerService>()
-								   .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null",
-											 GetType().Name);
+					               .AddEntry(eSeverity.Error, "{0} failed to send data - Port is null",
+					                         GetType().Name);
 					Clear();
 					return;
 				}
@@ -364,11 +380,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 				if (!sendSuccessful)
 				{
+					if (Debug)
+						IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "Send Command Failed!!");
 					return;
 				}
 
-				if (CommandDelayTime != 0)
-					m_DelayTimer.Restart(CommandDelayTime);
+				ResetComandDelayTimer();
 
 				OnSerialTransmission.Raise(this, new SerialTransmissionEventArgs(m_CurrentCommand));
 
@@ -379,6 +396,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 			}
 			catch (ObjectDisposedException)
 			{
+				if (Debug)
+					IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "ObjectDisposedException, clearing queue");
 				Clear();
 			}
 		}
@@ -394,6 +413,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 				return;
 			}
 
+			if (Debug)
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Timeout Expired - finishing command");
+
 			if (!m_DisconnectedTimer.IsRunning)
 			{
 				m_DisconnectedTimer.Start();
@@ -407,7 +429,13 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void FinishCommand(Action<ISerialData> callback)
 		{
 			StopTimeoutTimer();
-
+			if (Debug)
+			{
+				if (m_CurrentCommand != null)
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Finishing Command: {0}", m_CurrentCommand.Serialize());
+				else
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Finishing Command - Current Command is Null");
+			}
 			try
 			{
 				// Fire the event to allow devices to prioritize commands.
@@ -416,10 +444,21 @@ namespace ICD.Connect.Protocol.SerialQueues
 			catch (Exception e)
 			{
 				ServiceProvider.GetService<ILoggerService>()
-							   .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
+				               .AddEntry(eSeverity.Error, e, "{0} failed to execute callback - {1}", GetType().Name, e.Message);
 			}
 
-			m_CommandSection.Execute(() => m_CurrentCommand = null);
+			m_CommandSection.Enter();
+			try
+			{
+				m_CurrentCommand = null;
+				m_CommandIsRunning = false;
+				if (Debug)
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Clearing Current Command");
+			}
+			finally
+			{
+				m_CommandSection.Leave();
+			}
 
 			SendNextCommand();
 		}
@@ -558,19 +597,39 @@ namespace ICD.Connect.Protocol.SerialQueues
 		#endregion
 
 
-		#region Rate Limit Callbacks
+		#region Rate Limit
 
-		private void CommandDelayCallback(object sender, EventArgs e)
+		private void ResetComandDelayTimer()
 		{
-			if(CommandDelayTime == 0)
-				return;
+			if (CommandDelayTime != 0)
+			{
+				if (Debug)
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Resetting Delay Timer");
+				m_CommandDelaySection.Enter();
+				try
+				{
+					if (!m_CommandDelayRunning)
+					{
+						m_CommandDelayRunning = true;
+						m_CommandDelayTimer.Reset(CommandDelayTime);
+					}
+					else if (Debug)
+					{
+						IcdConsole.PrintLine(eConsoleColor.Magenta, "Delay Timer Already Running!");
+					}
+				}
+				finally
+				{
+					m_CommandDelaySection.Leave();
+				}		
+			}
+		}
 
-			bool sendNextCommand = false;
+		private void ComandDelayTimerElapesed()
+		{
+			m_CommandDelaySection.Execute(() => m_CommandDelayRunning = false);
 
-			m_CommandSection.Execute(() => sendNextCommand = !IsCommandInProgress && CommandCount > 0);
-
-			if(sendNextCommand)
-				SendNextCommand();
+			SendNextCommand();
 		}
 
 		#endregion
