@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - MockIoPort sets configuration and digital out
  - Added PulseOpen and PulseClose methods for toggling relays
  - Added ConsoleServerDevice to host the ICD console as a TCP server
+ - Added IoT project
+ - Added IcdMqttClient port
  
 ### Changed
  - Fixed CongureProxySettings allowing to make more than one request.

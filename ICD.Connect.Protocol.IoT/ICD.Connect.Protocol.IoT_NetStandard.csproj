@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>ICD.Connect.Protocol.IoT</RootNamespace>
+    <AssemblyName>ICD.Connect.Protocol.IoT</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
+    <EazfuscatorActiveConfiguration>Release</EazfuscatorActiveConfiguration>
+    <EazfuscatorCompatibilityVersion>2018.2</EazfuscatorCompatibilityVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;STANDARD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE;STANDARD</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="binNetCoreApp\**" />
+    <Compile Remove="References\**" />
+    <Compile Remove="SIMPLSharpLogs\**" />
+    <EmbeddedResource Remove="binNetCoreApp\**" />
+    <EmbeddedResource Remove="References\**" />
+    <EmbeddedResource Remove="SIMPLSharpLogs\**" />
+    <None Remove="binNetCoreApp\**" />
+    <None Remove="References\**" />
+    <None Remove="SIMPLSharpLogs\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="ObfuscationSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Remove="ICD.Connect.Protocol.IoT_SimplSharp.suo" />
+    <None Remove="ICD.Connect.Protocol.projectinfo" />
+    <None Remove="ICD.SimplSharp.projectinfo" />
+    <None Remove="Properties\ControlSystem.cfg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
+    <PackageReference Include="M2MqttDotnetCore" Version="1.0.8" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
+  </ItemGroup>
+
+</Project>
