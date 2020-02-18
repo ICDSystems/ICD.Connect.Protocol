@@ -171,7 +171,9 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			if (Debug)
 				IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "Clearing Queue!");
+
 			m_CommandSection.Enter();
+
 			try
 			{
 				m_CommandQueue.Clear();
@@ -182,6 +184,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			{
 				m_CommandSection.Leave();
 			}
+
 			StopTimeoutTimer();
 		}
 
@@ -192,9 +195,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void Enqueue(ISerialData data)
 		{
 			if (data == null)
-			{
 				throw new ArgumentNullException("data");
-			}
 
 			EnqueuePriority(data, int.MaxValue);
 		}
@@ -221,9 +222,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			where T : class, ISerialData
 		{
 			if (data == null)
-			{
 				throw new ArgumentNullException("data");
-			}
 
 			EnqueuePriority(data, comparer, int.MaxValue, false);
 		}
@@ -235,9 +234,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public void EnqueuePriority(ISerialData data)
 		{
 			if (data == null)
-			{
 				throw new ArgumentNullException("data");
-			}
 
 			EnqueuePriority(data, 0);
 		}
@@ -311,9 +308,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			where T : class, ISerialData
 		{
 			if (data == null)
-			{
 				throw new ArgumentNullException("data");
-			}
 
 			m_CommandSection.Execute(
 			                         () =>
@@ -407,9 +402,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			// Don't care about timeouts in trust mode
 			if (Trust)
-			{
 				return;
-			}
 
 			if (Debug)
 				IcdConsole.PrintLine(eConsoleColor.Magenta, "Timeout Expired - finishing command");
@@ -427,6 +420,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void FinishCommand(Action<ISerialData> callback)
 		{
 			StopTimeoutTimer();
+
 			if (Debug)
 			{
 				if (m_CurrentCommand != null)
@@ -434,6 +428,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 				else
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Finishing Command - Current Command is Null");
 			}
+
 			try
 			{
 				// Fire the event to allow devices to prioritize commands.
@@ -446,6 +441,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			}
 
 			m_CommandSection.Enter();
+
 			try
 			{
 				m_CurrentCommand = null;
@@ -482,9 +478,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Subscribe(ISerialPort port)
 		{
 			if (port == null)
-			{
 				return;
-			}
 
 			port.OnConnectedStateChanged += PortOnConnectedStateChanged;
 			port.OnSerialDataReceived += PortSerialDataReceived;
@@ -497,9 +491,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Unsubscribe(ISerialPort port)
 		{
 			if (port == null)
-			{
 				return;
-			}
 
 			port.OnConnectedStateChanged -= PortOnConnectedStateChanged;
 			port.OnSerialDataReceived -= PortSerialDataReceived;
@@ -528,15 +520,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void PortSerialDataReceived(object port, StringEventArgs args)
 		{
 			if (m_DisconnectedTimer.IsRunning)
-			{
 				m_DisconnectedTimer.Reset();
-			}
 
 			// Ignore buffer feedback
 			if (Trust)
-			{
 				return;
-			}
 
 			m_Buffer.Enqueue(args.Data);
 		}
@@ -552,9 +540,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Subscribe(ISerialBuffer buffer)
 		{
 			if (buffer == null)
-			{
 				return;
-			}
 
 			buffer.OnCompletedSerial += BufferCompletedSerial;
 		}
@@ -566,9 +552,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private void Unsubscribe(ISerialBuffer buffer)
 		{
 			if (buffer == null)
-			{
 				return;
-			}
 
 			buffer.OnCompletedSerial -= BufferCompletedSerial;
 		}
@@ -582,9 +566,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		{
 			// Ignore buffer feedback
 			if (Trust)
-			{
 				return;
-			}
 
 			TimeoutCount = 0;
 
@@ -599,27 +581,29 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 		private void ResetComandDelayTimer()
 		{
-			if (CommandDelayTime != 0)
+			if (CommandDelayTime == 0)
+				return;
+
+			if (Debug)
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Resetting Delay Timer");
+
+			m_CommandSection.Enter();
+
+			try
 			{
-				if (Debug)
-					IcdConsole.PrintLine(eConsoleColor.Magenta, "Resetting Delay Timer");
-				m_CommandSection.Enter();
-				try
+				if (!m_CommandDelayRunning)
 				{
-					if (!m_CommandDelayRunning)
-					{
-						m_CommandDelayRunning = true;
-						m_CommandDelayTimer.Reset(CommandDelayTime);
-					}
-					else
-					{
-						IcdConsole.PrintLine(eConsoleColor.Magenta, "Delay Timer Already Running! Possible Threading Issue?");
-					}
+					m_CommandDelayRunning = true;
+					m_CommandDelayTimer.Reset(CommandDelayTime);
 				}
-				finally
+				else if (Debug)
 				{
-					m_CommandSection.Leave();
-				}		
+					IcdConsole.PrintLine(eConsoleColor.Magenta, "Delay Timer Already Running! Possible Threading Issue?");
+				}
+			}
+			finally
+			{
+				m_CommandSection.Leave();
 			}
 		}
 
