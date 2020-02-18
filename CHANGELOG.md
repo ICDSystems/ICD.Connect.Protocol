@@ -113,6 +113,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed ComPortPlus and other unused code
 
+## [7.7.1] - 2020-02-18
+### Changed
+ - Fixed issues with rate limited serial queues
+ - Additional thread safety with serial queues
+
 ## [7.7.0] - 2020-02-14
 ### Added
  - Serial queue allows configuration of de-duplication behaviour
