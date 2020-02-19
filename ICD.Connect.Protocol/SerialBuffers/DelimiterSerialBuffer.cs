@@ -38,6 +38,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// Constructor.
 		/// </summary>
 		/// <param name="delimiter"></param>
+		/// <param name="passEmptyResponse"></param>
 		public DelimiterSerialBuffer(byte delimiter, bool passEmptyResponse)
 			: this((char)delimiter, passEmptyResponse)
 		{
