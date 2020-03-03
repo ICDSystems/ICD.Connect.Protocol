@@ -345,7 +345,6 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointSmartObjectShims
 		/// Use a negative offset to remove from the sig number
 		/// </summary>
 		/// <param name="sig"></param>
-		/// <param name="offset"></param>
 		protected virtual void ProcessOutputSig(SigInfo sig)
 		{
 			SendSigToSPlus(sig, 0);
