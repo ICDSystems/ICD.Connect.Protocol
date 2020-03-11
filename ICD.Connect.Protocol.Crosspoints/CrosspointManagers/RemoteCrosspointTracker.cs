@@ -113,7 +113,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 					RemoveCrosspointInfo(crosspoint.Id);
 				}
 
-				m_AddTimeMap[crosspoint.Id] = IcdEnvironment.GetLocalTime();
+				m_AddTimeMap[crosspoint.Id] = IcdEnvironment.GetUtcTime();
 				m_Crosspoints[crosspoint.Id] = crosspoint;
 
 				// Don't re-raise the event for the same crosspoint
@@ -251,7 +251,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				foreach (int id in m_Crosspoints.Keys.ToArray())
 				{
 					DateTime added = m_AddTimeMap[id];
-					TimeSpan age = IcdEnvironment.GetLocalTime() - added;
+					TimeSpan age = IcdEnvironment.GetUtcTime() - added;
 
 					if (age.TotalMilliseconds > ELAPSED_THRESHOLD)
 						RemoveCrosspointInfo(id);

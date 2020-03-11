@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Fixed CongureProxySettings allowing to make more than one request.
  - Fixed web requests to use new web port response.
+ - Using UTC to track durations
 
 ## [11.0.0] - 2019-11-19
 ### Added

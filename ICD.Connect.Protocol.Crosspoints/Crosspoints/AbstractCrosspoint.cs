@@ -382,7 +382,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			ClearOldPingTimes();
 
 			string key = Guid.NewGuid().ToString();
-			m_PingTimesSection.Execute(() => m_PingTimes[key] = IcdEnvironment.GetLocalTime());
+			m_PingTimesSection.Execute(() => m_PingTimes[key] = IcdEnvironment.GetUtcTime());
 
 			int[] controls = GetControlsForMessage().ToArray();
 			int equipment = GetEquipmentForMessage();
@@ -448,7 +448,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				m_PingTimesSection.Leave();
 			}
 
-			IcdConsole.PrintLine("Time - {0}ms", (IcdEnvironment.GetLocalTime() - pingTime).TotalMilliseconds);
+			IcdConsole.PrintLine("Time - {0}ms", (IcdEnvironment.GetUtcTime() - pingTime).TotalMilliseconds);
 		}
 
 		/// <summary>
@@ -472,7 +472,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			try
 			{
-				DateTime now = IcdEnvironment.GetLocalTime();
+				DateTime now = IcdEnvironment.GetUtcTime();
 
 				string[] remove = m_PingTimes.Where(kvp => (now - kvp.Value).TotalSeconds > PING_TIMEOUT_SECONDS)
 				                             .Select(kvp => kvp.Key)
