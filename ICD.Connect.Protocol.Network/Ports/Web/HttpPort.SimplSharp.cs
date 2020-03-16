@@ -212,12 +212,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.Url.Url);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", new Uri(request.Url.Url).ToPrivateString());
 				}
 				else
 				{
 					if (response.Code >= 300)
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.Url.Url, response.Code);
+						Log(eSeverity.Error, "{0} got response with error code {1}", new Uri(request.Url.Url), response.Code);
 
 					output = new WebPortResponse
 					{
@@ -230,7 +230,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.Url.Url, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", new Uri(request.Url.Url), e.GetType().Name, e.Message);
 			}
 			finally
 			{

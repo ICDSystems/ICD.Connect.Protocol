@@ -221,12 +221,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri);
+					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri.ToPrivateString());
 				}
 				else
 				{
 					if ((int)response.StatusCode >= 300)
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri, response.StatusCode);
+						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri.ToPrivateString(), response.StatusCode);
 
 					output = new WebPortResponse
 					{
@@ -242,14 +242,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				ae.Handle(x =>
 				{
 					if (x is TaskCanceledException)
-						Log(eSeverity.Error, "{0} request timed out", request.RequestUri);
+						Log(eSeverity.Error, "{0} request timed out", request.RequestUri.ToPrivateString());
 					else if (x is HttpRequestException)
 					{
 						Exception inner = x.GetBaseException();
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
+						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
 					}
 					else
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, x.GetType().Name,
+						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), x.GetType().Name,
 						    x.Message);
 
 					return true;
@@ -258,11 +258,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			catch (HttpRequestException e)
 			{
 				Exception inner = e.GetBaseException();
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, inner.GetType().Name, inner.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri, e.GetType().Name, e.Message);
+				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), e.GetType().Name, e.Message);
 			}
 			finally
 			{
