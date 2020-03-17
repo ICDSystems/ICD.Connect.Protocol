@@ -256,8 +256,15 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 
 			if (m_TcpServer != null)
 				yield return m_TcpServer;
+
+			if (m_ConnectionStateManager != null)
+				yield return m_ConnectionStateManager.Port;
 		}
 
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
 		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
 		{
 			return base.GetConsoleNodes();
