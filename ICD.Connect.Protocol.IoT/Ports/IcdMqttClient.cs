@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -48,6 +49,8 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// </summary>
 		public string Hostname { get; set; }
 
+		public int Port { get; set; }
+
 		/// <summary>
 		/// Gets/sets the client id.
 		/// </summary>
@@ -62,6 +65,8 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// Gets/sets the password.
 		/// </summary>
 		public string Password { get; set; }
+
+		public bool Secure { get; set; }
 
 		#endregion
 
@@ -85,8 +90,10 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		public byte Connect()
 		{
 			Disconnect();
-
-			Client = new MqttClient(Hostname);
+			if (Secure)
+				Client = new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2);
+			else
+				Client = new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
 			return Client.Connect(ClientId, Username, Password);
 		}
 
@@ -211,6 +218,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			ClientId = null;
 			Username = null;
 			Password = null;
+			Secure = false;
 		}
 
 		/// <summary>
@@ -225,6 +233,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			settings.ClientId = ClientId;
 			settings.Username = Username;
 			settings.Password = Password;
+			settings.Secure = Secure;
 		}
 
 		/// <summary>
@@ -240,6 +249,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			ClientId = settings.ClientId;
 			Username = settings.Username;
 			Password = settings.Password;
+			Secure = settings.Secure;
 		}
 
 		#region Console
@@ -257,6 +267,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			addRow("ClientId", ClientId);
 			addRow("Username", Username);
 			addRow("Password", Password);
+			addRow("Secure", Secure);
 		}
 
 		/// <summary>

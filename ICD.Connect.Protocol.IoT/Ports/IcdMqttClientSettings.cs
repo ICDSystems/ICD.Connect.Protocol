@@ -11,6 +11,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		private const string ELEMENT_CLIENT_ID = "ClientId";
 		private const string ELEMENT_USERNAME = "Username";
 		private const string ELEMENT_PASSWORD = "Password";
+		private const string ELEMENT_SECURE = "Secure";
 
 		/// <summary>
 		/// Gets/sets the hostname.
@@ -32,6 +33,8 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// </summary>
 		public string Password { get; set; }
 
+		public bool Secure { get; set; }
+
 		/// <summary>
 		/// Writes property elements to xml.
 		/// </summary>
@@ -44,6 +47,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			writer.WriteElementString(ELEMENT_CLIENT_ID, ClientId);
 			writer.WriteElementString(ELEMENT_USERNAME, Username);
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
+			writer.WriteElementString(ELEMENT_SECURE, IcdXmlConvert.ToString(Secure));
 		}
 
 		/// <summary>
@@ -58,6 +62,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			ClientId = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CLIENT_ID);
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);
+			Secure = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_SECURE) ?? false;
 		}
 	}
 }
