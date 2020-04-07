@@ -94,7 +94,12 @@ namespace ICD.Connect.Protocol.IoT.Ports
 				Client = new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2);
 			else
 				Client = new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
-			return Client.Connect(ClientId, Username, Password);
+
+			if (string.IsNullOrEmpty(Username))
+				return Client.Connect(ClientId);
+			else
+				return Client.Connect(ClientId, Username, Password);
+
 		}
 
 		/// <summary>
