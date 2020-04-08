@@ -11,7 +11,7 @@ namespace ICD.Connect.Protocol.Network.Utils
 		/// Given a mapping of keys to values, generates a & delimited string.
 		/// 
 		/// E.g.
-		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&grant_type=client_credentials&client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
+		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&amp;grant_type=client_credentials&amp;client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&amp;scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
 		/// </summary>
 		/// <param name="body"></param>
 		/// <returns></returns>
@@ -25,7 +25,7 @@ namespace ICD.Connect.Protocol.Network.Utils
 		/// Given a mapping of keys to values, generates a & delimited string.
 		/// 
 		/// E.g.
-		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&grant_type=client_credentials&client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
+		/// client_id=bfd05f66-d691-4af5-8d27-6cd99094999e&amp;grant_type=client_credentials&amp;client_secret=ReLEyn7Z%2FKbYEYStQD%3FZTJlHk%2BLH8%3D95&amp;scope=https%3A%2F%2Fgraph.microsoft.com%2F.default
 		/// </summary>
 		/// <param name="body"></param>
 		/// <returns></returns>

@@ -32,7 +32,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
 			}
 			finally
 			{

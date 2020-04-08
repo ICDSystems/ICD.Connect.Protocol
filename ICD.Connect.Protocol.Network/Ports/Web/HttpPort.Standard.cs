@@ -187,7 +187,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
 			}
 			finally
 			{
@@ -221,12 +221,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri.ToPrivateString());
+					Logger.Log(eSeverity.Error, "{0} received null response. Is the port busy?", request.RequestUri.ToPrivateString());
 				}
 				else
 				{
 					if ((int)response.StatusCode >= 300)
-						Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri.ToPrivateString(), response.StatusCode);
+						Logger.Log(eSeverity.Error, "{0} got response with error code {1}", request.RequestUri.ToPrivateString(), response.StatusCode);
 
 					output = new WebPortResponse
 					{
@@ -242,14 +242,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				ae.Handle(x =>
 				{
 					if (x is TaskCanceledException)
-						Log(eSeverity.Error, "{0} request timed out", request.RequestUri.ToPrivateString());
+						Logger.Log(eSeverity.Error, "{0} request timed out", request.RequestUri.ToPrivateString());
 					else if (x is HttpRequestException)
 					{
 						Exception inner = x.GetBaseException();
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
+						Logger.Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
 					}
 					else
-						Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), x.GetType().Name,
+						Logger.Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), x.GetType().Name,
 						    x.Message);
 
 					return true;
@@ -258,11 +258,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			catch (HttpRequestException e)
 			{
 				Exception inner = e.GetBaseException();
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
+				Logger.Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), inner.GetType().Name, inner.Message);
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), e.GetType().Name, e.Message);
+				Logger.Log(eSeverity.Error, "{0} threw {1} - {2}", request.RequestUri.ToPrivateString(), e.GetType().Name, e.Message);
 			}
 			finally
 			{

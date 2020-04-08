@@ -208,7 +208,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+					Logger.Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
 				}
 			}
 
@@ -217,7 +217,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 
 			if (settings.TcpServerPort == null)
 			{
-				Log(eSeverity.Error, "TCP Server port not specified in config");
+				Logger.Log(eSeverity.Error, "TCP Server port not specified in config");
 			}
 			else
 			{

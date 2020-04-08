@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -42,7 +43,7 @@ namespace ICD.Connect.Protocol.Ports
 
 				m_IsConnected = value;
 
-				Log(eSeverity.Informational, "Connected state changed to {0}", m_IsConnected);
+				Logger.Set("Connected", eSeverity.Informational, m_IsConnected);
 
 				UpdateCachedOnlineStatus();
 
@@ -117,7 +118,7 @@ namespace ICD.Connect.Protocol.Ports
 				if (IsConnected)
 					return SendFinal(data);
 
-				Log(eSeverity.Error, "Unable to send - Port is not connected.");
+				Logger.Log(eSeverity.Error, "Unable to send - Port is not connected.");
 				return false;
 			}
 			finally
@@ -143,7 +144,7 @@ namespace ICD.Connect.Protocol.Ports
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, e, "{0} - Exception handling received data - {1}", this, e.Message);
+				Logger.Log(eSeverity.Error, e, "Exception handling received data - {0}", e.Message);
 			}
 		}
 

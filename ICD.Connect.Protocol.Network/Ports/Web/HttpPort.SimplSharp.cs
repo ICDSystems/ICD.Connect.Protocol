@@ -178,7 +178,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed to dispatch SOAP - {0}", e.Message);
 			}
 			finally
 			{
@@ -212,12 +212,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				if (response == null)
 				{
-					Log(eSeverity.Error, "{0} received null response. Is the port busy?", new Uri(request.Url.Url).ToPrivateString());
+					Logger.Log(eSeverity.Error, "{0} received null response. Is the port busy?", new Uri(request.Url.Url).ToPrivateString());
 				}
 				else
 				{
 					if (response.Code >= 300)
-						Log(eSeverity.Error, "{0} got response with error code {1}", new Uri(request.Url.Url), response.Code);
+						Logger.Log(eSeverity.Error, "{0} got response with error code {1}", new Uri(request.Url.Url), response.Code);
 
 					output = new WebPortResponse
 					{
@@ -230,7 +230,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "{0} threw {1} - {2}", new Uri(request.Url.Url), e.GetType().Name, e.Message);
+				Logger.Log(eSeverity.Error, "{0} threw {1} - {2}", new Uri(request.Url.Url), e.GetType().Name, e.Message);
 			}
 			finally
 			{

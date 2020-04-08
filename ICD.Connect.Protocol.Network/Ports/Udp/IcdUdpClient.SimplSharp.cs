@@ -40,15 +40,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 				    error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
 				    error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				{
-					Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
-					    address, port, error);
+					Logger.Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+					           address, port, error);
 					Disconnect();
 				}
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
-				    address, port, e.Message);
+				Logger.Log(eSeverity.Error, "Failed to connect to {0}:{1} - {2}",
+				           address, port, e.Message);
 				Disconnect();
 			}
 
@@ -109,8 +109,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			if (m_UdpClient == null)
 			{
-				Log(eSeverity.Error, "Failed to send data to {0}:{1} - Wrapped client is null",
-				    ipAddress, port);
+				Logger.Log(eSeverity.Error, "Failed to send data to {0}:{1} - Wrapped client is null",
+				           ipAddress, port);
 				return false;
 			}
 
@@ -124,8 +124,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
-				    ipAddress, port, e.Message);
+				Logger.Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				           ipAddress, port, e.Message);
 			}
 
 			return false;
@@ -138,7 +138,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			if (m_UdpClient == null)
 			{
-				Log(eSeverity.Error, "Failed to send data - Wrapped client is null");
+				Logger.Log(eSeverity.Error, "Failed to send data - Wrapped client is null");
 				return false;
 			}
 
@@ -152,8 +152,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
-				    m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
+				Logger.Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				           m_UdpClient.AddressToAcceptConnectionFrom, m_UdpClient.PortNumber, e.Message);
 			}
 
 			return false;

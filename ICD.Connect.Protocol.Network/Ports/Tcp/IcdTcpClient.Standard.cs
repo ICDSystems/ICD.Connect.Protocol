@@ -27,7 +27,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
+				Logger.Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
 				return;
 			}
 
@@ -39,7 +39,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				if (!m_TcpClient.Connected)
 				{
-					Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
+					Logger.Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
 					return;
 				}
 				m_Stream = m_TcpClient.GetStream();
@@ -52,7 +52,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				{
 					if (x is SocketException)
 					{
-						Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
+						Logger.Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, x.Message);
 						return true;
 					}
 
@@ -61,7 +61,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, e.Message);
+				Logger.Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}", Address, Port, e.Message);
 			}
 			finally
 			{
@@ -112,7 +112,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (SocketException e)
 			{
-				Log(eSeverity.Error, "Failed to send data - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed to send data - {0}", e.Message);
 				return false;
 			}
 			finally
@@ -130,7 +130,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (task.IsFaulted)
 			{
 				string message = task.Exception.InnerExceptions.First().Message;
-				Log(eSeverity.Error, "Failed to receive data from host {0}:{1} - {2}", Address, Port, message);
+				Logger.Log(eSeverity.Error, "Failed to receive data from host {0}:{1} - {2}", Address, Port, message);
 				UpdateIsConnectedState();
 				return;
 			}

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Using new logging context
+
 ## [12.0.0] - 2020-03-20
 ### Added
  - Added WebPortResponse to help IWebPort return byte arrays and headers instad of just strings.

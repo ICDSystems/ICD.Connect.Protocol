@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -211,7 +212,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
+					Logger.Log(eSeverity.Warning, "Failed to close SSHStream - {0}", e.Message);
 				}
 #endif
 
@@ -221,7 +222,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
+					Logger.Log(eSeverity.Warning, "Failed to dispose SSHStream - {0}", e.Message);
 				}
 
 				m_SshStream = null;
@@ -251,13 +252,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 
 				if (Address == null)
 				{
-					Log(eSeverity.Error, "Failed to connect - Address is null");
+					Logger.Log(eSeverity.Error, "Failed to connect - Address is null");
 					return;
 				}
 
 				if (Username == null)
 				{
-					Log(eSeverity.Error, "Failed to connect - Username is null");
+					Logger.Log(eSeverity.Error, "Failed to connect - Username is null");
 					return;
 				}
 
@@ -293,14 +294,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 					if (!e.Message.Contains("Message type 80 is not valid"))
 					{
 						DisposeClient();
-						Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
+						Logger.Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 					}
 				}
 				// Catches when we attempt to connect to an invalid/offline endpoint.
 				catch (SocketException e)
 				{
 					DisposeClient();
-					Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
+					Logger.Log(eSeverity.Error, "Failed to connect - {0}", e.GetBaseException().Message);
 				}
 
 				// ShellStream can only be instantiated when the client is connected.
@@ -325,7 +326,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 						if (e.Message.Contains("Message type 80 is not valid"))
 							continue;
 
-						Log(eSeverity.Error, "Failed to create shell stream - {0}", e.Message);
+						Logger.Log(eSeverity.Error, "Failed to create shell stream - {0}", e.Message);
 					}
 
 					break;
@@ -380,7 +381,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			{
 				if (m_SshStream == null)
 				{
-					Log(eSeverity.Error, "Unable to write to stream - stream is null");
+					Logger.Log(eSeverity.Error, "Unable to write to stream - stream is null");
 					return false;
 				}
 
@@ -392,13 +393,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			// Thrown when we lose connection.
 			catch (SshConnectionException e)
 			{
-				Log(eSeverity.Error, "Failed writing to stream - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed writing to stream - {0}", e.Message);
 				return false;
 			}
 			catch (ObjectDisposedException e)
 			{
 				// ObjectDisposedException message is kinda worthless on its own
-				Log(eSeverity.Error, "Failed writing to stream - {0} {1}", e.GetType().Name, e.Message);
+				Logger.Log(eSeverity.Error, "Failed writing to stream - {0} {1}", e.GetType().Name, e.Message);
 
 				// Stream is broken so clean it up
 				DisposeStream();
@@ -511,7 +512,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to load PrivateKeyFile - {0}", e.Message);
+				Logger.Log(eSeverity.Error, "Failed to load PrivateKeyFile - {0}", e.Message);
 				return null;
 			}
 		}
@@ -636,7 +637,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <param name="args"></param>
 		private void SshStreamOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Log(eSeverity.Error, args.Exception, "SSH Stream Error - {0}", args.Exception.Message);
+			Logger.Log(eSeverity.Error, args.Exception, "SSH Stream Error - {0}", args.Exception.Message);
 
 			UpdateIsConnectedState();
 		}
@@ -693,7 +694,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <param name="args"></param>
 		private void SshClientOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Log(eSeverity.Error, "Internal Error - {0}", args.Exception.Message);
+			Logger.Log(eSeverity.Error, "Internal Error - {0}", args.Exception.Message);
 			UpdateIsConnectedState();
 		}
 

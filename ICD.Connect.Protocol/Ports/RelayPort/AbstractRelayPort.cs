@@ -34,7 +34,7 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 
 				m_Closed = value;
 
-				Log(eSeverity.Informational, "Closed changed to {0}", m_Closed);
+				Logger.Set("Closed", eSeverity.Informational, m_Closed);
 
 				OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
 			}

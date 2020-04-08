@@ -187,7 +187,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (UriFormatException e)
 			{
-				Log(eSeverity.Error, "Failed to set URI to {0} - {1}", builder.ToString(), e.Message);
+				Logger.Log(eSeverity.Error, "Failed to set URI to {0} - {1}", builder.ToString(), e.Message);
 				Uri = null;
 			}
 		}
@@ -229,7 +229,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			catch (UriFormatException e)
 			{
-				Log(eSeverity.Error, "Failed to set Proxy URI to {0} - {1}", builder.ToString(), e.Message);
+				Logger.Log(eSeverity.Error, "Failed to set Proxy URI to {0} - {1}", builder.ToString(), e.Message);
 				ProxyUri = null;
 			}
 		}

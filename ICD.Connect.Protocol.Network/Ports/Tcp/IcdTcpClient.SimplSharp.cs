@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Logging.LoggingContexts;
+#if SIMPLSHARP
 using System;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Utils;
@@ -21,7 +22,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
+				Logger.Log(eSeverity.Error, "Failed to obtain SocketMutex for connect");
 				return;
 			}
 
@@ -34,7 +35,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				if (m_TcpClient.ClientStatus != SocketStatus.SOCKET_STATUS_CONNECTED)
 				{
-					Log(eSeverity.Error, "Failed to connect with error code {0}", result);
+					Logger.Log(eSeverity.Error, "Failed to connect with error code {0}", result);
 					return;
 				}
 
@@ -42,10 +43,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}",
-				    m_TcpClient.AddressClientConnectedTo,
-				    m_TcpClient.PortNumber,
-				    e.Message);
+				Logger.Log(eSeverity.Error, "Failed to connect to host {0}:{1} - {2}",
+				           m_TcpClient.AddressClientConnectedTo,
+				           m_TcpClient.PortNumber,
+				           e.Message);
 			}
 			finally
 			{
@@ -173,7 +174,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, e, "Exception occurred while processing received data");
+				Logger.Log(eSeverity.Error, e, "Exception occurred while processing received data");
 			}
 
 			SocketErrorCodes socketError = tcpClient.ReceiveDataAsync(TcpClientReceiveHandler);
@@ -185,10 +186,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 					break;
 
 				default:
-					Log(eSeverity.Error, "Failed to ReceiveDataAsync from host {0}:{1} - {2}",
-					    tcpClient.AddressClientConnectedTo,
-					    tcpClient.PortNumber,
-					    socketError);
+					Logger.Log(eSeverity.Error, "Failed to ReceiveDataAsync from host {0}:{1} - {2}",
+					           tcpClient.AddressClientConnectedTo,
+					           tcpClient.PortNumber,
+					           socketError);
 					break;
 			}
 

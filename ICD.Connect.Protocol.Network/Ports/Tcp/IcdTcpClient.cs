@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
@@ -90,7 +91,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			if (!m_SocketMutex.WaitForMutex(1000))
 			{
-				Log(eSeverity.Error, "Failed to obtain SocketMutex for disconnect");
+				Logger.Log(eSeverity.Error, "Failed to obtain SocketMutex for disconnect");
 				return;
 			}
 
@@ -100,7 +101,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, e, "Failed to disconnect from host {0}:{1}", Address, Port);
+				Logger.Log(eSeverity.Error, e, "Failed to disconnect from host {0}:{1}", Address, Port);
 			}
 			finally
 			{
