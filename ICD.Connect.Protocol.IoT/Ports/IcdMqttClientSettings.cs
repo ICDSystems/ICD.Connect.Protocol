@@ -8,6 +8,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 	public sealed class IcdMqttClientSettings : AbstractPortSettings
 	{
 		private const string ELEMENT_HOSTNAME = "Hostname";
+		private const string ELEMENT_NETWORK_PORT = "Network Port";
 		private const string ELEMENT_CLIENT_ID = "ClientId";
 		private const string ELEMENT_USERNAME = "Username";
 		private const string ELEMENT_PASSWORD = "Password";
@@ -17,6 +18,8 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// Gets/sets the hostname.
 		/// </summary>
 		public string Hostname { get; set; }
+
+		public int? NetworkPort { get; set; }
 
 		/// <summary>
 		/// Gets/sets the client id.
@@ -44,6 +47,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			base.WriteElements(writer);
 
 			writer.WriteElementString(ELEMENT_HOSTNAME, Hostname);
+			writer.WriteElementString(ELEMENT_NETWORK_PORT, IcdXmlConvert.ToString(NetworkPort));
 			writer.WriteElementString(ELEMENT_CLIENT_ID, ClientId);
 			writer.WriteElementString(ELEMENT_USERNAME, Username);
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
@@ -59,6 +63,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			base.ParseXml(xml);
 
 			Hostname = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_HOSTNAME);
+			NetworkPort = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_NETWORK_PORT);
 			ClientId = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CLIENT_ID);
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.IoT.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace ICD.Connect.Protocol.IoT.Ports
@@ -87,19 +88,33 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// Connect to the broker.
 		/// </summary>
 		/// <returns></returns>
-		public byte Connect()
+		public void Connect()
 		{
-			Disconnect();
-			if (Secure)
-				Client = new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2);
-			else
-				Client = new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
+			try
+			{
+				if(IsConnected)
+					Disconnect();
 
-			if (string.IsNullOrEmpty(Username))
-				return Client.Connect(ClientId);
-			else
-				return Client.Connect(ClientId, Username, Password);
+				Client = Secure ? 
+					new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2) :
+					new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
 
+				if (string.IsNullOrEmpty(Username))
+					Client.Connect(ClientId);
+				else
+					Client.Connect(ClientId, Username, Password);
+			}
+			catch (MqttConnectionException e)
+			{
+				if (e.InnerException == null)
+					throw;
+				Log(eSeverity.Error, string.Format("Error connecting to mqtt client. {0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}", 
+					IcdEnvironment.NewLine,
+					e.InnerException.Message,
+					e.InnerException.StackTrace,
+					e.Message,
+					e.InnerException));
+			}
 		}
 
 		/// <summary>
@@ -235,6 +250,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			base.CopySettingsFinal(settings);
 
 			settings.Hostname = Hostname;
+			settings.NetworkPort = Port;
 			settings.ClientId = ClientId;
 			settings.Username = Username;
 			settings.Password = Password;
@@ -251,6 +267,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			base.ApplySettingsFinal(settings, factory);
 
 			Hostname = settings.Hostname;
+			Port = settings.NetworkPort ?? 1883; // 1883 default network port for mqtt
 			ClientId = settings.ClientId;
 			Username = settings.Username;
 			Password = settings.Password;
