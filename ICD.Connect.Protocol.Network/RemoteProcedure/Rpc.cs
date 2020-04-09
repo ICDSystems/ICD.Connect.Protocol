@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Network.Attributes.Rpc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -18,6 +18,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 	/// <summary>
 	/// Remote Procedure Call. Contains the destination member and associated parameters.
 	/// </summary>
+	[JsonConverter(typeof(RpcConverter))]
 	public sealed class Rpc : ISerialData
 	{
 		public enum eProcedureType
@@ -26,33 +27,30 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			PropertySetter = 1
 		}
 
-		// Keeping the tokens nice and small for less TCP data.
-		private const string PROCEDURE_TYPE_TOKEN = "t";
-		private const string KEY_TOKEN = "k";
-		private const string PARAMETERS_TOKEN = "p";
-
-		private readonly eProcedureType m_ProcedureType;
-		private readonly string m_Key;
 		private readonly List<object> m_Parameters;
+
+		#region Properties
 
 		/// <summary>
 		/// Gets the RPC destination type.
 		/// </summary>
-		public eProcedureType ProcedureType { get { return m_ProcedureType; } }
+		public eProcedureType ProcedureType { get; set; }
+
+		/// <summary>
+		/// Gets the RPC key name.
+		/// </summary>
+		public string Key { get; set; }
+
+		#endregion
 
 		#region Constructors
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="procedureType"></param>
-		/// <param name="key"></param>
-		/// <param name="parameters"></param>
-		private Rpc(eProcedureType procedureType, string key, IEnumerable<object> parameters)
+		public Rpc()
 		{
-			m_ProcedureType = procedureType;
-			m_Key = key;
-			m_Parameters = new List<object>(parameters);
+			m_Parameters = new List<object>();
 		}
 
 		/// <summary>
@@ -64,7 +62,14 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		[PublicAPI]
 		public static Rpc SetPropertyRpc(string key, object value)
 		{
-			return new Rpc(eProcedureType.PropertySetter, key, new[] {value});
+			Rpc output = new Rpc
+			{
+				ProcedureType = eProcedureType.PropertySetter,
+				Key = key
+			};
+			output.SetParameters(value.Yield());
+
+			return output;
 		}
 
 		/// <summary>
@@ -76,7 +81,14 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		[PublicAPI]
 		public static Rpc CallMethodRpc(string key, params object[] values)
 		{
-			return new Rpc(eProcedureType.Method, key, values);
+			Rpc output = new Rpc
+			{
+				ProcedureType = eProcedureType.Method,
+				Key = key
+			};
+			output.SetParameters(values);
+
+			return output;
 		}
 
 		#endregion
@@ -84,12 +96,32 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		#region Methods
 
 		/// <summary>
+		/// Gets the parameter values.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		public IEnumerable<object> GetParameters()
+		{
+			return m_Parameters.ToArray();
+		}
+
+		/// <summary>
+		/// Sets the parameter values.
+		/// </summary>
+		/// <param name="parameters"></param>
+		public void SetParameters([NotNull] IEnumerable<object> parameters)
+		{
+			m_Parameters.Clear();
+			m_Parameters.AddRange(parameters);
+		}
+
+		/// <summary>
 		/// Executes the RPC on the given instance.
 		/// </summary>
 		/// <param name="client"></param>
 		public void Execute(object client)
 		{
-			switch (m_ProcedureType)
+			switch (ProcedureType)
 			{
 				case eProcedureType.Method:
 					ExecuteMethod(client);
@@ -109,9 +141,18 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <exception cref="NotSupportedException">RPC type is not a method.</exception>
 		public void PrependClientId(uint clientId)
 		{
-			if (m_ProcedureType != eProcedureType.Method)
+			if (ProcedureType != eProcedureType.Method)
 				throw new NotSupportedException("Can not prepend client id unless the target is a method.");
 			m_Parameters.Insert(0, clientId);
+		}
+
+		/// <summary>
+		/// Returns the RPC as a JSON string representation.
+		/// </summary>
+		/// <returns></returns>
+		public string Serialize()
+		{
+			return JsonConvert.SerializeObject(this);
 		}
 
 		#endregion
@@ -124,11 +165,11 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="client"></param>
 		private void ExecuteMethod(object client)
 		{
-			MethodInfo method = RpcAttribute.GetMethod(client, m_Key, m_Parameters);
+			MethodInfo method = RpcAttribute.GetMethod(client, Key, m_Parameters);
 
 			if (method == null)
 			{
-				string message = string.Format("RPC unable to find Method with key \"{0}\" for type {1}", m_Key,
+				string message = string.Format("RPC unable to find Method with key \"{0}\" for type {1}", Key,
 				                               client.GetType().Name);
 				throw new KeyNotFoundException(message);
 			}
@@ -140,7 +181,9 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			catch (Exception e)
 			{
 				// Get the real exception, not the TargetInvocationException.
-				throw e.InnerException;
+				if (e.InnerException != null)
+					throw e.InnerException;
+				throw;
 			}
 		}
 
@@ -150,11 +193,11 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="client"></param>
 		private void ExecutePropertySetter(object client)
 		{
-			PropertyInfo property = RpcAttribute.GetProperty(client, m_Key, m_Parameters.First());
+			PropertyInfo property = RpcAttribute.GetProperty(client, Key, m_Parameters.First());
 
 			if (property == null)
 			{
-				string message = string.Format("RPC unable to find Property with key \"{0}\" for type {1}", m_Key,
+				string message = string.Format("RPC unable to find Property with key \"{0}\" for type {1}", Key,
 				                               client.GetType().Name);
 				throw new KeyNotFoundException(message);
 			}
@@ -166,88 +209,70 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			catch (Exception e)
 			{
 				// Get the real exception, not the TargetInvocationException.
-				throw e.InnerException;
+				if (e.InnerException != null)
+					throw e.InnerException;
+				throw;
 			}
 		}
 
 		#endregion
+	}
 
-		#region Serialization
-
-		/// <summary>
-		/// Instantiates the RPC from a JSON string.
-		/// </summary>
-		/// <returns></returns>
-		public static Rpc Deserialize(string data)
-		{
-			JObject json = JObject.Parse(data);
-
-			int procedureType = (int)json.SelectToken(PROCEDURE_TYPE_TOKEN);
-			string key = (string)json.SelectToken(KEY_TOKEN);
-			JToken paramsArray = json.SelectToken(PARAMETERS_TOKEN);
-
-			object[] parameters = paramsArray.AsJEnumerable()
-			                                 .Select(t => JsonItemWrapper.ReadToObject(t))
-			                                 .ToArray();
-
-			return new Rpc((eProcedureType)procedureType, key, parameters);
-		}
+	public sealed class RpcConverter : AbstractGenericJsonConverter<Rpc>
+	{
+		private const string PROCEDURE_TYPE_TOKEN = "t";
+		private const string KEY_TOKEN = "k";
+		private const string PARAMETERS_TOKEN = "p";
 
 		/// <summary>
-		/// Returns the RPC as a JSON string representation.
-		/// </summary>
-		/// <returns></returns>
-		public string Serialize()
-		{
-			return JsonUtils.Serialize(Serialize);
-		}
-
-		public void Serialize(JsonWriter writer)
-		{
-			writer.WriteStartObject();
-			{
-				WriteProcedureType(writer);
-				WriteKey(writer);
-				WriteParameters(writer);
-			}
-			writer.WriteEndObject();
-		}
-
-		/// <summary>
-		/// Writes the procedure type to JSON.
+		/// Override to write properties to the writer.
 		/// </summary>
 		/// <param name="writer"></param>
-		private void WriteProcedureType(JsonWriter writer)
+		/// <param name="value"></param>
+		/// <param name="serializer"></param>
+		protected override void WriteProperties(JsonWriter writer, Rpc value, JsonSerializer serializer)
 		{
-			writer.WritePropertyName(PROCEDURE_TYPE_TOKEN);
-			writer.WriteValue((int)m_ProcedureType);
-		}
+			base.WriteProperties(writer, value, serializer);
 
-		/// <summary>
-		/// Writes the key to JSON.
-		/// </summary>
-		/// <param name="writer"></param>
-		private void WriteKey(JsonWriter writer)
-		{
-			writer.WritePropertyName(KEY_TOKEN);
-			writer.WriteValue(m_Key);
-		}
+			if (value.ProcedureType != default(Rpc.eProcedureType))
+				writer.WriteProperty(PROCEDURE_TYPE_TOKEN, (int)value.ProcedureType);
 
-		/// <summary>
-		/// Writes the parameters to JSON.
-		/// </summary>
-		/// <param name="writer"></param>
-		private void WriteParameters(JsonWriter writer)
-		{
+			if (value.Key != null)
+				writer.WriteProperty(KEY_TOKEN, value.Key);
+
 			writer.WritePropertyName(PARAMETERS_TOKEN);
-			writer.WriteStartArray();
-
-			foreach (JsonItemWrapper wrapper in m_Parameters.Select(p => new JsonItemWrapper(p)))
-				wrapper.Write(writer);
-
-			writer.WriteEndArray();
+			serializer.SerializeArray(writer, value.GetParameters().Select(p => new JsonItemWrapper(p)));
 		}
 
-		#endregion
+		/// <summary>
+		/// Override to handle the current property value with the given name.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <param name="reader"></param>
+		/// <param name="instance"></param>
+		/// <param name="serializer"></param>
+		protected override void ReadProperty(string property, JsonReader reader, Rpc instance, JsonSerializer serializer)
+		{
+			switch (property)
+			{
+				case PROCEDURE_TYPE_TOKEN:
+					instance.ProcedureType = (Rpc.eProcedureType)reader.GetValueAsInt();
+					break;
+
+				case KEY_TOKEN:
+					instance.Key = reader.GetValueAsString();
+					break;
+
+				case PARAMETERS_TOKEN:
+					IEnumerable<JsonItemWrapper> wrappers =
+						serializer.DeserializeArray<JsonItemWrapper>(reader) ?? Enumerable.Empty<JsonItemWrapper>();
+					instance.SetParameters(wrappers.Select(w => w.Item));
+					break;
+
+				default:
+					base.ReadProperty(property, reader, instance, serializer);
+					break;
+			}
+		}
 	}
 }

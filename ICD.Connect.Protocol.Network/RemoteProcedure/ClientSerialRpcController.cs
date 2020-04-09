@@ -5,6 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Network.RemoteProcedure
 {
@@ -221,7 +222,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="args"></param>
 		private void BufferOnCompletedSerial(object sender, StringEventArgs args)
 		{
-			Rpc rpc = Rpc.Deserialize(args.Data);
+			Rpc rpc = JsonConvert.DeserializeObject<Rpc>(args.Data);
 			rpc.Execute(m_Parent);
 		}
 

@@ -3,6 +3,7 @@ using ICD.Connect.Protocol.Network.Attributes.Rpc;
 using ICD.Connect.Protocol.Network.RemoteProcedure;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Network.Tests.RemoteProcedure
 {
@@ -63,7 +64,6 @@ namespace ICD.Connect.Protocol.Network.Tests.RemoteProcedure
 			string json = rpc.Serialize();
 
 			Assert.IsTrue(json.Contains("TestKey"));
-			Assert.IsTrue(json.Contains("null"));
 			Assert.IsTrue(json.Contains("1"));
 			Assert.IsTrue(json.Contains("0.7"));
 		}
@@ -71,11 +71,11 @@ namespace ICD.Connect.Protocol.Network.Tests.RemoteProcedure
 		[Test, UsedImplicitly]
 		public void DeserializeTest()
 		{
-			const string json = @"{""t"":0,""k"":""SetData"",""p"":[{""t"":null,""i"":""null""},{""t"":""System.Int32"",""i"":""1""}]}";
+			const string json = @"{""t"":0,""k"":""SetData"",""p"":[{""t"":null,""i"":null},{""t"":""System.Int32"",""i"":1}]}";
 
 			TestClient client = new TestClient();
 
-			Rpc rpc = Rpc.Deserialize(json);
+			Rpc rpc = JsonConvert.DeserializeObject<Rpc>(json);
 			rpc.Execute(client);
 
 			Assert.AreEqual(null, client.MethodString1);

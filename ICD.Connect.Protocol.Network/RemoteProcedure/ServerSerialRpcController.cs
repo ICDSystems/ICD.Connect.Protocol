@@ -4,6 +4,7 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Network.RemoteProcedure
 {
@@ -139,7 +140,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="data"></param>
 		private void BufferManagerOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
 		{
-			Rpc rpc = Rpc.Deserialize(data);
+			Rpc rpc = JsonConvert.DeserializeObject<Rpc>(data);
 
 			// We add the clientId to the start of the list of RPC parameters.
 			if (rpc.ProcedureType == Rpc.eProcedureType.Method)
