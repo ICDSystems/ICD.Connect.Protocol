@@ -108,7 +108,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			{
 				if (e.InnerException == null)
 					throw;
-				Log(eSeverity.Error, string.Format("Error connecting to mqtt client. {0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}", 
+				Logger.Log(eSeverity.Error, string.Format("Error connecting to mqtt client. {0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}", 
 					IcdEnvironment.NewLine,
 					e.InnerException.Message,
 					e.InnerException.StackTrace,
