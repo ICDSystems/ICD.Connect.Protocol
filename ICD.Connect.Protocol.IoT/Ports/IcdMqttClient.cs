@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.IoT.EventArguments;
-using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace ICD.Connect.Protocol.IoT.Ports
 {
-	public sealed class IcdMqttClient : AbstractPort<IcdMqttClientSettings>
+	public sealed class IcdMqttClient : AbstractMqttClient<IcdMqttClientSettings>
 	{
 		/// <summary>
 		/// Raised when a published message is received.
 		/// </summary>
-		public event EventHandler<MqttMessageEventArgs> OnMessageReceived;
+		public override event EventHandler<MqttMessageEventArgs> OnMessageReceived;
 
 		private MqttClient m_Client;
 
@@ -40,34 +35,15 @@ namespace ICD.Connect.Protocol.IoT.Ports
 				Unsubscribe(m_Client);
 				m_Client = value;
 				Subscribe(m_Client);
+
+				UpdateCachedOnlineStatus();
 			}
 		}
 
-		public bool IsConnected { get { return m_Client != null && m_Client.IsConnected; } }
-
 		/// <summary>
-		/// Gets/sets the hostname.
+		/// Gets the connection state.
 		/// </summary>
-		public string Hostname { get; set; }
-
-		public int Port { get; set; }
-
-		/// <summary>
-		/// Gets/sets the client id.
-		/// </summary>
-		public string ClientId { get; set; }
-
-		/// <summary>
-		/// Gets/sets the username.
-		/// </summary>
-		public string Username { get; set; }
-
-		/// <summary>
-		/// Gets/sets the password.
-		/// </summary>
-		public string Password { get; set; }
-
-		public bool Secure { get; set; }
+		public override bool IsConnected { get { return m_Client != null && m_Client.IsConnected; } }
 
 		#endregion
 
@@ -88,16 +64,16 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// Connect to the broker.
 		/// </summary>
 		/// <returns></returns>
-		public void Connect()
+		public override void Connect()
 		{
 			try
 			{
-				if(IsConnected)
+				if (IsConnected)
 					Disconnect();
 
-				Client = Secure ? 
-					new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2) :
-					new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
+				Client = Secure
+					? new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2)
+					: new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
 
 				if (string.IsNullOrEmpty(Username))
 					Client.Connect(ClientId);
@@ -108,19 +84,25 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			{
 				if (e.InnerException == null)
 					throw;
-				Logger.Log(eSeverity.Error, string.Format("Error connecting to mqtt client. {0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}", 
-					IcdEnvironment.NewLine,
-					e.InnerException.Message,
-					e.InnerException.StackTrace,
-					e.Message,
-					e.InnerException));
+
+				Logger.Log(eSeverity.Error,
+				           string.Format("Error connecting to MQTT Broker.{0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}",
+				                         IcdEnvironment.NewLine,
+				                         e.InnerException.Message,
+				                         e.InnerException.StackTrace,
+				                         e.Message,
+				                         e.InnerException));
+			}
+			finally
+			{
+				UpdateCachedOnlineStatus();
 			}
 		}
 
 		/// <summary>
 		/// Disconnect from the broker.
 		/// </summary>
-		public void Disconnect()
+		public override void Disconnect()
 		{
 			if (m_Client != null)
 				m_Client.Disconnect();
@@ -128,7 +110,13 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			Client = null;
 		}
 
-		public ushort Subscribe(string[] topics, byte[] qosLevels)
+		/// <summary>
+		/// Subscribe to the given topics.
+		/// </summary>
+		/// <param name="topics"></param>
+		/// <param name="qosLevels"></param>
+		/// <returns></returns>
+		public override ushort Subscribe(string[] topics, byte[] qosLevels)
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
@@ -136,7 +124,12 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			return m_Client.Subscribe(topics, qosLevels);
 		}
 
-		public ushort Unsubscribe(string[] topics)
+		/// <summary>
+		/// Unsubscribe from the given topics.
+		/// </summary>
+		/// <param name="topics"></param>
+		/// <returns></returns>
+		public override ushort Unsubscribe(string[] topics)
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
@@ -144,7 +137,13 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			return m_Client.Unsubscribe(topics);
 		}
 
-		public ushort Publish(string topic, byte[] message)
+		/// <summary>
+		/// Publish the given topic.
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <param name="message"></param>
+		/// <returns></returns>
+		public override ushort Publish(string topic, byte[] message)
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
@@ -152,7 +151,15 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			return m_Client.Publish(topic, message);
 		}
 
-		public ushort Publish(string topic, byte[] message, byte qosLevel, bool retain)
+		/// <summary>
+		/// Publish the given topic.
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <param name="message"></param>
+		/// <param name="qosLevel"></param>
+		/// <param name="retain"></param>
+		/// <returns></returns>
+		public override ushort Publish(string topic, byte[] message, byte qosLevel, bool retain)
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
@@ -223,95 +230,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		private void ClientOnConnectionClosed(object sender, EventArgs eventArgs)
 		{
 			UpdateCachedOnlineStatus();
-		}
-
-		#endregion
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			Hostname = null;
-			ClientId = null;
-			Username = null;
-			Password = null;
-			Secure = false;
-		}
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(IcdMqttClientSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Hostname = Hostname;
-			settings.NetworkPort = Port;
-			settings.ClientId = ClientId;
-			settings.Username = Username;
-			settings.Password = Password;
-			settings.Secure = Secure;
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(IcdMqttClientSettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			Hostname = settings.Hostname;
-			Port = settings.NetworkPort ?? 1883; // 1883 default network port for mqtt
-			ClientId = settings.ClientId;
-			Username = settings.Username;
-			Password = settings.Password;
-			Secure = settings.Secure;
-		}
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("Is Connected", IsConnected);
-			addRow("Hostname", Hostname);
-			addRow("ClientId", ClientId);
-			addRow("Username", Username);
-			addRow("Password", Password);
-			addRow("Secure", Secure);
-		}
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new ConsoleCommand("Connect", "Connects to the broker at the configured hostname", () => Connect());
-			yield return new ConsoleCommand("Disconnect", "Disconnects from the broker", () => Disconnect());
-		}
-
-		/// <summary>
-		/// Workaround for "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
 		}
 
 		#endregion

@@ -130,10 +130,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Ports\AbstractMqttClient.cs" />
+    <Compile Include="Ports\AbstractMqttClientSettings.cs" />
     <Compile Include="Ports\IcdMqttClient.cs" />
     <Compile Include="Ports\IcdMqttClientSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
+    <Compile Include="Ports\IMqttClient.cs" />
+    <Compile Include="Ports\IMqttClientSettings.cs" />
+    <Compile Include="Ports\MockMqttClient.cs" />
+    <Compile Include="Ports\MockMqttClientSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
