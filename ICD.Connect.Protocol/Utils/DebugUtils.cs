@@ -87,9 +87,6 @@ namespace ICD.Connect.Protocol.Utils
 
 			string modeString = GetModeString(mode);
 
-			// Pad context for readability
-			context = string.IsNullOrEmpty(context) ? string.Empty : " " + context + " - ";
-
 			// Massage the data
 			data = FormatData(data, mode);
 
