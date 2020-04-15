@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.IoT.EventArguments;
+using ICD.Connect.Protocol.Ports;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
@@ -121,6 +123,14 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
 
+			string debug =
+				new StringBuilder()
+					.AppendFormat("Topics: {0}, ", StringUtils.ArrayFormat(topics))
+					.AppendFormat("QOS Levels: {0}", StringUtils.ArrayFormat(qosLevels))
+					.ToString();
+
+			PrintTx("Subscribe", debug);
+
 			return m_Client.Subscribe(topics, qosLevels);
 		}
 
@@ -133,6 +143,13 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
+
+			string debug =
+				new StringBuilder()
+					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics))
+					.ToString();
+
+			PrintTx("Unsubscribe", debug);
 
 			return m_Client.Unsubscribe(topics);
 		}
@@ -147,6 +164,14 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
+
+			string debug =
+				new StringBuilder()
+					.AppendFormat("Topic: {0}, ", topic)
+					.AppendFormat("Message: {0}", Encoding.UTF8.GetString(message))
+					.ToString();
+
+			PrintTx("Publish", debug);
 
 			return m_Client.Publish(topic, message);
 		}
@@ -163,6 +188,16 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		{
 			if (m_Client == null)
 				throw new InvalidOperationException("No client connected.");
+
+			string debug =
+				new StringBuilder()
+					.AppendFormat("Topic: {0}, ", topic)
+					.AppendFormat("QOS Level: {0}, ", qosLevel)
+					.AppendFormat("Retain: {0}, ", retain)
+					.AppendFormat("Message: {0}", Encoding.UTF8.GetString(message))
+					.ToString();
+
+			PrintTx("Publish", debug);
 
 			return m_Client.Publish(topic, message, qosLevel, retain);
 		}
@@ -217,7 +252,16 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// <param name="eventArgs"></param>
 		private void ClientOnMqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs eventArgs)
 		{
-			PrintRx(eventArgs.Topic, StringUtils.ToString(eventArgs.Message));
+			string debug =
+				new StringBuilder()
+					.AppendFormat("Topic: {0}, ", eventArgs.Topic)
+					.AppendFormat("QOS Level: {0}, ", eventArgs.QosLevel)
+					.AppendFormat("Retain: {0}, ", eventArgs.Retain)
+					.AppendFormat("Message: {0}, ", Encoding.UTF8.GetString(eventArgs.Message))
+					.AppendFormat("Duplicate Flag: {0}", eventArgs.DupFlag)
+					.ToString();
+
+			PrintRx("Publish Received", debug);
 
 			OnMessageReceived.Raise(this, new MqttMessageEventArgs(eventArgs.Topic, eventArgs.Message));
 		}
