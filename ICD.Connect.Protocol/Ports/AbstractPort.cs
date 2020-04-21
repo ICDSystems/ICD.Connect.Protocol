@@ -16,6 +16,11 @@ namespace ICD.Connect.Protocol.Ports
 		#region Properties
 
 		/// <summary>
+		/// Gets the category for this originator type (e.g. Device, Port, etc)
+		/// </summary>
+		public override string Category { get { return "Port"; } }
+
+		/// <summary>
 		/// When enabled prints the received data to the console.
 		/// </summary>
 		[PublicAPI]
