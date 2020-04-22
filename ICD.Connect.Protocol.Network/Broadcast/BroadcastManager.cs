@@ -175,6 +175,15 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		}
 
 		/// <summary>
+		/// Gets the known multicast addresses.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<string> GetBroadcastAddresses()
+		{
+			return m_AddressesSection.Execute(() => m_Addresses.ToArray());
+		}
+
+		/// <summary>
 		/// Removes manually added advertisement addresses.
 		/// </summary>
 		/// <param name="address"></param>
