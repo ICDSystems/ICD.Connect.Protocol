@@ -10,7 +10,7 @@ using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol
 {
-	public delegate void ConfigurePortCallback(ISerialPort port);
+	public delegate void ConfigurePortCallback(IPort port);
 
 	public sealed class ConnectionStateManager : IConnectable, IDisposable
 	{
@@ -79,7 +79,7 @@ namespace ICD.Connect.Protocol
 		/// </summary>
 		public int? PortNumber { get { return Port == null ? (int?)null : Port.Id; } }
 
-		public ISerialPort Port { get; private set; }
+		public IConnectablePort Port { get; private set; }
 
 		#endregion
 
@@ -132,7 +132,7 @@ namespace ICD.Connect.Protocol
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public void SetPort(ISerialPort port)
+		public void SetPort(IConnectablePort port)
 		{
 			SetPort(port, true);
 		}
@@ -143,7 +143,7 @@ namespace ICD.Connect.Protocol
 		/// <param name="port"></param>
 		/// <param name="monitor"></param>
 		[PublicAPI]
-		public void SetPort(ISerialPort port, bool monitor)
+		public void SetPort(IConnectablePort port, bool monitor)
 		{
 			if (port == Port)
 				return;
@@ -196,11 +196,20 @@ namespace ICD.Connect.Protocol
 				return false;
 			}
 
-			if (Port.IsConnected)
-				return Port.Send(data);
+			ISerialPort serialPort = Port as ISerialPort;
+			if (serialPort == null)
+			{
+				Log(eSeverity.Critical, "Unable to send data - Port is not a Serial Port");
+				return false;
+			}
 
-			Log(eSeverity.Error, "Unable to send command - {0} is not connected", Port);
-			return false;
+			if (!Port.IsConnected)
+			{
+				Log(eSeverity.Error, "Unable to send command - {0} is not connected", Port);
+				return false;
+			}
+			
+			return serialPort.Send(data);
 		}
 
 		/// <summary>
@@ -234,28 +243,34 @@ namespace ICD.Connect.Protocol
 		/// Subscribes to the port events.
 		/// </summary>
 		/// <param name="port"></param>
-		private void Subscribe(ISerialPort port)
+		private void Subscribe(IConnectablePort port)
 		{
 			if (port == null)
 				return;
 
-			port.OnSerialDataReceived += WrappedPortOnSerialDataReceived;
 			port.OnConnectedStateChanged += WrappedPortOnConnectionStatusChanged;
 			port.OnIsOnlineStateChanged += WrappedPortOnIsOnlineStateChanged;
+
+			ISerialPort serialPort = port as ISerialPort;
+			if (serialPort != null)
+				serialPort.OnSerialDataReceived += WrappedPortOnSerialDataReceived;
 		}
 
 		/// <summary>
 		/// Unsubscribe from the port events.
 		/// </summary>
 		/// <param name="port"></param>
-		private void Unsubscribe(ISerialPort port)
+		private void Unsubscribe(IConnectablePort port)
 		{
 			if (port == null)
 				return;
 
-			port.OnSerialDataReceived -= WrappedPortOnSerialDataReceived;
 			port.OnConnectedStateChanged -= WrappedPortOnConnectionStatusChanged;
 			port.OnIsOnlineStateChanged -= WrappedPortOnIsOnlineStateChanged;
+
+			ISerialPort serialPort = port as ISerialPort;
+			if (serialPort != null)
+				serialPort.OnSerialDataReceived -= WrappedPortOnSerialDataReceived;
 		}
 
 		private void WrappedPortOnSerialDataReceived(object sender, StringEventArgs e)

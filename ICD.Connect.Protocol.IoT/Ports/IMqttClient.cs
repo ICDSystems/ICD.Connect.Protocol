@@ -4,7 +4,7 @@ using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.IoT.Ports
 {
-	public interface IMqttClient : IPort
+	public interface IMqttClient : IConnectablePort
 	{
 		/// <summary>
 		/// Raised when a published message is received.
@@ -12,11 +12,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		event EventHandler<MqttMessageEventArgs> OnMessageReceived;
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the connection state.
-		/// </summary>
-		bool IsConnected { get; }
 
 		/// <summary>
 		/// Gets/sets the hostname.
@@ -51,17 +46,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		#endregion
 
 		#region Methods
-
-		/// <summary>
-		/// Connect to the broker.
-		/// </summary>
-		/// <returns></returns>
-		void Connect();
-
-		/// <summary>
-		/// Disconnect from the broker.
-		/// </summary>
-		void Disconnect();
 
 		/// <summary>
 		/// Subscribe to the given topics.

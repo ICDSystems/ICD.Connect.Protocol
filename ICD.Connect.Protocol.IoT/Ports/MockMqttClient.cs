@@ -12,15 +12,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 
 		private bool m_IsConnected;
 
-		#region Properties
-
-		/// <summary>
-		/// Gets the connection state.
-		/// </summary>
-		public override bool IsConnected { get { return m_IsConnected; } }
-
-		#endregion
-
 		/// <summary>
 		/// Connect to the broker.
 		/// </summary>
@@ -86,12 +77,12 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		}
 
 		/// <summary>
-		/// Gets the current online status of the device.
+		/// Returns the connection state of the wrapped port
 		/// </summary>
 		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
+		protected override bool GetIsConnectedState()
 		{
-			return IsConnected;
+			return m_IsConnected;
 		}
 	}
 }

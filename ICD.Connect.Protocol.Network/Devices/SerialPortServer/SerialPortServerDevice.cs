@@ -58,7 +58,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 			m_ConnectionStateManager.OnSerialDataReceived += CsmOnSerialDataReceived;
 		}
 
-		public void ConfigurePort(ISerialPort port)
+		public void ConfigurePort(IPort port)
 		{
 			// Com
 			if (port is IComPort)
@@ -92,7 +92,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		}
 
 		#endregion
-
 
 		#region ConnectionStateManager
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.IoT.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -8,7 +6,7 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.IoT.Ports
 {
-	public abstract class AbstractMqttClient<TSettings> : AbstractPort<TSettings>, IMqttClient
+	public abstract class AbstractMqttClient<TSettings> : AbstractConnectablePort<TSettings>, IMqttClient
 		where TSettings : IMqttClientSettings, new()
 	{
 		/// <summary>
@@ -17,11 +15,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		public abstract event EventHandler<MqttMessageEventArgs> OnMessageReceived;
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the connection state.
-		/// </summary>
-		public abstract bool IsConnected { get; }
 
 		/// <summary>
 		/// Gets/sets the hostname.
@@ -56,17 +49,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		#endregion
 
 		#region Methods
-
-		/// <summary>
-		/// Connect to the broker.
-		/// </summary>
-		/// <returns></returns>
-		public abstract void Connect();
-
-		/// <summary>
-		/// Disconnect from the broker.
-		/// </summary>
-		public abstract void Disconnect();
 
 		/// <summary>
 		/// Subscribe to the given topics.
@@ -165,35 +147,12 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Is Connected", IsConnected);
 			addRow("Hostname", Hostname);
 			addRow("Port", Port);
 			addRow("ClientId", ClientId);
 			addRow("Username", Username);
 			addRow("Password", Password);
 			addRow("Secure", Secure);
-		}
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new ConsoleCommand("Connect", "Connects to the broker at the configured hostname", () => Connect());
-			yield return new ConsoleCommand("Disconnect", "Disconnects from the broker", () => Disconnect());
-		}
-
-		/// <summary>
-		/// Workaround for "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
 		}
 
 		#endregion

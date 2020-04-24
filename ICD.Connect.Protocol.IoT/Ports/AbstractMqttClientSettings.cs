@@ -3,7 +3,7 @@ using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.IoT.Ports
 {
-	public abstract class AbstractMqttClientSettings : AbstractPortSettings, IMqttClientSettings
+	public abstract class AbstractMqttClientSettings : AbstractConnectablePortSettings, IMqttClientSettings
 	{
 		private const string ELEMENT_HOSTNAME = "Hostname";
 		private const string ELEMENT_PORT = "Port";

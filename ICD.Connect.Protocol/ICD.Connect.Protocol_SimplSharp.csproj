@@ -79,6 +79,8 @@
     <Compile Include="FeedbackDebounce\IFeedbackDebounce.cs" />
     <Compile Include="Heartbeat\Heartbeat.cs" />
     <Compile Include="Heartbeat\IConnectable.cs" />
+    <Compile Include="Ports\AbstractConnectablePort.cs" />
+    <Compile Include="Ports\AbstractConnectablePortSettings.cs" />
     <Compile Include="Ports\AbstractPortSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
@@ -93,6 +95,8 @@
     <Compile Include="Ports\DigitalInput\IDigitalInputPort.cs" />
     <Compile Include="Ports\DigitalInput\IDigitalInputPortSettings.cs" />
     <Compile Include="Ports\HostSessionInfo.cs" />
+    <Compile Include="Ports\IConnectablePort.cs" />
+    <Compile Include="Ports\IConnectablePortSettings.cs" />
     <Compile Include="Ports\IoPort\AbstractIoPortSettings.cs" />
     <Compile Include="Ports\IoPort\IIoPortSettings.cs" />
     <Compile Include="Ports\IPortSettings.cs" />

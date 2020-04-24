@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.IoT.Ports
 {
-	public interface IMqttClientSettings : IPortSettings
+	public interface IMqttClientSettings : IConnectablePortSettings
 	{
 		/// <summary>
 		/// Gets/sets the hostname.

@@ -149,7 +149,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			m_ConnectionStateManager.SetPort(port);
 		}
 
-		private void ConfigurePort(ISerialPort port)
+		private void ConfigurePort(IPort port)
 		{
 			m_Buffer.Clear();
 		}

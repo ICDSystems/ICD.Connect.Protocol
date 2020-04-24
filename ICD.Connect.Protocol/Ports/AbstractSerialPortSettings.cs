@@ -1,6 +1,6 @@
 ﻿namespace ICD.Connect.Protocol.Ports
 {
-	public abstract class AbstractSerialPortSettings : AbstractPortSettings, ISerialPortSettings
+	public abstract class AbstractSerialPortSettings : AbstractConnectablePortSettings, ISerialPortSettings
 	{
 	}
 }

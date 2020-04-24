@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Ports
 	/// <summary>
 	/// AbstractSerialPort is the base class for ICD serial ports.
 	/// </summary>
-	public abstract class AbstractSerialPort<T> : AbstractPort<T>, ISerialPort
+	public abstract class AbstractSerialPort<T> : AbstractConnectablePort<T>, ISerialPort
 		where T : ISerialPortSettings, new()
 	{
 		/// <summary>
@@ -21,72 +21,7 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		public event EventHandler<StringEventArgs> OnSerialDataReceived;
 
-		/// <summary>
-		/// Raised when the port connection status changes.
-		/// </summary>
-		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
-
-		private bool m_IsConnected;
-
-		#region Properties
-
-		/// <summary>
-		/// Returns the connection state of the port.
-		/// </summary>
-		public virtual bool IsConnected
-		{
-			get { return m_IsConnected; }
-			protected set
-			{
-				if (value == m_IsConnected)
-					return;
-
-				m_IsConnected = value;
-
-				Logger.Set("Connected", eSeverity.Informational, m_IsConnected);
-
-				UpdateCachedOnlineStatus();
-
-				OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
-			}
-		}
-
-		#endregion
-
 		#region Methods
-
-		/// <summary>
-		/// Connects to the end point.
-		/// </summary>
-		public abstract void Connect();
-
-		/// <summary>
-		/// Disconnects from the end point.
-		/// </summary>
-		public abstract void Disconnect();
-
-		/// <summary>
-		/// Returns the connection state of the port
-		/// </summary>
-		/// <returns></returns>
-		protected abstract bool GetIsConnectedState();
-
-		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return GetIsConnectedState();
-		}
-
-		/// <summary>
-		/// Queries the connection state of the port and updates the IsConnected property.
-		/// </summary>
-		protected void UpdateIsConnectedState()
-		{
-			IsConnected = GetIsConnectedState();
-		}
 
 		/// <summary>
 		/// Release resources.
@@ -94,9 +29,6 @@ namespace ICD.Connect.Protocol.Ports
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnSerialDataReceived = null;
-			OnConnectedStateChanged = null;
-
-			Disconnect();
 
 			base.DisposeFinal(disposing);
 		}
@@ -172,8 +104,6 @@ namespace ICD.Connect.Protocol.Ports
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("Connect", "Connects to the physical endpoint", () => Connect());
-			yield return new ConsoleCommand("Disconnect", "Disconnects from the physical endpoint", () => Disconnect());
 			yield return new ParamsConsoleCommand("Send", "Sends the serial data to the port", a => ConsoleSend(a));
 			yield return new ParamsConsoleCommand("Receive", "Mocks incoming data from the port", a => ConsoleReceive(a));
 		}

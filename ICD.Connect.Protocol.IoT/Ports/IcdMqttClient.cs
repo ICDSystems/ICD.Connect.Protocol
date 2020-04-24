@@ -5,7 +5,6 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.IoT.EventArguments;
-using ICD.Connect.Protocol.Ports;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
@@ -41,11 +40,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 				UpdateCachedOnlineStatus();
 			}
 		}
-
-		/// <summary>
-		/// Gets the connection state.
-		/// </summary>
-		public override bool IsConnected { get { return m_Client != null && m_Client.IsConnected; } }
 
 		#endregion
 
@@ -98,6 +92,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			finally
 			{
 				UpdateCachedOnlineStatus();
+				UpdateIsConnectedState();
 			}
 		}
 
@@ -110,6 +105,9 @@ namespace ICD.Connect.Protocol.IoT.Ports
 				m_Client.Disconnect();
 
 			Client = null;
+
+			UpdateCachedOnlineStatus();
+			UpdateIsConnectedState();
 		}
 
 		/// <summary>
@@ -215,6 +213,15 @@ namespace ICD.Connect.Protocol.IoT.Ports
 			return m_Client != null && m_Client.IsConnected;
 		}
 
+		/// <summary>
+		/// Returns the connection state of the wrapped port
+		/// </summary>
+		/// <returns></returns>
+		protected override bool GetIsConnectedState()
+		{
+			return GetIsOnlineStatus();
+		}
+
 		#endregion
 
 		#region Client Callbacks
@@ -274,6 +281,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		private void ClientOnConnectionClosed(object sender, EventArgs eventArgs)
 		{
 			UpdateCachedOnlineStatus();
+			UpdateIsConnectedState();
 		}
 
 		#endregion
