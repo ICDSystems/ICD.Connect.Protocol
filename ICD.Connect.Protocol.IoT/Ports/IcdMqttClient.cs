@@ -64,30 +64,21 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		{
 			try
 			{
-				if (IsConnected)
+				if (Client != null && Client.IsConnected)
 					Disconnect();
 
-				Client = Secure
-					? new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2)
-					: new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
-
 				if (string.IsNullOrEmpty(Username))
-					Client.Connect(ClientId);
+					GetClient().Connect(ClientId);
 				else
-					Client.Connect(ClientId, Username, Password);
+					GetClient().Connect(ClientId, Username, Password);
 			}
 			catch (MqttConnectionException e)
 			{
-				if (e.InnerException == null)
-					throw;
+				string message = string.Format("Error connecting to {0} - {1}", Hostname, e.Message);
+				if (e.InnerException != null)
+					message = string.Format("{0} - {1}", message, e.InnerException.Message);
 
-				Logger.Log(eSeverity.Error,
-				           string.Format("Error connecting to MQTT Broker.{0}Inner exception is {1}{0}{2}{0}Exception Is{3}{0}{4}",
-				                         IcdEnvironment.NewLine,
-				                         e.InnerException.Message,
-				                         e.InnerException.StackTrace,
-				                         e.Message,
-				                         e.InnerException));
+				Logger.Log(eSeverity.Error, message);
 			}
 			finally
 			{
@@ -101,8 +92,8 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// </summary>
 		public override void Disconnect()
 		{
-			if (m_Client != null)
-				m_Client.Disconnect();
+			if (Client != null)
+				Client.Disconnect();
 
 			Client = null;
 
@@ -118,9 +109,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// <returns></returns>
 		public override ushort Subscribe(string[] topics, byte[] qosLevels)
 		{
-			if (m_Client == null)
-				throw new InvalidOperationException("No client connected.");
-
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topics: {0}, ", StringUtils.ArrayFormat(topics))
@@ -129,7 +117,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 
 			PrintTx("Subscribe", debug);
 
-			return m_Client.Subscribe(topics, qosLevels);
+			return GetClient().Subscribe(topics, qosLevels);
 		}
 
 		/// <summary>
@@ -139,9 +127,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// <returns></returns>
 		public override ushort Unsubscribe(string[] topics)
 		{
-			if (m_Client == null)
-				throw new InvalidOperationException("No client connected.");
-
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics))
@@ -149,7 +134,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 
 			PrintTx("Unsubscribe", debug);
 
-			return m_Client.Unsubscribe(topics);
+			return GetClient().Unsubscribe(topics);
 		}
 
 		/// <summary>
@@ -160,9 +145,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// <returns></returns>
 		public override ushort Publish(string topic, byte[] message)
 		{
-			if (m_Client == null)
-				throw new InvalidOperationException("No client connected.");
-
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
@@ -171,7 +153,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 
 			PrintTx("Publish", debug);
 
-			return m_Client.Publish(topic, message);
+			return GetClient().Publish(topic, message);
 		}
 
 		/// <summary>
@@ -184,9 +166,6 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		/// <returns></returns>
 		public override ushort Publish(string topic, byte[] message, byte qosLevel, bool retain)
 		{
-			if (m_Client == null)
-				throw new InvalidOperationException("No client connected.");
-
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
@@ -197,7 +176,7 @@ namespace ICD.Connect.Protocol.IoT.Ports
 
 			PrintTx("Publish", debug);
 
-			return m_Client.Publish(topic, message, qosLevel, retain);
+			return GetClient().Publish(topic, message, qosLevel, retain);
 		}
 
 		#endregion
@@ -211,6 +190,23 @@ namespace ICD.Connect.Protocol.IoT.Ports
 		protected override bool GetIsOnlineStatus()
 		{
 			return m_Client != null && m_Client.IsConnected;
+		}
+
+		/// <summary>
+		/// Lazy-loads the existing client or a disconnected client.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		private MqttClient GetClient()
+		{
+			if (Client != null)
+				return Client;
+
+			Client = Secure
+				? new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2)
+				: new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
+
+			return Client;
 		}
 
 		/// <summary>
