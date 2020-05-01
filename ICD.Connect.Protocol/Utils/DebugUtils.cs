@@ -94,8 +94,14 @@ namespace ICD.Connect.Protocol.Utils
 
 			try
 			{
+				// "[App X] Instance Context - Direction(Mode) - Data"
 				// "[App 1] Port(Id=1) ClientId:10 - TX(Ascii) - SomeData"
-				IcdConsole.Print("[App {0}] {1}{2} - ", ProgramUtils.ProgramNumber, instance, context);
+				IcdConsole.Print("[App {0}] {1}", ProgramUtils.ProgramNumber, instance);
+
+				if (!string.IsNullOrEmpty(context))
+					IcdConsole.Print(" {0}", context);
+				IcdConsole.Print(" - ");
+
 				IcdConsole.Print(directionColor, direction);
 				IcdConsole.Print("({0}) - {1}", modeString, data);
 				IcdConsole.PrintLine(string.Empty);
