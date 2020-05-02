@@ -1,8 +1,8 @@
 ﻿using System;
-using ICD.Connect.Protocol.IoT.EventArguments;
+using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.IoT.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports
 {
 	public interface IMqttClient : IConnectablePort
 	{

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ICD.Connect.Protocol.IoT.EventArguments
+namespace ICD.Connect.Protocol.NetworkPro.EventArguments
 {
 	public class MqttMessageEventArgs : EventArgs
 	{

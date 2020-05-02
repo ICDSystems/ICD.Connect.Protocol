@@ -4,8 +4,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>ICD.Connect.Protocol.IoT</RootNamespace>
-    <AssemblyName>ICD.Connect.Protocol.IoT</AssemblyName>
+    <RootNamespace>ICD.Connect.Protocol.NetworkPro</RootNamespace>
+    <AssemblyName>ICD.Connect.Protocol.NetworkPro</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
@@ -35,7 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove=".gitignore" />
-    <None Remove="ICD.Connect.Protocol.IoT_SimplSharp.suo" />
+    <None Remove="ICD.Connect.Protocol.NetworkPro_SimplSharp.suo" />
     <None Remove="ICD.Connect.Protocol.projectinfo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
     <None Remove="Properties\ControlSystem.cfg" />

@@ -4,12 +4,12 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.IoT.EventArguments;
+using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
-namespace ICD.Connect.Protocol.IoT.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports
 {
 	public sealed class IcdMqttClient : AbstractMqttClient<IcdMqttClientSettings>
 	{
