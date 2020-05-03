@@ -40,9 +40,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			m_ControlClientMap = new Dictionary<int, uint>();
 			m_ControlClientMapSection = new SafeCriticalSection();
 
-			ushort port = Xp3Utils.GetPortForSystem(systemId);
+			m_Server = new IcdTcpServer
+			{
+				Port = Xp3Utils.GetPortForSystem(systemId)
+			};
 
-			m_Server = new IcdTcpServer(port, Xp3Utils.MAX_NUMBER_OF_CLIENTS);
 			m_Buffers = new TcpServerBufferManager(() => new DelimiterSerialBuffer(CrosspointData.MESSAGE_TERMINATOR));
 			m_Buffers.SetServer(m_Server);
 

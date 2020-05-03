@@ -112,6 +112,8 @@
     <Compile Include="RemoteProcedure\ClientSerialRpcController.cs" />
     <Compile Include="RemoteProcedure\Rpc.cs" />
     <Compile Include="RemoteProcedure\ServerSerialRpcController.cs" />
+    <Compile Include="Servers\AbstractNetworkServer.cs" />
+    <Compile Include="Servers\INetworkServer.cs" />
     <Compile Include="Settings\AbstractNetworkProperties.cs" />
     <Compile Include="Settings\AbstractWebProxyProperties.cs" />
     <Compile Include="Settings\AbstractSecureNetworkProperties.cs" />

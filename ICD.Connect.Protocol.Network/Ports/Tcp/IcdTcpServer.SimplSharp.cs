@@ -22,12 +22,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Starts the TCP Server
 		/// </summary>
 		[PublicAPI]
-		public void Start()
+		public override void Start()
 		{
 			if (m_TcpListener != null)
 				throw new InvalidOperationException("TCP Server must be stopped before it is started again.");
 
-			Logger.AddEntry(eSeverity.Notice, "{0} - Starting server", this);
+			Logger.Log(eSeverity.Notice, "Starting server");
 
 			Enabled = true;
 
@@ -39,35 +39,27 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			// Hack - I think it takes a little while for the listening state to update
 			Listening = true;
 
-			Logger.AddEntry(eSeverity.Notice,
-			                string.Format("{0} - Listening on port {1} with max # of connections {2}", this, Port,
+			Logger.Log(eSeverity.Notice,
+			                string.Format("Listening on port {0} with max # of connections {1}", Port,
 			                              MaxNumberOfClients));
-		}
-
-		/// <summary>
-		/// Stops and Disables the TCP Server
-		/// </summary>
-		public void Stop()
-		{
-			Stop(true);
 		}
 
 		/// <summary>
 		/// Stops the TCP server.
 		/// </summary>
 		/// <param name="disable">When true disables the TCP server.</param>
-		private void Stop(bool disable)
+		protected override void Stop(bool disable)
 		{
 			if (disable)
 			{
 				if (m_TcpListener != null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - Stopping server", this);
+					Logger.Log(eSeverity.Notice, "Stopping server");
 				Enabled = false;
 			}
 			else
 			{
 				if (m_TcpListener != null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - Temporarily stopping server", this);
+					Logger.Log(eSeverity.Notice, "Temporarily stopping server");
 			}
 
 			if (m_TcpListener != null)
@@ -91,7 +83,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				}
 				finally
 				{
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, m_TcpListener.PortNumber);
+					Logger.Log(eSeverity.Notice, "No longer listening on port {0}", m_TcpListener.PortNumber);
 
 					m_TcpListener = null;
 					UpdateListeningState();
@@ -106,7 +98,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Sends the data to all connected clients.
 		/// </summary>
 		/// <param name="data"></param>
-		public void Send(string data)
+		public override void Send(string data)
 		{
 			uint[] clients = GetClients().ToArray();
 			if (clients.Length == 0)
@@ -129,11 +121,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="clientId">Client Identifier for Connection</param>
 		/// <param name="data">String in ISO-8859-1 Format</param>
 		/// <returns></returns>
-		public void Send(uint clientId, string data)
+		public override void Send(uint clientId, string data)
 		{
 			if (!ClientConnected(clientId))
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send data to unconnected client {1}", this, clientId);
+				Logger.Log(eSeverity.Warning, "Unable to send data to unconnected client {0}", clientId);
 				RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
 				return;
 			}
@@ -143,41 +135,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			PrintTx(hostInfo, data);
 			m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
-		}
-
-		/// <summary>
-		/// Gets the address and port for the client with the given id.
-		/// </summary>
-		/// <param name="client"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public HostInfo GetClientInfo(uint client)
-		{
-			if (m_TcpListener == null)
-				throw new InvalidOperationException("Server is not connected");
-
-			string address = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(client);
-			ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(client);
-
-			return new HostInfo(address, port);
-		}
-
-		/// <summary>
-		/// Returns true if the client is connected.
-		/// </summary>
-		/// <param name="client"></param>
-		/// <returns></returns>
-		public bool ClientConnected(uint client)
-		{
-			if (m_TcpListener == null)
-				return false;
-
-			// This is a hack. We have no way of determining if a client id is still valid,
-			// so if we get a null address we know the client is invalid.
-			if (m_TcpListener.GetLocalAddressServerAcceptedConnectionFromForSpecificClient(client) == null)
-				return false;
-
-			return m_TcpListener.ClientConnected(client);
 		}
 
 		#endregion
@@ -194,22 +151,31 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			SocketStateEventArgs.eSocketStatus reason = GetSocketStatus(status);
 
-			if (clientId != 0)
+			try
 			{
+				if (clientId == 0)
+					return;
+
 				// Client disconnected
-				if (!ClientConnected(clientId))
+				if (!tcpListener.ClientConnected(clientId))
 				{
 					RemoveClient(clientId, reason);
 				}
-					// Client connected
+				// Client connected
 				else if (!ContainsClient(clientId))
 				{
-					AddClient(clientId, reason);
+					string host = tcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId);
+					ushort port = (ushort)tcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId);
+					HostInfo clientInfo = new HostInfo(host, port);
+
+					AddClient(clientId, clientInfo, reason);
 					tcpListener.ReceiveDataAsync(clientId, TcpClientReceiveHandler);
 				}
 			}
-
-			UpdateListeningState();
+			finally
+			{
+				UpdateListeningState();
+			}
 		}
 
 		private static SocketStateEventArgs.eSocketStatus GetSocketStatus(SocketStatus status)
@@ -294,27 +260,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				return;
 
-			Logger.AddEntry(eSeverity.Error,
-			                "{0} - ClientId {1} hostname {2} failed to ReceiveDataAsync: {3}",
-			                this, clientId, GetHostInfoForClientId(clientId), socketError);
+			Logger.Log(eSeverity.Error,
+							"Failed to receive data from ClientId {0} at {1} : {2}",
+			                clientId, GetClientInfo(clientId), socketError);
 
 			RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
-		}
-
-		/// <summary>
-		/// Gets the hostname for the client in the format 0.0.0.0:0
-		/// </summary>
-		/// <param name="clientId"></param>
-		/// <returns></returns>
-		public HostInfo GetHostInfoForClientId(uint clientId)
-		{
-			if (m_TcpListener == null)
-				throw new InvalidOperationException("Server is not connected");
-
-			string host = m_TcpListener.GetAddressServerAcceptedConnectionFromForSpecificClient(clientId);
-			ushort port = (ushort)m_TcpListener.GetPortNumberServerAcceptedConnectionFromForSpecificClient(clientId);
-
-			return new HostInfo(host, port);
 		}
 
 		private void UpdateListeningState()

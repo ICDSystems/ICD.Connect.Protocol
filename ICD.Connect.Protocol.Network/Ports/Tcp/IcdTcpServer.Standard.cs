@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Services.Logging;
@@ -19,14 +20,26 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 	{
 		private TcpListenerEx m_TcpListener;
 
-		private readonly Dictionary<uint, TcpClient> m_TcpClients = new Dictionary<uint, TcpClient>();
-		private readonly Dictionary<uint, byte[]> m_ClientBuffers = new Dictionary<uint, byte[]>();
+		private readonly Dictionary<uint, TcpClient> m_TcpClients;
+		private readonly Dictionary<uint, byte[]> m_ClientBuffers;
+		private readonly SafeCriticalSection m_ClientsSection;
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public IcdTcpServer()
+		{
+			m_TcpClients = new Dictionary<uint, TcpClient>();
+			m_ClientBuffers = new Dictionary<uint, byte[]>();
+			m_ClientsSection = new SafeCriticalSection();
+		}
+
+		#region Methods
 
 		/// <summary>
 		/// Starts the TCP Server
 		/// </summary>
-		[PublicAPI]
-		public void Start()
+		public override void Start()
 		{
 			try
 			{
@@ -50,14 +63,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				Enabled = true;
 
-				Logger.AddEntry(eSeverity.Notice, string.Format("{0} - Listening on port {1} with max # of connections {2}", this,
-				                                                Port, MaxNumberOfClients));
+				Logger.Log(eSeverity.Notice, "Listening on port {0} with max # of connections {1}",
+				                                                Port, MaxNumberOfClients);
 			}
 			catch (Exception e)
 			{
 				m_TcpListener = null;
 
-				Logger.AddEntry(eSeverity.Error, string.Format("{0} - Failed to start listening - {1}", this, e.Message));
+				Logger.Log(eSeverity.Error, "Failed to start listening - {0}", e.Message);
 			}
 			finally
 			{
@@ -66,31 +79,22 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		}
 
 		/// <summary>
-		/// Stops and Disables the TCP Server
-		/// </summary>
-		[PublicAPI]
-		public void Stop()
-		{
-			Stop(true);
-		}
-
-		/// <summary>
 		/// Stops the TCP server.
 		/// </summary>
 		/// <param name="disable">When true disables the TCP server.</param>
 		[PublicAPI]
-		private void Stop(bool disable)
+		protected override void Stop(bool disable)
 		{
 			if (disable)
 			{
 				if (m_TcpListener != null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - Stopping server", this);
+					Logger.Log(eSeverity.Notice, "Stopping server");
 				Enabled = false;
 			}
 			else
 			{
 				if (m_TcpListener != null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - Temporarily stopping server", this);
+					Logger.Log(eSeverity.Notice, "Temporarily stopping server");
 			}
 
 			if (m_TcpListener != null)
@@ -99,9 +103,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				IPEndPoint endpoint = m_TcpListener.LocalEndpoint as IPEndPoint;
 				if (endpoint == null)
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening", this);
+					Logger.Log(eSeverity.Notice, "No longer listening");
 				else
-					Logger.AddEntry(eSeverity.Notice, "{0} - No longer listening on port {1}", this, endpoint.Port);
+					Logger.Log(eSeverity.Notice, "No longer listening on port {0}", endpoint.Port);
 			}
 
 			m_TcpListener = null;
@@ -116,13 +120,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Sends the data to all connected clients.
 		/// </summary>
 		/// <param name="data"></param>
-		public void Send(string data)
+		public override void Send(string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 
 			foreach (uint clientId in GetClients())
 			{
-				HostInfo hostInfo = GetHostInfoForClientId(clientId);
+				HostInfo hostInfo = GetClientInfo(clientId);
 				PrintTx(hostInfo, data);
 				Send(clientId, byteData);
 			}
@@ -134,21 +138,30 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="clientId">Client Identifier for Connection</param>
 		/// <param name="data">String in ISO-8859-1 Format</param>
 		/// <returns></returns>
-		public void Send(uint clientId, string data)
+		public override void Send(uint clientId, string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetHostInfoForClientId(clientId);
+			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintTx(hostInfo, data);
 			Send(clientId, byteData);
 		}
 
-		public void Send(uint clientId, byte[] data)
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Sends a Byte for Byte string (ISO-8859-1)
+		/// </summary>
+		/// <param name="clientId">Client Identifier for Connection</param>
+		/// <param name="data">String in ISO-8859-1 Format</param>
+		/// <returns></returns>
+		private void Send(uint clientId, byte[] data)
 		{
 			if (!ClientConnected(clientId))
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send data to unconnected client {1}", this,
-				                clientId);
+				Logger.Log(eSeverity.Error, "Unable to send data to unconnected client {0}", clientId);
 				return;
 			}
 
@@ -159,51 +172,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (SocketException ex)
 			{
-				Logger.AddEntry(eSeverity.Error, ex, "Failed to send data to client {0}",
-				                GetHostInfoForClientId(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}", GetClientInfo(clientId));
 			}
 
 			if (!ClientConnected(clientId))
 				RemoveTcpClient(clientId);
-		}
-
-		/// <summary>
-		/// Gets the address and port for the client with the given id.
-		/// </summary>
-		/// <param name="clientId"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public HostInfo GetHostInfoForClientId(uint clientId)
-		{
-			TcpClient tcpClient = m_ClientsSection.Execute(() => m_TcpClients[clientId]);
-			IPEndPoint endpoint = tcpClient.Client.RemoteEndPoint as IPEndPoint;
-
-			return endpoint == null ? new HostInfo() : new HostInfo(endpoint.Address.ToString(), (ushort)endpoint.Port);
-		}
-
-		/// <summary>
-		/// Returns true if the client is connected.
-		/// </summary>
-		/// <param name="client"></param>
-		/// <returns></returns>
-		public bool ClientConnected(uint client)
-		{
-			m_ClientsSection.Enter();
-
-			try
-			{
-				// This is a hack. We have no way of determining if a client id is still valid,
-				// so if we get a null address we know the client is invalid.
-				TcpClient tcpClient;
-				if (!m_TcpClients.TryGetValue(client, out tcpClient) || tcpClient == null)
-					return false;
-
-				return tcpClient.Connected;
-			}
-			finally
-			{
-				m_ClientsSection.Leave();
-			}
 		}
 
 		/// <summary>
@@ -219,7 +192,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			try
 			{
-				clientId = (uint)IdUtils.GetNewId(m_Clients.Keys.Select(i => (int)i));
+				clientId = (uint)IdUtils.GetNewId(m_TcpClients.Keys.Select(i => (int)i), 1);
 				if (task.Status == TaskStatus.Faulted)
 					return;
 
@@ -241,7 +214,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_TcpListener.AcceptTcpClientAsync().ContinueWith(TcpClientConnectCallback);
 
 			// let the rest of the application know a new client connected
-			AddClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusConnected);
+			IPEndPoint endpoint = (IPEndPoint)client.Client.RemoteEndPoint;
+			string host = endpoint.Address.ToString();
+			ushort port = (ushort)endpoint.Port;
+			HostInfo hostInfo = new HostInfo(host, port);
+
+			AddClient(clientId, hostInfo, SocketStateEventArgs.eSocketStatus.SocketStatusConnected);
 
 			UpdateListeningState();
 		}
@@ -286,7 +264,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 
 			TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, length);
-			HostInfo hostInfo = GetHostInfoForClientId(clientId);
+			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);
@@ -331,6 +309,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			Listening = m_TcpListener != null && m_TcpListener.Active;
 		}
+
+		#endregion
 	}
 
 	public sealed class TcpListenerEx : TcpListener
@@ -343,9 +323,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:System.Net.Sockets.TcpListener"/> class with the specified local endpoint.
 		/// </summary>
-		/// <param name="localEP">An <see cref="T:System.Net.IPEndPoint"/> that represents the local endpoint to which to bind the listener <see cref="T:System.Net.Sockets.Socket"/>. </param><exception cref="T:System.ArgumentNullException"><paramref name="localEP"/> is null. </exception>
-		public TcpListenerEx(IPEndPoint localEP)
-			: base(localEP)
+		/// <param name="localEp">An <see cref="T:System.Net.IPEndPoint"/> that represents the local endpoint to which to bind the listener <see cref="T:System.Net.Sockets.Socket"/>. </param><exception cref="T:System.ArgumentNullException"><paramref name="localEp"/> is null. </exception>
+		public TcpListenerEx(IPEndPoint localEp)
+			: base(localEp)
 		{
 		}
 

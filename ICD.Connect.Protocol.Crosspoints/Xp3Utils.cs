@@ -1,16 +1,10 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 
 namespace ICD.Connect.Protocol.Crosspoints
 {
 	public static class Xp3Utils
 	{
-		/// <summary>
-		/// Max number of clients accepted by the EquipmentCrosspointManager TCP Server.
-		/// </summary>
-		public const int MAX_NUMBER_OF_CLIENTS = IcdTcpServer.MAX_NUMBER_OF_CLIENTS_SUPPORTED;
-
 		/// <summary>
 		/// A Equipment id of 0 is invalid, so represents no equipment connected.
 		/// </summary>

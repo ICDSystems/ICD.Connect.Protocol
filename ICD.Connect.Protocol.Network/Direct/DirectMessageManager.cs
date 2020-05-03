@@ -101,9 +101,10 @@ namespace ICD.Connect.Protocol.Network.Direct
 
 			m_SystemId = systemId;
 
-			m_Server = new IcdTcpServer(NetworkUtils.GetDirectMessagePortForSystem(m_SystemId), 64)
+			m_Server = new IcdTcpServer
 			{
-				Name = GetType().Name
+				Name = GetType().Name,
+				Port = NetworkUtils.GetDirectMessagePortForSystem(m_SystemId)
 			};
 
 			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(DELIMITER));
@@ -418,7 +419,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
 				               .AddEntry(eSeverity.Error, "{0} - Failed to deserialize message from {1} - {2}{3}{4}",
-				                         GetType().Name, m_Server.GetHostInfoForClientId(clientId), e.Message,
+				                         GetType().Name, m_Server.GetClientInfo(clientId), e.Message,
 				                         IcdEnvironment.NewLine, data);
 			}
 
