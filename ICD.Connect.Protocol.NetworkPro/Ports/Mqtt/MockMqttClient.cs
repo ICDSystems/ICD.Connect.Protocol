@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 {
 	public sealed class MockMqttClient : AbstractMqttClient<MockMqttClientSettings>
 	{

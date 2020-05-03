@@ -1,6 +1,6 @@
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 {
 	[KrangSettings("MQTT", typeof(IcdMqttClient))]
 	public sealed class IcdMqttClientSettings : AbstractMqttClientSettings

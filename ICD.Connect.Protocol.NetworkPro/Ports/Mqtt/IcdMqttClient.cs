@@ -9,7 +9,7 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 {
 	public sealed class IcdMqttClient : AbstractMqttClient<IcdMqttClientSettings>
 	{

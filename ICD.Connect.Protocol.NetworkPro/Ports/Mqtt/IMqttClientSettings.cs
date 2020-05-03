@@ -1,6 +1,6 @@
 ﻿using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports
+namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 {
 	public interface IMqttClientSettings : IConnectablePortSettings
 	{
