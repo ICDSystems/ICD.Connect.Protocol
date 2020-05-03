@@ -43,8 +43,10 @@
   <ItemGroup>
     <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
     <PackageReference Include="M2MqttDotnetCore" Version="1.0.8" />
+    <PackageReference Include="websocketsharp.core" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
   </ItemGroup>
 

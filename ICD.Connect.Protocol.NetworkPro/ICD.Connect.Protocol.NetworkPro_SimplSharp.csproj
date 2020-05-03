@@ -84,6 +84,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\SSharpThreadingLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="SSharpWebSocketLibrary, Version=1.0.2.31862, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\SSharpWebSocketLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="SSMonoConcurrentCollectionsLibrary, Version=1.0.0.15309, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\SSMonoConcurrentCollectionsLibrary.dll</HintPath>
@@ -95,6 +99,10 @@
     <Reference Include="SSMonoCryptographyLibrary, Version=1.0.0.15280, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\SSMonoCryptographyLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="SSMonoIOLibrary, Version=1.0.0.30801, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\SSMonoIOLibrary.dll</HintPath>
     </Reference>
     <Reference Include="SSMonoNetLibrary, Version=1.0.0.19651, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -120,6 +128,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\SSMonoThreadPoolLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="SSMonoWebLibrary, Version=1.0.0.31028, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\SSMonoWebLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="SSMonoX509CertificatesLibrary, Version=1.0.0.15443, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\SSMonoX509CertificatesLibrary.dll</HintPath>
@@ -140,6 +152,8 @@
     <Compile Include="Ports\Mqtt\IMqttClientSettings.cs" />
     <Compile Include="Ports\Mqtt\MockMqttClient.cs" />
     <Compile Include="Ports\Mqtt\MockMqttClientSettings.cs" />
+    <Compile Include="Ports\WebSockets\CallbackWebSocketBehavior.cs" />
+    <Compile Include="Ports\WebSockets\IcdWebSocketServer.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +180,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Telemetry\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
       <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
       <Name>ICD.Connect.Telemetry_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
+      <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
+      <Name>ICD.Connect.Protocol.Network_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_SimplSharp.csproj">
       <Project>{2E4E01B8-D4EA-4FB1-9FCE-0A0DC8D83C8A}</Project>
