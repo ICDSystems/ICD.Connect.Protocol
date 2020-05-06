@@ -2,8 +2,8 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using NUnit.Framework;
-using TcpReceiveEventArgs = ICD.Connect.Protocol.Network.Ports.Tcp.TcpReceiveEventArgs;
 
 namespace ICD.Connect.Protocol.Network.Tests.Tcp
 {
@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Tcp
 		[Test]
 		public void DataReceivedEventTest()
 		{
-			List<TcpReceiveEventArgs> feedback = new List<TcpReceiveEventArgs>();
+			List<DataReceiveEventArgs> feedback = new List<DataReceiveEventArgs>();
 
 			IcdTcpServer server = new IcdTcpServer
 			{

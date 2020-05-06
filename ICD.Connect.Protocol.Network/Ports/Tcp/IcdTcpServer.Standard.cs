@@ -12,6 +12,7 @@ using ICD.Common.Properties;
 using ICD.Connect.Protocol.Ports;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Settings.Utils;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
@@ -263,7 +264,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				return;
 			}
 
-			TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, length);
+			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, length);
 			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);

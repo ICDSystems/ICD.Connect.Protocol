@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Servers
 {
-	public interface INetworkServer : IDisposable
+	public interface INetworkServer : IDisposable, IConsoleNode
 	{
 		/// <summary>
 		/// Raised when data is received from a client.
 		/// </summary>
-		event EventHandler<TcpReceiveEventArgs> OnDataReceived;
+		event EventHandler<DataReceiveEventArgs> OnDataReceived;
 
 		/// <summary>
 		/// Raised when a client socket state changes.

@@ -5,6 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.SerialBuffers;
 using Newtonsoft.Json;
 
@@ -24,7 +25,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		private readonly SafeCriticalSection m_ControlClientMapSection;
 
 		private readonly IcdTcpServer m_Server;
-		private readonly TcpServerBufferManager m_Buffers;
+		private readonly NetworkServerBufferManager m_Buffers;
 
 		/// <summary>
 		/// Gets the help information for the node.
@@ -45,7 +46,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				Port = Xp3Utils.GetPortForSystem(systemId)
 			};
 
-			m_Buffers = new TcpServerBufferManager(() => new DelimiterSerialBuffer(CrosspointData.MESSAGE_TERMINATOR));
+			m_Buffers = new NetworkServerBufferManager(() => new DelimiterSerialBuffer(CrosspointData.MESSAGE_TERMINATOR));
 			m_Buffers.SetServer(m_Server);
 
 			Subscribe(m_Server);
@@ -220,7 +221,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Subscribe to the buffer events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Subscribe(TcpServerBufferManager bufferManager)
+		private void Subscribe(NetworkServerBufferManager bufferManager)
 		{
 			bufferManager.OnClientCompletedSerial += BufferManagerOnClientCompletedSerial;
 		}
@@ -229,7 +230,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Unsubscribe from the buffer events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Unsubscribe(TcpServerBufferManager bufferManager)
+		private void Unsubscribe(NetworkServerBufferManager bufferManager)
 		{
 			bufferManager.OnClientCompletedSerial -= BufferManagerOnClientCompletedSerial;
 		}
@@ -240,7 +241,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="sender"></param>
 		/// <param name="clientId"></param>
 		/// <param name="data"></param>
-		private void BufferManagerOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
+		private void BufferManagerOnClientCompletedSerial(NetworkServerBufferManager sender, uint clientId, string data)
 		{
 			CrosspointData crosspointData = JsonConvert.DeserializeObject<CrosspointData>(data);
 

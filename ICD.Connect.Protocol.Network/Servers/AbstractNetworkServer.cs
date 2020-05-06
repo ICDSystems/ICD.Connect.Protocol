@@ -28,7 +28,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <summary>
 		/// Raised when data is received from a client.
 		/// </summary>
-		public event EventHandler<TcpReceiveEventArgs> OnDataReceived;
+		public event EventHandler<DataReceiveEventArgs> OnDataReceived;
 
 		/// <summary>
 		/// Raised when a client socket state changes.
@@ -386,7 +386,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Raises the OnDataReceived event and logs any handler exceptions.
 		/// </summary>
 		/// <param name="eventArgs"></param>
-		protected void RaiseOnDataReceived(TcpReceiveEventArgs eventArgs)
+		protected void RaiseOnDataReceived(DataReceiveEventArgs eventArgs)
 		{
 			try
 			{

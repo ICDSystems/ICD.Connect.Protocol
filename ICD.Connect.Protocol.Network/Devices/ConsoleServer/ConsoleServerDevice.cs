@@ -7,6 +7,7 @@ using ICD.Connect.API;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
@@ -139,7 +140,7 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			SendLine(args.ClientId, "Welcome to ICD Console. All commands begin with `ICD`. Type `ICD ?` for help.");
 		}
 
-		private void TcpServerOnDataReceived(object sender, TcpReceiveEventArgs args)
+		private void TcpServerOnDataReceived(object sender, DataReceiveEventArgs args)
 		{
 			string commandString = args.Data.Trim();
 

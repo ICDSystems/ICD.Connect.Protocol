@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.SerialBuffers;
 using Newtonsoft.Json;
 
@@ -14,7 +15,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 	[PublicAPI]
 	public sealed class ServerSerialRpcController : IDisposable
 	{
-		private readonly TcpServerBufferManager m_BufferManager;
+		private readonly NetworkServerBufferManager m_BufferManager;
 		private readonly object m_Parent;
 
 		private IcdTcpServer m_Server;
@@ -25,7 +26,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="parent"></param>
 		public ServerSerialRpcController(object parent)
 		{
-			m_BufferManager = new TcpServerBufferManager(() => new JsonSerialBuffer());
+			m_BufferManager = new NetworkServerBufferManager(() => new JsonSerialBuffer());
 			m_Parent = parent;
 
 			Subscribe(m_BufferManager);
@@ -118,7 +119,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// Subscribe to the buffer manager events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Subscribe(TcpServerBufferManager bufferManager)
+		private void Subscribe(NetworkServerBufferManager bufferManager)
 		{
 			bufferManager.OnClientCompletedSerial += BufferManagerOnClientCompletedSerial;
 		}
@@ -127,7 +128,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// Unsubscribe from the buffer manager events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Unsubscribe(TcpServerBufferManager bufferManager)
+		private void Unsubscribe(NetworkServerBufferManager bufferManager)
 		{
 			bufferManager.OnClientCompletedSerial -= BufferManagerOnClientCompletedSerial;
 		}
@@ -138,7 +139,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="sender"></param>
 		/// <param name="clientId"></param>
 		/// <param name="data"></param>
-		private void BufferManagerOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
+		private void BufferManagerOnClientCompletedSerial(NetworkServerBufferManager sender, uint clientId, string data)
 		{
 			Rpc rpc = JsonConvert.DeserializeObject<Rpc>(data);
 

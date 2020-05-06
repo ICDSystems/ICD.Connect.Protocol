@@ -5,18 +5,19 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
 
-namespace ICD.Connect.Protocol.Network.Ports.Tcp
+namespace ICD.Connect.Protocol.Network.Servers
 {
 	/// <summary>
-	/// The TcpServerBufferManager is responsible for creating buffers for each new
+	/// The NetworkServerBufferManager is responsible for creating buffers for each new
 	/// client, and firing an event when complete data is received.
 	/// </summary>
 	[PublicAPI]
-	public sealed class TcpServerBufferManager : IDisposable
+	public sealed class NetworkServerBufferManager : IDisposable
 	{
-		public delegate void ClientCompletedSerialCallback(TcpServerBufferManager sender, uint clientId, string data);
+		public delegate void ClientCompletedSerialCallback(NetworkServerBufferManager sender, uint clientId, string data);
 
 		/// <summary>
 		/// Raised when we finish buffering a complete string from a client.
@@ -28,13 +29,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private readonly BiDictionary<uint, ISerialBuffer> m_Buffers;
 		private readonly SafeCriticalSection m_BufferSection;
 
-		private IcdTcpServer m_Server;
+		private INetworkServer m_Server;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="bufferFactory"></param>
-		public TcpServerBufferManager(Func<ISerialBuffer> bufferFactory)
+		public NetworkServerBufferManager(Func<ISerialBuffer> bufferFactory)
 		{
 			if (bufferFactory == null)
 				throw new ArgumentNullException("bufferFactory");
@@ -62,7 +63,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="server"></param>
 		[PublicAPI]
-		public void SetServer(IcdTcpServer server)
+		public void SetServer(INetworkServer server)
 		{
 			m_BufferSection.Enter();
 
@@ -165,7 +166,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Subscribe to the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Subscribe(IcdTcpServer server)
+		private void Subscribe(INetworkServer server)
 		{
 			if (server == null)
 				return;
@@ -178,7 +179,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// Unsubscribe from the server events.
 		/// </summary>
 		/// <param name="server"></param>
-		private void Unsubscribe(IcdTcpServer server)
+		private void Unsubscribe(INetworkServer server)
 		{
 			if (server == null)
 				return;
@@ -192,7 +193,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void ServerOnDataReceived(object sender, TcpReceiveEventArgs args)
+		private void ServerOnDataReceived(object sender, DataReceiveEventArgs args)
 		{
 			LazyLoadBuffer(args.ClientId).Enqueue(args.Data);
 		}

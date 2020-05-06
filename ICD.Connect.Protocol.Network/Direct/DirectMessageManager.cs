@@ -9,6 +9,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Broadcast;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -23,7 +24,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		private readonly TcpClientPool m_ClientPool;
 
 		private readonly IcdTcpServer m_Server;
-		private readonly TcpServerBufferManager m_ServerBuffer;
+		private readonly NetworkServerBufferManager m_ServerBuffer;
 
 		private readonly Dictionary<Guid, ClientBufferCallbackInfo> m_MessageCallbacks;
 		private readonly Dictionary<Type, IMessageHandler> m_MessageHandlers;
@@ -107,7 +108,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 				Port = NetworkUtils.GetDirectMessagePortForSystem(m_SystemId)
 			};
 
-			m_ServerBuffer = new TcpServerBufferManager(() => new DelimiterSerialBuffer(DELIMITER));
+			m_ServerBuffer = new NetworkServerBufferManager(() => new DelimiterSerialBuffer(DELIMITER));
 			m_ServerBuffer.SetServer(m_Server);
 			Subscribe(m_ServerBuffer);
 
@@ -387,7 +388,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Subscribe to the server buffer manager events.
 		/// </summary>
 		/// <param name="manager"></param>
-		private void Subscribe(TcpServerBufferManager manager)
+		private void Subscribe(NetworkServerBufferManager manager)
 		{
 			manager.OnClientCompletedSerial += ServerBufferOnClientCompletedSerial;
 		}
@@ -396,7 +397,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Unsubscribe from the server buffer manager events.
 		/// </summary>
 		/// <param name="manager"></param>
-		private void Unsubscribe(TcpServerBufferManager manager)
+		private void Unsubscribe(NetworkServerBufferManager manager)
 		{
 			manager.OnClientCompletedSerial -= ServerBufferOnClientCompletedSerial;
 		}
@@ -407,7 +408,7 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// <param name="sender"></param>
 		/// <param name="clientId"></param>
 		/// <param name="data"></param>
-		private void ServerBufferOnClientCompletedSerial(TcpServerBufferManager sender, uint clientId, string data)
+		private void ServerBufferOnClientCompletedSerial(NetworkServerBufferManager sender, uint clientId, string data)
 		{
 			Message message = null;
 

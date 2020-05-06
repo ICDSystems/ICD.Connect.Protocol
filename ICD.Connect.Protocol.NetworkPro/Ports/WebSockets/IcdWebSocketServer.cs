@@ -305,7 +305,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.WebSockets
 			uint clientId = m_SessionsSection.Execute(() => m_Sessions.GetKey(session));
 			byte[] message = messageEventArgs.RawData;
 
-			TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, message, message.Length);
+			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, message, message.Length);
 			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);

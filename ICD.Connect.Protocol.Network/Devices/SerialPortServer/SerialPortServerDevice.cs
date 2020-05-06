@@ -8,6 +8,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
@@ -140,10 +141,10 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		/// Send received server data to port
 		/// </summary>
 		/// <param name="sender"></param>
-		/// <param name="tcpReceiveEventArgs"></param>
-		private void IncomingServerOnDataReceived(object sender, TcpReceiveEventArgs tcpReceiveEventArgs)
+		/// <param name="dataReceiveEventArgs"></param>
+		private void IncomingServerOnDataReceived(object sender, DataReceiveEventArgs dataReceiveEventArgs)
 		{
-			m_ConnectionStateManager.Send(tcpReceiveEventArgs.Data);
+			m_ConnectionStateManager.Send(dataReceiveEventArgs.Data);
 		}
 
 		#endregion

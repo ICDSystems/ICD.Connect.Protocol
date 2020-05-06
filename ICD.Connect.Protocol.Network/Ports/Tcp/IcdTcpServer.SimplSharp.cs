@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Protocol.Network.Servers;
+#if SIMPLSHARP
 using System;
 using System.Linq;
 using Crestron.SimplSharp;
@@ -240,7 +241,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				return;
 			}
 
-			TcpReceiveEventArgs eventArgs = new TcpReceiveEventArgs(clientId, buffer, bytesReceived);
+			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, bytesReceived);
 			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);

@@ -141,8 +141,8 @@
     <Compile Include="Ports\Tcp\IcdTcpServer.Standard.cs" />
     <Compile Include="Ports\Tcp\TcpClientPool.cs" />
     <Compile Include="Ports\Tcp\TcpClientPoolBufferManager.cs" />
-    <Compile Include="Ports\Tcp\TcpReceiveEventArgs.cs" />
-    <Compile Include="Ports\Tcp\TcpServerBufferManager.cs" />
+    <Compile Include="Servers\DataReceiveEventArgs.cs" />
+    <Compile Include="Servers\NetworkServerBufferManager.cs" />
     <Compile Include="Ports\Tcp\TelnetControl.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.SimplSharp.cs" />
