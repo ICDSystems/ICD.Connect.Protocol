@@ -218,8 +218,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		/// <param name="data"></param>
 		/// <param name="comparer"></param>
-		public void Enqueue<T>(T data, Func<T, T, bool> comparer)
-			where T : class, ISerialData
+		public void Enqueue(ISerialData data, Func<ISerialData, ISerialData, bool> comparer)
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
@@ -273,8 +272,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  <param name="data"></param>
 		///  <param name="comparer"></param>
 		///  <param name="priority"></param>
-		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority)
-			where T : class, ISerialData
+		public void EnqueuePriority(ISerialData data, Func<ISerialData, ISerialData, bool> comparer, int priority)
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
@@ -304,15 +302,13 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  <param name="comparer"></param>
 		///  <param name="priority"></param>
 		///  <param name="deDuplicateToEndOfQueue"></param>
-		public void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority, bool deDuplicateToEndOfQueue)
-			where T : class, ISerialData
+		public void EnqueuePriority(ISerialData data, Func<ISerialData, ISerialData, bool> comparer, int priority, bool deDuplicateToEndOfQueue)
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
 
-			m_CommandSection.Execute(
-			                         () =>
-			                         m_CommandQueue.EnqueueRemove(data, d => comparer(d as T, data), priority,
+			m_CommandSection.Execute(() =>
+			                         m_CommandQueue.EnqueueRemove(data, d => comparer(d, data), priority,
 			                                                      deDuplicateToEndOfQueue));
 			SendNextCommand();
 		}
@@ -575,7 +571,6 @@ namespace ICD.Connect.Protocol.SerialQueues
 		}
 
 		#endregion
-
 
 		#region Rate Limit
 

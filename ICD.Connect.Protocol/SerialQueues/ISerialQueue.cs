@@ -81,7 +81,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		/// <param name="data"></param>
 		/// <param name="comparer"></param>
-		void Enqueue<T>(T data, Func<T, T, bool> comparer) where T : class, ISerialData;
+		void Enqueue(ISerialData data, Func<ISerialData, ISerialData, bool> comparer);
 
 		/// <summary>
 		/// Enqueues the given data at higher than normal priority.
@@ -118,24 +118,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		///  <param name="comparer"></param>
 		///  <param name="priority"></param>
 		///  <param name="deDuplicateToEndOfQueue"></param>
-		void EnqueuePriority<T>(T data, Func<T, T, bool> comparer, int priority, bool deDuplicateToEndOfQueue) where T : class, ISerialData;
-	}
-
-	public static class SerialQueueExtensions
-	{
-		/// <summary>
-		/// Queues data to be sent.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="data"></param>
-		public static void Enqueue(this ISerialQueue extends, string data)
-		{
-			extends.Enqueue(new SerialData(data));
-		}
-
-		public static void EnqueuePriority(this ISerialQueue extends, string data)
-		{
-			extends.EnqueuePriority(new SerialData(data));
-		}
+		void EnqueuePriority(ISerialData data, Func<ISerialData, ISerialData, bool> comparer, int priority,
+		                     bool deDuplicateToEndOfQueue);
 	}
 }
