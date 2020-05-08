@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Mock.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -26,8 +27,8 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			queue.OnSerialResponse += (sender, e) => responses.Add(e);
 
 			// Queue some Tx
-			queue.Enqueue("Ping");
-			queue.Enqueue("Ping2");
+			queue.Enqueue(new SerialData("Ping"));
+			queue.Enqueue(new SerialData("Ping2"));
 
 			// Fake some Rx
 			port.Receive("Pong\n");
@@ -82,7 +83,7 @@ namespace ICD.Connect.Protocol.Tests.SerialQueues
 			queue.OnTimeout += (sender, e) => responses.Add(e);
 
 			// Queue some Tx
-			queue.Enqueue("Ping\n");
+			queue.Enqueue(new SerialData("Ping\n"));
 
 			Assert.IsTrue(ThreadingUtils.Wait(() => responses.Count == 1, 200));
 		}
