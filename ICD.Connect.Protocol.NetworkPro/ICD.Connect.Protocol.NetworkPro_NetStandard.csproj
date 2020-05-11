@@ -19,6 +19,9 @@
     <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE;STANDARD</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="binNetCoreApp\**" />
     <Compile Remove="References\**" />
