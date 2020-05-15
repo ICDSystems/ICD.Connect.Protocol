@@ -9,13 +9,12 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Utils;
 
 namespace ICD.Connect.Protocol.Network.Servers
 {
-	public abstract class AbstractNetworkServer : INetworkServer, IConsoleNode
+	public abstract class AbstractNetworkServer : INetworkServer
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
 		private const ushort DEFAULT_PORT = 23;

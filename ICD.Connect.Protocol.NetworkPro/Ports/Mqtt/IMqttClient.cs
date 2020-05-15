@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.Ports;
 
@@ -42,6 +43,12 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Gets/sets the secure mode.
 		/// </summary>
 		bool Secure { get; set; }
+
+		/// <summary>
+		/// Gets/sets the last will and testament parameters.
+		/// </summary>
+		[NotNull]
+		LastWillAndTestament Will { get; }
 
 		#endregion
 

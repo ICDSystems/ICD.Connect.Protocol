@@ -67,10 +67,24 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				if (Client != null && Client.IsConnected)
 					Disconnect();
 
-				if (string.IsNullOrEmpty(Username))
-					GetClient().Connect(ClientId);
-				else
-					GetClient().Connect(ClientId, Username, Password);
+				string debug =
+					new StringBuilder()
+						.AppendFormat("Topic: {0}, ", Will.Topic)
+						.AppendFormat("Message: {0}", Will.Message)
+						.ToString();
+
+				PrintTx("Will", debug);
+
+				GetClient().Connect(ClientId,
+				                    Username,
+				                    Password,
+				                    Will.Retain,
+				                    Will.QosLevel,
+				                    Will.Flag,
+				                    Will.Topic,
+				                    Will.Message,
+				                    true,
+				                    60);
 			}
 			catch (MqttConnectionException e)
 			{

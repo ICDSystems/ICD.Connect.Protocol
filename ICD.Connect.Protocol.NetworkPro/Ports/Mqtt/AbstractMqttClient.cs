@@ -14,6 +14,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// </summary>
 		public abstract event EventHandler<MqttMessageEventArgs> OnMessageReceived;
 
+		private readonly LastWillAndTestament m_Will;
+
 		#region Properties
 
 		/// <summary>
@@ -46,7 +48,20 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// </summary>
 		public bool Secure { get; set; }
 
+		/// <summary>
+		/// Gets the last will and testament parameters.
+		/// </summary>
+		public LastWillAndTestament Will { get { return m_Will; } }
+
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractMqttClient()
+		{
+			m_Will = new LastWillAndTestament();
+		}
 
 		#region Methods
 

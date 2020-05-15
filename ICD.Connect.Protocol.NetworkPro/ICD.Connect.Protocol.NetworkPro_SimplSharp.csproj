@@ -150,6 +150,7 @@
     <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
     <Compile Include="Ports\Mqtt\IMqttClient.cs" />
     <Compile Include="Ports\Mqtt\IMqttClientSettings.cs" />
+    <Compile Include="Ports\Mqtt\LastWillAndTestament.cs" />
     <Compile Include="Ports\Mqtt\MockMqttClient.cs" />
     <Compile Include="Ports\Mqtt\MockMqttClientSettings.cs" />
     <Compile Include="Ports\WebSockets\CallbackWebSocketBehavior.cs" />
