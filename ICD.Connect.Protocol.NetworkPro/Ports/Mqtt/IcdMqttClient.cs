@@ -6,7 +6,6 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using uPLibrary.Networking.M2Mqtt;
-using uPLibrary.Networking.M2Mqtt.Exceptions;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
@@ -86,7 +85,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				                    true,
 				                    60);
 			}
-			catch (MqttConnectionException e)
+			catch (Exception e)
 			{
 				string message = string.Format("Error connecting to {0} - {1}", Hostname, e.Message);
 				if (e.InnerException != null)
