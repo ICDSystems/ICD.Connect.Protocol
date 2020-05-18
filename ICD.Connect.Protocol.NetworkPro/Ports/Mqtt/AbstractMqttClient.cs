@@ -98,6 +98,17 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <returns></returns>
 		public abstract ushort Publish(string topic, byte[] message, byte qosLevel, bool retain);
 
+		/// <summary>
+		/// Override to add additional properties to the ToString representation.
+		/// </summary>
+		/// <param name="addPropertyAndValue"></param>
+		protected override void BuildStringRepresentationProperties(Action<string, object> addPropertyAndValue)
+		{
+			base.BuildStringRepresentationProperties(addPropertyAndValue);
+
+			addPropertyAndValue("Host", new HostInfo(Hostname, Port));
+		}
+
 		#endregion
 
 		#region Settings
