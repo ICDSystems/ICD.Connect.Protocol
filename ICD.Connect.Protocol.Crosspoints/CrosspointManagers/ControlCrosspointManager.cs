@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -344,8 +345,10 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 					CrosspointInfo equipmentInfo;
 					if (!RemoteCrosspoints.TryGetCrosspointInfo(controlCrosspoint.EquipmentCrosspoint, out equipmentInfo))
+					{
+						Logger.AddEntry(eSeverity.Error, "XP3 ControlCrosspoing Manager - Unable to find remote equipment crosspoint {1} for local control crosspoint {0}", controlCrosspoint.Id, controlCrosspoint.EquipmentCrosspoint );
 						return null;
-
+					}
 					client = m_ClientPool.GetClient(equipmentInfo.Host);
 					IcdConsole.PrintLine(eConsoleColor.Magenta, "Lazy loaded TCP client for host {0} - {1}", equipmentInfo.Host, client);
 
@@ -582,12 +585,18 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// </summary>
 		/// <param name="crosspoint"></param>
 		/// <param name="data"></param>
-		protected override void CrosspointOnSendInputData(IControlCrosspoint crosspoint, CrosspointData data)
+		protected override void CrosspointOnSendInputData([NotNull] IControlCrosspoint crosspoint,
+		                                                  [NotNull] CrosspointData data)
 		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+			if (data == null)
+				throw new ArgumentNullException("data");
+
 			IcdTcpClient client = LazyLoadClientForControl(crosspoint.Id);
 			if (client == null)
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control is not connected to an equipment");
+				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control {0} is not able to connect to equipment {1}", crosspoint.Id, crosspoint.EquipmentCrosspoint);
 				return;
 			}
 
@@ -596,7 +605,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 			if (!client.IsConnected)
 			{
-				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Unable to connect to remote endpoint");
+				Logger.AddEntry(eSeverity.Warning, "{0} - Unable to send input data - Control {0} unable to connect to remote endpoint equipment {1}", crosspoint.Id, crosspoint.EquipmentCrosspoint);
 				return;
 			}
 
