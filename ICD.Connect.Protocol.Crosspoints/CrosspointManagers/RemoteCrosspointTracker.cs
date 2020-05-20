@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
@@ -134,7 +135,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Adds the crosspoint to the crosspoint lookup table.
 		/// </summary>
 		/// <param name="crosspoints"></param>
-		public void AddCrosspointInfo(IEnumerable<CrosspointInfo> crosspoints)
+		public void AddCrosspointInfo([NotNull] IEnumerable<CrosspointInfo> crosspoints)
 		{
 			if (crosspoints == null)
 				throw new ArgumentNullException("crosspoints");
@@ -171,8 +172,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 				handler(this, info);
 		}
 
-		public void RemoveCrosspointInfo(IEnumerable<CrosspointInfo> crosspoints)
+		public void RemoveCrosspointInfo([NotNull] IEnumerable<CrosspointInfo> crosspoints)
 		{
+			if (crosspoints == null)
+				throw new ArgumentNullException("crosspoints");
+
 			foreach (CrosspointInfo info in crosspoints)
 				RemoveCrosspointInfo(info.Id);
 		}
