@@ -232,7 +232,7 @@ namespace ICD.Connect.Protocol.Crosspoints
 		}
 
 		/// <summary>
-		/// Called by the AdvertisementMananger when we discover new equipment/controls on the network.
+		/// Called by the AdvertisementMananger when equipment/controls are removed from the network.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
