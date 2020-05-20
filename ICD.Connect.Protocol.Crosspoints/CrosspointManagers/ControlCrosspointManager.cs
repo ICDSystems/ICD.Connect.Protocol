@@ -120,8 +120,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="equipmentId"></param>
 		/// <returns>False if connection failed.</returns>
 		[PublicAPI]
-		public eCrosspointStatus ConnectCrosspoint(IControlCrosspoint crosspoint, int equipmentId)
+		public eCrosspointStatus ConnectCrosspoint([NotNull] IControlCrosspoint crosspoint, int equipmentId)
 		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+
 			return ConnectCrosspoint(crosspoint.Id, equipmentId);
 		}
 
@@ -193,8 +196,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="crosspoint"></param>
 		/// <returns>False if disconnect failed.</returns>
 		[PublicAPI]
-		public eCrosspointStatus DisconnectCrosspoint(IControlCrosspoint crosspoint)
+		public eCrosspointStatus DisconnectCrosspoint([NotNull] IControlCrosspoint crosspoint)
 		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+
 			return DisconnectCrosspoint(crosspoint.Id);
 		}
 
@@ -374,6 +380,31 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			return new ControlCrosspoint(id, name);
 		}
 
+		/// <summary>
+		/// Sends data from the program to the crosspoint.
+		/// </summary>
+		/// <param name="crosspoint"></param>
+		/// <param name="data"></param>
+		protected override void SendCrosspointOutputData([NotNull] IControlCrosspoint crosspoint,
+		                                                 [NotNull] CrosspointData data)
+		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+			if (data == null)
+				throw new ArgumentNullException("data");
+
+			// Is the control connected to equipment?
+			int equipmentId;
+			if (!TryGetEquipmentForControl(crosspoint.Id, out equipmentId))
+				return;
+
+			// Is the control connected to the equipment that sent this data?
+			if (equipmentId != data.EquipmentId)
+				return;
+
+			base.SendCrosspointOutputData(crosspoint, data);
+		}
+
 		#endregion
 
 		#region TCP Client Pool callbacks
@@ -382,8 +413,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Subscribe to the client pool events.
 		/// </summary>
 		/// <param name="pool"></param>
-		private void Subscribe(TcpClientPool pool)
+		private void Subscribe([NotNull] TcpClientPool pool)
 		{
+			if (pool == null)
+				throw new ArgumentNullException("pool");
+
 			pool.OnClientConnectionStateChanged += PoolOnClientConnectionStateChanged;
 			pool.OnClientAdded += PoolOnClientAdded;
 			pool.OnClientRemoved += PoolOnClientRemoved;
@@ -480,8 +514,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Subscribe to the buffer manager events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Subscribe(TcpClientPoolBufferManager bufferManager)
+		private void Subscribe([NotNull] TcpClientPoolBufferManager bufferManager)
 		{
+			if (bufferManager == null)
+				throw new ArgumentNullException("bufferManager");
+
 			bufferManager.OnClientCompletedSerial += BufferManagerOnClientCompletedSerial;
 		}
 
@@ -489,8 +526,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Unsubscribe from the buffer manager events.
 		/// </summary>
 		/// <param name="bufferManager"></param>
-		private void Unsubscribe(TcpClientPoolBufferManager bufferManager)
+		private void Unsubscribe([NotNull] TcpClientPoolBufferManager bufferManager)
 		{
+			if (bufferManager == null)
+				throw new ArgumentNullException("bufferManager");
+
 			bufferManager.OnClientCompletedSerial -= BufferManagerOnClientCompletedSerial;
 		}
 
@@ -533,25 +573,6 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 			}
 		}
 
-		/// <summary>
-		/// Sends data from the program to the crosspoint.
-		/// </summary>
-		/// <param name="crosspoint"></param>
-		/// <param name="data"></param>
-		protected override void SendCrosspointOutputData(IControlCrosspoint crosspoint, CrosspointData data)
-		{
-			// Is the control connected to equipment?
-			int equipmentId;
-			if (!TryGetEquipmentForControl(crosspoint.Id, out equipmentId))
-				return;
-
-			// Is the control connected to the equipment that sent this data?
-			if (equipmentId != data.EquipmentId)
-				return;
-
-			base.SendCrosspointOutputData(crosspoint, data);
-		}
-
 		#endregion
 
 		#region Crosspoint Callbacks
@@ -560,8 +581,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Subscribe to the crosspoint events.
 		/// </summary>
 		/// <param name="crosspoint"></param>
-		protected override void Subscribe(IControlCrosspoint crosspoint)
+		protected override void Subscribe([NotNull] IControlCrosspoint crosspoint)
 		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+
 			base.Subscribe(crosspoint);
 
 			crosspoint.RequestConnectCallback = ConnectCrosspoint;
@@ -572,8 +596,11 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// Unsubscribe from the crosspoint events.
 		/// </summary>
 		/// <param name="crosspoint"></param>
-		protected override void Unsubscribe(IControlCrosspoint crosspoint)
+		protected override void Unsubscribe([NotNull] IControlCrosspoint crosspoint)
 		{
+			if (crosspoint == null)
+				throw new ArgumentNullException("crosspoint");
+
 			base.Unsubscribe(crosspoint);
 
 			crosspoint.RequestConnectCallback = null;
