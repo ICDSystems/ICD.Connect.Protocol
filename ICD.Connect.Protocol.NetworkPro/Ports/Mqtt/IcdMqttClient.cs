@@ -215,11 +215,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			if (Client != null)
 				return Client;
 
-			Client = Secure
-				? new MqttClient(Hostname, Port, true, null, null, MqttSslProtocols.TLSv1_2)
-				: new MqttClient(Hostname, Port, false, null, null, MqttSslProtocols.None);
+			MqttSslProtocols protocol =
+				Secure
+#if SIMPLSHARP
+					? MqttSslProtocols.TLSv1_0
+#else
+					? MqttSslProtocols.TLSv1_2
+#endif
+					: MqttSslProtocols.None;
 
-			return Client;
+			return Client = new MqttClient(Hostname, Port, Secure, null, null, protocol);
 		}
 
 		/// <summary>
