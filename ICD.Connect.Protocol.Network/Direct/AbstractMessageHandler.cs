@@ -1,4 +1,6 @@
 ﻿using System;
+using ICD.Common.Utils.Services;
+using ICD.Connect.Settings.Cores;
 
 namespace ICD.Connect.Protocol.Network.Direct
 {
@@ -8,6 +10,13 @@ namespace ICD.Connect.Protocol.Network.Direct
 		/// Raised to send messages back to a connected endpoint.
 		/// </summary>
 		public event ReplyCallback OnAsyncReply;
+
+		/// <summary>
+		/// Gets the message type that this handler is expecting.
+		/// </summary>
+		public abstract Type MessageType { get; }
+
+		protected ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Release resources.
@@ -25,11 +34,6 @@ namespace ICD.Connect.Protocol.Network.Direct
 		{
 			OnAsyncReply = null;
 		}
-
-		/// <summary>
-		/// Gets the message type that this handler is expecting.
-		/// </summary>
-		public abstract Type MessageType { get; }
 
 		/// <summary>
 		/// Handles the message receieved from the remote core.
