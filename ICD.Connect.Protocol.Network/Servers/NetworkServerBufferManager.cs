@@ -5,7 +5,6 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.Network.Servers
@@ -35,7 +34,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Constructor.
 		/// </summary>
 		/// <param name="bufferFactory"></param>
-		public NetworkServerBufferManager(Func<ISerialBuffer> bufferFactory)
+		public NetworkServerBufferManager([NotNull] Func<ISerialBuffer> bufferFactory)
 		{
 			if (bufferFactory == null)
 				throw new ArgumentNullException("bufferFactory");
@@ -238,7 +237,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <param name="args"></param>
 		private void BufferOnCompletedSerial(object sender, StringEventArgs args)
 		{
-			uint clientUi = m_BufferSection.Execute(() => m_Buffers.GetKey(sender as ISerialBuffer));
+			uint clientUi = m_BufferSection.Execute(() => m_Buffers.GetKey((ISerialBuffer)sender));
 
 			ClientCompletedSerialCallback handler = OnClientCompletedSerial;
 			if (handler != null)
