@@ -224,7 +224,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 						Success = response.Code < 300,
 						StatusCode = response.Code,
 						Data = response.ContentBytes,
-						Headers = response.Header.Cast<HttpsHeader>().ToDictionary(h => h.Name, h => new[] {h.Value})
+						Headers = response.Header.Cast<HttpsHeader>().ToDictionary(h => h.Name, h => new[] {h.Value}),
+						ResponseUrl = response.ResponseUrl
 					};
 				}
 			}

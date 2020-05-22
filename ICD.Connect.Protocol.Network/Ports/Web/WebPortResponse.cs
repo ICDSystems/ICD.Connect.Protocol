@@ -11,6 +11,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		public int StatusCode { get; set; }
 		public byte[] Data { get; set; }
 		public IDictionary<string, string[]> Headers { get; set; }
+		public string ResponseUrl { get; set; }
 
 		/// <summary>
 		/// Converts the byte array to an extended-ASCII string for backwards compatibility.

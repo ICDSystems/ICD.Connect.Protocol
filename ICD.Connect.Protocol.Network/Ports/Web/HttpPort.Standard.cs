@@ -233,7 +233,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 						Success = (int)response.StatusCode < 300,
 						StatusCode = (int)response.StatusCode,
 						Data = response.Content.ReadAsByteArrayAsync().Result,
-						Headers = response.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray())
+						Headers = response.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
+						ResponseUrl = response.RequestMessage.RequestUri.ToString()
 					};
 				}
 			}
