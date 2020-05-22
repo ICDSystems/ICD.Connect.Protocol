@@ -5,6 +5,13 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
+#if SIMPLSHARP
+using SSMono.Net.Security;
+using SSMono.Security.Cryptography.X509Certificates;
+#else
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+#endif
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
@@ -224,7 +231,18 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 #endif
 					: MqttSslProtocols.None;
 
-			return Client = new MqttClient(Hostname, Port, Secure, null, null, protocol);
+			X509Certificate caCert =
+				Secure && CaCertPath != null
+					? new X509Certificate(PathUtils.GetDefaultConfigPath("Certificates", CaCertPath))
+					: null;
+
+			return Client = new MqttClient(Hostname, Port, Secure, caCert, null, protocol, UserCertificateValidation, null);
+		}
+
+		private bool UserCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+		{
+			// TODO - Need to get cert validation working on crestron
+			return true;
 		}
 
 		/// <summary>

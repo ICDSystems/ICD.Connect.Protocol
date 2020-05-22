@@ -33,5 +33,10 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Gets/sets the secure mode.
 		/// </summary>
 		bool Secure { get; set; }
+
+		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		string CaCertPath { get; set; }
 	}
 }

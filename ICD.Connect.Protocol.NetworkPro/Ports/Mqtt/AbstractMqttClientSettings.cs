@@ -11,6 +11,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		private const string ELEMENT_USERNAME = "Username";
 		private const string ELEMENT_PASSWORD = "Password";
 		private const string ELEMENT_SECURE = "Secure";
+		private const string ELEMENT_CA_CERT_PATH = "CaCertPath";
 
 		/// <summary>
 		/// Gets/sets the hostname.
@@ -43,6 +44,11 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		public bool Secure { get; set; }
 
 		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		public string CaCertPath { get; set; }
+
+		/// <summary>
 		/// Writes property elements to xml.
 		/// </summary>
 		/// <param name="writer"></param>
@@ -56,6 +62,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			writer.WriteElementString(ELEMENT_USERNAME, Username);
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
 			writer.WriteElementString(ELEMENT_SECURE, IcdXmlConvert.ToString(Secure));
+			writer.WriteElementString(ELEMENT_CA_CERT_PATH, CaCertPath);
 		}
 
 		/// <summary>
@@ -72,6 +79,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);
 			Secure = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_SECURE) ?? false;
+			CaCertPath = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CA_CERT_PATH);
 		}
 	}
 }

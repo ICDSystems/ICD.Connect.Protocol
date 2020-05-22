@@ -45,6 +45,11 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		bool Secure { get; set; }
 
 		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		string CaCertPath { get; set; }
+
+		/// <summary>
 		/// Gets/sets the last will and testament parameters.
 		/// </summary>
 		[NotNull]

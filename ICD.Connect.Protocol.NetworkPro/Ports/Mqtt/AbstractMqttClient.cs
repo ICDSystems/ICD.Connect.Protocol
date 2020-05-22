@@ -49,6 +49,11 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		public bool Secure { get; set; }
 
 		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		public string CaCertPath { get; set; }
+
+		/// <summary>
 		/// Gets the last will and testament parameters.
 		/// </summary>
 		public LastWillAndTestament Will { get { return m_Will; } }
@@ -126,6 +131,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			Username = null;
 			Password = null;
 			Secure = false;
+			CaCertPath = null;
 		}
 
 		/// <summary>
@@ -142,6 +148,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			settings.Username = Username;
 			settings.Password = Password;
 			settings.Secure = Secure;
+			settings.CaCertPath = CaCertPath;
 		}
 
 		/// <summary>
@@ -159,6 +166,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			Username = settings.Username;
 			Password = settings.Password;
 			Secure = settings.Secure;
+			CaCertPath = settings.CaCertPath;
 		}
 
 		#endregion
@@ -179,6 +187,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			addRow("Username", Username);
 			addRow("Password", Password);
 			addRow("Secure", Secure);
+			addRow("CaCertPath", CaCertPath);
 		}
 
 		#endregion
