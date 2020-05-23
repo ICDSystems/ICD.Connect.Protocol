@@ -25,7 +25,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <summary>
 		/// Content type for the server to respond with. See HttpClient.Accept.
 		/// </summary>
-		public override string Accept { get { return m_HttpsClient.Accept; } set { m_HttpsClient.Accept = value; } }
+		public override string Accept
+		{
+			get { return m_HttpsClient.Accept; }
+			set { m_HttpsClient.Accept = string.IsNullOrEmpty(value) ? "*/*" : value; }
+		}
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
@@ -44,10 +48,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			m_HttpsClient = new HttpsClient
 			{
 				KeepAlive = true,
+				Accept = "*/*",
 				TimeoutEnabled = true,
 				Timeout = 60,
 				HostVerification = false,
-				PeerVerification = false
+				PeerVerification = false,
+				UserAgent = "Crestron SimplSharp HTTPS Client"
 			};
 
 			m_ClientBusySection = new SafeCriticalSection();
@@ -97,6 +103,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				request.Url.Parse(url);
 				request.Header.SetHeaderValue("Accept", Accept);
+				request.Header.SetHeaderValue("Expect", "");
 
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -135,6 +142,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				request.Url.Parse(url);
 				request.Header.SetHeaderValue("Accept", Accept);
+				request.Header.SetHeaderValue("Expect", "");
 				request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
 
 				return Dispatch(request);
@@ -173,6 +181,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					ContentString = content
 				};
 				request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
+				request.Header.SetHeaderValue("Expect", "");
 
 				return Dispatch(request);
 			}
