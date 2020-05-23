@@ -1,25 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Protocol.SerialBuffers
 {
-	public sealed class MultiDelimiterSerialBuffer : ISerialBuffer
+	public sealed class MultiDelimiterSerialBuffer : AbstractSerialBuffer
 	{
-		/// <summary>
-		/// Raised when a complete message has been buffered.
-		/// </summary>
-		public event EventHandler<StringEventArgs> OnCompletedSerial;
-
 		private readonly StringBuilder m_RxData;
-		private readonly Queue<string> m_Queue;
-
-		private readonly SafeCriticalSection m_QueueSection;
-		private readonly SafeCriticalSection m_ParseSection;
 
 		private readonly char[] m_Delimiters;
 
@@ -59,10 +47,6 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		public MultiDelimiterSerialBuffer(IEnumerable<char> delimiters)
 		{
 			m_RxData = new StringBuilder();
-			m_Queue = new Queue<string>();
-
-			m_QueueSection = new SafeCriticalSection();
-			m_ParseSection = new SafeCriticalSection();
 
 			m_Delimiters = delimiters.Distinct().ToArray();
 		}
@@ -72,77 +56,38 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		#region Methods
 
 		/// <summary>
-		/// Enqueues the serial data.
+		/// Override to clear any current state.
 		/// </summary>
-		/// <param name="data"></param>
-		public void Enqueue(string data)
+		protected override void ClearFinal()
 		{
-			m_QueueSection.Execute(() => m_Queue.Enqueue(data));
-			Parse();
+			m_RxData.Clear();
 		}
 
 		/// <summary>
-		/// Clears all queued data in the buffer.
+		/// Override to process the given item for chunking.
 		/// </summary>
-		public void Clear()
+		/// <param name="data"></param>
+		protected override IEnumerable<string> Process(string data)
 		{
-			m_ParseSection.Enter();
-			m_QueueSection.Enter();
+			while (true)
+			{
+				int index = data.IndexOfAny(m_Delimiters);
 
-			try
-			{
-				m_RxData.Clear();
-				m_Queue.Clear();
-			}
-			finally
-			{
-				m_ParseSection.Leave();
-				m_QueueSection.Leave();
+				if (index < 0)
+				{
+					m_RxData.Append(data);
+					break;
+				}
+
+				m_RxData.Append(data.Substring(0, index));
+				data = data.Substring(index + 1);
+
+				string output = m_RxData.Pop();
+				if (!string.IsNullOrEmpty(output))
+					yield return output;
 			}
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Searches the enqueued serial data for the delimiter character.
-		/// Complete strings are raised via the OnCompletedString event.
-		/// </summary>
-		private void Parse()
-		{
-			if (!m_ParseSection.TryEnter())
-				return;
-
-			try
-			{
-				string data = null;
-
-				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
-				{
-					while (true)
-					{
-						int index = data.IndexOfAny(m_Delimiters);
-
-						if (index < 0)
-						{
-							m_RxData.Append(data);
-							break;
-						}
-
-						m_RxData.Append(data.Substring(0, index));
-						data = data.Substring(index + 1);
-
-						string output = m_RxData.Pop();
-						if (string.IsNullOrEmpty(output))
-							continue;
-
-						OnCompletedSerial.Raise(this, new StringEventArgs(output));
-					}
-				}
-			}
-			finally
-			{
-				m_ParseSection.Leave();
-			}
-		}
 	}
 }

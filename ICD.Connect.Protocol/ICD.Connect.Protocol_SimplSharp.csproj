@@ -105,6 +105,7 @@
     <Compile Include="Ports\ISerialPortSettings.cs" />
     <Compile Include="Ports\RelayPort\AbstractRelayPortSettings.cs" />
     <Compile Include="Ports\RelayPort\IRelayPortSettings.cs" />
+    <Compile Include="SerialBuffers\AbstractSerialBuffer.cs" />
     <Compile Include="SerialBuffers\BoundedSerialBuffer.cs" />
     <Compile Include="SerialBuffers\MultiDelimiterSerialBuffer.cs" />
     <Compile Include="SerialBuffers\XSigSerialBuffer.cs" />
