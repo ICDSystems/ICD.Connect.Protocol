@@ -36,7 +36,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		public void Enqueue(string data)
 		{
 			m_QueueSection.Execute(() => m_Queue.Enqueue(data));
-			Parse();
+			ThreadingUtils.SafeInvoke(Parse);
 		}
 
 		/// <summary>
