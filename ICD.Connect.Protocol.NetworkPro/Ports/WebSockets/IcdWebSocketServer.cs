@@ -6,7 +6,6 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Utils;
