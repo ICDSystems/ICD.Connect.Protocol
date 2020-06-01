@@ -80,8 +80,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 
 				m_Listening = value;
 
-				eSeverity severity = m_Listening ? eSeverity.Notice : eSeverity.Warning;
-				Logger.Set("Listening", severity, m_Listening);
+				Logger.LogSetTo(m_Listening ? eSeverity.Notice : eSeverity.Warning, "Listening", m_Listening);
 
 				OnListeningStateChanged.Raise(this, new BoolEventArgs(m_Listening));
 			}

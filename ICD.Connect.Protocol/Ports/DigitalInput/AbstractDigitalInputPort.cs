@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -28,7 +29,10 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 
 				m_State = value;
 
-				Logger.Set("State", eSeverity.Informational, m_State);
+				Logger.LogSetTo(eSeverity.Informational, "State", m_State);
+				Activities.LogActivity(m_State
+					                   ? new Activity(Activity.ePriority.Medium, "State", "Input High", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Low, "State", "Input Low", eSeverity.Informational));
 
 				OnStateChanged.Raise(this, new BoolEventArgs(m_State));
 			}

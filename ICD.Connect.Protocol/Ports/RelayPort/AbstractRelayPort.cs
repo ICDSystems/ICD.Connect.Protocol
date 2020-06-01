@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -34,7 +35,10 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 
 				m_Closed = value;
 
-				Logger.Set("Closed", eSeverity.Informational, m_Closed);
+				Logger.LogSetTo(eSeverity.Informational, "Closed", m_Closed);
+				Activities.LogActivity(m_Closed
+					                   ? new Activity(Activity.ePriority.Medium, "Closed", "Closed", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Medium, "Closed", "Open", eSeverity.Informational));
 
 				OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
 			}

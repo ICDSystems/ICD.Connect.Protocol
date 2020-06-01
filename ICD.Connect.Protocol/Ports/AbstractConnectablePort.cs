@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -36,7 +37,12 @@ namespace ICD.Connect.Protocol.Ports
 
 				m_IsConnected = value;
 
-				Logger.Set("Connected", eSeverity.Informational, m_IsConnected);
+				eSeverity severity = m_IsConnected ? eSeverity.Informational : eSeverity.Error;
+
+				Logger.LogSetTo(severity, "IsConnected", m_IsConnected);
+				Activities.LogActivity(m_IsConnected
+					                   ? new Activity(Activity.ePriority.High, "Is Connected", "Connected", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.High, "Is Connected", "Disconnected", eSeverity.Error));
 
 				UpdateCachedOnlineStatus();
 

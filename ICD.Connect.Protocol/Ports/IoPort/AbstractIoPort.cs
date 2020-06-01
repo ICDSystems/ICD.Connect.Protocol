@@ -8,6 +8,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Settings;
+using ICD.Common.Logging.LoggingContexts;
 
 namespace ICD.Connect.Protocol.Ports.IoPort
 {
@@ -46,7 +47,10 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_DigitalIn = value;
 
-				Logger.Set("Digital In", eSeverity.Informational, m_DigitalIn);
+				Logger.LogSetTo(eSeverity.Informational, "DigitalIn", m_DigitalIn);
+				Activities.LogActivity(m_DigitalIn
+					                   ? new Activity(Activity.ePriority.Medium, "Digital In", "Input High", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Low, "Digital In", "Input Low", eSeverity.Informational));
 
 				OnDigitalInChanged.Raise(this, new BoolEventArgs(m_DigitalIn));
 			}
@@ -65,7 +69,11 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_DigitalOut = value;
 
-				Logger.Set("Digital Out", eSeverity.Informational, m_DigitalOut);
+				Logger.LogSetTo(eSeverity.Informational, "DigitalOut", m_DigitalOut);
+				Activities.LogActivity(m_DigitalOut
+					                   ? new Activity(Activity.ePriority.Medium, "Digital Out", "Output High", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Low, "Digital Out", "Output Low", eSeverity.Informational));
+
 
 				OnDigitalOutChanged.Raise(this, new BoolEventArgs(m_DigitalOut));
 			}
@@ -84,7 +92,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_AnalogIn = value;
 
-				Logger.Set("Analog In", eSeverity.Informational, m_AnalogIn);
+				Logger.LogSetTo(eSeverity.Informational, "AnalogIn", m_AnalogIn);
 
 				OnAnalogInChanged.Raise(this, new UShortEventArgs(m_AnalogIn));
 			}
@@ -103,7 +111,7 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 
 				m_Configuration = value;
 
-				Logger.Set("Configuration", eSeverity.Informational, m_Configuration);
+				Logger.LogSetTo(eSeverity.Informational, "Configuration", m_Configuration);
 
 				IoPortConfigurationCallback handler = OnConfigurationChanged;
 				if (handler != null)
