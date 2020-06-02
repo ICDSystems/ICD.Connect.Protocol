@@ -30,6 +30,8 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			};
 			Subscribe(m_TcpServer);
 
+			m_TcpServer.Start();
+
 			IcdConsole.OnConsolePrint += IcdConsoleOnConsolePrint;
 		}
 
