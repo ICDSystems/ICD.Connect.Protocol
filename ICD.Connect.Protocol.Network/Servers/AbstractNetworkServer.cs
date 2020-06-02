@@ -18,9 +18,9 @@ namespace ICD.Connect.Protocol.Network.Servers
 	{
 		private const string ACCEPT_ALL = "0.0.0.0";
 		private const ushort DEFAULT_PORT = 23;
-		private const int DEFAULT_MAX_NUMBER_OF_CLIENTS = 1;
 		private const int DEFAULT_BUFFER_SIZE = 16384;
 		public const int MAX_NUMBER_OF_CLIENTS_SUPPORTED = 64;
+		private const int DEFAULT_MAX_NUMBER_OF_CLIENTS = MAX_NUMBER_OF_CLIENTS_SUPPORTED;
 
 		private readonly ILoggingContext m_Logger;
 
