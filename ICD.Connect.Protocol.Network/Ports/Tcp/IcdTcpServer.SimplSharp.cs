@@ -232,6 +232,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (clientId == 0)
 				return;
 
+			// If bytesReceived is <= 0, client disconnected
+			if (bytesReceived <= 0)
+			{
+				RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
+				return;
+			}
+
 			byte[] buffer = tcpListener.GetIncomingDataBufferForSpecificClient(clientId);
 
 			// Buffer is null if there is no client with the given id connected
