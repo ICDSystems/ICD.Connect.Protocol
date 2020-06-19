@@ -6,9 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.0.0] - 2020-06-19
+### Added
+ - Added MQTT client port
+ - Added WebSocket server
+ - Added ResponseUrl to WebPortResponse
+ - XP3 equipment manager is exposed in the console
+
 ### Changed
  - Using new logging context
  - Rewrote RPC JSON serialization
+ - Fixed issues with port debug formatting
+ - ConnectionStateManager supports any connectable port, not just serial ports
+ - Simplified TCP server implementations
+ - Fixed a bug related to casting when enqueuing commands against a serial queue for de-duplication
+ - Serial buffers are asynchronous, provides a stability improvement for multi-system
+ - Improvements to XP3 logging and validation
+ - Fixed an XP3 bug related to null crosspoints
+ - Automatically starting the console server device
+ - TCP server defaults to 64 max clients
 
 ## [12.0.0] - 2020-03-20
 ### Added
