@@ -129,6 +129,9 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <returns></returns>
 		public override ushort Subscribe(string[] topics, byte[] qosLevels)
 		{
+			if (topics.Length == 0)
+				return 0;
+
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topics: {0}, ", StringUtils.ArrayFormat(topics))
@@ -147,6 +150,9 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <returns></returns>
 		public override ushort Unsubscribe(string[] topics)
 		{
+			if (topics.Length == 0)
+				return 0;
+
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics))
