@@ -3,6 +3,7 @@ using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 #if SIMPLSHARP
@@ -237,10 +238,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 #endif
 					: MqttSslProtocols.None;
 
-			X509Certificate caCert =
-				Secure && CaCertPath != null
-					? new X509Certificate(PathUtils.GetDefaultConfigPath("Certificates", CaCertPath))
-					: null;
+			X509Certificate caCert = null;
+
+			string certPath = string.IsNullOrEmpty(CaCertPath) ? null : PathUtils.GetDefaultConfigPath("Certificates", CaCertPath);
+			if (Secure && certPath != null)
+			{
+				if (IcdFile.Exists(certPath))
+					caCert = new X509Certificate(certPath);
+				else
+					Logger.Log(eSeverity.Error, "No certificate found at path {0}", certPath);
+			}
 
 			return Client = new MqttClient(Hostname, Port, Secure, caCert, null, protocol, UserCertificateValidation, null);
 		}
