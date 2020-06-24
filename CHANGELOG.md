@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.0.1] - 2020-06-24
+### Changed
+ - Fixed IcdMqttClient exception when attempting to subscribe to an empty array of topics
+ - Fixed IcdMqttClient exception when attempting to load a certificate from a bad path
+
 ## [13.0.0] - 2020-06-19
 ### Added
  - Added MQTT client port
