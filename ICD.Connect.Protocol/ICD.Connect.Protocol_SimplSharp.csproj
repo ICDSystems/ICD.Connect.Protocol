@@ -82,7 +82,7 @@
     <Compile Include="Ports\AbstractConnectablePort.cs" />
     <Compile Include="Ports\AbstractConnectablePortSettings.cs" />
     <Compile Include="Ports\AbstractPortSettings.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Ports\AbstractSerialPortSettings.cs" />
     <Compile Include="Ports\ComPort\AbstractComPort.cs" />

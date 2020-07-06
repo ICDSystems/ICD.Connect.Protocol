@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KrangPlugin.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Ports\ComPort\MockComPort.cs" />
     <Compile Include="Ports\ComPort\MockComPortSettings.cs" />
     <Compile Include="Ports\DigitalInput\MockDigitalInputPort.cs" />
