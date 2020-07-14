@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added WebSocket server
  - Added ResponseUrl to WebPortResponse
  - XP3 equipment manager is exposed in the console
+ - Added method to set the HTTP Authorization header if there is a username in the URI for Net Standard
+
 
 ### Changed
  - Using new logging context
