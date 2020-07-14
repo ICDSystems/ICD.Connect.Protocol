@@ -114,9 +114,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			{
 				string url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(url);
-				
+
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-				
+
+				SetAuthorizationHeader(request.RequestUri, request);
+
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					AddHeader(request, header.Key, header.Value);
 
@@ -148,6 +150,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					Content = new ByteArrayContent(data)
 				};
+
+				SetAuthorizationHeader(request.RequestUri, request);
 
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					AddHeader(request, header.Key, header.Value);
@@ -309,6 +313,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				default:
 					message.Headers.Add(header, values);
 					break;
+			}
+		}
+
+		private void SetAuthorizationHeader(Uri uri, HttpRequestMessage request)
+		{
+			string username = uri.GetUserName();
+			string password = uri.GetPassword();
+
+			if (!string.IsNullOrEmpty(username))
+			{
+				string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+				AddHeader(request, "Authorization", "Basic " + encoded);
 			}
 		}
 
