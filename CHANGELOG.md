@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added method to set the HTTP Authorization header if there is a username in the URI
+
 ## [13.0.1] - 2020-06-24
 ### Changed
  - Fixed IcdMqttClient exception when attempting to subscribe to an empty array of topics
@@ -17,8 +20,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added WebSocket server
  - Added ResponseUrl to WebPortResponse
  - XP3 equipment manager is exposed in the console
- - Added method to set the HTTP Authorization header if there is a username in the URI for Net Standard
-
 
 ### Changed
  - Using new logging context

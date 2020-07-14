@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 #if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
@@ -105,6 +106,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				request.Header.SetHeaderValue("Accept", Accept);
 				request.Header.SetHeaderValue("Expect", "");
 
+				Uri uri = new Uri(url);
+				SetAuthorizationHeader(uri, request);
+
 				foreach (KeyValuePair<string, List<string>> header in headers)
 					request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
 
@@ -144,6 +148,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				request.Header.SetHeaderValue("Accept", Accept);
 				request.Header.SetHeaderValue("Expect", "");
 				request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+
+				Uri uri = new Uri(url);
+				SetAuthorizationHeader(uri, request);
 
 				return Dispatch(request);
 			}
@@ -273,6 +280,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			settings.UserName = ProxyUri == null ? string.Empty : ProxyUri.GetUserName();
 			settings.UserPassword = ProxyUri == null ? string.Empty : ProxyUri.GetPassword();
 			settings.HostOrUrl = urlOrHost;
+		}
+
+		private void SetAuthorizationHeader(Uri uri, HttpsClientRequest request)
+		{
+			string username = uri.GetUserName();
+			string password = uri.GetPassword();
+
+			if (!string.IsNullOrEmpty(username))
+			{
+				string encoded = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+				request.Header.SetHeaderValue("Authorization", "Basic " + encoded);
+			}
 		}
 
 		#endregion
