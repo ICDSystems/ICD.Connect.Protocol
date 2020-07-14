@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.1.0] - 2020-07-14
 ### Added
  - Added method to set the HTTP Authorization header if there is a username in the URI
+
+### Changed
+ - Reverted async SerialBuffer change due to deadlocks
 
 ## [13.0.1] - 2020-06-24
 ### Changed
