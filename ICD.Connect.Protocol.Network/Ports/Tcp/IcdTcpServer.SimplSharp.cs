@@ -192,6 +192,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="status"></param>
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
+			// Spawn a new thread to handle status changes
+			// Mitigration strategy for Creston TCPServer bugs
+			ThreadingUtils.SafeInvoke(() => SocketStatusChangeWorker(tcpListener, clientId, status));
+		}
+
+		/// <summary>
+		/// Handles the socket status change event, to be run in a different thread
+		/// </summary>
+		/// <param name="tcpListener"></param>
+		/// <param name="clientId"></param>
+		/// <param name="status"></param>
+		private void SocketStatusChangeWorker(TCPServer tcpListener, uint clientId, SocketStatus status)
+		{
 			SocketStateEventArgs.eSocketStatus reason = GetSocketStatus(status);
 
 			if (clientId != 0)
@@ -201,7 +214,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				{
 					RemoveClient(clientId, reason);
 				}
-					// Client connected
+				// Client connected
 				else if (!ContainsClient(clientId))
 				{
 					AddClient(clientId, reason);
