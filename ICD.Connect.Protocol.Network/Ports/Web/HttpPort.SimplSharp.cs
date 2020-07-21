@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using System.Text;
+using ICD.Connect.API.Commands;
 #if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
@@ -276,8 +276,26 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			settings.HostOrUrl = urlOrHost;
 		}
 
-		{
+		#endregion
 
+		#region Console
+
+		/// <summary>
+		/// Gets the console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new ConsoleCommand("EnableVerboseMode", "Enables Verbose mode on the Crestron HttpsClient", () => m_HttpsClient.Verbose = true);
+			yield return new ConsoleCommand("DisableVerboseMode", "Disables Verbose mode on the Crestron HttpsClient", () => m_HttpsClient.Verbose = false);
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
