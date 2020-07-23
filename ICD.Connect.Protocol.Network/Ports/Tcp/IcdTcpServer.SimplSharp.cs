@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Utils.Extensions;
+#if SIMPLSHARP
 using System;
 using System.Linq;
 using Crestron.SimplSharp;
@@ -332,7 +333,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		private void UpdateListeningState()
 		{
-			Listening = m_TcpListener != null && m_TcpListener.State > ServerState.SERVER_NOT_LISTENING;
+			Listening = m_TcpListener != null && m_TcpListener.State.HasFlag(ServerState.SERVER_LISTENING);
 		}
 
 		#endregion
