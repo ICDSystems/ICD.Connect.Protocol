@@ -249,7 +249,10 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 					Logger.Log(eSeverity.Error, "No certificate found at path {0}", certPath);
 			}
 
-			return Client = new MqttClient(Hostname, Port, Secure, caCert, null, protocol, UserCertificateValidation, null);
+			// Null proxy hostname disables the proxy
+			string proxyHostname = string.IsNullOrEmpty(ProxyHostname) ? null : ProxyHostname;
+
+			return Client = new MqttClient(Hostname, Port, proxyHostname, ProxyPort, Secure, caCert, null, protocol, UserCertificateValidation, null);
 		}
 
 		private bool UserCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)

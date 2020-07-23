@@ -7,6 +7,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 	{
 		private const string ELEMENT_HOSTNAME = "Hostname";
 		private const string ELEMENT_PORT = "Port";
+		private const string ELEMENT_PROXY_HOSTNAME = "ProxyHostname";
+		private const string ELEMENT_PROXY_PORT = "ProxyPort";
 		private const string ELEMENT_CLIENT_ID = "ClientId";
 		private const string ELEMENT_USERNAME = "Username";
 		private const string ELEMENT_PASSWORD = "Password";
@@ -22,6 +24,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Gets/sets the network port.
 		/// </summary>
 		public ushort Port { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy hostname.
+		/// </summary>
+		public string ProxyHostname { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy port.
+		/// </summary>
+		public ushort ProxyPort { get; set; }
 
 		/// <summary>
 		/// Gets/sets the client id.
@@ -58,6 +70,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			writer.WriteElementString(ELEMENT_HOSTNAME, Hostname);
 			writer.WriteElementString(ELEMENT_PORT, IcdXmlConvert.ToString(Port));
+			writer.WriteElementString(ELEMENT_PROXY_HOSTNAME, ProxyHostname);
+			writer.WriteElementString(ELEMENT_PROXY_PORT, IcdXmlConvert.ToString(ProxyPort));
 			writer.WriteElementString(ELEMENT_CLIENT_ID, ClientId);
 			writer.WriteElementString(ELEMENT_USERNAME, Username);
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
@@ -75,6 +89,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			Hostname = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_HOSTNAME);
 			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, ELEMENT_PORT) ?? 1883; // 1883 default network port for mqtt;
+			ProxyHostname = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PROXY_HOSTNAME);
+			ProxyPort = XmlUtils.TryReadChildElementContentAsUShort(xml, ELEMENT_PROXY_PORT) ?? 0;
 			ClientId = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CLIENT_ID);
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);

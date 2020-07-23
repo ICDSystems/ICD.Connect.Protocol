@@ -15,6 +15,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		ushort Port { get; set; }
 
 		/// <summary>
+		/// Gets/sets the proxy hostname.
+		/// </summary>
+		string ProxyHostname { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy port.
+		/// </summary>
+		ushort ProxyPort { get; set; }
+
+		/// <summary>
 		/// Gets/sets the client id.
 		/// </summary>
 		string ClientId { get; set; }

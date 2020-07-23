@@ -29,6 +29,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		public ushort Port { get; set; }
 
 		/// <summary>
+		/// Gets/sets the proxy hostname.
+		/// </summary>
+		public string ProxyHostname { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy port.
+		/// </summary>
+		public ushort ProxyPort { get; set; }
+
+		/// <summary>
 		/// Gets/sets the client id.
 		/// </summary>
 		public string ClientId { get; set; }
@@ -127,6 +137,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			Hostname = null;
 			Port = 1883; // 1883 default network port for mqtt
+			ProxyHostname = null;
+			ProxyPort = 0;
 			ClientId = null;
 			Username = null;
 			Password = null;
@@ -144,6 +156,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			settings.Hostname = Hostname;
 			settings.Port = Port;
+			settings.ProxyHostname = ProxyHostname;
+			settings.ProxyPort = ProxyPort;
 			settings.ClientId = ClientId;
 			settings.Username = Username;
 			settings.Password = Password;
@@ -162,6 +176,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			Hostname = settings.Hostname;
 			Port = settings.Port;
+			ProxyHostname = settings.ProxyHostname;
+			ProxyPort = settings.ProxyPort;
 			ClientId = settings.ClientId;
 			Username = settings.Username;
 			Password = settings.Password;
@@ -183,6 +199,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			addRow("Hostname", Hostname);
 			addRow("Port", Port);
+			addRow("ProxyHostname", ProxyHostname);
+			addRow("ProxyPort", ProxyPort);
 			addRow("ClientId", ClientId);
 			addRow("Username", Username);
 			addRow("Password", Password);
