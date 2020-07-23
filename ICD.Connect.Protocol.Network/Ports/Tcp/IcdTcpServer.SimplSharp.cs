@@ -265,7 +265,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void TcpClientConnectCallback(TCPServer tcpListener, uint clientId)
 		{
 			// Spawn new thread for accepting new clients
-			tcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			if (tcpListener.NumberOfClientsConnected < tcpListener.MaxNumberOfClientSupported)
+				tcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			else
+				Logger.AddEntry(eSeverity.Warning, "{0} - Max number of clients reached:{1}", this,
+				                tcpListener.MaxNumberOfClientSupported);
 		}
 
 		/// <summary>
@@ -334,6 +338,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void UpdateListeningState()
 		{
 			Listening = m_TcpListener != null && m_TcpListener.State.HasFlag(ServerState.SERVER_LISTENING);
+
+			// If we are enabled but not listening, probably hit max clients - check to see if we're not and reset listener
+			if (m_TcpListener != null && Enabled && !Listening &&
+				m_TcpListener.NumberOfClientsConnected < m_TcpListener.MaxNumberOfClientSupported)
+			{
+				m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			}
 		}
 
 		#endregion

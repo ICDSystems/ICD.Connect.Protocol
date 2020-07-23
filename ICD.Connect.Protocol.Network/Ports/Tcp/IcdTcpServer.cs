@@ -355,6 +355,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				m_ClientsSection.Leave();
 			}
 
+			UpdateListeningState();
+
 			RaiseSocketStateChange(new SocketStateEventArgs(reason, clientId));
 		}
 
