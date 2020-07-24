@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added proxy support to IcdMqttClient
+ - Added console commands for enabling/disabling crestron HTTP/S verbose mode
+
 ## [13.1.0] - 2020-07-14
 ### Added
  - Added method to set the HTTP Authorization header if there is a username in the URI
