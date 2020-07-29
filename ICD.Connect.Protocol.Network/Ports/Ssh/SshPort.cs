@@ -30,7 +30,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		public const ushort DEFAULT_PORT = 22;
 
 		private readonly SafeCriticalSection m_SshSection;
-		private readonly Dictionary<string, string> m_PrivateKeys;
+		private readonly List<PrivateKey> m_PrivateKeys;
 		private readonly List<PrivateKeyFile> m_PrivateKeyFiles;
         private readonly SecureNetworkProperties m_NetworkProperties;
 
@@ -94,7 +94,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			m_SshSection = new SafeCriticalSection();
 			m_NetworkProperties = new SecureNetworkProperties();
-			m_PrivateKeys = new Dictionary<string, string>();
+			m_PrivateKeys = new List<PrivateKey>();
 			m_PrivateKeyFiles = new List<PrivateKeyFile>();
 
 			Port = DEFAULT_PORT;
@@ -419,14 +419,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// </summary>
 		public void ClearPrivateKeys()
 		{
-			SetPrivateKeys(Enumerable.Empty<KeyValuePair<string, string>>());
+			SetPrivateKeys(Enumerable.Empty<PrivateKey>());
 		}
 
 		/// <summary>
 		/// Gets the private keys path -> pass-phrase mapping.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<KeyValuePair<string, string>> GetPrivateKeys()
+		public IEnumerable<PrivateKey> GetPrivateKeys()
 		{
 			return m_SshSection.Execute(() => m_PrivateKeys.ToArray(m_PrivateKeys.Count));
 		}
@@ -435,7 +435,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// Sets the private keys path -> pass-phrase mapping.
 		/// </summary>
 		/// <param name="privateKeys"></param>
-		public void SetPrivateKeys(IEnumerable<KeyValuePair<string, string>> privateKeys)
+		public void SetPrivateKeys(IEnumerable<PrivateKey> privateKeys)
 		{
 			if (privateKeys == null)
 				throw new ArgumentNullException("privateKeys");
@@ -448,7 +448,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 				m_PrivateKeys.AddRange(privateKeys);
 
 				IEnumerable<PrivateKeyFile> privateKeyFiles =
-					m_PrivateKeys.Select(kvp => ToPrivateKeyFile(kvp))
+					m_PrivateKeys.Select(pk => ToPrivateKeyFile(pk))
 					             .Where(f => f != null);
 
 				m_PrivateKeyFiles.Clear();
@@ -490,9 +490,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <param name="pair"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		private PrivateKeyFile ToPrivateKeyFile(KeyValuePair<string, string> pair)
+		private PrivateKeyFile ToPrivateKeyFile(PrivateKey pair)
 		{
-			return ToPrivateKeyFile(pair.Key, pair.Value);
+			return ToPrivateKeyFile(pair.Path, pair.PassPhrase);
 		}
 
 		/// <summary>
@@ -529,7 +529,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.CopySettingsFinal(settings);
 
-			IEnumerable<KeyValuePair<string, string>> privateKeys = GetPrivateKeys();
+			IEnumerable<PrivateKey> privateKeys = GetPrivateKeys();
 			settings.SetPrivateKeys(privateKeys);
 		}
 
@@ -554,7 +554,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			IEnumerable<KeyValuePair<string, string>> privateKeys = settings.GetPrivateKeys();
+			IEnumerable<PrivateKey> privateKeys = settings.GetPrivateKeys();
 			SetPrivateKeys(privateKeys);
 
 			ApplyConfiguration();

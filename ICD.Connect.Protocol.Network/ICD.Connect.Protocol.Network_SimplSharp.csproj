@@ -103,6 +103,7 @@
     <Compile Include="Ports\INetworkPortSettings.cs" />
     <Compile Include="Ports\ISecureNetworkPort.cs" />
     <Compile Include="Ports\ISecureNetworkPortSettings.cs" />
+    <Compile Include="Ports\Ssh\PrivateKey.cs" />
     <Compile Include="Ports\Web\AbstractWebPort.cs" />
     <Compile Include="Ports\Web\AbstractWebPortSettings.cs" />
     <Compile Include="Ports\Web\eProxyAuthenticationMethod.cs" />

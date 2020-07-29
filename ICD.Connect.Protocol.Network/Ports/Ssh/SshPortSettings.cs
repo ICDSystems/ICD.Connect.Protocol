@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Network.Settings;
@@ -18,11 +20,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		private const string PASSPHRASE_ELEMENT = "PassPhrase";
 
 		private readonly SecureNetworkProperties m_NetworkProperties;
-
-		/// <summary>
-		/// Path -> Pass-phrase
-		/// </summary>
-		private readonly Dictionary<string, string> m_PrivateKeys; 
+		private readonly List<PrivateKey> m_PrivateKeys; 
 
 		#region Properties
 
@@ -62,6 +60,36 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 			set { m_NetworkProperties.NetworkPort = value; }
 		}
 
+		/// <summary>
+		/// Gets/sets the path to the first private key.
+		/// </summary>
+		[PublicAPI("DAV")]
+		public string PrimaryPrivateKeyPath
+		{
+			get { return m_PrivateKeys.Select(pk => pk.Path).FirstOrDefault(); }
+			set
+			{
+				if (m_PrivateKeys.Count == 0)
+					m_PrivateKeys.Add(new PrivateKey());
+				m_PrivateKeys[0].Path = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets/sets the pass-phrase for the first private key.
+		/// </summary>
+		[PublicAPI("DAV")]
+		public string PrimaryPrivateKeyPassPhrase
+		{
+			get { return m_PrivateKeys.Select(pk => pk.PassPhrase).FirstOrDefault(); }
+			set
+			{
+				if (m_PrivateKeys.Count == 0)
+					m_PrivateKeys.Add(new PrivateKey());
+				m_PrivateKeys[0].PassPhrase = value;
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -74,7 +102,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 				NetworkPort = SshPort.DEFAULT_PORT
 			};
 
-			m_PrivateKeys = new Dictionary<string, string>();
+			m_PrivateKeys = new List<PrivateKey>();
 		}
 
 		#region Methods
@@ -83,16 +111,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// Gets the configured path -> pass-phrase pairs.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<KeyValuePair<string, string>> GetPrivateKeys()
+		public IEnumerable<PrivateKey> GetPrivateKeys()
 		{
-			return m_PrivateKeys.ToArray(m_PrivateKeys.Count);
+			return m_PrivateKeys.Where(pk => !string.IsNullOrEmpty(pk.Path))
+			                    .ToArray(m_PrivateKeys.Count);
 		}
 
 		/// <summary>
 		/// Sets the configured path -> pass-phrase pairs.
 		/// </summary>
 		/// <returns></returns>
-		public void SetPrivateKeys(IEnumerable<KeyValuePair<string, string>> privateKeys)
+		public void SetPrivateKeys(IEnumerable<PrivateKey> privateKeys)
 		{
 			m_PrivateKeys.Clear();
 			m_PrivateKeys.AddRange(privateKeys);
@@ -114,7 +143,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.WriteElements(writer);
 
-			XmlUtils.WriteDictToXml(writer, GetPrivateKeys(), PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT, PASSPHRASE_ELEMENT);
+			IEnumerable<KeyValuePair<string, string>> kvps =
+				GetPrivateKeys().Select(pk => new KeyValuePair<string, string>(pk.Path, pk.PassPhrase));
+
+			XmlUtils.WriteDictToXml(writer, kvps, PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT, PASSPHRASE_ELEMENT);
 		}
 
 		/// <summary>
@@ -125,8 +157,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			base.ParseXml(xml);
 
-			IEnumerable<KeyValuePair<string, string>> privateKeys =
-				XmlUtils.ReadDictFromXml<string, string>(xml, PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT, PASSPHRASE_ELEMENT);
+			IEnumerable<PrivateKey> privateKeys =
+				XmlUtils.ReadDictFromXml<string, string>(xml, PRIVATE_KEYS_ELEMENT, PRIVATE_KEY_ELEMENT, PATH_ELEMENT,
+				                                         PASSPHRASE_ELEMENT)
+				        .Select(kvp => new PrivateKey {Path = kvp.Key, PassPhrase = kvp.Value});
 
 			SetPrivateKeys(privateKeys);
 

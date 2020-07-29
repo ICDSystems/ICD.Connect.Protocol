@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added proxy support to IcdMqttClient
  - Added console commands for enabling/disabling crestron HTTP/S verbose mode
+ - Added helpers for DeployAV configuration of SSH private key
 
 ## [13.1.0] - 2020-07-14
 ### Added
