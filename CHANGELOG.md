@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.2.0] - 2020-07-29
 ### Added
  - Added proxy support to IcdMqttClient
  - Added console commands for enabling/disabling crestron HTTP/S verbose mode
