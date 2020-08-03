@@ -351,7 +351,18 @@ namespace ICD.Connect.Protocol.Network.Servers
 				m_ClientsSection.Leave();
 			}
 
+			HandleClientRemoved(clientId, reason);
+
 			RaiseSocketStateChange(new SocketStateEventArgs(reason, clientId));
+		}
+
+		/// <summary>
+		/// Called when a client is removed from the collection.
+		/// </summary>
+		/// <param name="clientId"></param>
+		/// <param name="reason"></param>
+		protected virtual void HandleClientRemoved(uint clientId, SocketStateEventArgs.eSocketStatus reason)
+		{
 		}
 
 		/// <summary>

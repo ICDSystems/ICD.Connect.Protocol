@@ -44,6 +44,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Automatically starting the console server device
  - TCP server defaults to 64 max clients
 
+## [12.0.1] - 2020-03-20
+### Changed
+ - Crestron TCPServer now spawns a new thread to handle SocketStatusChanged event - mitigation for TCPServer bugs
+ - Crestron TCPServer - Fixed issue where connected but not listening would be interpreted as listening
+ - Crestron TCPServer - Better handling and recovery when hitting max number of connections - will now allow additional connections when no longer at max
+
 ## [12.0.0] - 2020-03-20
 ### Added
  - Added WebPortResponse to help IWebPort return byte arrays and headers instad of just strings.

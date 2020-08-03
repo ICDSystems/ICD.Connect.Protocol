@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Protocol.Network.Servers;
+﻿using ICD.Common.Utils.Extensions;
+using ICD.Connect.Protocol.Network.Servers;
 #if SIMPLSHARP
 using System;
 using System.Linq;
@@ -150,6 +151,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="status"></param>
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
+			// Spawn a new thread to handle status changes
+			// Mitigration strategy for Creston TCPServer bugs
+			ThreadingUtils.SafeInvoke(() => SocketStatusChangeWorker(tcpListener, clientId, status));
+		}
+
+		/// <summary>
+		/// Handles the socket status change event, to be run in a different thread
+		/// </summary>
+		/// <param name="tcpListener"></param>
+		/// <param name="clientId"></param>
+		/// <param name="status"></param>
+		private void SocketStatusChangeWorker(TCPServer tcpListener, uint clientId, SocketStatus status)
+		{
 			SocketStateEventArgs.eSocketStatus reason = GetSocketStatus(status);
 
 			try
@@ -218,7 +232,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void TcpClientConnectCallback(TCPServer tcpListener, uint clientId)
 		{
 			// Spawn new thread for accepting new clients
-			tcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			if (tcpListener.NumberOfClientsConnected < tcpListener.MaxNumberOfClientSupported)
+				tcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			else
+				Logger.Log(eSeverity.Warning, "{0} - Max number of clients reached:{1}", this,
+				           tcpListener.MaxNumberOfClientSupported);
 		}
 
 		/// <summary>
@@ -277,7 +295,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		private void UpdateListeningState()
 		{
-			Listening = m_TcpListener != null && m_TcpListener.State > ServerState.SERVER_NOT_LISTENING;
+			Listening = m_TcpListener != null && m_TcpListener.State.HasFlag(ServerState.SERVER_LISTENING);
+
+			// If we are enabled but not listening, probably hit max clients - check to see if we're not and reset listener
+			if (m_TcpListener != null && Enabled && !Listening &&
+				m_TcpListener.NumberOfClientsConnected < m_TcpListener.MaxNumberOfClientSupported)
+			{
+				m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			}
 		}
 
 		#endregion
