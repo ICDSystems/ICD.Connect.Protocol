@@ -137,8 +137,6 @@ namespace ICD.Connect.Protocol.Network.Servers
 			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
 			MaxNumberOfClients = DEFAULT_MAX_NUMBER_OF_CLIENTS;
-
-			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
 		}
 
 		/// <summary>
@@ -149,8 +147,6 @@ namespace ICD.Connect.Protocol.Network.Servers
 			OnDataReceived = null;
 			OnSocketStateChange = null;
 			OnListeningStateChanged = null;
-
-			IcdEnvironment.OnEthernetEvent -= IcdEnvironmentOnEthernetEvent;
 
 			Stop();
 		}

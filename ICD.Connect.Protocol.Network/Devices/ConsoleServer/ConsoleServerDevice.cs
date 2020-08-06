@@ -56,6 +56,7 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 		{
 			base.DisposeFinal(disposing);
 
+			Unsubscribe(m_TcpServer);
 			m_TcpServer.Dispose();
 
 			IcdConsole.OnConsolePrint -= IcdConsoleOnConsolePrint;
