@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		private readonly NetworkServerBufferManager m_BufferManager;
 		private readonly object m_Parent;
 
-		private IcdTcpServer m_Server;
+		private INetworkServer m_Server;
 
 		/// <summary>
 		/// Constructor.
@@ -98,7 +98,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// </summary>
 		/// <param name="server"></param>
 		[PublicAPI]
-		public void SetServer(IcdTcpServer server)
+		public void SetServer(INetworkServer server)
 		{
 			if (server == m_Server)
 				return;

@@ -164,6 +164,7 @@
     <Compile Include="Ports\Web\HttpPort.Standard.cs" />
     <Compile Include="Ports\Web\HttpPortSettings.cs" />
     <Compile Include="Ports\Web\IWebPort.cs" />
+    <Compile Include="Utils\X509Utils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
