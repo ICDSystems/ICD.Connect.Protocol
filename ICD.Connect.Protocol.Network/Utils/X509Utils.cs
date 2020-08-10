@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
+﻿#if SIMPLSHARP
 using Crestron.SimplSharp.CrestronIO;
-using Crestron.SimplSharp.Cryptography.X509Certificates;
+#else
+using System.IO;
+#endif
+using System;
+using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils.IO;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
@@ -17,7 +20,6 @@ using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
-using X509Certificate2 = System.Security.Cryptography.X509Certificates.X509Certificate2;
 
 namespace ICD.Connect.Protocol.Network.Utils
 {
@@ -31,6 +33,12 @@ namespace ICD.Connect.Protocol.Network.Utils
 
 		#region Methods
 
+		/// <summary>
+		/// Generates and writes a PFX file to the specified path.
+		/// </summary>
+		/// <param name="commonName"></param>
+		/// <param name="path"></param>
+		[PublicAPI]
 		public static void GenerateAndWriteCertificate(string commonName, string path)
 		{
 			X509Name name = new X509Name(string.Format("CN={0}", commonName));
@@ -52,6 +60,14 @@ namespace ICD.Connect.Protocol.Network.Utils
 			}
 		}
 
+		/// <summary>
+		/// Extracts the X509 Certificate and private key bytes from a PFX file.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="cerPath"></param>
+		/// <param name="keyPath"></param>
+		/// <returns></returns>
+		[PublicAPI]
 		public static KeyValuePair<byte[], byte[]> GetCertAndKeyFromPfx(string path, string cerPath, string keyPath)
 		{
 			using (IcdFileStream fs = new IcdFileStream(new FileStream(path, FileMode.Open)))
@@ -72,13 +88,13 @@ namespace ICD.Connect.Protocol.Network.Utils
 						}
 
 						using (IcdStream s = new IcdStream(new FileStream(keyPath, FileMode.Create)))
-						using (IcdTextWriter tw = new IcdStreamWriter(new StreamWriter(s.WrappedStream)))
-						{
-							var generator = new MiscPemGenerator(privateKey);
-							PemWriter pemWriter = new PemWriter(tw.WrappedTextWriter);
-							pemWriter.WriteObject(generator);
-							tw.WrappedTextWriter.Flush();
-						}
+							using (IcdTextWriter tw = new IcdStreamWriter(new StreamWriter(s.WrappedStream)))
+							{
+								var generator = new MiscPemGenerator(privateKey);
+								PemWriter pemWriter = new PemWriter(tw.WrappedTextWriter);
+								pemWriter.WriteObject(generator);
+								tw.WrappedTextWriter.Flush();
+							}
 					}
 					break;
 				}
@@ -94,6 +110,11 @@ namespace ICD.Connect.Protocol.Network.Utils
 
 		#region Private Methods
 
+		/// <summary>
+		/// Reads the file from the specified path into a byte array.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		private static byte[] ReadFileToByteArray(string path)
 		{
 			byte[] buffer;
@@ -105,7 +126,11 @@ namespace ICD.Connect.Protocol.Network.Utils
 			return buffer;
 		}
 
-
+		/// <summary>
+		/// Generates an RSA private key.
+		/// </summary>
+		/// <param name="length"></param>
+		/// <returns></returns>
 		private static AsymmetricCipherKeyPair GenerateRsaKeyPair(int length)
 		{
 			var keygenParam = new KeyGenerationParameters(s_SecureRandom, length);
@@ -115,6 +140,14 @@ namespace ICD.Connect.Protocol.Network.Utils
 			return keyGenerator.GenerateKeyPair();
 		}
 
+		/// <summary>
+		/// Generates an X509 Certificate.
+		/// </summary>
+		/// <param name="issuer"></param>
+		/// <param name="subject"></param>
+		/// <param name="issuerPrivate"></param>
+		/// <param name="subjectPublic"></param>
+		/// <returns></returns>
 		private static X509Certificate Generate(
 			X509Name issuer, X509Name subject,
 			AsymmetricKeyParameter issuerPrivate,

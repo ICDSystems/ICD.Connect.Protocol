@@ -133,8 +133,15 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
+				if (m_Stream == null)
+				{
+					Logger.Log(eSeverity.Error, "Failed to send data - no SSLStream");
+					return false;
+				}
+
 				PrintTx(data);
-				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
+				m_Stream.Write(bytes);
+				//m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 				return true;
 			}
 			catch (SocketException e)
