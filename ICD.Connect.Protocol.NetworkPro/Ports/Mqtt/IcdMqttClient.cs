@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Text;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
+using uPLibrary.Networking.M2Mqtt.Exceptions;
 #if SIMPLSHARP
 using SSMono.Net.Security;
 using SSMono.Security.Cryptography.X509Certificates;
@@ -113,8 +115,15 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// </summary>
 		public override void Disconnect()
 		{
-			if (Client != null)
-				Client.Disconnect();
+			try
+			{
+				if (Client != null)
+					Client.Disconnect();
+			}
+			catch (MqttClientException e)
+			{
+				Logger.Log(eSeverity.Error, "Exception on Disconnect - {0}", e.Message);
+			}
 
 			Client = null;
 
