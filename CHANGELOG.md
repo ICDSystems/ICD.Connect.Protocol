@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.2.1] - 2020-08-13
+### Changed
+ - Catching MQTT exceptions on disconnect
+ - Updated M2MQTT library
+
 ## [13.2.0] - 2020-07-29
 ### Added
  - Added proxy support to IcdMqttClient
