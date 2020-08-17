@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Settings.Attributes;
@@ -114,7 +113,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		public IEnumerable<PrivateKey> GetPrivateKeys()
 		{
 			return m_PrivateKeys.Where(pk => !string.IsNullOrEmpty(pk.Path))
-			                    .ToArray(m_PrivateKeys.Count);
+			                    .ToArray();
 		}
 
 		/// <summary>
