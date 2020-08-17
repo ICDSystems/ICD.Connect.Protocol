@@ -180,7 +180,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, m_UriProperties.GetUri())
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Uri)
 				{
 					Content = new StringContent(content, Encoding.GetEncoding(28591), SOAP_CONTENT_TYPE)
 				};
