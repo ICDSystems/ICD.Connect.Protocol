@@ -10,7 +10,7 @@ using ICD.Connect.Protocol.Crosspoints.EventArguments;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Protocol.XSig;
-using ICD.Connect.Settings.SPlusShims;
+using ICD.Connect.Settings.CrestronSPlus.SPlusShims;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus.CrosspointShims
 {

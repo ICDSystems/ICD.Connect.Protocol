@@ -131,6 +131,10 @@
       <Project>{36A8C910-4035-4F68-B0B6-2EC2D18FD939}</Project>
       <Name>ICD.Common.Permissions_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings.CrestronSPlus\ICD.Connect.Settings.CrestronSPlus_SimplSharp.csproj">
+      <Project>{AA8E36BD-02CE-4B25-BA30-A76E990DF391}</Project>
+      <Name>ICD.Connect.Settings.CrestronSPlus_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Telemetry\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
       <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
       <Name>ICD.Connect.Telemetry_SimplSharp</Name>
