@@ -95,6 +95,26 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		public abstract WebPortResponse Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data);
 
 		/// <summary>
+		/// Sends a PATCH request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public WebPortResponse Patch(string relativeOrAbsoluteUri, byte[] data)
+		{
+			return Patch(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data);
+		}
+
+		/// <summary>
+		/// Sends a PATCH request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public abstract WebPortResponse Patch(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data);
+
+		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
 		/// <param name="action"></param>

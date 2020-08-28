@@ -155,6 +155,43 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 		/// <summary>
+		/// Sends a PATCH request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public override WebPortResponse Patch(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
+		{
+			m_ClientBusySection.Enter();
+
+			try
+			{
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url);
+
+				HttpsClientRequest request = new HttpsClientRequest
+				{
+					KeepAlive = m_HttpsClient.KeepAlive,
+					ContentBytes = data,
+					ContentSource = ContentSource.ContentBytes,
+					RequestType = RequestType.Patch
+				};
+
+				request.Url.Parse(url);
+				request.Header.SetHeaderValue("Accept", Accept);
+				request.Header.SetHeaderValue("Expect", "");
+				request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+
+				return Dispatch(request);
+			}
+			finally
+			{
+				m_ClientBusySection.Leave();
+			}
+		}
+
+		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
 		/// <param name="action"></param>

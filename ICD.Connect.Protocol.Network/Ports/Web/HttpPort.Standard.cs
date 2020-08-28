@@ -164,6 +164,33 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 		}
 
+		public override WebPortResponse Patch(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
+		{
+			m_ClientBusySection.Enter();
+
+			try
+			{
+				string url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url);
+
+				HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+				{
+					Content = new ByteArrayContent(data)
+				};
+
+				SetAuthorizationHeader(request.RequestUri, request);
+
+				foreach (KeyValuePair<string, List<string>> header in headers)
+					AddHeader(request, header.Key, header.Value);
+
+				return Dispatch(request);
+			}
+			finally
+			{
+				m_ClientBusySection.Leave();
+			}
+		}
+
 		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
