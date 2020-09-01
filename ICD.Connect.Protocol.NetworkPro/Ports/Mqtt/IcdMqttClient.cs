@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
-using uPLibrary.Networking.M2Mqtt.Exceptions;
+using ICD.Connect.Protocol.Ports;
 #if SIMPLSHARP
 using SSMono.Net.Security;
 using SSMono.Security.Cryptography.X509Certificates;
@@ -120,7 +121,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				if (Client != null)
 					Client.Disconnect();
 			}
-			catch (MqttClientException e)
+			catch (Exception e)
 			{
 				Logger.Log(eSeverity.Error, "Exception on Disconnect - {0}", e.Message);
 			}
@@ -135,22 +136,48 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Subscribe to the given topics.
 		/// </summary>
 		/// <param name="topics"></param>
-		/// <param name="qosLevels"></param>
 		/// <returns></returns>
-		public override ushort Subscribe(string[] topics, byte[] qosLevels)
+		public override ushort Subscribe([NotNull] IDictionary<string, byte> topics)
 		{
-			if (topics.Length == 0)
+			if (topics == null)
+				throw new ArgumentNullException("topics");
+
+			if (!IsConnected)
+			{
+				Logger.Log(eSeverity.Error, "Unable to Subscribe - Client is not connected.");
+				return 0;
+			}
+
+			if (topics.Count == 0)
 				return 0;
 
 			string debug =
 				new StringBuilder()
-					.AppendFormat("Topics: {0}, ", StringUtils.ArrayFormat(topics))
-					.AppendFormat("QOS Levels: {0}", StringUtils.ArrayFormat(qosLevels))
+					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics.Select(kvp => string.Format("{0} ({1})", kvp.Key, kvp.Value))))
 					.ToString();
 
 			PrintTx("Subscribe", debug);
 
-			return GetClient().Subscribe(topics, qosLevels);
+			string[] topicStrings = new string[topics.Count];
+			byte[] qosLevels = new byte[topics.Count];
+
+			int index = 0;
+			foreach (var kvp in topics)
+			{
+				topicStrings[index] = kvp.Key;
+				qosLevels[index] = kvp.Value;
+				index++;
+			}
+
+			try
+			{
+				return GetClient().Subscribe(topicStrings, qosLevels);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to Subscribe - {0}", e.Message);
+				return 0;
+			}
 		}
 
 		/// <summary>
@@ -158,19 +185,37 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// </summary>
 		/// <param name="topics"></param>
 		/// <returns></returns>
-		public override ushort Unsubscribe(string[] topics)
+		public override ushort Unsubscribe([NotNull] IEnumerable<string> topics)
 		{
-			if (topics.Length == 0)
+			if (topics == null)
+				throw new ArgumentNullException("topics");
+
+			if (!IsConnected)
+			{
+				Logger.Log(eSeverity.Error, "Unable to Unsubscribe - Client is not connected.");
+				return 0;
+			}
+
+			string[] topicsArray = topics as string[] ?? topics.ToArray();
+			if (topicsArray.Length == 0)
 				return 0;
 
 			string debug =
 				new StringBuilder()
-					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics))
+					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topicsArray))
 					.ToString();
 
 			PrintTx("Unsubscribe", debug);
 
-			return GetClient().Unsubscribe(topics);
+			try
+			{
+				return GetClient().Unsubscribe(topicsArray);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to Unsubscribe - {0}", e.Message);
+				return 0;
+			}
 		}
 
 		/// <summary>
@@ -179,8 +224,17 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <param name="topic"></param>
 		/// <param name="message"></param>
 		/// <returns></returns>
-		public override ushort Publish(string topic, byte[] message)
+		public override ushort Publish(string topic, [NotNull] byte[] message)
 		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
+			if (!IsConnected)
+			{
+				Logger.Log(eSeverity.Error, "Unable to Publish - Client is not connected.");
+				return 0;
+			}
+
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
@@ -189,7 +243,15 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			PrintTx("Publish", debug);
 
-			return GetClient().Publish(topic, message);
+			try
+			{
+				return GetClient().Publish(topic, message);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to Publish - {0}", e.Message);
+				return 0;
+			}
 		}
 
 		/// <summary>
@@ -200,8 +262,17 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <param name="qosLevel"></param>
 		/// <param name="retain"></param>
 		/// <returns></returns>
-		public override ushort Publish(string topic, byte[] message, byte qosLevel, bool retain)
+		public override ushort Publish(string topic, [NotNull] byte[] message, byte qosLevel, bool retain)
 		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
+			if (!IsConnected)
+			{
+				Logger.Log(eSeverity.Error, "Unable to Publish - Client is not connected.");
+				return 0;
+			}
+
 			string debug =
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
@@ -212,7 +283,15 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 
 			PrintTx("Publish", debug);
 
-			return GetClient().Publish(topic, message, qosLevel, retain);
+			try
+			{
+				return GetClient().Publish(topic, message, qosLevel, retain);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to Publish - {0}", e.Message);
+				return 0;
+			}
 		}
 
 		#endregion

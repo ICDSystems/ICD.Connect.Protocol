@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 
 namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
@@ -35,9 +36,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Subscribe to the given topics.
 		/// </summary>
 		/// <param name="topics"></param>
-		/// <param name="qosLevels"></param>
 		/// <returns></returns>
-		public override ushort Subscribe(string[] topics, byte[] qosLevels)
+		public override ushort Subscribe(IDictionary<string, byte> topics)
 		{
 			return 0;
 		}
@@ -47,7 +47,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// </summary>
 		/// <param name="topics"></param>
 		/// <returns></returns>
-		public override ushort Unsubscribe(string[] topics)
+		public override ushort Unsubscribe(IEnumerable<string> topics)
 		{
 			return 0;
 		}

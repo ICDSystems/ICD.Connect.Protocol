@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -83,17 +84,16 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <summary>
 		/// Subscribe to the given topics.
 		/// </summary>
-		/// <param name="topics"></param>
-		/// <param name="qosLevels"></param>
+		/// <param name="topics1"></param>
 		/// <returns></returns>
-		public abstract ushort Subscribe(string[] topics, byte[] qosLevels);
+		public abstract ushort Subscribe(IDictionary<string, byte> topics1);
 
 		/// <summary>
 		/// Unsubscribe from the given topics.
 		/// </summary>
 		/// <param name="topics"></param>
 		/// <returns></returns>
-		public abstract ushort Unsubscribe(string[] topics);
+		public abstract ushort Unsubscribe(IEnumerable<string> topics);
 
 		/// <summary>
 		/// Publish the given topic.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -73,16 +74,15 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// Subscribe to the given topics.
 		/// </summary>
 		/// <param name="topics"></param>
-		/// <param name="qosLevels"></param>
 		/// <returns></returns>
-		ushort Subscribe(string[] topics, byte[] qosLevels);
+		ushort Subscribe([NotNull] IDictionary<string, byte> topics);
 
 		/// <summary>
 		/// Unsubscribe from the given topics.
 		/// </summary>
 		/// <param name="topics"></param>
 		/// <returns></returns>
-		ushort Unsubscribe(string[] topics);
+		ushort Unsubscribe([NotNull] IEnumerable<string> topics);
 
 		/// <summary>
 		/// Publish the given topic.
@@ -90,7 +90,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <param name="topic"></param>
 		/// <param name="message"></param>
 		/// <returns></returns>
-		ushort Publish(string topic, byte[] message);
+		ushort Publish(string topic, [NotNull] byte[] message);
 
 		/// <summary>
 		/// Publish the given topic.
@@ -100,8 +100,32 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <param name="qosLevel"></param>
 		/// <param name="retain"></param>
 		/// <returns></returns>
-		ushort Publish(string topic, byte[] message, byte qosLevel, bool retain);
+		ushort Publish(string topic, [NotNull] byte[] message, byte qosLevel, bool retain);
 
 		#endregion
+	}
+
+	public static class MqttClientExtensions
+	{
+		/// <summary>
+		/// Subscribe to the given topic.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="topic"></param>
+		/// <param name="qosLevel"></param>
+		/// <returns></returns>
+		public static ushort Subscribe([NotNull] this IMqttClient extends, string topic, byte qosLevel)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			Dictionary<string, byte> topics =
+				new Dictionary<string, byte>
+				{
+					{topic, qosLevel}
+				};
+
+			return extends.Subscribe(topics);
+		}
 	}
 }
