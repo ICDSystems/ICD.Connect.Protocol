@@ -5,12 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Added
  - Added PATCH requests to IWebPort and Implemented in HttpPort
  - Added PUT requests to IWebPort and Implemented in HttpPort
+ - Added secure TCP server and client
+ - Added X509Utils for automatic certificate generation
 
 ### Changed
  - Dispatch SOAP now uses the URI directly on the port when creating HTTPRequestMessages
+ - TCP Clients/Servers now use synchronous send commands to ensure messages are sent in-order, with a ThreadedWorkerQueue
+ - Fixed NetStandard TCP Servers to use configured BufferSize correctly
 
 ## [13.3.1] - 2020-09-24
 ### Changed
@@ -23,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [13.2.2] - 2020-08-25
 ### Changed
  - Fixed a bug that was preventing SSH config generation
- - Fixed an MQTT bug that was preventing SSL fromm working on net standard
+ - Fixed an MQTT bug that was preventing SSL from working on net standard
 
 ## [13.2.1] - 2020-08-13
 ### Changed
