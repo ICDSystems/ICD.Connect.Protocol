@@ -1,7 +1,9 @@
 ﻿using System;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -29,9 +31,9 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		private readonly object m_Parent;
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
+		private readonly ILoggingContext m_Logger;
 
 		private bool m_IsConnected;
-
 		private bool m_IsOnline;
 
 		public bool IsConnected
@@ -68,6 +70,11 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		public int? PortNumber { get { return m_ConnectionStateManager.PortNumber; } }
 
 		/// <summary>
+		/// Logger for the client.
+		/// </summary>
+		public ILoggingContext Logger { get { return m_Logger; } }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="parent"></param>
@@ -75,6 +82,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		{
 			m_Buffer = new JsonSerialBuffer();
 			m_Parent = parent;
+			m_Logger = new ServiceLoggingContext(this);
 
 			m_ConnectionStateManager = new ConnectionStateManager(this){ConfigurePort = ConfigurePort};
 			Subscribe(m_ConnectionStateManager);
@@ -222,8 +230,15 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="args"></param>
 		private void BufferOnCompletedSerial(object sender, StringEventArgs args)
 		{
-			Rpc rpc = JsonConvert.DeserializeObject<Rpc>(args.Data);
-			rpc.Execute(m_Parent);
+			try
+			{
+				Rpc rpc = JsonConvert.DeserializeObject<Rpc>(args.Data);
+				rpc.Execute(m_Parent);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, e, "Failed to execute RPC - {0}", e.Message);
+			}
 		}
 
 		#endregion
