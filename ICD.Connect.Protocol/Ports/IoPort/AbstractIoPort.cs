@@ -43,17 +43,24 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 			get { return m_DigitalIn; }
 			protected set
 			{
-				if (value == m_DigitalIn)
-					return;
+				try
+				{
+					if (value == m_DigitalIn)
+						return;
 
-				m_DigitalIn = value;
+					m_DigitalIn = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "DigitalIn", m_DigitalIn);
-				Activities.LogActivity(m_DigitalIn
-					                   ? new Activity(Activity.ePriority.Medium, "Digital In", "Input High", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Low, "Digital In", "Input Low", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "DigitalIn", m_DigitalIn);
 
-				OnDigitalInChanged.Raise(this, new BoolEventArgs(m_DigitalIn));
+					OnDigitalInChanged.Raise(this, new BoolEventArgs(m_DigitalIn));
+				}
+				finally
+				{
+					Activities.LogActivity(m_DigitalIn
+						                       ? new Activity(Activity.ePriority.Medium, "Digital In", "Input High",
+						                                      eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Low, "Digital In", "Input Low", eSeverity.Informational));
+				}
 			}
 		}
 
@@ -65,18 +72,24 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 			get { return m_DigitalOut; }
 			protected set
 			{
-				if (value == m_DigitalOut)
-					return;
+				try
+				{
+					if (value == m_DigitalOut)
+						return;
 
-				m_DigitalOut = value;
+					m_DigitalOut = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "DigitalOut", m_DigitalOut);
-				Activities.LogActivity(m_DigitalOut
-					                   ? new Activity(Activity.ePriority.Medium, "Digital Out", "Output High", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Low, "Digital Out", "Output Low", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "DigitalOut", m_DigitalOut);
 
-
-				OnDigitalOutChanged.Raise(this, new BoolEventArgs(m_DigitalOut));
+					OnDigitalOutChanged.Raise(this, new BoolEventArgs(m_DigitalOut));
+				}
+				finally
+				{
+					Activities.LogActivity(m_DigitalOut
+						                       ? new Activity(Activity.ePriority.Medium, "Digital Out", "Output High",
+						                                      eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Low, "Digital Out", "Output Low", eSeverity.Informational));
+				}
 			}
 		}
 
@@ -126,6 +139,16 @@ namespace ICD.Connect.Protocol.Ports.IoPort
 		bool IDigitalInputPort.State { get { return DigitalIn; } }
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractIoPort()
+		{
+			// Initialize activities
+			DigitalIn = false;
+			DigitalOut = false;
+		}
 
 		/// <summary>
 		/// Release resources.

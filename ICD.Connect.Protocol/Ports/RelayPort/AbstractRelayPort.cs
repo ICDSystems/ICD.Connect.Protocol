@@ -31,17 +31,23 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 			get { return m_Closed; }
 			protected set
 			{
-				if (value == m_Closed)
-					return;
+				try
+				{
+					if (value == m_Closed)
+						return;
 
-				m_Closed = value;
+					m_Closed = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "Closed", m_Closed);
-				Activities.LogActivity(m_Closed
-					                   ? new Activity(Activity.ePriority.Medium, "Closed", "Closed", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Medium, "Closed", "Open", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "Closed", m_Closed);
 
-				OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
+					OnClosedStateChanged.Raise(this, new BoolEventArgs(m_Closed));
+				}
+				finally
+				{
+					Activities.LogActivity(m_Closed
+						                       ? new Activity(Activity.ePriority.Medium, "Closed", "Closed", eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Medium, "Closed", "Open", eSeverity.Informational));
+				}
 			}
 		}
 
@@ -53,6 +59,19 @@ namespace ICD.Connect.Protocol.Ports.RelayPort
 		protected AbstractRelayPort()
 		{
 			m_PulseTimer = SafeTimer.Stopped(PulseCallback);
+
+			// Initialize activities
+			Closed = false;
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			base.DisposeFinal(disposing);
+
+			m_PulseTimer.Dispose();
 		}
 
 		#region Methods
