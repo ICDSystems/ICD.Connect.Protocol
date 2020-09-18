@@ -24,6 +24,9 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 {
 	public sealed partial class IcdSecureTcpServer
 	{
+		private const int SSL_STREAM_READ_TIMEOUT = 5000;
+		private const int SSL_STREAM_WRITE_TIMEOUT = 5000;
+
 		private X509Certificate m_ServerCertificate;
 
 		private TcpListenerEx m_TcpListener;
@@ -228,7 +231,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 
 			TcpClient client = task.Result;
 			SslStream clientSslStream = new SslStream(client.GetStream(), false);
-			byte[] clientBuffer = new byte[16384];
+			byte[] clientBuffer = new byte[BufferSize];
 
 			m_ClientsSection.Enter();
 
@@ -246,10 +249,10 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			try
 			{
 				clientSslStream.AuthenticateAsServer(m_ServerCertificate, false, SslProtocols.Default, true);
-				clientSslStream.ReadTimeout = 5000;
-				clientSslStream.WriteTimeout = 5000;
+				clientSslStream.ReadTimeout = SSL_STREAM_READ_TIMEOUT;
+				clientSslStream.WriteTimeout = SSL_STREAM_WRITE_TIMEOUT;
 
-				clientSslStream.ReadAsync(clientBuffer, 0, 16384)
+				clientSslStream.ReadAsync(clientBuffer, 0, BufferSize)
 							   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
 			}
 			catch (AuthenticationException e)
@@ -335,7 +338,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 
 			// Spawn a new listening thread
-			clientData.Item2.ReadAsync(clientData.Item3, 0, 16384)
+			clientData.Item2.ReadAsync(clientData.Item3, 0, BufferSize)
 							.ContinueWith(a => TcpClientReceiveHandler(a, clientId));
 
 			UpdateListeningState();
