@@ -113,6 +113,25 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		WebPortResponse Patch(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data);
 
 		/// <summary>
+		/// Sends a PUT request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		WebPortResponse Put(string relativeOrAbsoluteUri, byte[] data);
+
+		/// <summary>
+		/// Sends a PUT request to the server.
+		/// </summary>
+		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="headers"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		WebPortResponse Put(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data);
+
+		/// <summary>
 		/// Sends a SOAP request to the server.
 		/// </summary>
 		/// <param name="action"></param>
