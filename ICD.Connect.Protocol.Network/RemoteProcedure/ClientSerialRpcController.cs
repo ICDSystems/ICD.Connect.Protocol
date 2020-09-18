@@ -80,7 +80,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="parent"></param>
 		public ClientSerialRpcController(object parent)
 		{
-			m_Buffer = new JsonSerialBuffer();
+			m_Buffer = new DelimiterSerialBuffer(ServerSerialRpcController.DELIMITER);
 			m_Parent = parent;
 			m_Logger = new ServiceLoggingContext(this);
 
@@ -144,7 +144,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="data"></param>
 		private void SendData(ISerialData data)
 		{
-			m_ConnectionStateManager.Send(data.Serialize());
+			m_ConnectionStateManager.Send(data.Serialize() + ServerSerialRpcController.DELIMITER);
 		}
 
 		/// <summary>

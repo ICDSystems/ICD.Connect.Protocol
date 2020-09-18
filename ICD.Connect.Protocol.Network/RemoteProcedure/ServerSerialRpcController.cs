@@ -15,6 +15,8 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 	[PublicAPI]
 	public sealed class ServerSerialRpcController : IDisposable
 	{
+		public const char DELIMITER = '\xFF';
+
 		private readonly NetworkServerBufferManager m_BufferManager;
 		private readonly object m_Parent;
 
@@ -26,7 +28,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// <param name="parent"></param>
 		public ServerSerialRpcController(object parent)
 		{
-			m_BufferManager = new NetworkServerBufferManager(() => new JsonSerialBuffer());
+			m_BufferManager = new NetworkServerBufferManager(() => new DelimiterSerialBuffer(DELIMITER));
 			m_Parent = parent;
 
 			Subscribe(m_BufferManager);
@@ -90,7 +92,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 				return;
 			}
 
-			m_Server.Send(client, data);
+			m_Server.Send(client, data + DELIMITER);
 		}
 
 		/// <summary>
