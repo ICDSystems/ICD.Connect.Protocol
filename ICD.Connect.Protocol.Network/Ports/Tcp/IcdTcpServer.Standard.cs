@@ -118,28 +118,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		}
 
 		/// <summary>
-		/// Sends the data to all connected clients.
+		/// Called in a worker thread to send the data to the specified client
+		/// This should send the data synchronously to ensure in-order transmission
+		/// If this blocks, it will stop all data from being sent
 		/// </summary>
+		/// <param name="clientId"></param>
 		/// <param name="data"></param>
-		public override void Send(string data)
-		{
-			byte[] byteData = StringUtils.ToBytes(data);
-
-			foreach (uint clientId in GetClients())
-			{
-				HostInfo hostInfo = GetClientInfo(clientId);
-				PrintTx(hostInfo, data);
-				Send(clientId, byteData);
-			}
-		}
-
-		/// <summary>
-		/// Sends a Byte for Byte string (ISO-8859-1)
-		/// </summary>
-		/// <param name="clientId">Client Identifier for Connection</param>
-		/// <param name="data">String in ISO-8859-1 Format</param>
-		/// <returns></returns>
-		public override void Send(uint clientId, string data)
+		protected override void SendWorkerAction(uint clientId, string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 			HostInfo hostInfo = GetClientInfo(clientId);

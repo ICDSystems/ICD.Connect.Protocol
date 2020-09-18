@@ -28,24 +28,16 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 
 		private TcpListenerEx m_TcpListener;
 
-		private readonly Dictionary<uint, TcpClient> m_TcpClients;
-		private readonly Dictionary<uint, byte[]> m_ClientBuffers;
+		private readonly Dictionary<uint, Tuple<TcpClient, SslStream, byte[]>> m_Clients;
 		private readonly SafeCriticalSection m_ClientsSection;
-
-		private readonly Dictionary<uint, SslStream> m_ClientSslStreams;
-		private readonly SafeCriticalSection m_ClientSslStreamsSection;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public IcdSecureTcpServer()
 		{
-			m_TcpClients = new Dictionary<uint, TcpClient>();
-			m_ClientBuffers = new Dictionary<uint, byte[]>();
+			m_Clients = new Dictionary<uint, Tuple<TcpClient, SslStream, byte[]>>();
 			m_ClientsSection = new SafeCriticalSection();
-
-			m_ClientSslStreams = new Dictionary<uint, SslStream>();
-			m_ClientSslStreamsSection = new SafeCriticalSection();
 		}
 
 		#region Methods
@@ -132,34 +124,19 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		}
 
 		/// <summary>
-		/// Sends the data to all connected clients.
+		/// Called in a worker thread to send the data to the specified client
+		/// This should send the data synchronously to ensure in-order transmission
+		/// If this blocks, it will stop all data from being sent
 		/// </summary>
+		/// <param name="clientId"></param>
 		/// <param name="data"></param>
-		public override void Send(string data)
-		{
-			byte[] byteData = StringUtils.ToBytes(data);
-
-			foreach (uint clientId in GetClients())
-			{
-				HostInfo hostInfo = GetClientInfo(clientId);
-				PrintTx(hostInfo, data);
-				Send(clientId, byteData);
-			}
-		}
-
-		/// <summary>
-		/// Sends a Byte for Byte string (ISO-8859-1)
-		/// </summary>
-		/// <param name="clientId">Client Identifier for Connection</param>
-		/// <param name="data">String in ISO-8859-1 Format</param>
-		/// <returns></returns>
-		public override void Send(uint clientId, string data)
+		protected override void SendWorkerAction(uint clientId, string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
 			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintTx(hostInfo, data);
-			Send(clientId, byteData);
+			SendWorkerAction(clientId, byteData);
 		}
 
 		/// <summary>
@@ -205,7 +182,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// <param name="clientId">Client Identifier for Connection</param>
 		/// <param name="data">String in ISO-8859-1 Format</param>
 		/// <returns></returns>
-		private void Send(uint clientId, byte[] data)
+		private void SendWorkerAction(uint clientId, byte[] data)
 		{
 			if (!ClientConnected(clientId))
 			{
@@ -215,15 +192,23 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 
 			try
 			{
-				m_ClientSslStreamsSection.Execute(() => m_ClientSslStreams[clientId])
-				                         .Write(data);
-
-				//m_ClientsSection.Execute(() => m_TcpClients[clientId])
-				//				.Client.Send(data, 0, data.Length, SocketFlags.None);
+				m_ClientsSection.Execute(() => m_Clients[clientId])
+				                .Item2.Write(data);
 			}
-			catch (SocketException ex)
+			catch (IOException ex)
 			{
-				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}", GetClientInfo(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}",
+				           GetClientInfo(clientId));
+			}
+			catch (InvalidOperationException ex)
+			{
+				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}: Authentication has not occured yet",
+				           GetClientInfo(clientId));
+			}
+			catch (NotSupportedException ex)
+			{
+				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}: Write operation already in progress",
+				           GetClientInfo(clientId));
 			}
 
 			if (!ClientConnected(clientId))
@@ -236,38 +221,36 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// <param name="task"></param>
 		private void TcpClientConnectCallback(Task<TcpClient> task)
 		{
-			TcpClient client;
+			if (task.Status == TaskStatus.Faulted)
+				return;
+
 			uint clientId;
+
+			TcpClient client = task.Result;
+			SslStream clientSslStream = new SslStream(client.GetStream(), false);
+			byte[] clientBuffer = new byte[16384];
 
 			m_ClientsSection.Enter();
 
 			try
 			{
-				clientId = (uint)IdUtils.GetNewId(m_TcpClients.Keys.Select(i => (int)i), 1);
-				if (task.Status == TaskStatus.Faulted)
-					return;
-
-				client = task.Result;
-
-				m_TcpClients[clientId] = client;
-				m_ClientBuffers[clientId] = new byte[16384];
+				clientId = (uint)IdUtils.GetNewId(m_Clients.Keys.Select(i => (int)i), 1);
+				m_Clients[clientId] = new Tuple<TcpClient, SslStream, byte[]>(client, clientSslStream, clientBuffer);
 			}
 			finally
 			{
 				m_ClientsSection.Leave();
 			}
 
-			SslStream clientSslStream = new SslStream(client.GetStream(), false);
+			
 			try
 			{
 				clientSslStream.AuthenticateAsServer(m_ServerCertificate, false, SslProtocols.Default, true);
 				clientSslStream.ReadTimeout = 5000;
 				clientSslStream.WriteTimeout = 5000;
 
-				clientSslStream.ReadAsync(m_ClientBuffers[clientId], 0, 16384)
+				clientSslStream.ReadAsync(clientBuffer, 0, 16384)
 							   .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
-
-				m_ClientSslStreamsSection.Execute(() => m_ClientSslStreams[clientId] = clientSslStream);
 			}
 			catch (AuthenticationException e)
 			{
@@ -303,7 +286,14 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			if (clientId == 0)
 				return;
 
-			byte[] buffer = m_ClientBuffers[clientId];
+			Tuple<TcpClient, SslStream, byte[]> clientData = null;
+
+			if (!m_ClientsSection.Execute(() => m_Clients.TryGetValue(clientId, out clientData)))
+			{
+				// Specified Client Doesn't exits?
+				RemoveTcpClient(clientId);
+				return;
+			}
 
 			int length = 0;
 
@@ -332,7 +322,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 				return;
 			}
 
-			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, length);
+			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, clientData.Item3, length);
 			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);
@@ -345,9 +335,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 
 			// Spawn a new listening thread
-			m_ClientSslStreamsSection.Execute(() => m_ClientSslStreams[clientId])
-			                         .ReadAsync(buffer, 0, 16384)
-			                          .ContinueWith(a => TcpClientReceiveHandler(a, clientId));
+			clientData.Item2.ReadAsync(clientData.Item3, 0, 16384)
+							.ContinueWith(a => TcpClientReceiveHandler(a, clientId));
 
 			UpdateListeningState();
 		}
@@ -355,14 +344,14 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		private void RemoveTcpClient(uint clientId)
 		{
 			m_ClientsSection.Enter();
-
 			try
 			{
-				TcpClient client;
-				if (m_TcpClients.TryGetValue(clientId, out client))
+				Tuple<TcpClient, SslStream, byte[]> client;
+				if (m_Clients.TryGetValue(clientId, out client))
 				{
-					m_TcpClients.Remove(clientId);
-					client.Dispose();
+					m_Clients.Remove(clientId);
+					client.Item2.Dispose();
+					client.Item1.Dispose();
 				}
 			}
 			finally

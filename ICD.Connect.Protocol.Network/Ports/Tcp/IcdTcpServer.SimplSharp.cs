@@ -1,4 +1,5 @@
-﻿using ICD.Common.Utils.Extensions;
+﻿using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Network.Servers;
 #if SIMPLSHARP
 using System;
@@ -96,34 +97,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 				RemoveClient(client, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
 		}
 
-		/// <summary>
-		/// Sends the data to all connected clients.
-		/// </summary>
-		/// <param name="data"></param>
-		public override void Send(string data)
-		{
-			uint[] clients = GetClients().ToArray();
-			if (clients.Length == 0)
-				return;
-
-			byte[] byteData = StringUtils.ToBytes(data);
-
-			foreach (uint clientId in clients)
-			{
-				HostInfo hostInfo = GetClientInfo(clientId);
-
-				PrintTx(hostInfo, data);
-				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
-			}
-		}
-
-		/// <summary>
-		/// Sends a Byte for Byte string (ISO-8859-1)
-		/// </summary>
-		/// <param name="clientId">Client Identifier for Connection</param>
-		/// <param name="data">String in ISO-8859-1 Format</param>
-		/// <returns></returns>
-		public override void Send(uint clientId, string data)
+		protected override void SendWorkerAction(uint clientId, string data)
 		{
 			if (!ClientConnected(clientId))
 			{
@@ -152,7 +126,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
 			// Spawn a new thread to handle status changes
-			// Mitigration strategy for Creston TCPServer bugs
+			// Mitigation strategy for Creston TCPServer bugs
 			ThreadingUtils.SafeInvoke(() => SocketStatusChangeWorker(tcpListener, clientId, status));
 		}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
@@ -40,7 +41,10 @@ namespace ICD.Connect.Protocol.Network.Servers
 		public event EventHandler<BoolEventArgs> OnListeningStateChanged;
 
 		private readonly IcdOrderedDictionary<uint, HostInfo> m_Clients;
+		private readonly Dictionary<uint, ThreadedWorkerQueue<string>> m_ClientSendQueues;
 		private readonly SafeCriticalSection m_ClientsSection;
+
+		
 
 		private bool m_Listening;
 		private int m_MaxNumberOfClients;
@@ -131,12 +135,15 @@ namespace ICD.Connect.Protocol.Network.Servers
 		{
 			m_Logger = new ServiceLoggingContext(this);
 			m_Clients = new IcdOrderedDictionary<uint, HostInfo>();
+			m_ClientSendQueues = new Dictionary<uint, ThreadedWorkerQueue<string>>();
 			m_ClientsSection = new SafeCriticalSection();
 
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
 			MaxNumberOfClients = DEFAULT_MAX_NUMBER_OF_CLIENTS;
+
+			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
 		}
 
 		/// <summary>
@@ -212,7 +219,15 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Sends the data to all connected clients.
 		/// </summary>
 		/// <param name="data"></param>
-		public abstract void Send(string data);
+		public void Send(string data)
+		{
+			uint[] clients = GetClients().ToArray();
+			if (clients.Length == 0)
+				return;
+
+			foreach (uint clientId in clients)
+				Send(clientId, data);
+		}
 
 		/// <summary>
 		/// Sends a Byte for Byte string (ISO-8859-1)
@@ -220,7 +235,25 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <param name="clientId">Client Identifier for Connection</param>
 		/// <param name="data">String in ISO-8859-1 Format</param>
 		/// <returns></returns>
-		public abstract void Send(uint clientId, string data);
+		public void Send(uint clientId, string data)
+		{
+			m_ClientsSection.Enter();
+			try
+			{
+				ThreadedWorkerQueue<string> queue;
+				if (!m_ClientSendQueues.TryGetValue(clientId, out queue))
+				{
+					Logger.Log(eSeverity.Warning, "Unable to send data to unconnected client {0}", clientId);
+					RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
+					return;
+				}
+				queue.Enqueue(data);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
+		}
 
 		/// <summary>
 		/// Gets the address and port for the client with the given id.
@@ -245,6 +278,15 @@ namespace ICD.Connect.Protocol.Network.Servers
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Called in a worker thread to send the data to the specified client
+		/// This should send the data synchronously to ensure in-order transmission
+		/// If this blocks, it will stop all data from being sent
+		/// </summary>
+		/// <param name="clientId"></param>
+		/// <param name="data"></param>
+		protected abstract void SendWorkerAction(uint clientId, string data);
 
 		/// <summary>
 		/// Formats and prints the received data to the console.
@@ -312,6 +354,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 					return;
 
 				m_Clients.Add(clientId, hostInfo);
+				m_ClientSendQueues.Add(clientId, new ThreadedWorkerQueue<string>(data => SendWorkerAction(clientId, data)));
 
 				Logger.Log(eSeverity.Notice, "Client {0} ({1}) connected", clientId, hostInfo);
 			}
@@ -339,6 +382,14 @@ namespace ICD.Connect.Protocol.Network.Servers
 					return;
 
 				m_Clients.Remove(clientId);
+
+				ThreadedWorkerQueue<string> clientQueue;
+				if (m_ClientSendQueues.TryGetValue(clientId, out clientQueue))
+				{
+					m_ClientSendQueues.Remove(clientId);
+					clientQueue.Clear();
+				}
+				
 
 				Logger.Log(eSeverity.Notice, "Client {0} ({1}) disconnected", clientId, hostInfo);
 			}
@@ -421,7 +472,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Gets the child console nodes.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		public virtual IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
 			yield break;
 		}
@@ -430,7 +481,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
-		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("Name", Name);
 			addRow("Port", Port);
@@ -445,7 +496,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
 			yield return new ConsoleCommand("Stop", "Stops the server", () => Stop());
 			yield return new ConsoleCommand("Start", "Starts the server", () => Start());
@@ -473,6 +524,8 @@ namespace ICD.Connect.Protocol.Network.Servers
 
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeTx", p => SetTxDebugMode(p));
 			yield return new EnumConsoleCommand<eDebugMode>("SetDebugModeRx", p => SetRxDebugMode(p));
+
+			yield return new GenericConsoleCommand<uint, string>("Send", "Send<clientId, data>", (clientId, data) => Send(clientId, data));
 
 			yield return new ConsoleCommand("PrintClients", "Prints a table of the active clients", () => ConsolePrintClients());
 		}
