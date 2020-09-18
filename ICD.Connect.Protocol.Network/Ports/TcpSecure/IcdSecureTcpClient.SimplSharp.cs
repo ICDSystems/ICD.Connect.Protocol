@@ -110,14 +110,13 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// </summary>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		protected override bool SendFinal(string data)
+		private void SendWorkerAction(string data)
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
 				PrintTx(data);
 				m_TcpClient.SendData(bytes, bytes.Length);
-				return true;
 			}
 			finally
 			{

@@ -44,6 +44,8 @@ namespace ICD.Connect.Protocol.Ports
 
 					Logger.LogSetTo(severity, "IsConnected", m_IsConnected);
 
+					HandleIsConnectedStateChange(value);
+					
 					UpdateCachedOnlineStatus();
 
 					OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
@@ -102,6 +104,15 @@ namespace ICD.Connect.Protocol.Ports
 		protected void UpdateIsConnectedState()
 		{
 			IsConnected = GetIsConnectedState();
+		}
+
+		/// <summary>
+		/// Called when IsConnected state changes
+		/// Called before OnlineStatus is updated, and before any events are raised
+		/// </summary>
+		/// <param name="isConnected"></param>
+		protected virtual void HandleIsConnectedStateChange(bool isConnected)
+		{
 		}
 
 		/// <summary>

@@ -18,6 +18,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		private readonly SafeMutex m_SocketMutex;
 		private readonly NetworkProperties m_NetworkProperties;
+		private readonly ThreadedWorkerQueue<string> m_SendWorkerQueue;
 
 		#region Properties
 
@@ -55,6 +56,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		{
 			m_NetworkProperties = new NetworkProperties();
 			m_SocketMutex = new SafeMutex();
+
+			m_SendWorkerQueue = new ThreadedWorkerQueue<string>(SendWorkerAction);
 
 			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
@@ -112,6 +115,32 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		#endregion
 
 		#region Private Methods
+
+
+		/// <summary>
+		/// Sends a Byte for Byte string (ISO-8859-1)
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		protected override bool SendFinal(string data)
+		{
+			m_SendWorkerQueue.Enqueue(data);
+			// Now that we're doing the worker queue, we don't have real value to return here
+			return true;
+		}
+
+		/// <summary>
+		/// Called when IsConnected state changes
+		/// Called before OnlineStatus is updated, and before any events are raised
+		/// </summary>
+		/// <param name="isConnected"></param>
+		protected override void HandleIsConnectedStateChange(bool isConnected)
+		{
+			base.HandleIsConnectedStateChange(isConnected);
+
+			if (!isConnected)
+				m_SendWorkerQueue.Clear();
+		}
 
 		/// <summary>
 		/// Called when the processor ethernet adapter changes state.

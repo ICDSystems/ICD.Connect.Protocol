@@ -128,7 +128,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// </summary>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		protected override bool SendFinal(string data)
+		private void  SendWorkerAction(string data)
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
@@ -136,18 +136,15 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 				if (m_Stream == null)
 				{
 					Logger.Log(eSeverity.Error, "Failed to send data - no SSLStream");
-					return false;
+					return;
 				}
 
 				PrintTx(data);
 				m_Stream.Write(bytes);
-				//m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
-				return true;
 			}
 			catch (SocketException e)
 			{
 				Logger.Log(eSeverity.Error, "Failed to send data - {0}", e.Message);
-				return false;
 			}
 			finally
 			{
