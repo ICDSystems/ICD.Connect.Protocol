@@ -63,6 +63,10 @@ namespace ICD.Connect.Protocol.Tests.SerialBuffers
 	}
 }jhgdjh}";
 
+		private const string EXAMPLE_JSON_PARTIAL_2_A = @"{";
+
+		private const string EXAMPLE_JSON_PARTIAL_2_B = @"""k"":""RegisterFeedback"",""p"":[{""t"":""System.Int32"",""i"":2101}]}";
+
 		[Test]
 		public void CompletedStringEventTest()
 		{
@@ -101,6 +105,21 @@ namespace ICD.Connect.Protocol.Tests.SerialBuffers
 			buffer.Enqueue(EXAMPLE_JSON_PARTIAL_C);
 
 			Assert.AreEqual(3, receivedEvents.Count);
+		}
+
+		[Test]
+		public void CompletedStringResponsPartialTest()
+		{
+			List<StringEventArgs> receivedEvents = new List<StringEventArgs>();
+			JsonSerialBuffer buffer = new JsonSerialBuffer();
+
+			buffer.OnCompletedSerial += (sender, e) => receivedEvents.Add(e);
+
+			buffer.Enqueue(EXAMPLE_JSON_PARTIAL_2_A);
+			buffer.Enqueue(EXAMPLE_JSON_PARTIAL_2_B);
+
+			Assert.AreEqual(1, receivedEvents.Count);
+			Assert.AreEqual(EXAMPLE_JSON_PARTIAL_2_A + EXAMPLE_JSON_PARTIAL_2_B, receivedEvents[0].Data);
 		}
 	}
 }
