@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
- - Added PATCH requests to IWebPort and improvemented in HttpPort
+ - Added PATCH requests to IWebPort and Implemented in HttpPort
+ - Added PUT requests to IWebPort and Implemented in HttpPort
 
 ### Changed
  - Dispatch SOAP now uses the URI directly on the port when creating HTTPRequestMessages
