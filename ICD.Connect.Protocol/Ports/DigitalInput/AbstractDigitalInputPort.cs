@@ -25,21 +25,36 @@ namespace ICD.Connect.Protocol.Ports.DigitalInput
 			get { return m_State; }
 			protected set
 			{
-				if (value == m_State)
-					return;
+				try
+				{
+					if (value == m_State)
+						return;
 
-				m_State = value;
+					m_State = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "State", m_State);
-				Activities.LogActivity(m_State
-					                   ? new Activity(Activity.ePriority.Medium, "State", "Input High", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Low, "State", "Input Low", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "State", m_State);
 
-				OnStateChanged.Raise(this, new BoolEventArgs(m_State));
+					OnStateChanged.Raise(this, new BoolEventArgs(m_State));
+				}
+				finally
+				{
+					Activities.LogActivity(m_State
+						                       ? new Activity(Activity.ePriority.Medium, "State", "Input High", eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Low, "State", "Input Low", eSeverity.Informational));
+				}
 			}
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractDigitalInputPort()
+		{
+			// Initialize activities
+			State = false;
+		}
 
 		/// <summary>
 		/// Release resources.

@@ -33,25 +33,41 @@ namespace ICD.Connect.Protocol.Ports
 			get { return m_IsConnected; }
 			protected set
 			{
-				if (value == m_IsConnected)
-					return;
+				try
+				{
+					if (value == m_IsConnected)
+						return;
 
-				m_IsConnected = value;
+					m_IsConnected = value;
 
-				eSeverity severity = m_IsConnected ? eSeverity.Informational : eSeverity.Error;
+					eSeverity severity = m_IsConnected ? eSeverity.Informational : eSeverity.Error;
 
-				Logger.LogSetTo(severity, "IsConnected", m_IsConnected);
-				Activities.LogActivity(m_IsConnected
-					                   ? new Activity(Activity.ePriority.High, "Is Connected", "Connected", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.High, "Is Connected", "Disconnected", eSeverity.Error));
+					Logger.LogSetTo(severity, "IsConnected", m_IsConnected);
 
-				UpdateCachedOnlineStatus();
+					UpdateCachedOnlineStatus();
 
-				OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
+					OnConnectedStateChanged.Raise(this, new BoolEventArgs(m_IsConnected));
+				}
+				finally
+				{
+					Activities.LogActivity(m_IsConnected
+						                       ? new Activity(Activity.ePriority.High, "Is Connected", "Connected",
+						                                      eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.High, "Is Connected", "Disconnected", eSeverity.Error));
+				}
 			}
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractConnectablePort()
+		{
+			// Initialize activities
+			IsConnected = false;
+		}
 
 		#region Methods
 

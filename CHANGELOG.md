@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Dispatch SOAP now uses the URI directly on the port when creating HTTPRequestMessages
 
+## [13.3.1] - 2020-09-24
+### Changed
+ - Fixed a bug where default port activities were not being initialized
+
 ## [13.3.0] - 2020-09-11
 ### Changed
  - MQTT messages are buffered in the ICD client until the client connects
