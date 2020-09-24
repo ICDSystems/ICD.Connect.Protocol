@@ -47,13 +47,6 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			{
 				m_TcpClient = new TcpClient(Address, Port);
 				m_Cancellation = new CancellationTokenSource();
-				//m_TcpClient.ConnectAsync(Address, Port).Wait();
-
-				//if (!m_TcpClient.Connected)
-				//{
-				//	Logger.Log(eSeverity.Error, "Failed to connect to {0}:{1}", Address, Port);
-				//	return;
-				//}
 
 				m_Stream = new SslStream(m_TcpClient.GetStream(), false,
 				                         ValidateServerCertificate, null);
