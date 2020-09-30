@@ -92,7 +92,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				                    Will.Flag,
 				                    Will.Topic,
 				                    Will.Message,
-				                    true,
+				                    false, // TODO - Recycle MQTT client so long as details don't change
 				                    60);
 			}
 			catch (Exception e)
@@ -118,7 +118,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			try
 			{
 				if (Client != null)
-					Client.Disconnect();
+					Client.Close();
 			}
 			catch (Exception e)
 			{
