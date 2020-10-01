@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.3.2] - 2020-09-30
 ### Changed
  - Fixed a bug where the MQTT client was not closing the connection on disconnect, causing LWT issues
 
