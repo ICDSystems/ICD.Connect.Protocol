@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - TCP Clients/Servers now use synchronous send commands to ensure messages are sent in-order, with a ThreadedWorkerQueue
  - Fixed NetStandard TCP Servers to use configured BufferSize correctly
 
+## [13.3.2] - 2020-09-30
+### Changed
+ - Fixed a bug where the MQTT client was not closing the connection on disconnect, causing LWT issues
+
 ## [13.3.1] - 2020-09-24
 ### Changed
  - Fixed a bug where default port activities were not being initialized
