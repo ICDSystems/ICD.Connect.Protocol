@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.1.0] - 2020-10-06
 ### Changed
  - Implemented StartSettings for SerialPortServer to start listening
  - Changes to ClientSerialRpcController to support using StartSettings in implementors
