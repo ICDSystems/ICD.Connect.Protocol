@@ -67,7 +67,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// </summary>
 		public int? PortNumber { get { return m_ConnectionStateManager.PortNumber; } }
 
-		public ISerialPort Port {get { return m_ConnectionStateManager.Port; }}
+		public ISerialPort Port {get { return (ISerialPort)m_ConnectionStateManager.Port; }}
 
 		/// <summary>
 		/// Constructor.
