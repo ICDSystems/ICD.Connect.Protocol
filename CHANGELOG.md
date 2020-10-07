@@ -77,6 +77,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Automatically starting the console server device
  - TCP server defaults to 64 max clients
 
+## [12.1.0] - 2020-10-06
+### Changed
+ - Implemented StartSettings for SerialPortServer to start listening
+ - Changes to ClientSerialRpcController to support using StartSettings in implementors
+ - Fixed issue with Heartbeat where a null reference exception is thrown if the instance is cleared while connect is blocking
+ - Fixed issue with Heartbeat where if StopMonitoring is called while connect is blocking it will continue to try and connect
+
 ## [12.0.1] - 2020-03-20
 ### Changed
  - Crestron TCPServer now spawns a new thread to handle SocketStatusChanged event - mitigation for TCPServer bugs

@@ -205,6 +205,10 @@ namespace ICD.Connect.Protocol.Heartbeat
 
 			try
 			{
+				IConnectable instance = m_Instance;
+				if (instance == null)
+					return;
+
 				long interval;
 				if (!m_RampIntervalMs.TryElementAt(m_ConnectAttempts, out interval))
 					interval = m_MaxIntervalMs;
@@ -212,15 +216,18 @@ namespace ICD.Connect.Protocol.Heartbeat
 				eSeverity severity = m_ConnectAttempts >= m_RampIntervalMs.Length ? eSeverity.Error : eSeverity.Warning;
 
 				Logger.AddEntry(severity, "{0} - Attempting to reconnect (Attempt {1}).",
-				                m_Instance, m_ConnectAttempts + 1);
+				                instance, m_ConnectAttempts + 1);
 
-				m_Instance.Connect();
+				instance.Connect();
 
-				if (!m_Instance.IsConnected)
-				{
-					m_Timer.Reset(interval);
-					m_ConnectAttempts++;
-				}
+				// Sometimes Connect blocks long enough for the instance to get cleared or
+				// for the heartbeat to be disposed while it's blocking
+				// If that happens, we don't need to check connection state or keep monitoring
+				if (IsDisposed || m_Instance == null || !MonitoringActive || instance.IsConnected)
+					return;
+
+				m_Timer.Reset(interval);
+				m_ConnectAttempts++;
 			}
 			finally
 			{
