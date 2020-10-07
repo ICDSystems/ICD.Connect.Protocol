@@ -67,6 +67,8 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// </summary>
 		public int? PortNumber { get { return m_ConnectionStateManager.PortNumber; } }
 
+		public ISerialPort Port {get { return m_ConnectionStateManager.Port; }}
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
@@ -84,14 +86,14 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 
 		#region Methods
 
-		public void Connect()
+		public void Start()
 		{
-			m_ConnectionStateManager.Connect();
+			m_ConnectionStateManager.Start();
 		}
 
-		public void Disconnect()
+		public void Stop()
 		{
-			m_ConnectionStateManager.Disconnect();
+			m_ConnectionStateManager.Stop();
 		}
 
 		/// <summary>
@@ -143,10 +145,11 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// Sets the port for communication with the remote RPC controller.
 		/// </summary>
 		/// <param name="port"></param>
+		/// <param name="monitor"></param>
 		[PublicAPI]
-		public void SetPort(ISerialPort port)
+		public void SetPort(ISerialPort port, bool monitor)
 		{
-			m_ConnectionStateManager.SetPort(port);
+			m_ConnectionStateManager.SetPort(port, monitor);
 		}
 
 		private void ConfigurePort(IPort port)
