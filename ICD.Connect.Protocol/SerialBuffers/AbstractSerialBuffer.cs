@@ -18,6 +18,11 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		private readonly SafeCriticalSection m_ParseSection;
 
 		/// <summary>
+		/// Sets while clearing, to tell the parse method to bail out early
+		/// </summary>
+		private bool m_Clearing;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractSerialBuffer()
@@ -44,17 +49,18 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// </summary>
 		public virtual void Clear()
 		{
-			m_QueueSection.Enter();
+			m_Clearing = true;
+
 			m_ParseSection.Enter();
 
 			try
 			{
-				m_Queue.Clear();
+				m_QueueSection.Execute(() => m_Queue.Clear());
 				ClearFinal();
 			}
 			finally
 			{
-				m_QueueSection.Leave();
+				m_Clearing = false;
 				m_ParseSection.Leave();
 			}
 		}
@@ -79,7 +85,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 			try
 			{
 				string data = null;
-				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
+				while (!m_Clearing && m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
 					foreach (string serial in Process(data))
 						OnCompletedSerial.Raise(this, new StringEventArgs(serial));
 			}
