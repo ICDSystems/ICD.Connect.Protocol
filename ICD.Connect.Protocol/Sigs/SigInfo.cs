@@ -129,7 +129,7 @@ namespace ICD.Connect.Protocol.Sigs
 		{
 		}
 
-		private SigInfo(eSigType type, uint number, string name, ushort smartObject)
+		public SigInfo(eSigType type, uint number, string name, ushort smartObject)
 		{
 			m_Type = type;
 			m_Number = number;
