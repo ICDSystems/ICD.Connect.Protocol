@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added SerialPortAdapter for controlling NetStandard serial ports
+
 ### Changed
  - Fixed a bug where PFX auto-generation would fail if the output directory did not exist yet
 
