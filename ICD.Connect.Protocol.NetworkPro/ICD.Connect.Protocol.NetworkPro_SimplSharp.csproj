@@ -142,17 +142,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObfuscationSettings.cs" />
-    <Compile Include="Ports\Mqtt\AbstractMqttClient.cs" />
-    <Compile Include="Ports\Mqtt\AbstractMqttClientSettings.cs" />
     <Compile Include="Ports\Mqtt\IcdMqttClient.cs" />
     <Compile Include="Ports\Mqtt\IcdMqttClientSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
-    <Compile Include="Ports\Mqtt\IMqttClient.cs" />
-    <Compile Include="Ports\Mqtt\IMqttClientSettings.cs" />
-    <Compile Include="Ports\Mqtt\LastWillAndTestament.cs" />
-    <Compile Include="Ports\Mqtt\MockMqttClient.cs" />
-    <Compile Include="Ports\Mqtt\MockMqttClientSettings.cs" />
     <Compile Include="Ports\WebSockets\CallbackWebSocketBehavior.cs" />
     <Compile Include="Ports\WebSockets\IcdWebSocketServer.cs" />
     <None Include="Properties\ControlSystem.cfg" />

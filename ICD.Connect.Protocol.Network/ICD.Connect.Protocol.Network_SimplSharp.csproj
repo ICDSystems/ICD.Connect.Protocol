@@ -80,6 +80,7 @@
     <Compile Include="Devices\SerialPortServer\SerialPortServerDeviceSettings.cs" />
     <Compile Include="Direct\MessageConverter.cs" />
     <Compile Include="Direct\ClientBufferCallbackInfo.cs" />
+    <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
     <Compile Include="Ports\AbstractNetworkPort.cs" />
     <Compile Include="Attributes\Rpc\RpcAttribute.cs" />
     <Compile Include="Broadcast\BroadcastData.cs" />
@@ -103,6 +104,13 @@
     <Compile Include="Ports\INetworkPortSettings.cs" />
     <Compile Include="Ports\ISecureNetworkPort.cs" />
     <Compile Include="Ports\ISecureNetworkPortSettings.cs" />
+    <Compile Include="Ports\Mqtt\AbstractMqttClient.cs" />
+    <Compile Include="Ports\Mqtt\AbstractMqttClientSettings.cs" />
+    <Compile Include="Ports\Mqtt\IMqttClient.cs" />
+    <Compile Include="Ports\Mqtt\IMqttClientSettings.cs" />
+    <Compile Include="Ports\Mqtt\LastWillAndTestament.cs" />
+    <Compile Include="Ports\Mqtt\MockMqttClient.cs" />
+    <Compile Include="Ports\Mqtt\MockMqttClientSettings.cs" />
     <Compile Include="Ports\Ssh\PrivateKey.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.SimplSharp.cs" />
@@ -158,6 +166,7 @@
     <Compile Include="Ports\Udp\IcdUdpClientSettings.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JwtUtils.cs" />
+    <Compile Include="Utils\MqttUtils.cs" />
     <Compile Include="Utils\NetworkUtils.cs" />
     <Compile Include="Ports\Web\HttpPort.cs" />
     <Compile Include="Ports\Web\HttpPort.SimplSharp.cs" />

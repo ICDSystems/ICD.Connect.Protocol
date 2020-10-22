@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Connect.Protocol.NetworkPro.EventArguments;
+using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
+namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 {
 	public interface IMqttClient : IConnectablePort
 	{
@@ -126,6 +127,20 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				};
 
 			return extends.Subscribe(topics);
+		}
+
+		/// <summary>
+		/// Clears the retained message on the broker with the given topic.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="topic"></param>
+		/// <returns></returns>
+		public static ushort ClearRetained([NotNull] this IMqttClient extends, string topic)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.Publish(topic, new byte[0], MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
 		}
 	}
 }

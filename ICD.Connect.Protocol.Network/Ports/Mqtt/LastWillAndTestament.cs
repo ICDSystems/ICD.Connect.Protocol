@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
+namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 {
 	public sealed class LastWillAndTestament
 	{

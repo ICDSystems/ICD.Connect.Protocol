@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Protocol.NetworkPro.EventArguments;
+using ICD.Connect.Protocol.Network.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
+namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 {
 	public abstract class AbstractMqttClient<TSettings> : AbstractConnectablePort<TSettings>, IMqttClient
 		where TSettings : IMqttClientSettings, new()

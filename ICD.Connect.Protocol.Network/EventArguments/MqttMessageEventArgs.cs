@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ICD.Connect.Protocol.NetworkPro.EventArguments
+namespace ICD.Connect.Protocol.Network.EventArguments
 {
-	public class MqttMessageEventArgs : EventArgs
+	public sealed class MqttMessageEventArgs : EventArgs
 	{
 		private readonly string m_Topic;
 		private readonly byte[] m_Message;

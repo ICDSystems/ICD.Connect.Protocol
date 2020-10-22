@@ -7,7 +7,8 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.NetworkPro.EventArguments;
+using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Ports.Mqtt;
 #if SIMPLSHARP
 using SSMono.Net.Security;
 using SSMono.Security.Cryptography.X509Certificates;

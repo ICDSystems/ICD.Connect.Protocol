@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports;
 
-namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
+namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 {
 	public abstract class AbstractMqttClientSettings : AbstractConnectablePortSettings, IMqttClientSettings
 	{
