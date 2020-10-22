@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
@@ -114,6 +116,16 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		public abstract ushort Publish(string topic, byte[] message, byte qosLevel, bool retain);
 
 		/// <summary>
+		/// Clears the retained message with the given topic.
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <returns></returns>
+		public ushort Clear(string topic)
+		{
+			return Publish(topic, new byte[0], MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
+		}
+
+		/// <summary>
 		/// Override to add additional properties to the ToString representation.
 		/// </summary>
 		/// <param name="addPropertyAndValue"></param>
@@ -190,6 +202,28 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		#region Console
 
 		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in MqttClientConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
+		/// Wrokaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
+		}
+
+		/// <summary>
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
@@ -197,15 +231,29 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Hostname", Hostname);
-			addRow("Port", Port);
-			addRow("ProxyHostname", ProxyHostname);
-			addRow("ProxyPort", ProxyPort);
-			addRow("ClientId", ClientId);
-			addRow("Username", Username);
-			addRow("Password", Password);
-			addRow("Secure", Secure);
-			addRow("CaCertPath", CaCertPath);
+			MqttClientConsole.BuildConsoleStatus(this, addRow);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			foreach (IConsoleCommand command in MqttClientConsole.GetConsoleCommands(this))
+				yield return command;
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
