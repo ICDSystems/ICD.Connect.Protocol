@@ -48,6 +48,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				Subscribe(m_Client);
 
 				UpdateCachedOnlineStatus();
+				UpdateIsConnectedState();
 			}
 		}
 
