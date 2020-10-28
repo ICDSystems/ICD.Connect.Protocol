@@ -140,9 +140,8 @@
     <Compile Include="SerialBuffers\JsonSerialBuffer.cs" />
     <Compile Include="SerialBuffers\XmlSerialBuffer.cs" />
     <Compile Include="EventArguments\SerialDataEventArgs.cs" />
-    <Compile Include="SerialQueues\AbstractSerialQueue.cs" />
-    <Compile Include="SerialQueues\ISerialQueue.cs" />
     <Compile Include="SerialQueues\SerialQueue.cs" />
+    <Compile Include="SerialQueues\ISerialQueue.cs" />
     <Compile Include="EventArguments\SerialResponseEventArgs.cs" />
     <Compile Include="Sigs\ISig.cs" />
     <Compile Include="Sigs\ISigs.cs" />
