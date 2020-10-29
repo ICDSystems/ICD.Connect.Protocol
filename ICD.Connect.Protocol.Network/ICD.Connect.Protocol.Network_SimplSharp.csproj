@@ -120,6 +120,7 @@
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.SimplSharp.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.Standard.cs" />
+    <Compile Include="Ports\Tcp\TelnetCommand.cs" />
     <Compile Include="Ports\Web\AbstractWebPort.cs" />
     <Compile Include="Ports\Web\AbstractWebPortSettings.cs" />
     <Compile Include="Ports\Web\eProxyAuthenticationMethod.cs" />
@@ -160,7 +161,6 @@
     <Compile Include="Ports\Tcp\TcpClientPoolBufferManager.cs" />
     <Compile Include="Servers\DataReceiveEventArgs.cs" />
     <Compile Include="Servers\NetworkServerBufferManager.cs" />
-    <Compile Include="Ports\Tcp\TelnetControl.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.SimplSharp.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.Standard.cs" />
