@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added PUT requests to IWebPort and Implemented in HttpPort
  - Added secure TCP server and client
  - Added X509Utils for automatic certificate generation
+ - Added ConfigurePort option to ClientSerialRpcController
 
 ### Changed
  - Dispatch SOAP now uses the URI directly on the port when creating HTTPRequestMessages

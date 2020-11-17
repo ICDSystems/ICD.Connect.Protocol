@@ -71,6 +71,8 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 
 		public ISerialPort Port {get { return (ISerialPort)m_ConnectionStateManager.Port; }}
 
+		public ConfigurePortCallback ConfigurePort { get; set; }
+
 		/// <summary>
 		/// Logger for the client.
 		/// </summary>
@@ -86,7 +88,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			m_Parent = parent;
 			m_Logger = new ServiceLoggingContext(this);
 
-			m_ConnectionStateManager = new ConnectionStateManager(this){ConfigurePort = ConfigurePort};
+			m_ConnectionStateManager = new ConnectionStateManager(this){ConfigurePort = ConfigurePortInternal};
 			Subscribe(m_ConnectionStateManager);
 
 			Subscribe(m_Buffer);
@@ -160,9 +162,13 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			m_ConnectionStateManager.SetPort(port, monitor);
 		}
 
-		private void ConfigurePort(IPort port)
+		private void ConfigurePortInternal(IPort port)
 		{
 			m_Buffer.Clear();
+
+			var configurePort = ConfigurePort;
+			if (configurePort != null)
+				configurePort(port);
 		}
 
 		#endregion
