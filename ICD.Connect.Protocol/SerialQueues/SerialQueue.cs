@@ -101,6 +101,13 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public int CommandCount { get { return m_CommandSection.Execute(() => m_CommandQueue.Count); } }
 
+		/// <summary>
+		/// If set, this is used to compare responses with the paired commands to
+		/// determine if the command is an echoed response. If this function returns
+		/// true, the response is ignored.
+		/// </summary>
+		public Func<ISerialData, string, bool> EchoComparer { get; set; }
+
 		#endregion
 
 		#region Constructors
@@ -567,6 +574,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 			TimeoutCount = 0;
 
 			string data = args.Data;
+
+			// Run echo comparer to see if this is an echo, and if so, ignore it
+			var echoComparer = EchoComparer;
+			if (echoComparer != null && echoComparer(m_CurrentCommand, data))
+				return;
+
 			FinishCommand(command => OnSerialResponse.Raise(this, new SerialResponseEventArgs(command, data)));
 		}
 

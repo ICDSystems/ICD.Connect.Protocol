@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added secure TCP server and client
  - Added X509Utils for automatic certificate generation
  - Added ConfigurePort option to ClientSerialRpcController
+ - Added EchoComparer function to Serial Queue to skip echoed responses
 
 ### Changed
  - Dispatch SOAP now uses the URI directly on the port when creating HTTPRequestMessages
