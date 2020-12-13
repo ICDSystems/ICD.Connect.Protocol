@@ -380,6 +380,9 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
+
+			yield return m_UdpClient;
+
 			IEnumerable<IConsoleNodeBase> broadcasters =
 				m_Broadcasters.OrderBy(kvp => kvp.Key.Name)
 				              .Select(kvp => kvp.Value)
