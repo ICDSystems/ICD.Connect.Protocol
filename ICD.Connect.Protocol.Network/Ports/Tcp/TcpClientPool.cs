@@ -183,7 +183,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 		}
 
-		/// <summary>
+		public IEnumerable<IcdTcpClient> GetClients()
+		{
+			return m_ClientsSection.Execute(() => m_Clients.Values.ToList(m_Clients.Count));
+		}
+
+			/// <summary>
 		/// Removes the TCP client with the given key.
 		/// </summary>
 		/// <param name="key"></param>
@@ -395,7 +400,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <returns></returns>
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			yield break;
+			yield return ConsoleNodeGroup.IndexNodeMap("Clients", GetClients());
 		}
 
 		/// <summary>
