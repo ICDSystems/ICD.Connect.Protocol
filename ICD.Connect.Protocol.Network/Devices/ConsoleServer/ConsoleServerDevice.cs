@@ -18,7 +18,7 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 
 		[NotNull]
 		private readonly IcdTcpServer m_TcpServer;
-		
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
@@ -29,8 +29,6 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 				Port = ConsoleServerSettings.DEFAULT_PORT
 			};
 			Subscribe(m_TcpServer);
-
-			m_TcpServer.Start();
 
 			IcdConsole.OnConsolePrint += IcdConsoleOnConsolePrint;
 		}
@@ -45,7 +43,23 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 
 				m_TcpServer.Port = value;
 
-				m_TcpServer.Restart();
+				if (m_TcpServer.Enabled)
+					m_TcpServer.Restart();
+			}
+		}
+
+		public int MaxClients
+		{
+			get { return m_TcpServer.MaxNumberOfClients; }
+			set
+			{
+				if (value == m_TcpServer.MaxNumberOfClients)
+					return;
+
+				m_TcpServer.MaxNumberOfClients = value;
+
+				if (m_TcpServer.Enabled)
+					m_TcpServer.Restart();
 			}
 		}
 
@@ -198,6 +212,8 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			base.CopySettingsFinal(settings);
 
 			settings.Port = Port;
+
+			settings.MaxClients = MaxClients;
 		}
 
 		/// <summary>
@@ -210,6 +226,8 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			base.ApplySettingsFinal(settings, factory);
 
 			Port = settings.Port;
+
+			MaxClients = settings.MaxClients;
 		}
 
 		/// <summary>
@@ -220,6 +238,18 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			base.ClearSettingsFinal();
 
 			Port = ConsoleServerSettings.DEFAULT_PORT;
+			MaxClients = ConsoleServerSettings.DEFAULT_MAX_CLIENTS;
+		}
+
+		/// <summary>
+		/// Override to add actions on StartSettings
+		/// This should be used to start communications with devices and perform initial actions
+		/// </summary>
+		protected override void StartSettingsFinal()
+		{
+			base.StartSettingsFinal();
+
+			m_TcpServer.Start();
 		}
 
 		#endregion

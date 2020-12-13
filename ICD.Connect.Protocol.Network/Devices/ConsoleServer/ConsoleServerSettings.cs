@@ -4,22 +4,19 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 {
-	[KrangSettings(FACTORY_NAME, typeof(ConsoleServerDevice))]
-	[KrangSettings("IcdConsoleServer", typeof(ConsoleServerDevice))]
+	[KrangSettings("ConsoleServer", typeof(ConsoleServerDevice))]
 	public sealed class ConsoleServerSettings : AbstractDeviceSettings
 	{
-		private const string FACTORY_NAME = "ConsoleServer";
 
 		private const string PORT_ELEMENT = "Port";
 		private const string PORT_NUMBER_ELEMENT = "PortNumber";
+		private const string MAX_CLIENTS_ELEMENT = "MaxClients";
 		public const ushort DEFAULT_PORT = 8023;
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
+		public const int DEFAULT_MAX_CLIENTS = 32;
 
 		public ushort Port { get; set; }
+
+		public int MaxClients { get; set; }
 
 		/// <summary>
 		/// Updates the settings from xml.
@@ -32,6 +29,8 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, PORT_ELEMENT) ??
 			       XmlUtils.TryReadChildElementContentAsUShort(xml, PORT_NUMBER_ELEMENT) ??
 			       DEFAULT_PORT;
+
+			MaxClients = XmlUtils.TryReadChildElementContentAsInt(xml, MAX_CLIENTS_ELEMENT) ?? DEFAULT_MAX_CLIENTS;
 		}
 
 		/// <summary>
@@ -43,6 +42,7 @@ namespace ICD.Connect.Protocol.Network.Devices.ConsoleServer
 			base.WriteElements(writer);
 
 			writer.WriteElementString(PORT_ELEMENT, IcdXmlConvert.ToString(Port));
+			writer.WriteElementString(MAX_CLIENTS_ELEMENT, IcdXmlConvert.ToString(MaxClients));
 		}
 	}
 }
