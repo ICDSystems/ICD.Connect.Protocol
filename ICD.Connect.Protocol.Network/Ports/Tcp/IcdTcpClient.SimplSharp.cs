@@ -207,6 +207,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			addRow("Buffer Size", BufferSize);
 			addRow("Client Status", m_TcpClient == null ? string.Empty : m_TcpClient.ClientStatus.ToString());
+			addRow("Local Port", m_TcpClient == null ? 0 : m_TcpClient.LocalPortNumberOfClient);
 		}
 	}
 }
