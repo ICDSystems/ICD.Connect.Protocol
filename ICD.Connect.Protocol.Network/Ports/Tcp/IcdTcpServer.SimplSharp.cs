@@ -37,7 +37,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_TcpListener = new TCPServer(AddressToAcceptConnectionFrom, Port, BufferSize,
 			                              EthernetAdapterType.EthernetUnknownAdapter, MaxNumberOfClients);
 			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
-			m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+			m_TcpListener.WaitForConnectionsAlways(TcpClientConnectCallback);
 
 			// Hack - I think it takes a little while for the listening state to update
 			Listening = true;
@@ -205,10 +205,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="clientId"></param>
 		private void TcpClientConnectCallback(TCPServer tcpListener, uint clientId)
 		{
-			// Spawn new thread for accepting new clients
-			if (tcpListener.NumberOfClientsConnected < tcpListener.MaxNumberOfClientSupported)
-				tcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
-			else
+			// Log if we hit max clients
+			if (tcpListener.NumberOfClientsConnected >= tcpListener.MaxNumberOfClientSupported)
 				Logger.Log(eSeverity.Warning, "{0} - Max number of clients reached:{1}", this,
 				           tcpListener.MaxNumberOfClientSupported);
 		}
@@ -275,7 +273,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (m_TcpListener != null && Enabled && !Listening &&
 				m_TcpListener.NumberOfClientsConnected < m_TcpListener.MaxNumberOfClientSupported)
 			{
-				m_TcpListener.WaitForConnectionAsync(AddressToAcceptConnectionFrom, TcpClientConnectCallback);
+				m_TcpListener.WaitForConnectionsAlways(TcpClientConnectCallback);
 			}
 		}
 

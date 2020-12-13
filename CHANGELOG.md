@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Fixed NetStandard TCP Servers to use configured BufferSize correctly
  - Changed various property XML parsing routines to parse an empty string as null, so overrides work correctly
  - Changed TCPClient and SecureTCPClient settings to not use the default port in the network properties
+ - Changed Crestron TCPServer and SecureTCPServer to use "WaitForConnectionAlways" - resolves some multi-client issues
+ - Added local port number to TCPClient status
+ - Added individual client console access to TCPClientPool
+ - Added configurable MaxClients to IcdConsoleServer
+ - Changed ICDConsoleServer to start on StartSettings
 
 ## [13.3.3] - 2020-10-12
 ### Changed
