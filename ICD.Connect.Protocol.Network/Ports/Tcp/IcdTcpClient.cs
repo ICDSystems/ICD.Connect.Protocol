@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
 	public sealed partial class IcdTcpClient : AbstractNetworkPort<IcdTcpClientSettings>
 	{
-		public const ushort DEFAULT_PORT = 23;
+		private const ushort DEFAULT_PORT = 23;
 		private const ushort DEFAULT_BUFFER_SIZE = 16384;
 
 		private readonly SafeMutex m_SocketMutex;

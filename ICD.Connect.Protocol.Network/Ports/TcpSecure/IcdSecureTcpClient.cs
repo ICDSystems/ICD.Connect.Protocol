@@ -13,7 +13,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 {
 	public sealed partial class IcdSecureTcpClient : AbstractNetworkPort<IcdSecureTcpClientSettings>
 	{
-		public const ushort DEFAULT_PORT = 443;
+		private const ushort DEFAULT_PORT = 443;
 		private const ushort DEFAULT_BUFFER_SIZE = 16384;
 
 		private readonly SafeMutex m_SocketMutex;

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - TCP Clients/Servers now use synchronous send commands to ensure messages are sent in-order, with a ThreadedWorkerQueue
  - Fixed NetStandard TCP Servers to use configured BufferSize correctly
  - Changed various property XML parsing routines to parse an empty string as null, so overrides work correctly
+ - Changed TCPClient and SecureTCPClient settings to not use the default port in the network properties
 
 ## [13.3.3] - 2020-10-12
 ### Changed

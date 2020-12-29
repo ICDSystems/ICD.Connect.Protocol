@@ -36,10 +36,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// </summary>
 		public IcdTcpClientSettings()
 		{
-			m_NetworkProperties = new NetworkProperties
-			{
-				NetworkPort = IcdTcpClient.DEFAULT_PORT
-			};
+			m_NetworkProperties = new NetworkProperties();
 		}
 
 		/// <summary>

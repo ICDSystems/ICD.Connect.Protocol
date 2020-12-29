@@ -36,10 +36,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// </summary>
 		public IcdSecureTcpClientSettings()
 		{
-			m_NetworkProperties = new NetworkProperties
-			{
-				NetworkPort = IcdSecureTcpClient.DEFAULT_PORT
-			};
+			m_NetworkProperties = new NetworkProperties();
 		}
 
 		#region Methods
