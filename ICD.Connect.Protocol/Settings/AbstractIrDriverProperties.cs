@@ -80,7 +80,10 @@ namespace ICD.Connect.Protocol.Settings
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out ir))
 				return;
 
-			IrDriverPath = XmlUtils.TryReadChildElementContentAsString(ir, DRIVER_ELEMENT);
+			string irDriverPath = XmlUtils.TryReadChildElementContentAsString(ir, DRIVER_ELEMENT);
+
+			// If strings are empty, set the value as null so overrides will work properly
+			IrDriverPath = String.IsNullOrEmpty(irDriverPath) ? null : irDriverPath;
 			IrPulseTime = XmlUtils.TryReadChildElementContentAsUShort(ir, PULSETIME_ELEMENT);
 			IrBetweenTime = XmlUtils.TryReadChildElementContentAsUShort(ir, BETWEENTIME_ELEMENT);
 		}

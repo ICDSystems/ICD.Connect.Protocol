@@ -106,7 +106,10 @@ namespace ICD.Connect.Protocol.Network.Settings
 		/// <param name="xml"></param>
 		protected virtual void ParseInnerXml(string xml)
 		{
-			NetworkAddress = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_ADDRESS_ELEMENT);
+			string networkAddress = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_ADDRESS_ELEMENT);
+
+			// If strings are empty, set the value as null so overrides will work properly
+			NetworkAddress = String.IsNullOrEmpty(networkAddress) ? null : networkAddress;
 			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(xml, NETWORK_PORT_ELEMENT);
 		}
 

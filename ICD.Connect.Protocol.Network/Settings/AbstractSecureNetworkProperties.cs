@@ -54,8 +54,12 @@ namespace ICD.Connect.Protocol.Network.Settings
 		{
 			base.ParseInnerXml(xml);
 
-			NetworkUsername = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_USERNAME_ELEMENT);
-			NetworkPassword = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_PASSWORD_ELEMENT);
+			string networkUsername = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_USERNAME_ELEMENT);
+			string networkPassword = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_PASSWORD_ELEMENT);
+
+			// If strings are empty, set the value as null so overrides will work properly
+			NetworkUsername = string.IsNullOrEmpty(networkUsername) ? null : networkUsername;
+			NetworkPassword = string.IsNullOrEmpty(networkPassword) ? null : networkPassword;
 		}
 
 		#endregion

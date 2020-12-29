@@ -97,11 +97,17 @@ namespace ICD.Connect.Protocol.Network.Settings
 			if (!XmlUtils.TryGetChildElementAsString(xml, ELEMENT, out proxy))
 				return;
 
-			ProxyUsername = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_USERNAME_ELEMENT);
-			ProxyPassword = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_PASSWORD_ELEMENT);
-			ProxyHost = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_HOST_ELEMENT);
+			string proxyUsername = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_USERNAME_ELEMENT);
+			string proxyPassword = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_PASSWORD_ELEMENT);
+			string proxyHost = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_HOST_ELEMENT);
+			string proxyScheme = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_SCHEME_ELEMENT);
+
+			// If strings are empty, set the value as null so overrides will work properly
+			ProxyUsername = string.IsNullOrEmpty(proxyUsername) ? null : proxyUsername;
+			ProxyPassword = string.IsNullOrEmpty(proxyPassword) ? null : proxyPassword;
+			ProxyHost = string.IsNullOrEmpty(proxyHost) ? null : proxyHost;
 			ProxyPort = XmlUtils.TryReadChildElementContentAsUShort(proxy, PROXY_PORT_ELEMENT);
-			ProxyScheme = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_SCHEME_ELEMENT);
+			ProxyScheme = string.IsNullOrEmpty(proxyScheme) ? null : proxyScheme;
 			ProxyAuthenticationMethod = XmlUtils.TryReadChildElementContentAsEnum<eProxyAuthenticationMethod>(proxy, PROXY_METHOD_ELEMENT, true);
 		}
 
