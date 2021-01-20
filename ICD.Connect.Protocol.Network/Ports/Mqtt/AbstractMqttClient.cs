@@ -215,7 +215,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		}
 
 		/// <summary>
-		/// Wrokaround for "unverifiable code" warning.
+		/// Workaround for "unverifiable code" warning.
 		/// </summary>
 		/// <returns></returns>
 		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()

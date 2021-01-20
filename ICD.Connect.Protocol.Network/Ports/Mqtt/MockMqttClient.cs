@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils;
+using ICD.Connect.API.Commands;
 using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Utils;
 
 namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 {
@@ -11,7 +14,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		/// </summary>
 		public override event EventHandler<MqttMessageEventArgs> OnMessageReceived;
 
+		private readonly Dictionary<string, string> m_TopicsToMessages;
 		private bool m_IsConnected;
+
+		public MockMqttClient()
+		{
+			m_TopicsToMessages = new Dictionary<string, string>();
+		}
 
 		/// <summary>
 		/// Connect to the broker.
@@ -20,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		public override void Connect()
 		{
 			m_IsConnected = true;
-			UpdateCachedOnlineStatus();
+			UpdateIsConnectedState();
 		}
 
 		/// <summary>
@@ -29,7 +38,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		public override void Disconnect()
 		{
 			m_IsConnected = false;
-			UpdateCachedOnlineStatus();
+			UpdateIsConnectedState();
 		}
 
 		/// <summary>
@@ -60,7 +69,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		/// <returns></returns>
 		public override ushort Publish(string topic, byte[] message)
 		{
-			return 0;
+			return Publish(topic, message, MqttUtils.QOS_LEVEL_AT_MOST_ONCE, false);
 		}
 
 		/// <summary>
@@ -73,6 +82,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		/// <returns></returns>
 		public override ushort Publish(string topic, byte[] message, byte qosLevel, bool retain)
 		{
+			AddToCache(topic, message);
 			return 0;
 		}
 
@@ -83,6 +93,37 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 		protected override bool GetIsConnectedState()
 		{
 			return m_IsConnected;
+		}
+
+		private void AddToCache(string topic, byte[] message)
+		{
+			m_TopicsToMessages[topic] = System.Text.Encoding.UTF8.GetString(message, 0, message.Length);
+		}
+
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+			{
+				yield return command;
+			}
+
+			yield return new ConsoleCommand("ViewTopicsToMessages", "Prints a dictionary of topics and their messages", () => PrintTopicsToMessages());
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
+		private string PrintTopicsToMessages()
+		{
+			TableBuilder builder = new TableBuilder("Topic", "Messages");
+			foreach (KeyValuePair<string, string> topicsToMessage in m_TopicsToMessages)
+			{
+				builder.AddRow(topicsToMessage.Key, topicsToMessage.Value);
+			}
+
+			return builder.ToString();
 		}
 	}
 }
