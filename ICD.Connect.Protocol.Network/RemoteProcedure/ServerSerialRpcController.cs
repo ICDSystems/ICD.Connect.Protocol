@@ -45,6 +45,18 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		}
 
 		/// <summary>
+		/// Calls the method on all clients.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="parameters"></param>
+		[PublicAPI]
+		public void CallMethod(string key, params object[] parameters)
+		{
+			string data = Rpc.CallMethodRpc(key, parameters).Serialize();
+			SendData(null, data);
+		}
+
+		/// <summary>
 		/// Calls the method on the client.
 		/// </summary>
 		/// <param name="client"></param>
@@ -55,6 +67,18 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		{
 			string data = Rpc.CallMethodRpc(key, parameters).Serialize();
 			SendData(client, data);
+		}
+
+		/// <summary>
+		/// Sets the property on all clients.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		[PublicAPI]
+		public void SetProperty(string key, object value)
+		{
+			string data = Rpc.SetPropertyRpc(key, value).Serialize();
+			SendData(null, data);
 		}
 
 		/// <summary>
@@ -75,7 +99,7 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="data"></param>
-		private void SendData(uint client, string data)
+		private void SendData(uint? client, string data)
 		{
 			if (m_Server == null)
 			{
@@ -84,14 +108,17 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 				return;
 			}
 
-			if (!m_Server.ClientConnected(client))
+			if (client.HasValue && !m_Server.ClientConnected(client.Value))
 			{
 				ServiceProvider.TryGetService<ILoggerService>()
 				               .AddEntry(eSeverity.Warning, "{0} unable to send data, no client {1}", GetType().Name, client);
 				return;
 			}
 
-			m_Server.Send(client, data + DELIMITER);
+			if (client.HasValue)
+				m_Server.Send(client.Value, data + DELIMITER);
+			else
+				m_Server.Send(data + DELIMITER);
 		}
 
 		/// <summary>
