@@ -159,6 +159,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			catch (SocketException ex)
 			{
 				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}", GetClientInfo(clientId));
+				RemoveTcpClient(clientId);
 			}
 
 			if (!ClientConnected(clientId))
