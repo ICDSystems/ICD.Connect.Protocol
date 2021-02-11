@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using ICD.Common.Utils.Extensions;
+﻿using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Network.Servers;
 #if SIMPLSHARP
 using System;
-using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronSockets;
 using ICD.Common.Properties;
