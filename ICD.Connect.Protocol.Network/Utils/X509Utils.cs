@@ -167,11 +167,11 @@ namespace ICD.Connect.Protocol.Network.Utils
 					issuerPrivate);
 			}
 
-			var certGenerator = new X509V3CertificateGenerator();
+			X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
 			certGenerator.SetIssuerDN(issuer);
 			certGenerator.SetSubjectDN(subject);
-			certGenerator.SetSerialNumber(BigInteger.ValueOf(1));
-			certGenerator.SetNotAfter(DateTime.UtcNow.AddHours(1));
+			certGenerator.SetSerialNumber(new BigInteger(Guid.NewGuid().GetHashCode().ToString()));
+			certGenerator.SetNotAfter(DateTime.UtcNow.AddYears(20));
 			certGenerator.SetNotBefore(DateTime.UtcNow);
 			certGenerator.SetPublicKey(subjectPublic);
 			return certGenerator.Generate(signatureFactory);
