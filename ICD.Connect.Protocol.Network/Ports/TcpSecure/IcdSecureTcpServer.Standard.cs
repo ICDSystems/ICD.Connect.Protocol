@@ -175,8 +175,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// <returns></returns>
 		private static bool IsValidCertificate(X509Certificate certificate)
 		{
-			var expire = DateTime.Parse(certificate.GetExpirationDateString());
-			return expire > IcdEnvironment.GetLocalTime();
+			DateTime expire = DateTime.Parse(certificate.GetExpirationDateString());
+			return expire > IcdEnvironment.GetUtcTime();
 		}
 
 		/// <summary>
