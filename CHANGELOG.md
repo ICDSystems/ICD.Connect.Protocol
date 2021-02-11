@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - MockMqttClient now "publishes" messages to an internal class. Added console command for viewing messages.
+ - Generated certs have a longer expiration window
+ - Fixed a bug where certificate validation was not using UTC
+ - Using existing generated certificates if still valid instead of generating a new one
 
 ## [13.4.0] - 2021-01-14
 ### Added
