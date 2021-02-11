@@ -41,7 +41,6 @@
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
     <PackageReference Include="ICD_M2Mqtt.NetStandard" Version="1.0.1" />
     <PackageReference Include="websocketsharp.core" Version="1.0.0" />
   </ItemGroup>
