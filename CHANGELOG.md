@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [12.2.0] - 2021-03-08
 ### Changed
  - ISerialQueue now supports DisconnectClearTime, to allow a port to reconnect before clearing the queue
  - ISerialQueue now raises OnSendFailed event when a port fails to send data.
