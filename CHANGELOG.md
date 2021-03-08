@@ -100,6 +100,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Automatically starting the console server device
  - TCP server defaults to 64 max clients
 
+## [12.2.0] - 2021-03-08
+### Changed
+ - ISerialQueue now supports DisconnectClearTime, to allow a port to reconnect before clearing the queue
+ - ISerialQueue now raises OnSendFailed event when a port fails to send data.
+
 ## [12.1.0] - 2020-10-06
 ### Changed
  - Implemented StartSettings for SerialPortServer to start listening

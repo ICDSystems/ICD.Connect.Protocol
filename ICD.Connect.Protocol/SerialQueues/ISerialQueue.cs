@@ -23,6 +23,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		event EventHandler<SerialDataEventArgs> OnTimeout;
 
 		/// <summary>
+		/// Raised when a command fails to send due to port failures.
+		/// </summary>
+		event EventHandler<SerialDataEventArgs> OnSendFailed;
+
+		/// <summary>
 		/// Returns the number of queued commands.
 		/// </summary>
 		int CommandCount { get; }
@@ -41,6 +46,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// Wait time between sending commands, defaults to 0.
 		/// </summary>
 		long CommandDelayTime { get; set; }
+
+		/// <summary>
+		/// How long to wait for the port to re-connect before clearing the queue and buffer
+		/// This is helpful for IP devices that regularly disconnect in operation
+		/// </summary>
+		long DisconnectClearTime { get; set; }
 
 		/// <summary>
 		/// Gets the current port.
