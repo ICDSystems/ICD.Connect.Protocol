@@ -35,6 +35,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// </summary>
 		public event EventHandler<SerialDataEventArgs> OnTimeout;
 
+		/// <summary>
+		/// Raised when a command fails to send due to port failures.
+		/// </summary>
+		public event EventHandler<SerialDataEventArgs> OnSendFailed;
+
 		private ISerialBuffer m_Buffer;
 
 		private readonly PriorityQueue<ISerialData> m_CommandQueue;
@@ -61,6 +66,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private ISerialData m_CurrentCommand;
 
 		private bool m_CommandIsRunning;
+
+		private readonly SafeTimer m_DisconnectClearTimer;
 
 		#region Properties
 
@@ -97,6 +104,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 		public long CommandDelayTime { get; set; }
 
 		/// <summary>
+		/// How long to wait for the port to re-connect before clearing the queue and buffer
+		/// This is helpful for IP devices that regularly disconnect in operation
+		/// </summary>
+		public long DisconnectClearTime { get; set; }
+
+		/// <summary>
 		/// Returns the number of queued commands.
 		/// </summary>
 		public int CommandCount { get { return m_CommandSection.Execute(() => m_CommandQueue.Count); } }
@@ -122,6 +135,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 			m_CommandSection = new SafeCriticalSection();
 			m_DisconnectedTimer = new IcdStopwatch();
 			m_TimeoutTimer = SafeTimer.Stopped(TimeoutCallback);
+			m_DisconnectClearTimer = SafeTimer.Stopped(DisconnectedClearCallback);
 
 			MaxTimeoutCount = 5;
 			Timeout = 3000;
@@ -376,6 +390,8 @@ namespace ICD.Connect.Protocol.SerialQueues
 
 				if (!sendSuccessful)
 				{
+					OnSendFailed.Raise(this, new SerialDataEventArgs(m_CurrentCommand));
+
 					if (Debug)
 						IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "Send Command Failed!!");
 					return;
@@ -470,6 +486,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 			m_TimeoutTimer.Stop();
 		}
 
+		private void DisconnectedClearCallback()
+		{
+			m_Buffer.Clear();
+			Clear();
+		}
+
 		#endregion
 
 		#region Port Callbacks
@@ -507,12 +529,12 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// <param name="args"></param>
 		private void PortOnConnectedStateChanged(object sender, BoolEventArgs args)
 		{
-			// Clear the command queue if we lose connection.
-			if (!args.Data)
-			{
-				m_Buffer.Clear();
-				Clear();
-			}
+			if (args.Data)
+				m_DisconnectClearTimer.Stop(); // If we're connected, stop the timer
+			else if (DisconnectClearTime > 0)
+				m_DisconnectClearTimer.Reset(DisconnectClearTime); // Reset the timer if DisconnectClearTime is set > 0
+			else
+				DisconnectedClearCallback(); // Clear the queue immediately if DisconnectClearTime isn't > 0
 		}
 
 		/// <summary>
