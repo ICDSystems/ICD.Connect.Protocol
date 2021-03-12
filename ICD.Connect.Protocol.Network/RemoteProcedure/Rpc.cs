@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 #endif
 
 namespace ICD.Connect.Protocol.Network.RemoteProcedure
@@ -180,10 +181,12 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			}
 			catch (Exception e)
 			{
-				// Get the real exception, not the TargetInvocationException.
-				if (e.InnerException != null)
-					throw e.InnerException;
+#if SIMPLSHARP
+				throw e.InnerException ?? e;
+#else
+				ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
 				throw;
+#endif
 			}
 		}
 
@@ -208,10 +211,12 @@ namespace ICD.Connect.Protocol.Network.RemoteProcedure
 			}
 			catch (Exception e)
 			{
-				// Get the real exception, not the TargetInvocationException.
-				if (e.InnerException != null)
-					throw e.InnerException;
+#if SIMPLSHARP
+				throw e.InnerException ?? e;
+#else
+				ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
 				throw;
+#endif
 			}
 		}
 
