@@ -124,9 +124,10 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Gets the address and port for the client with the given id.
 		/// </summary>
 		/// <param name="client"></param>
+		/// <param name="info"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		HostInfo GetClientInfo(uint client);
+		bool TryGetClientInfo(uint client, out HostInfo info);
 
 		/// <summary>
 		/// Returns true if the client is connected.

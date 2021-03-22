@@ -44,8 +44,6 @@ namespace ICD.Connect.Protocol.Network.Servers
 		private readonly Dictionary<uint, ThreadedWorkerQueue<string>> m_ClientSendQueues;
 		private readonly SafeCriticalSection m_ClientsSection;
 
-		
-
 		private bool m_Listening;
 		private int m_MaxNumberOfClients;
 
@@ -259,10 +257,20 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// Gets the address and port for the client with the given id.
 		/// </summary>
 		/// <param name="client"></param>
+		/// <param name="info"></param>
 		/// <returns></returns>
-		public HostInfo GetClientInfo(uint client)
+		public bool TryGetClientInfo(uint client, out HostInfo info)
 		{
-			return m_ClientsSection.Execute(() => m_Clients[client]);
+			m_ClientsSection.Enter();
+
+			try
+			{
+				return m_Clients.TryGetValue(client, out info);
+			}
+			finally
+			{
+				m_ClientsSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -536,8 +544,10 @@ namespace ICD.Connect.Protocol.Network.Servers
 
 			foreach (uint client in GetClients().Order())
 			{
-				HostInfo clientInfo = GetClientInfo(client);
-				builder.AddRow(client, clientInfo);
+				HostInfo info;
+				TryGetClientInfo(client, out info);
+
+				builder.AddRow(client, info);
 			}
 
 			return builder.ToString();

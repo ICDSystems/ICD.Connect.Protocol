@@ -137,7 +137,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		protected override void SendWorkerAction(uint clientId, string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintTx(hostInfo, data);
 			SendWorkerAction(clientId, byteData);
@@ -201,7 +202,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// <returns></returns>
 		private void SendWorkerAction(uint clientId, byte[] data)
 		{
-			if (!ClientConnected(clientId))
+			HostInfo info;
+			if (!TryGetClientInfo(clientId, out info))
 			{
 				Logger.Log(eSeverity.Error, "Unable to send data to unconnected client {0}", clientId);
 				return;
@@ -214,18 +216,15 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 			catch (IOException ex)
 			{
-				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}",
-				           GetClientInfo(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}", info);
 			}
 			catch (InvalidOperationException ex)
 			{
-				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}: Authentication has not occured yet",
-				           GetClientInfo(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}: Authentication has not occured yet", info);
 			}
 			catch (NotSupportedException ex)
 			{
-				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}: Write operation already in progress",
-				           GetClientInfo(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to write data to ssl stream for client {0}: Write operation already in progress", info);
 			}
 
 			if (!ClientConnected(clientId))
@@ -339,7 +338,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 
 			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, clientData.Item3, length);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);

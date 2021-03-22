@@ -103,7 +103,8 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.WebSockets
 		/// <param name="data"></param>
 		protected override void SendWorkerAction(uint clientId, string data)
 		{
-			if (!ClientConnected(clientId))
+			HostInfo hostInfo;
+			if (!TryGetClientInfo(clientId, out hostInfo))
 			{
 				Logger.Log(eSeverity.Warning, "Unable to send data to unconnected client {0}", clientId);
 				RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
@@ -111,7 +112,6 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.WebSockets
 			}
 
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintTx(hostInfo, data);
 
@@ -280,10 +280,13 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.WebSockets
 		{
 			CallbackWebSocketBehavior session = (CallbackWebSocketBehavior)sender;
 			uint clientId = m_SessionsSection.Execute(() => m_Sessions.GetKey(session));
-			byte[] message = messageEventArgs.RawData;
 
+			HostInfo hostInfo;
+			if (!TryGetClientInfo(clientId, out hostInfo))
+				return;
+
+			byte[] message = messageEventArgs.RawData;
 			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, message, message.Length);
-			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);

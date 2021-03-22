@@ -127,7 +127,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		protected override void SendWorkerAction(uint clientId, string data)
 		{
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintTx(hostInfo, data);
 			Send(clientId, byteData);
@@ -145,7 +146,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <returns></returns>
 		private void Send(uint clientId, byte[] data)
 		{
-			if (!ClientConnected(clientId))
+			HostInfo info;
+			if (!TryGetClientInfo(clientId, out info))
 			{
 				Logger.Log(eSeverity.Error, "Unable to send data to unconnected client {0}", clientId);
 				return;
@@ -158,7 +160,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 			catch (SocketException ex)
 			{
-				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}", GetClientInfo(clientId));
+				Logger.Log(eSeverity.Error, ex, "Failed to send data to client {0}", info);
 				RemoveTcpClient(clientId);
 			}
 
@@ -251,7 +253,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 
 			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, length);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);

@@ -103,7 +103,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			if (m_TcpListener == null)
 				throw new InvalidOperationException("Cannot Send Worker Action with no TcpListener");
 
-			if (!ClientConnected(clientId))
+			HostInfo hostInfo;
+			if (!TryGetClientInfo(clientId, out hostInfo))
 			{
 				Logger.Log(eSeverity.Warning, "Unable to send data to unconnected client {0}", clientId);
 				RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
@@ -111,7 +112,6 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintTx(hostInfo, data);
 			SocketErrorCodes response = m_TcpListener.SendData(clientId, byteData, byteData.Length);
@@ -245,7 +245,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 
 			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, bytesReceived);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);
@@ -265,8 +266,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 				return;
 
 			Logger.Log(eSeverity.Error,
-							"Failed to receive data from ClientId {0} at {1} : {2}",
-							clientId, GetClientInfo(clientId), socketError);
+			           "Failed to receive data from ClientId {0} at {1} : {2}",
+			           clientId, hostInfo, socketError);
 
 			RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
 		}

@@ -97,7 +97,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		protected override void SendWorkerAction(uint clientId, string data)
 		{
-			if (!ClientConnected(clientId))
+			HostInfo hostInfo;
+			if (!TryGetClientInfo(clientId, out hostInfo))
 			{
 				Logger.Log(eSeverity.Warning, "Unable to send data to unconnected client {0}", clientId);
 				RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
@@ -105,7 +106,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 
 			byte[] byteData = StringUtils.ToBytes(data);
-			HostInfo hostInfo = GetClientInfo(clientId);
 
 			PrintTx(hostInfo, data);
 			m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
@@ -237,7 +237,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			}
 
 			DataReceiveEventArgs eventArgs = new DataReceiveEventArgs(clientId, buffer, bytesReceived);
-			HostInfo hostInfo = GetClientInfo(clientId);
+			HostInfo hostInfo;
+			TryGetClientInfo(clientId, out hostInfo);
 
 			PrintRx(hostInfo, eventArgs.Data);
 			RaiseOnDataReceived(eventArgs);
@@ -256,9 +257,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			if (socketError == SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				return;
 
-			Logger.Log(eSeverity.Error,
-							"Failed to receive data from ClientId {0} at {1} : {2}",
-			                clientId, GetClientInfo(clientId), socketError);
+			Logger.Log(eSeverity.Error, "Failed to receive data from ClientId {0} at {1} : {2}",
+			           clientId, hostInfo, socketError);
 
 			RemoveClient(clientId, SocketStateEventArgs.eSocketStatus.SocketStatusNoConnect);
 		}
