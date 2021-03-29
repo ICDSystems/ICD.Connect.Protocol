@@ -37,7 +37,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 
 		#region Private Members
 
-		private readonly IcdOrderedDictionary<int, T> m_Crosspoints;
+		private readonly IcdSortedDictionary<int, T> m_Crosspoints;
 		private readonly SafeCriticalSection m_CrosspointsSection;
 		private readonly RemoteCrosspointTracker m_RemoteCrosspoints;
 		private readonly int m_SystemId;
@@ -82,7 +82,7 @@ namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 		/// <param name="systemId">The id of the parent system.</param>
 		protected AbstractCrosspointManager(int systemId)
 		{
-			m_Crosspoints = new IcdOrderedDictionary<int, T>();
+			m_Crosspoints = new IcdSortedDictionary<int, T>();
 			m_CrosspointsSection = new SafeCriticalSection();
 
 			m_RemoteCrosspoints = new RemoteCrosspointTracker();

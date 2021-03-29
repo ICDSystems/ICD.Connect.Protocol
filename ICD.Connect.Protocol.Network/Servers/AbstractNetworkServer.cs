@@ -40,7 +40,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnListeningStateChanged;
 
-		private readonly IcdOrderedDictionary<uint, HostInfo> m_Clients;
+		private readonly IcdSortedDictionary<uint, HostInfo> m_Clients;
 		private readonly Dictionary<uint, ThreadedWorkerQueue<string>> m_ClientSendQueues;
 		private readonly SafeCriticalSection m_ClientsSection;
 
@@ -132,7 +132,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		protected AbstractNetworkServer()
 		{
 			m_Logger = new ServiceLoggingContext(this);
-			m_Clients = new IcdOrderedDictionary<uint, HostInfo>();
+			m_Clients = new IcdSortedDictionary<uint, HostInfo>();
 			m_ClientSendQueues = new Dictionary<uint, ThreadedWorkerQueue<string>>();
 			m_ClientsSection = new SafeCriticalSection();
 
