@@ -124,6 +124,37 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			}
 		}
 
+		/// <summary>
+		/// Gets the severity for the socket state change.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <returns></returns>
+		private static eSeverity GetSeverity(SocketStatus state)
+		{
+			switch (state)
+			{
+				case SocketStatus.SOCKET_STATUS_NO_CONNECT:
+				case SocketStatus.SOCKET_STATUS_CONNECT_FAILED:
+				case SocketStatus.SOCKET_STATUS_BROKEN_REMOTELY:
+				case SocketStatus.SOCKET_STATUS_BROKEN_LOCALLY:
+				case SocketStatus.SOCKET_STATUS_DNS_FAILED:
+				case SocketStatus.SOCKET_STATUS_LINK_LOST:
+				case SocketStatus.SOCKET_STATUS_SOCKET_NOT_EXIST:
+					return eSeverity.Error;
+
+				case SocketStatus.SOCKET_STATUS_WAITING:
+				case SocketStatus.SOCKET_STATUS_DNS_LOOKUP:
+				case SocketStatus.SOCKET_STATUS_DNS_RESOLVED:
+					return eSeverity.Debug;
+
+				case SocketStatus.SOCKET_STATUS_CONNECTED:
+					return eSeverity.Informational;
+
+				default:
+					throw new ArgumentOutOfRangeException("state");
+			}
+		}
+
 #region TCPClient Callbacks
 
 		/// <summary>
@@ -151,6 +182,9 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// <param name="newSocketState"></param>
 		private void TcpClientOnSocketStateChange(SecureTCPClient tcpClient, SocketStatus newSocketState)
 		{
+			eSeverity severity = GetSeverity(newSocketState);
+			Logger.Log(severity, StringUtils.NiceName(newSocketState));
+
 			UpdateIsConnectedState();
 		}
 
