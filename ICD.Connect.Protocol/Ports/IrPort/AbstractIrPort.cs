@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Ports.IrPort.IrPulse;
 using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings;
 
@@ -12,6 +13,11 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		where T : IIrPortSettings, new()
 	{
 		#region Properties
+
+		/// <summary>
+		/// Controls pulsing and timing for the IR port.
+		/// </summary>
+		public abstract IrPortPulseComponent PulseComponent { get; set; }
 
 		/// <summary>
 		/// Gets the path to the loaded IR driver.
@@ -64,14 +70,20 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// Sends the command for the default pulse time.
 		/// </summary>
 		/// <param name="command"></param>
-		public abstract void PressAndRelease(string command);
+		public void PressAndRelease(string command)
+		{
+			PressAndRelease(command, PulseTime);
+		}
 
 		/// <summary>
 		/// Send the command for the given number of milliseconds.
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="pulseTime"></param>
-		public abstract void PressAndRelease(string command, ushort pulseTime);
+		public void PressAndRelease(string command, ushort pulseTime)
+		{
+			PressAndRelease(command, pulseTime, BetweenTime);
+		}
 
 		/// <summary>
 		/// Sends the command for the given number of milliseconds.
@@ -79,7 +91,11 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="command"></param>
 		/// <param name="pulseTime"></param>
 		/// <param name="betweenTime"></param>
-		public abstract void PressAndRelease(string command, ushort pulseTime, ushort betweenTime);
+		public void PressAndRelease(string command, ushort pulseTime, ushort betweenTime)
+		{
+			IrPulse.IrPulse pulse = new IrPulse.IrPulse(command, pulseTime, betweenTime);
+			PulseComponent.EnqueuePulse(pulse);
+		}
 
 		/// <summary>
 		/// Applies the given device configuration properties to the port.
@@ -90,7 +106,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 			if (properties == null)
 				throw new ArgumentNullException("properties");
 
-			// Port supercedes device configuration
+			// Port supersedes device configuration
 			IIrDriverProperties config = IrDriverProperties.Superimpose(properties);
 
 			ApplyConfiguration(config);

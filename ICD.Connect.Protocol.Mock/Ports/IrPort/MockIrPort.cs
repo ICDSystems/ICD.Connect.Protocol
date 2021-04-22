@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Protocol.Ports.IrPort;
+using ICD.Connect.Protocol.Ports.IrPort.IrPulse;
 using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Mock.Ports.IrPort
@@ -11,6 +12,11 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		private string m_DriverPath;
 
 		#region Properties
+
+		/// <summary>
+		/// Controls pulsing and timing for the IR port.
+		/// </summary>
+		public override IrPortPulseComponent PulseComponent { get; set; }
 
 		/// <summary>
 		/// Gets the IR Driver configuration properties.
@@ -74,33 +80,6 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		/// Stop sending the current command.
 		/// </summary>
 		public override void Release()
-		{
-		}
-
-		/// <summary>
-		/// Sends the command for the default pulse time.
-		/// </summary>
-		/// <param name="command"></param>
-		public override void PressAndRelease(string command)
-		{
-		}
-
-		/// <summary>
-		/// Send the command for the given number of milliseconds.
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="pulseTime"></param>
-		public override void PressAndRelease(string command, ushort pulseTime)
-		{
-		}
-
-		/// <summary>
-		/// Sends the command for the given number of milliseconds.
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="pulseTime"></param>
-		/// <param name="betweenTime"></param>
-		public override void PressAndRelease(string command, ushort pulseTime, ushort betweenTime)
 		{
 		}
 
