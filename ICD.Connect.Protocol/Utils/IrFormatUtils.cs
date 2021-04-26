@@ -41,14 +41,18 @@ namespace ICD.Connect.Protocol.Utils
 
 			switch (ext)
 			{
+				// Crestron
 				case ".ir":
 					return ImportCrestronDriverFromPath(path);
-				// TODO Pronto
-				case ".ccf":
-
 				// Krang
 				case ".csv":
 					return ImportCsvDriverFromPath(path);
+				/*
+				// TODO - support Pronto files
+				// Pronto
+				case ".ccf":
+					return ImportProntoDriverFromPath(path);
+				*/
 
 				default:
 					throw new FormatException(string.Format("{0} is not a supported extension", ext));
@@ -182,179 +186,107 @@ namespace ICD.Connect.Protocol.Utils
 				Name = commandName,
 				Frequency = dataCcfFreq,
 				RepeatCount = 1,
+				Offset = false,
 				Data = data
 			};
 		}
 
 		#endregion
 
+		#region Csv
+
+		/// <summary>
+		/// Custom format - each line should be the IR code name followed by the hex describing the IR Code
+		/// Example:
+		/// COMMAND NAME,0000 1111 2222
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		private static KrangIrDriver ImportCsvDriverFromPath(string path)
 		{
 			if (!IcdFile.Exists(path))
 				throw new FileNotFoundException(string.Format("No file at path {0}", path));
 
-			//using (FileStream stream = new FileStream(path, FileMode.Open))
-			//{
-			//	using (StreamReader reader = new StreamReader(stream))
-			//	{
-			//		List<string> names = new List<string>();
-			//		List<byte[]> bytes = new List<byte[]>();
+			string content = IcdFile.ReadToEnd(path, Encoding.UTF8);
 
-			//		while (!reader.EndOfStream)
-			//		{
-			//			var line = reader.ReadLine();
-			//			var values = line.Split(',');
+			IEnumerable<KrangIrCommand> commands =
+				content.Split('\r', '\n')
+				       .Select(s => s.Trim())
+				       .Where(s => !string.IsNullOrEmpty(s))
+				       .Select(s =>
+				       {
+					       string[] entry = s.Split(',');
+					       //if (CsvDataEntryValid(entry[1]))
+					       return ImportIrCommandFromCsvEntry(entry);
+				       });
 
-			//			names.Add(values[0]);
-			//			bytes.Add(values[1]);
-			//		}
-			//	}
-			//}
+			KrangIrDriver driver = new KrangIrDriver();
+			foreach (KrangIrCommand command in commands)
+			{
+				driver.AddCommand(command);
+			}
 
-			return null;
+			return driver;
 		}
 
-		#region old
+		/// <summary>
+		/// Converts a csv line entry into an IR command class.
+		/// </summary>
+		/// <param name="entry"></param>
+		/// <returns></returns>
+		private static KrangIrCommand ImportIrCommandFromCsvEntry(string[] entry)
+		{
+			if (entry.Length < 2)
+				throw new FormatException("Invalid configured IR command in csv file.");
 
-		///// <summary>
-		///// Reads the file at the given path and converts to GC format.
-		///// </summary>
-		///// <param name="filename"></param>
-		///// <returns></returns>
-		//public static IEnumerable<string> ReadIrFileToGc(string filename)
-		//{
-		//	if (!IcdFile.Exists(filename))
-		//		throw new FileNotFoundException(string.Format("No file at path {0}", filename));
+			string name = entry[0];
+			string data = entry[1];
 
-		//	string ext = IcdPath.GetExtension(filename).ToLower();
+			int[] intArray = data.Split(' ')
+			                     .Select(s => int.Parse(s, System.Globalization.NumberStyles.HexNumber))
+			                     .ToArray();
 
-		//	switch (ext)
-		//	{
-		//		case ".ir":
-		//			return ImportCrestronDriverFromPath(filename);
+			int num = (((0xa1ea / intArray[1]) + 5) / 10) * 0x3e8;
 
-		//		case ".ccf":
-		//			return ReadCcfTextIrFile(filename);
+			return new KrangIrCommand
+			{
+				Name = name,
+				Frequency = num,
+				RepeatCount = 1,
+				Offset = true,
+				Data = intArray.Skip(4).ToList()
+			};
+		}
 
-		//		default:
-		//			throw new FormatException(string.Format("{0} is not a supported extension", ext));
-		//	}
-		//}
+		/// <summary>
+		/// Returns true if the given CCF string is valid.
+		/// </summary>
+		/// <param name="dataEntry"></param>
+		/// <returns></returns>
+		private static bool CsvDataEntryValid(string dataEntry)
+		{
+			if (dataEntry == null)
+				throw new ArgumentNullException("dataEntry");
 
-		///// <summary>
-		///// Reads the CCF driver at the given path to GC format.
-		///// </summary>
-		///// <param name="filename"></param>
-		///// <returns></returns>
-		//private static IEnumerable<string> ReadCcfTextIrFile(string filename)
-		//{
-		//	if (!IcdFile.Exists(filename))
-		//		throw new FileNotFoundException(string.Format("No file at path {0}", filename));
+			int length = dataEntry.Length;
+			if (length < 0x1d || length > 0x513)
+				return false;
 
-		//	using (FileStream stream = new FileStream(filename, FileMode.Open))
-		//	{
-		//		using (StreamReader reader = new StreamReader(stream))
-		//		{
-		//			string line;
-		//			while ((line = reader.ReadLine()) != null)
-		//			{
-		//				line = line.Trim();
-		//				if (CcfValid(line))
-		//					yield return CcfToGc(line);
-		//			}
-		//		}
-		//	}
-		//}
+			return dataEntry.ToCharArray().All(CsvDataEntryValid);
+		}
 
-		#region Conversion
-
-		///// <summary>
-		///// Converts Crestron to GC format.
-		///// </summary>
-		///// <param name="crestronIr"></param>
-		///// <returns></returns>
-		//public static string CrestronToGc(byte[] crestronIr)
-		//{
-		//	int[] indexedInteger = new int[15];
-		//	int dataOneTimeIndexed = crestronIr[3] & 0x0F;
-
-		//	int dataLength = crestronIr.Length - 4;
-		//	byte[] newArray = new byte[dataLength];
-
-		//	Array.Copy(crestronIr, 4, newArray, 0, newArray.Length);
-
-		//	int dataCcfFreq = 4000000 / crestronIr[0];
-		//	string gc = string.Empty + dataCcfFreq + ",1,1";
-
-		//	for (int y = 0; y < dataOneTimeIndexed; y++)
-		//		indexedInteger[y] = (newArray[y * 2] << 8) + newArray[1 + (y * 2)];
-
-		//	for (int y = 0; y < dataLength - (dataOneTimeIndexed * 2); y++)
-		//	{
-		//		int indexHighByte = (newArray[(dataOneTimeIndexed * 2) + y] & 0xF0) >> 4;
-		//		int indexLowByte = newArray[(dataOneTimeIndexed * 2) + y] & 0x0F;
-		//		gc += "," + indexedInteger[indexHighByte] + "," + indexedInteger[indexLowByte];
-		//	}
-
-		//	return gc;
-		//}
-
-		///// <summary>
-		///// Converts CCF to GC format.
-		///// </summary>
-		///// <param name="ccf"></param>
-		///// <returns></returns>
-		//public static string CcfToGc(string ccf)
-		//{
-		//	if (ccf == null)
-		//		throw new ArgumentNullException("ccf");
-
-		//	int[] intArray = ccf.Split(' ')
-		//						.Select(s => int.Parse(s, System.Globalization.NumberStyles.HexNumber))
-		//						.ToArray();
-
-		//	int length = intArray.Length;
-
-		//	int num = (((0xa1ea / intArray[1]) + 5) / 10) * 0x3e8;
-
-		//	string gc = num + ",1,1";
-		//	for (int i = 4; i < length; i++)
-		//		gc += "," + intArray[i];
-
-		//	return gc;
-		//}
-
-		#endregion
-
-		///// <summary>
-		///// Returns true if the given CCF string is valid.
-		///// </summary>
-		///// <param name="ccf"></param>
-		///// <returns></returns>
-		//public static bool CcfValid(string ccf)
-		//{
-		//	if (ccf == null)
-		//		throw new ArgumentNullException("ccf");
-
-		//	int length = ccf.Length;
-		//	if (length < 0x1d || length > 0x513)
-		//		return false;
-
-		//	return ccf.ToCharArray().All(CcfValid);
-		//}
-
-		///// <summary>
-		///// Returns true if the given CCF character is valid.
-		///// </summary>
-		///// <param name="input"></param>
-		///// <returns></returns>
-		//public static bool CcfValid(char input)
-		//{
-		//	return ((input >= '0') && (input <= '9')) ||
-		//	       ((input >= 'a') && (input <= 'f')) ||
-		//	       (((input >= 'A') && (input <= 'F')) ||
-		//	        (input == ' '));
-		//}
+		/// <summary>
+		/// Returns true if the given CCF character is valid.
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+		private static bool CsvDataEntryValid(char input)
+		{
+			return ((input >= '0') && (input <= '9')) ||
+			       ((input >= 'a') && (input <= 'f')) ||
+			       (((input >= 'A') && (input <= 'F')) ||
+			        (input == ' '));
+		}
 
 		#endregion
 	}

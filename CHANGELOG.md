@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Added overloads to RPC server for calling a method on all connected clients
+ - Support configured Crestron IR driver files & custom .csv files
 
 ### Changed
+ - Abstracted IR pulsing & timing logic from Crestron IrPortAdapter to IrPortPulseComponent
  - MockMqttClient now "publishes" messages to an internal class. Added console command for viewing messages.
  - Generated certs have a longer expiration window
  - Fixed a bug where certificate validation was not using UTC
