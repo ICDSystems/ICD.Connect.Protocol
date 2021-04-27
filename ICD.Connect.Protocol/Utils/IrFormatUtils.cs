@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Common.Utils;
+#if SIMPLSHARP
 using Crestron.SimplSharp.CrestronIO;
 #else
 using System.IO;
@@ -7,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Connect.Protocol.Data;
@@ -22,6 +25,13 @@ namespace ICD.Connect.Protocol.Utils
 
 		private const byte FIELD_FILE_TYPE = 0xF0;
 		private const byte FIELD_HEADER_END = 0xFF;
+
+		#endregion
+
+		#region Regex
+
+		private const string GLOBAL_CACHE_IR_COMMAND_REGEX =
+			@"[a-zA-Z]+,\d+:\d+,\d+,(?'freq'\d+),\d+,\d+,(?'data'\d+(,\d+)*)";
 
 		#endregion
 
@@ -196,9 +206,16 @@ namespace ICD.Connect.Protocol.Utils
 		#region Csv
 
 		/// <summary>
-		/// Custom format - each line should be the IR code name followed by the hex describing the IR Code
-		/// Example:
-		/// COMMAND NAME,0000 1111 2222
+		/// 3rd column of a csv driver should specify one of these driver types.
+		/// </summary>
+		private enum eCsvDriverType
+		{
+			ProntoHex = 1,
+			GlobalCache = 2
+		}
+
+		/// <summary>
+		/// Custom format - See example file in ICD.Connect.Protocol.Utils for details.
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
@@ -215,16 +232,13 @@ namespace ICD.Connect.Protocol.Utils
 				       .Where(s => !string.IsNullOrEmpty(s))
 				       .Select(s =>
 				       {
-					       string[] entry = s.Split(',');
-					       //if (CsvDataEntryValid(entry[1]))
+					       string[] entry = s.Split(';');
 					       return ImportIrCommandFromCsvEntry(entry);
 				       });
 
 			KrangIrDriver driver = new KrangIrDriver();
 			foreach (KrangIrCommand command in commands)
-			{
 				driver.AddCommand(command);
-			}
 
 			return driver;
 		}
@@ -236,11 +250,39 @@ namespace ICD.Connect.Protocol.Utils
 		/// <returns></returns>
 		private static KrangIrCommand ImportIrCommandFromCsvEntry(string[] entry)
 		{
-			if (entry.Length < 2)
+			if (entry.Length < 3)
 				throw new FormatException("Invalid configured IR command in csv file.");
 
 			string name = entry[0];
 			string data = entry[1];
+			eCsvDriverType type;
+
+			if (!EnumUtils.TryParse(entry[2], true, out type))
+				throw new FormatException("Unspecified driver type");
+
+			switch (type)
+			{
+				case eCsvDriverType.ProntoHex:
+					return ImportProntoIrCommand(name, data);
+				case eCsvDriverType.GlobalCache:
+					return ImportGlobalCacheIrCommand(name, data);
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		#region Pronto Hex
+
+		/// <summary>
+		/// Imports the Pronto Hex IR command from a configured csv file.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		private static KrangIrCommand ImportProntoIrCommand([NotNull] string name, [NotNull] string data)
+		{
+			if (!ProntoHexDataEntryValid(data))
+				throw new FormatException("Invalid Pronto Hex");
 
 			int[] intArray = data.Split(' ')
 			                     .Select(s => int.Parse(s, System.Globalization.NumberStyles.HexNumber))
@@ -259,11 +301,11 @@ namespace ICD.Connect.Protocol.Utils
 		}
 
 		/// <summary>
-		/// Returns true if the given CCF string is valid.
+		/// Returns true if the given pronto hex string is valid.
 		/// </summary>
 		/// <param name="dataEntry"></param>
 		/// <returns></returns>
-		private static bool CsvDataEntryValid(string dataEntry)
+		private static bool ProntoHexDataEntryValid(string dataEntry)
 		{
 			if (dataEntry == null)
 				throw new ArgumentNullException("dataEntry");
@@ -272,21 +314,68 @@ namespace ICD.Connect.Protocol.Utils
 			if (length < 0x1d || length > 0x513)
 				return false;
 
-			return dataEntry.ToCharArray().All(CsvDataEntryValid);
+			return dataEntry.ToCharArray().All(ProntoHexDataEntryValid);
 		}
 
 		/// <summary>
-		/// Returns true if the given CCF character is valid.
+		/// Returns true if the given pronto hex character is valid.
 		/// </summary>
 		/// <param name="input"></param>
 		/// <returns></returns>
-		private static bool CsvDataEntryValid(char input)
+		private static bool ProntoHexDataEntryValid(char input)
 		{
 			return ((input >= '0') && (input <= '9')) ||
 			       ((input >= 'a') && (input <= 'f')) ||
 			       (((input >= 'A') && (input <= 'F')) ||
 			        (input == ' '));
 		}
+
+		#endregion
+
+		#region Global Cache
+
+		/// <summary>
+		/// Imports the Global Cache IR command string.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		private static KrangIrCommand ImportGlobalCacheIrCommand(string name, string data)
+		{
+			if (!GlobaclCacheDataEntryValid(data))
+				throw new FormatException("Invalid Global Cache IR command string");
+
+			Match match = Regex.Match(data, GLOBAL_CACHE_IR_COMMAND_REGEX);
+
+			int freq = int.Parse(match.Groups["freq"].Value);
+			List<int> intData = match.Groups["data"]
+			                         .Value
+			                         .Split(',')
+			                         .Select(s => int.Parse(s))
+			                         .ToList();
+			bool offset = intData.Count % 2 == 0;
+
+			return new KrangIrCommand
+			{
+				Name = name,
+				RepeatCount = 1,
+				Frequency = freq,
+				Data = intData,
+				Offset = offset
+			};
+		}
+
+		/// <summary>
+		/// Checks if the data entry matches the global cache command string regex.
+		/// </summary>
+		/// <param name="dataEntry"></param>
+		/// <returns></returns>
+		private static bool GlobaclCacheDataEntryValid(string dataEntry)
+		{
+			return Regex.IsMatch(dataEntry, GLOBAL_CACHE_IR_COMMAND_REGEX);
+		}
+
+		#endregion
 
 		#endregion
 	}
