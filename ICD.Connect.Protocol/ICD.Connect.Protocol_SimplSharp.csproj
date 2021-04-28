@@ -85,6 +85,8 @@
     <Compile Include="Ports\AbstractConnectablePortSettings.cs" />
     <Compile Include="Ports\AbstractPortSettings.cs" />
     <Compile Include="ObfuscationSettings.cs" />
+    <Compile Include="Ports\IrPort\IrPulse\IrPortPulseComponent.cs" />
+    <Compile Include="Ports\IrPort\IrPulse\IrPulse.cs" />
     <Compile Include="Utils\IrFormatUtils.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Ports\AbstractSerialPortSettings.cs" />
@@ -158,6 +160,7 @@
     <Compile Include="XSig\SerialXSig.cs" />
     <Compile Include="XSig\XSigParser.cs" />
     <None Include="Properties\ControlSystem.cfg" />
+    <None Include="Utils\ExampleCustomIRDriver.csv" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Logging\ICD.Common.Logging\ICD.Common.Logging_SimplSharp.csproj">

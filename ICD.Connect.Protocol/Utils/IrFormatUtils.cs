@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
+using ICD.Common.Utils.Csv;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Connect.Protocol.Data;
@@ -224,17 +225,19 @@ namespace ICD.Connect.Protocol.Utils
 			if (!IcdFile.Exists(path))
 				throw new FileNotFoundException(string.Format("No file at path {0}", path));
 
-			string content = IcdFile.ReadToEnd(path, Encoding.UTF8);
+			List<KrangIrCommand> commands = new List<KrangIrCommand>();
+			CsvReaderSettings settings = new CsvReaderSettings
+			{
+				HeaderRowIncluded = false
+			};
 
-			IEnumerable<KrangIrCommand> commands =
-				content.Split('\r', '\n')
-				       .Select(s => s.Trim())
-				       .Where(s => !string.IsNullOrEmpty(s))
-				       .Select(s =>
-				       {
-					       string[] entry = s.Split(';');
-					       return ImportIrCommandFromCsvEntry(entry);
-				       });
+			using (var streamReader = new IcdStreamReader(path))
+			{
+				using (var csvReader = new CsvReader(streamReader, settings))
+				{
+					commands.AddRange(csvReader.Lines().Select(row => ImportIrCommandFromCsvEntry(row)));
+				}
+			}
 
 			KrangIrDriver driver = new KrangIrDriver();
 			foreach (KrangIrCommand command in commands)
