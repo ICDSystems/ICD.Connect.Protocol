@@ -12,12 +12,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 	public abstract class AbstractIrPort<T> : AbstractPort<T>, IIrPort
 		where T : IIrPortSettings, new()
 	{
-		#region Properties
-
 		/// <summary>
 		/// Controls pulsing and timing for the IR port.
 		/// </summary>
-		public abstract IrPortPulseComponent PulseComponent { get; set; }
+		private readonly IrPortPulseComponent m_PulseComponent;
+
+		#region Properties
 
 		/// <summary>
 		/// Gets the path to the loaded IR driver.
@@ -41,6 +41,24 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 
 		#endregion
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractIrPort()
+		{
+			m_PulseComponent = new IrPortPulseComponent(this);
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			m_PulseComponent.Dispose();
+
+			base.DisposeFinal(disposing);
+		}
+
 		#region Methods
 
 		/// <summary>
@@ -59,12 +77,33 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// Begin sending the command.
 		/// </summary>
 		/// <param name="command"></param>
-		public abstract void Press(string command);
+		public void Press(string command)
+		{
+			m_PulseComponent.Clear();
+
+			PressFinal(command);
+		}
+
+		/// <summary>
+		/// Override to implement the press logic.
+		/// </summary>
+		/// <param name="command"></param>
+		protected abstract void PressFinal(string command);
 
 		/// <summary>
 		/// Stop sending the current command.
 		/// </summary>
-		public abstract void Release();
+		public void Release()
+		{
+			m_PulseComponent.Clear();
+
+			ReleaseFinal();
+		}
+
+		/// <summary>
+		/// Override to implement the release logic.
+		/// </summary>
+		protected abstract void ReleaseFinal();
 
 		/// <summary>
 		/// Sends the command for the default pulse time.
@@ -94,7 +133,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		public void PressAndRelease(string command, ushort pulseTime, ushort betweenTime)
 		{
 			IrPulse.IrPulse pulse = new IrPulse.IrPulse(command, pulseTime, betweenTime);
-			PulseComponent.EnqueuePulse(pulse);
+			m_PulseComponent.EnqueuePulse(pulse);
 		}
 
 		/// <summary>

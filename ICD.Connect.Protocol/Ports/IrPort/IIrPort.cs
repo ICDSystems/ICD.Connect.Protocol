@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Connect.Protocol.Ports.IrPort.IrPulse;
 using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Ports.IrPort
@@ -11,11 +10,6 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 	public interface IIrPort : IPort
 	{
 		#region Properties
-
-		/// <summary>
-		/// Controls pulsing and timing for the IR port.
-		/// </summary>
-		IrPortPulseComponent PulseComponent { get; set; }
 
 		/// <summary>
 		/// Gets the IR Driver configuration.

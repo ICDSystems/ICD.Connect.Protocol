@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Protocol.Ports.IrPort;
-using ICD.Connect.Protocol.Ports.IrPort.IrPulse;
 using ICD.Connect.Protocol.Settings;
 
 namespace ICD.Connect.Protocol.Mock.Ports.IrPort
@@ -12,11 +11,6 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		private string m_DriverPath;
 
 		#region Properties
-
-		/// <summary>
-		/// Controls pulsing and timing for the IR port.
-		/// </summary>
-		public override IrPortPulseComponent PulseComponent { get; set; }
 
 		/// <summary>
 		/// Gets the IR Driver configuration properties.
@@ -72,14 +66,14 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		/// Begin sending the command.
 		/// </summary>
 		/// <param name="command"></param>
-		public override void Press(string command)
+		protected override void PressFinal(string command)
 		{
 		}
 
 		/// <summary>
 		/// Stop sending the current command.
 		/// </summary>
-		public override void Release()
+		protected override void ReleaseFinal()
 		{
 		}
 

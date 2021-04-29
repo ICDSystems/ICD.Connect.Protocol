@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -8,16 +9,11 @@ using ICD.Common.Utils.Timers;
 
 namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 {
-	public sealed class IrPortPulseComponent
+	public sealed class IrPortPulseComponent : IDisposable
 	{
-		#region Events
-
-		public event EventHandler OnPulseQueueCleared;
-
-		#endregion
-
 		#region Members
 
+		[NotNull]
 		private readonly IIrPort m_Port;
 
 		private readonly SafeCriticalSection m_PulseSection;
@@ -31,13 +27,24 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public IrPortPulseComponent(IIrPort parent)
+		public IrPortPulseComponent([NotNull] IIrPort parent)
 		{
+			if (parent == null)
+				throw new ArgumentNullException("parent");
+
 			m_Port = parent;
 
 			m_PulseSection = new SafeCriticalSection();
 			m_PulseTimer = SafeTimer.Stopped(() => PulseElapseCallback());
 			m_Queue = new Queue<IrPulse>();
+		}
+
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public void Dispose()
+		{
+			m_PulseTimer.Dispose();
 		}
 
 		#endregion
@@ -72,8 +79,6 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 			{
 				m_PulseTimer.Stop();
 				m_Queue.Clear();
-
-				OnPulseQueueCleared.Raise(this);
 			}
 			finally
 			{
@@ -97,13 +102,6 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 				IrPulse pulse;
 				if (!m_Queue.Peek(out pulse))
 					return;
-
-				if (m_Port == null)
-				{
-					IcdErrorLog.Error("Unable to send command - internal port is null");
-					Clear();
-					return;
-				}
 
 				if (!m_Port.GetCommands().Contains(pulse.Command))
 				{

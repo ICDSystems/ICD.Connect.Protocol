@@ -43,7 +43,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public static KrangIrDriver ImportDriverFromPath(string path)
+		public static IrDriver ImportDriverFromPath(string path)
 		{
 			if (!IcdFile.Exists(path))
 				throw new FileNotFoundException(string.Format("No file at path {0}", path));
@@ -79,12 +79,12 @@ namespace ICD.Connect.Protocol.Utils
 		/// </summary>
 		/// <param name="filename"></param>
 		/// <returns></returns>
-		private static KrangIrDriver ImportCrestronDriverFromPath(string filename)
+		private static IrDriver ImportCrestronDriverFromPath(string filename)
 		{
 			if (!IcdFile.Exists(filename))
 				throw new FileNotFoundException(string.Format("No file at path {0}", filename));
 
-			KrangIrDriver driver = new KrangIrDriver();
+			IrDriver driver = new IrDriver();
 
 			using (BinaryReader b = new BinaryReader(File.Open(filename, FileMode.Open)))
 			{
@@ -166,7 +166,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="crestronIr"></param>
 		/// <param name="commandName"></param>
 		/// <returns></returns>
-		private static KrangIrCommand CrestronToKrangCommand(byte[] crestronIr, string commandName)
+		private static IrCommand CrestronToKrangCommand(byte[] crestronIr, string commandName)
 		{
 			int[] indexedInteger = new int[15];
 			int dataOneTimeIndexed = crestronIr[3] & 0x0F;
@@ -192,7 +192,7 @@ namespace ICD.Connect.Protocol.Utils
 				data.Add(indexedInteger[indexLowByte]);
 			}
 
-			return new KrangIrCommand
+			return new IrCommand
 			{
 				Name = commandName,
 				Frequency = dataCcfFreq,
@@ -220,12 +220,12 @@ namespace ICD.Connect.Protocol.Utils
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		private static KrangIrDriver ImportCsvDriverFromPath(string path)
+		private static IrDriver ImportCsvDriverFromPath(string path)
 		{
 			if (!IcdFile.Exists(path))
 				throw new FileNotFoundException(string.Format("No file at path {0}", path));
 
-			List<KrangIrCommand> commands = new List<KrangIrCommand>();
+			List<IrCommand> commands = new List<IrCommand>();
 			CsvReaderSettings settings = new CsvReaderSettings
 			{
 				HeaderRowIncluded = false
@@ -239,8 +239,8 @@ namespace ICD.Connect.Protocol.Utils
 				}
 			}
 
-			KrangIrDriver driver = new KrangIrDriver();
-			foreach (KrangIrCommand command in commands)
+			IrDriver driver = new IrDriver();
+			foreach (IrCommand command in commands)
 				driver.AddCommand(command);
 
 			return driver;
@@ -251,7 +251,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// </summary>
 		/// <param name="entry"></param>
 		/// <returns></returns>
-		private static KrangIrCommand ImportIrCommandFromCsvEntry(string[] entry)
+		private static IrCommand ImportIrCommandFromCsvEntry(string[] entry)
 		{
 			if (entry.Length < 3)
 				throw new FormatException("Invalid configured IR command in csv file.");
@@ -282,7 +282,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="name"></param>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		private static KrangIrCommand ImportProntoIrCommand([NotNull] string name, [NotNull] string data)
+		private static IrCommand ImportProntoIrCommand([NotNull] string name, [NotNull] string data)
 		{
 			if (!ProntoHexDataEntryValid(data))
 				throw new FormatException("Invalid Pronto Hex");
@@ -293,7 +293,7 @@ namespace ICD.Connect.Protocol.Utils
 
 			int num = (((0xa1ea / intArray[1]) + 5) / 10) * 0x3e8;
 
-			return new KrangIrCommand
+			return new IrCommand
 			{
 				Name = name,
 				Frequency = num,
@@ -343,7 +343,7 @@ namespace ICD.Connect.Protocol.Utils
 		/// <param name="name"></param>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		private static KrangIrCommand ImportGlobalCacheIrCommand(string name, string data)
+		private static IrCommand ImportGlobalCacheIrCommand(string name, string data)
 		{
 			if (!GlobaclCacheDataEntryValid(data))
 				throw new FormatException("Invalid Global Cache IR command string");
@@ -358,7 +358,7 @@ namespace ICD.Connect.Protocol.Utils
 			                         .ToList();
 			bool offset = intData.Count % 2 == 0;
 
-			return new KrangIrCommand
+			return new IrCommand
 			{
 				Name = name,
 				RepeatCount = 1,

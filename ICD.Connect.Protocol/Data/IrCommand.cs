@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Protocol.Data
 {
-	public sealed class KrangIrCommand
+	public sealed class IrCommand
 	{
 		public string Name { get; set; }
 		public int Frequency { get; set; }
