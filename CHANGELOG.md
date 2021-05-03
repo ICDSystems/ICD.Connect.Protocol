@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added overloads to RPC server for calling a method on all connected clients
  - Support configured Crestron IR driver files & custom .csv files
+ - Add new console node for URI Properties
 
 ### Changed
  - Abstracted IR pulsing & timing logic from Crestron IrPortAdapter to IrPortPulseComponent
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Generated certs have a longer expiration window
  - Fixed a bug where certificate validation was not using UTC
  - Using existing generated certificates if still valid instead of generating a new one
+ - Obfuscate URI passwords when printing them to console
 
 ## [13.4.0] - 2021-01-14
 ### Added

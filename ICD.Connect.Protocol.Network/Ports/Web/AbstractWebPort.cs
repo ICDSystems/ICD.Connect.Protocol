@@ -348,7 +348,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("URI", Uri);
+			if (Uri != null)
+			{
+				var builder = new IcdUriBuilder(Uri);
+				builder.Password = StringUtils.PasswordFormat(builder.Password);
+
+				addRow("URI", builder.ToString());
+			}
+			else
+			{
+				addRow("URI", Uri);
+			}
+
 			addRow("Proxy URI", ProxyUri);
 			addRow("Accept", Accept);
 			addRow("Busy", Busy);

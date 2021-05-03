@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Protocol.Network.Settings
 {
-	public abstract class AbstractUriProperties : IUriProperties
+	public abstract class AbstractUriProperties : IUriProperties, IConsoleNode
 	{
 		private const string ELEMENT = "Uri";
 
@@ -138,6 +141,47 @@ namespace ICD.Connect.Protocol.Network.Settings
 			UriPath = string.IsNullOrEmpty(uriPath) ? null : uriPath;
 			UriQuery = string.IsNullOrEmpty(uriQuery) ? null : uriQuery;
 			UriFragment = string.IsNullOrEmpty(uriFragment) ? null : uriFragment;
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the name of the node.
+		/// </summary>
+		public string ConsoleName { get { return GetType().Name; } }
+
+		/// <summary>
+		/// Gets the help information for the node.
+		/// </summary>
+		public string ConsoleHelp { get { return "Information about the configured URI"; } }
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			return UriPropertiesConsole.GetConsoleNodes(this);
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			UriPropertiesConsole.BuildConsoleStatus(this, addRow);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			return UriPropertiesConsole.GetConsoleCommands(this);
 		}
 
 		#endregion

@@ -142,6 +142,7 @@
     <Compile Include="Settings\ISecureNetworkProperties.cs" />
     <Compile Include="Settings\ISecureNetworkSettings.cs" />
     <Compile Include="Settings\IUriSettings.cs" />
+    <Compile Include="Settings\UriPropertiesConsole.cs" />
     <Compile Include="Settings\WebProxyProperties.cs" />
     <Compile Include="Settings\SecureNetworkProperties.cs" />
     <Compile Include="Settings\UriProperties.cs" />
