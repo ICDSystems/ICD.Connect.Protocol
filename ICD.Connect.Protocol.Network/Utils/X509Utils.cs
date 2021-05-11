@@ -167,10 +167,15 @@ namespace ICD.Connect.Protocol.Network.Utils
 					issuerPrivate);
 			}
 
+			// Serial number needs to be an unsigned integer
+			// Should be unique every time - not a device serial number
+			long hash = (long)Guid.NewGuid().GetHashCode() + (long)int.MaxValue;
+			uint unsignedHash = (uint)hash;
+
 			X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
 			certGenerator.SetIssuerDN(issuer);
 			certGenerator.SetSubjectDN(subject);
-			certGenerator.SetSerialNumber(new BigInteger(Guid.NewGuid().GetHashCode().ToString()));
+			certGenerator.SetSerialNumber(new BigInteger(unsignedHash.ToString()));
 			certGenerator.SetNotAfter(DateTime.UtcNow.AddYears(20));
 			certGenerator.SetNotBefore(DateTime.UtcNow);
 			certGenerator.SetPublicKey(subjectPublic);
