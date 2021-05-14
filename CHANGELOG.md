@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.0.0] - 2021-05-14
 ### Added
  - Added overloads to RPC server for calling a method on all connected clients
  - Support configured Crestron IR driver files & custom .csv files
@@ -18,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Fixed a bug where certificate validation was not using UTC
  - Using existing generated certificates if still valid instead of generating a new one
  - Obfuscate URI passwords when printing them to console
+ - Fixed bugs where TCP server would sometimes fail to lookup a client by ID
+ - Fixed exception related to generating TCP certs with a negative hash
 
 ## [13.4.0] - 2021-01-14
 ### Added
