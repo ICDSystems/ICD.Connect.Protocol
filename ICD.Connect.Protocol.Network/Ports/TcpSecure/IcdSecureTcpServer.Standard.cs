@@ -168,6 +168,11 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 					}
 				}
 
+				// Create the directory
+				string directory = IcdPath.GetDirectoryName(autoPath);
+				if (!string.IsNullOrEmpty(directory))
+					IcdDirectory.CreateDirectory(directory);
+
 				// Make a new cert
 				X509Utils.GenerateAndWriteCertificate(ICD_SECURE_TCP_SERVER_COMMON_NAME, autoPath);
 				X509Certificate autoCertificate = X509Certificate.CreateFromCertFile(autoPath);

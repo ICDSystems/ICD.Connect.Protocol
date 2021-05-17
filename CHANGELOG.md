@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed a bug where PFX auto-generation would fail if the output directory did not exist yet
+
 ## [14.0.0] - 2021-05-14
 ### Added
  - Added overloads to RPC server for calling a method on all connected clients
