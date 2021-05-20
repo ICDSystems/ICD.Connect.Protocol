@@ -45,16 +45,13 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.WebSockets
 
 			Enabled = true;
 
-			// TODO - Address to accept connections, buffersize, max number of clients?
 			m_Server = new WebSocketServer(Port);
 			m_Server.AddWebSocketService<CallbackWebSocketBehavior>("/", AddSession);
 			m_Server.Start();
 
 			UpdateListeningState();
 
-			Logger.Log(eSeverity.Notice,
-							string.Format("Listening on port {0} with max # of connections {1}", Port,
-										  MaxNumberOfClients));
+			Logger.Log(eSeverity.Notice, string.Format("Listening on port {0}", Port));
 		}
 
 		/// <summary>

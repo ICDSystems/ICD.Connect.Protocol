@@ -125,6 +125,8 @@
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.SimplSharp.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpServer.Standard.cs" />
+    <Compile Include="Ports\Tcp\AbstractTcpServer.cs" />
+    <Compile Include="Ports\Tcp\ITcpServer.cs" />
     <Compile Include="Ports\Tcp\TelnetCommand.cs" />
     <Compile Include="Ports\Web\AbstractWebPort.cs" />
     <Compile Include="Ports\Web\AbstractWebPortSettings.cs" />
@@ -136,7 +138,9 @@
     <Compile Include="RemoteProcedure\Rpc.cs" />
     <Compile Include="RemoteProcedure\ServerSerialRpcController.cs" />
     <Compile Include="Servers\AbstractNetworkServer.cs" />
+    <Compile Include="Servers\AbstractServer.cs" />
     <Compile Include="Servers\INetworkServer.cs" />
+    <Compile Include="Servers\IServer.cs" />
     <Compile Include="Settings\AbstractNetworkProperties.cs" />
     <Compile Include="Settings\AbstractWebProxyProperties.cs" />
     <Compile Include="Settings\AbstractSecureNetworkProperties.cs" />

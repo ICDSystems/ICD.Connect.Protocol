@@ -1,9 +1,8 @@
 ﻿using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Servers;
 
 namespace ICD.Connect.Protocol.Network.Ports.Tcp
 {
-	public sealed partial class IcdTcpServer : AbstractNetworkServer
+	public sealed partial class IcdTcpServer : AbstractTcpServer
 	{
 		/// <summary>
 		/// Called when a client is removed from the collection.
