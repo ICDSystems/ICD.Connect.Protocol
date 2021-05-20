@@ -112,6 +112,11 @@
     <Compile Include="Ports\Mqtt\MockMqttClient.cs" />
     <Compile Include="Ports\Mqtt\MockMqttClientSettings.cs" />
     <Compile Include="Ports\Mqtt\MqttClientConsole.cs" />
+    <Compile Include="Ports\NamedPipe\INamedPipeProperties.cs" />
+    <Compile Include="Ports\NamedPipe\INamedPipeSettings.cs" />
+    <Compile Include="Ports\NamedPipe\NamedPipeClient.cs" />
+    <Compile Include="Ports\NamedPipe\NamedPipeClientSettings.cs" />
+    <Compile Include="Ports\NamedPipe\NamedPipeProperties.cs" />
     <Compile Include="Ports\Ssh\PrivateKey.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.SimplSharp.cs" />
