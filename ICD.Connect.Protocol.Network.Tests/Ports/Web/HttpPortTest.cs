@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Network.Ports.Web;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.WebPorts.Http
+namespace ICD.Connect.Protocol.Network.Tests.Ports.Web
 {
 	[TestFixture]
     public sealed class CoreHttpPortTest

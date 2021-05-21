@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.Tcp
+namespace ICD.Connect.Protocol.Network.Tests.Ports.Tcp
 {
 	[TestFixture]
 	public sealed class TelnetCommandTest

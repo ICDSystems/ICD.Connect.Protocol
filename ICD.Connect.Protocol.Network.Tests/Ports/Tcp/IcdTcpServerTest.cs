@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Servers;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.Tcp
+namespace ICD.Connect.Protocol.Network.Tests.Ports.Tcp
 {
 	[TestFixture]
 	public sealed class IcdTcpServerTest

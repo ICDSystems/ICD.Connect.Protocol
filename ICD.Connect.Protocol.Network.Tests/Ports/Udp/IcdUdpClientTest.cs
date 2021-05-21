@@ -3,7 +3,7 @@ using ICD.Common.Utils;
 using ICD.Connect.Protocol.Network.Ports.Udp;
 using NUnit.Framework;
 
-namespace ICD.Connect.Protocol.Network.Tests.Udp
+namespace ICD.Connect.Protocol.Network.Tests.Ports.Udp
 {
 	[TestFixture]
 	public sealed class IcdUdpClientTest
