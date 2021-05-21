@@ -117,6 +117,10 @@
     <Compile Include="Ports\NamedPipe\NamedPipeClient.cs" />
     <Compile Include="Ports\NamedPipe\NamedPipeClientSettings.cs" />
     <Compile Include="Ports\NamedPipe\NamedPipeProperties.cs" />
+    <Compile Include="Ports\NamedPipe\NamedPipeServer.cs" />
+    <Compile Include="Ports\NamedPipe\Sockets\AbstractNamedPipeSocket.cs" />
+    <Compile Include="Ports\NamedPipe\Sockets\ClientNamedPipeSocket.cs" />
+    <Compile Include="Ports\NamedPipe\Sockets\ServerNamedPipeSocket.cs" />
     <Compile Include="Ports\Ssh\PrivateKey.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.cs" />
     <Compile Include="Ports\TcpSecure\IcdSecureTcpClient.SimplSharp.cs" />

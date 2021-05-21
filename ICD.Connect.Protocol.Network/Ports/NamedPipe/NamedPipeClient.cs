@@ -1,16 +1,15 @@
 ﻿#if !SIMPLSHARP
 using System;
 using System.IO.Pipes;
-using System.Linq;
 using System.Net.Sockets;
 using System.Security.Principal;
-using System.Threading;
-using System.Threading.Tasks;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
@@ -18,17 +17,12 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 {
 	public sealed class NamedPipeClient : AbstractSerialPort<NamedPipeClientSettings>
 	{
-		private const ushort DEFAULT_BUFFER_SIZE = 16384;
-
 		private readonly NamedPipeProperties m_NamedPipeProperties;
 		private readonly SafeMutex m_SocketMutex;
-		private readonly byte[] m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
 		private readonly ThreadedWorkerQueue<string> m_SendWorkerQueue;
 
-		private CancellationTokenSource m_Cancellation;
-
 		[CanBeNull]
-		private NamedPipeClientStream m_Client;
+		private ClientNamedPipeSocket m_Socket;
 
 		#region Properties
 
@@ -97,10 +91,10 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 		/// </summary>
 		private void DisposeClient()
 		{
-			m_Cancellation?.Cancel();
+			Unsubscribe(m_Socket);
 
-			m_Client?.Dispose();
-			m_Client = null;
+			m_Socket?.Dispose();
+			m_Socket = null;
 
 			UpdateIsConnectedState();
 		}
@@ -122,18 +116,19 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 
 			try
 			{
-				m_Client = new NamedPipeClientStream(Hostname, PipeName, Direction, Options, TokenImpersonationLevel);
-				m_Cancellation = new CancellationTokenSource();
-				m_Client.ConnectAsync().Wait();
+				NamedPipeClientStream stream =
+					new NamedPipeClientStream(Hostname,
+					                          PipeName,
+					                          Direction,
+					                          Options,
+					                          TokenImpersonationLevel);
+				m_Socket = new ClientNamedPipeSocket(stream, Hostname, PipeName);
+				Subscribe(m_Socket);
 
-				if (!m_Client.IsConnected)
-				{
+				m_Socket.ConnectAsync().Wait();
+
+				if (!m_Socket.IsConnected)
 					Logger.Log(eSeverity.Error, "Failed to connect to {0}/{1}", Hostname, PipeName);
-					return;
-				}
-
-				m_Client.ReadAsync(m_Buffer, 0, m_Buffer.Length, m_Cancellation.Token)
-				        .ContinueWith(ClientReceiveHandler, m_Cancellation.Token);
 			}
 			catch (AggregateException ae)
 			{
@@ -250,41 +245,12 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 		}
 
 		/// <summary>
-		/// Handles Receiving Data from the Active Named Pipe Connection
-		/// </summary>
-		/// <param name="task"></param>
-		private void ClientReceiveHandler(Task<int> task)
-		{
-			if (task.IsFaulted)
-			{
-				string message = task.Exception.InnerExceptions.First().Message;
-				Logger.Log(eSeverity.Error, "Failed to receive data from {0}/{1} - {2}", Hostname, PipeName, message);
-				UpdateIsConnectedState();
-				return;
-			}
-
-			int bytesRead = task.Result;
-			if (bytesRead <= 0)
-				return;
-
-			string data = StringUtils.ToString(m_Buffer, bytesRead);
-
-			PrintRx(data);
-			Receive(data);
-
-			if (m_Client?.IsConnected ?? false)
-				m_Client.ReadAsync(m_Buffer, 0, m_Buffer.Length).ContinueWith(ClientReceiveHandler);
-
-			UpdateIsConnectedState();
-		}
-
-		/// <summary>
 		/// Returns the connection state of the wrapped port
 		/// </summary>
 		/// <returns></returns>
 		protected override bool GetIsConnectedState()
 		{
-			return m_Client != null && m_Client.IsConnected;
+			return m_Socket != null && m_Socket.IsConnected;
 		}
 
 		/// <summary>
@@ -308,7 +274,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			try
 			{
 				PrintTx(data);
-				m_Client.WriteAsync(bytes, 0, bytes.Length, m_Cancellation.Token);
+				m_Socket.SendAsync(bytes);
 			}
 			catch (SocketException e)
 			{
@@ -335,6 +301,61 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 					Disconnect();
 					break;
 			}
+		}
+
+		#endregion
+
+		#region Socket Callbacks
+
+		/// <summary>
+		/// Subscribe to the socket events.
+		/// </summary>
+		/// <param name="socket"></param>
+		private void Subscribe([CanBeNull] ClientNamedPipeSocket socket)
+		{
+			if (socket == null)
+				return;
+
+			socket.OnDataReceived += SocketOnDataReceived;
+			socket.OnIsConnectedChanged += SocketOnIsConnectedChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the socket events.
+		/// </summary>
+		/// <param name="socket"></param>
+		private void Unsubscribe([CanBeNull] ClientNamedPipeSocket socket)
+		{
+			if (socket == null)
+				return;
+
+			socket.OnDataReceived -= SocketOnDataReceived;
+			socket.OnIsConnectedChanged -= SocketOnIsConnectedChanged;
+		}
+
+		/// <summary>
+		/// Called when the socket connects/disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void SocketOnIsConnectedChanged(object sender, BoolEventArgs e)
+		{
+			UpdateIsConnectedState();
+		}
+
+		/// <summary>
+		/// Called when data is received from the remote endpoint.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void SocketOnDataReceived(object sender, GenericEventArgs<byte[]> eventArgs)
+		{
+			string data = StringUtils.ToString(eventArgs.Data);
+
+			PrintRx(data);
+			Receive(data);
+
+			UpdateIsConnectedState();
 		}
 
 		#endregion
