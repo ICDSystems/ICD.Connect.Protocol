@@ -35,7 +35,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 			m_Port = parent;
 
 			m_PulseSection = new SafeCriticalSection();
-			m_PulseTimer = SafeTimer.Stopped(() => PulseElapseCallback());
+			m_PulseTimer = SafeTimer.Stopped(PulseElapseCallback);
 			m_Queue = new Queue<IrPulse>();
 		}
 
