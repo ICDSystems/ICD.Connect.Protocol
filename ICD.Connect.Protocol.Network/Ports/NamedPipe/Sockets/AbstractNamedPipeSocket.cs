@@ -12,6 +12,8 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 	public abstract class AbstractNamedPipeSocket<TStream> : IDisposable
 		where TStream : PipeStream
 	{
+		private const int DEFAULT_BUFFER_SIZE = 16384;
+
 		/// <summary>
 		/// Raised when the socket connects/disconnects.
 		/// </summary>
@@ -22,10 +24,10 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 		/// </summary>
 		public event EventHandler<GenericEventArgs<byte[]>> OnDataReceived; 
 
-		private readonly byte[] m_Buffer;
 		private readonly TStream m_Stream;
 		private readonly string m_PipeName;
 		private readonly CancellationTokenSource m_Cancellation;
+		private readonly byte[] m_Buffer;
 
 		private bool m_IsConnected;
 
@@ -71,11 +73,10 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 				throw new ArgumentNullException("stream");
 			
 			m_Cancellation = new CancellationTokenSource();
+			m_Buffer = new byte[DEFAULT_BUFFER_SIZE];
 
 			m_Stream = stream;
 			m_PipeName = pipeName;
-
-			m_Buffer = new byte[m_Stream.InBufferSize];
 		}
 
 		#region Methods
@@ -114,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 		}
 
 		/// <summary>
-		/// Enqueues the data to be sent to the remote endpoint.
+		/// Sends the data to the remote endpoint.
 		/// </summary>
 		public Task SendAsync([NotNull] byte[] data)
 		{
@@ -150,15 +151,17 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 		/// </summary>
 		private void Arm()
 		{
-			if (m_Stream.IsConnected)
-				m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length, m_Cancellation.Token)
-				        .ContinueWith(ClientReceiveHandler, m_Cancellation.Token);
+			if (!m_Stream.IsConnected)
+				return;
+
+			m_Stream.ReadAsync(m_Buffer, 0, m_Buffer.Length, m_Cancellation.Token)
+			        .ContinueWith(ReceiveHandler, m_Cancellation.Token);
 		}
 
 		/// <summary>
 		/// Updates the IsConnected property to reflect the underlying stream.
 		/// </summary>
-		protected void UpdateIsConnected()
+		private void UpdateIsConnected()
 		{
 			IsConnected = m_Stream.IsConnected;
 		}
@@ -179,12 +182,12 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe.Sockets
 		/// Handles Receiving Data from the Active Named Pipe Connection
 		/// </summary>
 		/// <param name="task"></param>
-		private void ClientReceiveHandler([NotNull] Task<int> task)
+		private void ReceiveHandler([NotNull] Task<int> task)
 		{
 			if (task == null)
 				throw new ArgumentNullException("task");
 
-			if (!task.IsFaulted)
+			if (!task.IsFaulted && task.Result > 0)
 			{
 				int bytesRead = task.Result;
 				byte[] data = new byte[bytesRead];

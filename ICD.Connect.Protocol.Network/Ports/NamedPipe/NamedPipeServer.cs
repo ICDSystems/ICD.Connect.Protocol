@@ -59,7 +59,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			MaxNumberOfClients = DEFAULT_MAX_NUMBER_OF_CLIENTS;
 			Direction = PipeDirection.InOut;
 			TransmissionMode = PipeTransmissionMode.Byte;
-			Options = PipeOptions.None;
+			Options = PipeOptions.Asynchronous;
 
 			m_Sockets = new BiDictionary<uint, ServerNamedPipeSocket>();
 			m_SocketsSection = new SafeCriticalSection();
@@ -122,7 +122,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			try
 			{
 				if (Enabled &&
-				    m_Sockets.Values.Any(s => !s.IsConnected) &&
+				    m_Sockets.Values.All(s => s.IsConnected) &&
 				    m_Sockets.Count < MaxNumberOfClients)
 					AddSocket();
 			}

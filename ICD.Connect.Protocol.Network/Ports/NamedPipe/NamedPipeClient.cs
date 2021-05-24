@@ -70,7 +70,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			Hostname = ".";
 			PipeName = null;
 			Direction = PipeDirection.InOut;
-			Options = PipeOptions.None;
+			Options = PipeOptions.Asynchronous;
 			TokenImpersonationLevel = TokenImpersonationLevel.Identification;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
@@ -122,6 +122,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 					                          Direction,
 					                          Options,
 					                          TokenImpersonationLevel);
+
 				m_Socket = new ClientNamedPipeSocket(stream, Hostname, PipeName);
 				Subscribe(m_Socket);
 
