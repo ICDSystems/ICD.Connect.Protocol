@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - Fixed a bug where PFX auto-generation would fail if the output directory did not exist yet
+ - Fixed a mistake preventing configuring MQTT proxy port via console
 
 ## [14.0.0] - 2021-05-14
 ### Added

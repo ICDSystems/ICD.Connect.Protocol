@@ -63,7 +63,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Mqtt
 			yield return new GenericConsoleCommand<string>("SetHostname", "SetHostname <HOSTNAME>", h => instance.Hostname = h);
 			yield return new GenericConsoleCommand<ushort>("SetPort", "SetPort <PORT>", p => instance.Port = p);
 			yield return new GenericConsoleCommand<string>("SetProxyHostname", "SetProxyHostname <HOSTNAME>", h => instance.ProxyHostname = h);
-			yield return new GenericConsoleCommand<string>("SetProxyPort", "SetProxyPort <PORT>", h => instance.Hostname = h);
+			yield return new GenericConsoleCommand<ushort>("SetProxyPort", "SetProxyPort <PORT>", p => instance.ProxyPort = p);
 		}
 	}
 }
