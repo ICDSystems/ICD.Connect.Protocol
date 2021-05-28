@@ -18,7 +18,11 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 
 		private readonly SafeCriticalSection m_PulseSection;
 		private readonly SafeTimer m_PulseTimer;
+		private readonly SafeTimer m_BetweenTimer;
 		private readonly Queue<IrPulse> m_Queue;
+
+		private bool m_IsSending;
+		private ushort m_BetweenTime;
 
 		#endregion
 
@@ -36,6 +40,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 
 			m_PulseSection = new SafeCriticalSection();
 			m_PulseTimer = SafeTimer.Stopped(PulseElapseCallback);
+			m_BetweenTimer = SafeTimer.Stopped(BetweenElapsedCallback);
 			m_Queue = new Queue<IrPulse>();
 		}
 
@@ -44,7 +49,9 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		public void Dispose()
 		{
+			Clear();
 			m_PulseTimer.Dispose();
+			m_BetweenTimer.Dispose();
 		}
 
 		#endregion
@@ -59,13 +66,15 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 			{
 				m_Queue.Enqueue(pulse);
 
-				if (m_Queue.Count == 1)
-					SendNext();
+				if (m_IsSending || m_Queue.Count != 1)
+					return;
 			}
 			finally
 			{
 				m_PulseSection.Leave();
 			}
+
+			SendNext();
 		}
 
 		/// <summary>
@@ -73,11 +82,14 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		public void Clear()
 		{
+			m_Port.Release();
+
 			m_PulseSection.Enter();
 
 			try
 			{
 				m_PulseTimer.Stop();
+				m_BetweenTimer.Stop();
 				m_Queue.Clear();
 			}
 			finally
@@ -95,30 +107,34 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		private void SendNext()
 		{
+			IrPulse pulse;
+
+
 			m_PulseSection.Enter();
 
 			try
 			{
-				IrPulse pulse;
-				if (!m_Queue.Peek(out pulse))
+				if (m_IsSending || m_Queue.Count == 0)
 					return;
 
-				if (!m_Port.GetCommands().Contains(pulse.Command))
-				{
-					m_Queue.Dequeue();
-					m_Port.Logger.Log(eSeverity.Error, "Unable to send command - No command {0}", StringUtils.ToRepresentation(pulse.Command));
-					SendNext();
-					return;
-				}
 
-				m_Port.Release();
-				m_Port.Press(pulse.Command);
-				m_PulseTimer.Reset(pulse.Duration);
+				if (!m_Queue.Dequeue(out pulse))
+					return;
+
+				m_IsSending = true;
 			}
 			finally
 			{
 				m_PulseSection.Leave();
 			}
+
+			m_BetweenTime = pulse.BetweenTime;
+
+			m_Port.Release();
+			m_Port.Press(pulse.Command);
+			m_PulseTimer.Reset(pulse.Duration);
+
+
 		}
 
 		/// <summary>
@@ -126,20 +142,31 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		private void PulseElapseCallback()
 		{
+			m_Port.Release();
+
+			m_BetweenTimer.Reset(m_BetweenTime);
+		}
+
+		/// <summary>
+		/// Called when the between timer elapses
+		/// </summary>
+		private void BetweenElapsedCallback()
+		{
 			m_PulseSection.Enter();
 
 			try
 			{
+				m_IsSending = false;
+
 				if (m_Queue.Count == 0)
 					return;
-
-				m_Queue.Dequeue();
-				SendNext();
 			}
 			finally
 			{
 				m_PulseSection.Leave();
 			}
+
+			SendNext();
 		}
 
 		#endregion

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports.IrPort.IrPulse;
@@ -79,7 +81,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// <param name="command"></param>
 		public void Press(string command)
 		{
-			m_PulseComponent.Clear();
+			if (!GetCommands().Contains(command))
+			{
+				Logger.Log(eSeverity.Error, "Unable to send command - No command {0}",
+								  StringUtils.ToRepresentation(command));
+				return;
+			}
 
 			PressFinal(command);
 		}
@@ -95,8 +102,6 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		public void Release()
 		{
-			m_PulseComponent.Clear();
-
 			ReleaseFinal();
 		}
 
