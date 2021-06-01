@@ -134,13 +134,13 @@ namespace ICD.Connect.Protocol.Network.Settings
 			string uriFragment = XmlUtils.TryReadChildElementContentAsString(uri, URI_FRAGMENT_ELEMENT);
 
 			// If strings are empty, set the value as null so overrides will work properly
-			UriScheme = string.IsNullOrEmpty(uriScheme) ? null : uriScheme;
-			UriUsername = string.IsNullOrEmpty(uriUsername) ? null : uriUsername;
-			UriPassword = string.IsNullOrEmpty(uriPassword) ? null : uriPassword;
-			UriHost = string.IsNullOrEmpty(uriHost) ? null : uriHost;
-			UriPath = string.IsNullOrEmpty(uriPath) ? null : uriPath;
-			UriQuery = string.IsNullOrEmpty(uriQuery) ? null : uriQuery;
-			UriFragment = string.IsNullOrEmpty(uriFragment) ? null : uriFragment;
+			UriScheme = string.IsNullOrEmpty(uriScheme) ? null : uriScheme.Trim();
+			UriUsername = string.IsNullOrEmpty(uriUsername) ? null : uriUsername.Trim();
+			UriPassword = string.IsNullOrEmpty(uriPassword) ? null : uriPassword.Trim();
+			UriHost = string.IsNullOrEmpty(uriHost) ? null : uriHost.Trim();
+			UriPath = string.IsNullOrEmpty(uriPath) ? null : uriPath.Trim();
+			UriQuery = string.IsNullOrEmpty(uriQuery) ? null : uriQuery.Trim();
+			UriFragment = string.IsNullOrEmpty(uriFragment) ? null : uriFragment.Trim();
 		}
 
 		#endregion

@@ -107,8 +107,8 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			string name = XmlUtils.TryReadChildElementContentAsString(configXml, ELEMENT_NAME);
 
 			// If strings are empty, set the value as null so overrides will work properly
-			NamedPipeHostname = string.IsNullOrEmpty(hostname) ? null : hostname;
-			NamedPipeName = string.IsNullOrEmpty(name) ? null : name;
+			NamedPipeHostname = string.IsNullOrEmpty(hostname) ? null : hostname.Trim();
+			NamedPipeName = string.IsNullOrEmpty(name) ? null : name.Trim();
 		}
 
 		#endregion

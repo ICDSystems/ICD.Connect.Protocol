@@ -103,11 +103,11 @@ namespace ICD.Connect.Protocol.Network.Settings
 			string proxyScheme = XmlUtils.TryReadChildElementContentAsString(proxy, PROXY_SCHEME_ELEMENT);
 
 			// If strings are empty, set the value as null so overrides will work properly
-			ProxyUsername = string.IsNullOrEmpty(proxyUsername) ? null : proxyUsername;
-			ProxyPassword = string.IsNullOrEmpty(proxyPassword) ? null : proxyPassword;
-			ProxyHost = string.IsNullOrEmpty(proxyHost) ? null : proxyHost;
+			ProxyUsername = string.IsNullOrEmpty(proxyUsername) ? null : proxyUsername.Trim();
+			ProxyPassword = string.IsNullOrEmpty(proxyPassword) ? null : proxyPassword.Trim();
+			ProxyHost = string.IsNullOrEmpty(proxyHost) ? null : proxyHost.Trim();
 			ProxyPort = XmlUtils.TryReadChildElementContentAsUShort(proxy, PROXY_PORT_ELEMENT);
-			ProxyScheme = string.IsNullOrEmpty(proxyScheme) ? null : proxyScheme;
+			ProxyScheme = string.IsNullOrEmpty(proxyScheme) ? null : proxyScheme.Trim();
 			ProxyAuthenticationMethod = XmlUtils.TryReadChildElementContentAsEnum<eProxyAuthenticationMethod>(proxy, PROXY_METHOD_ELEMENT, true);
 		}
 

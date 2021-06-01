@@ -58,8 +58,8 @@ namespace ICD.Connect.Protocol.Network.Settings
 			string networkPassword = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_PASSWORD_ELEMENT);
 
 			// If strings are empty, set the value as null so overrides will work properly
-			NetworkUsername = string.IsNullOrEmpty(networkUsername) ? null : networkUsername;
-			NetworkPassword = string.IsNullOrEmpty(networkPassword) ? null : networkPassword;
+			NetworkUsername = string.IsNullOrEmpty(networkUsername) ? null : networkUsername.Trim();
+			NetworkPassword = string.IsNullOrEmpty(networkPassword) ? null : networkPassword.Trim();
 		}
 
 		#endregion

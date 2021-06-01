@@ -109,7 +109,7 @@ namespace ICD.Connect.Protocol.Network.Settings
 			string networkAddress = XmlUtils.TryReadChildElementContentAsString(xml, NETWORK_ADDRESS_ELEMENT);
 
 			// If strings are empty, set the value as null so overrides will work properly
-			NetworkAddress = String.IsNullOrEmpty(networkAddress) ? null : networkAddress;
+			NetworkAddress = string.IsNullOrEmpty(networkAddress) ? null : networkAddress.Trim();
 			NetworkPort = XmlUtils.TryReadChildElementContentAsUShort(xml, NETWORK_PORT_ELEMENT);
 		}
 
