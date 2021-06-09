@@ -637,7 +637,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		/// <param name="args"></param>
 		private void SshStreamOnErrorOccurred(object sender, ExceptionEventArgs args)
 		{
-			Logger.Log(eSeverity.Error, args.Exception, "SSH Stream Error - {0}", args.Exception.Message);
+			Logger.Log(eSeverity.Error, "SSH Stream Error - {0}", args.Exception.Message);
 
 			UpdateIsConnectedState();
 		}
