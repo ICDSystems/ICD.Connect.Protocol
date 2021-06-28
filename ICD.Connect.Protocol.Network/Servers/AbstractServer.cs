@@ -447,7 +447,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <summary>
 		/// Gets the name of the node.
 		/// </summary>
-		public string ConsoleName { get { return Name; } }
+		public string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().Name : Name; } }
 
 		/// <summary>
 		/// Gets the help information for the node.
