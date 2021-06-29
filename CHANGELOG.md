@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added SerialPortAdapter for controlling NetStandard serial ports
  - Added NamedPipeClient and NamedPipeServer for communicating between processes
+ - Added XP3 service class
 
 ### Changed
  - Fixed a bug where PFX auto-generation would fail if the output directory did not exist yet

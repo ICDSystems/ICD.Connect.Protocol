@@ -100,6 +100,7 @@
     </Compile>
     <Compile Include="Crosspoints\IEquipmentCrosspoint.cs" />
     <Compile Include="CrosspointData.cs" />
+    <Compile Include="Services\Xp3Service.cs" />
     <Compile Include="SimplPlus\CrosspointShims\AbstractSimplPlusXSigCrosspointShim.cs" />
     <Compile Include="SimplPlus\CrosspointShims\ISimplPlusCrosspointShim.cs" />
     <Compile Include="SimplPlus\CrosspointShims\SimplPlusXSigControlCrosspointShim.cs" />
