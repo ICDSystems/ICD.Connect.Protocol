@@ -1,10 +1,4 @@
-﻿#if SIMPLSHARP
-using Crestron.SimplSharp.CrestronIO;
-#else
-using System.IO;
-#endif
-using System;
-using System.Collections.Generic;
+﻿using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.IO;
 using Org.BouncyCastle.Asn1.Pkcs;
@@ -15,7 +9,6 @@ using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
@@ -59,72 +52,9 @@ namespace ICD.Connect.Protocol.Network.Utils
 				f.WrappedFileStream.Write(byteArray, 0, byteArray.Length);
 			}
 		}
-
-		/// <summary>
-		/// Extracts the X509 Certificate and private key bytes from a PFX file.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <param name="cerPath"></param>
-		/// <param name="keyPath"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static KeyValuePair<byte[], byte[]> GetCertAndKeyFromPfx(string path, string cerPath, string keyPath)
-		{
-			using (IcdFileStream fs = new IcdFileStream(new FileStream(path, FileMode.Open)))
-			{
-				Pkcs12Store store = new Pkcs12Store(fs.WrappedFileStream, new char[0]);
-
-				foreach (string alias in store.Aliases)
-				{
-					if (store.IsKeyEntry(alias) && store.GetKey(alias).Key.IsPrivate)
-					{
-						X509Certificate cert = store.GetCertificate(alias).Certificate;
-						AsymmetricKeyParameter privateKey = store.GetKey(alias).Key;
-
-						using (var f = IcdFile.Create(cerPath))
-						{
-							var buf = cert.GetEncoded();
-							f.WrappedFileStream.Write(buf, 0, buf.Length);
-						}
-
-						using (IcdStream s = new IcdStream(new FileStream(keyPath, FileMode.Create)))
-							using (IcdTextWriter tw = new IcdStreamWriter(new StreamWriter(s.WrappedStream)))
-							{
-								var generator = new MiscPemGenerator(privateKey);
-								PemWriter pemWriter = new PemWriter(tw.WrappedTextWriter);
-								pemWriter.WriteObject(generator);
-								tw.WrappedTextWriter.Flush();
-							}
-					}
-					break;
-				}
-
-				var certBytes = ReadFileToByteArray(cerPath);
-				var keyBytes = ReadFileToByteArray(keyPath);
-
-				return new KeyValuePair<byte[], byte[]>(certBytes, keyBytes);
-			}
-		} 
-
 		#endregion
 
 		#region Private Methods
-
-		/// <summary>
-		/// Reads the file from the specified path into a byte array.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private static byte[] ReadFileToByteArray(string path)
-		{
-			byte[] buffer;
-			using (IcdFileStream fs = new IcdFileStream(new FileStream(path, FileMode.Open, FileAccess.Read)))
-			{
-				buffer = new byte[fs.Length];
-				fs.WrappedFileStream.Read(buffer, 0, (int)fs.Length);
-			}
-			return buffer;
-		}
 
 		/// <summary>
 		/// Generates an RSA private key.
