@@ -7,24 +7,16 @@ using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
-namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
+namespace ICD.Connect.Protocol.Network.Devices.PortServers
 {
 	[KrangSettings("SerialPortServerDevice", typeof(SerialPortServerDevice))]
-	public sealed class SerialPortServerDeviceSettings : AbstractDeviceSettings, ISecureNetworkSettings,
+	public sealed class SerialPortServerDeviceSettings : AbstractPortServerDeviceSettings<ISerialPort>, ISecureNetworkSettings,
 	                                                     IComSpecSettings
 	{
-		private const string PORT_ELEMENT = "Port";
-		private const string TCP_SERVER_PORT_ELEMENT = "TcpServerPort";
-
 		private readonly SecureNetworkProperties m_NetworkProperties;
 		private readonly ComSpecProperties m_ComSpecProperties;
 
 		#region Properties
-
-		[OriginatorIdSettingsProperty(typeof(ISerialPort))]
-		public int? Port { get; set; }
-
-		public ushort? TcpServerPort { get; set; }
 
 		#endregion
 
@@ -177,9 +169,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(PORT_ELEMENT, Port == null ? null : IcdXmlConvert.ToString((int)Port));
-			writer.WriteElementString(TCP_SERVER_PORT_ELEMENT, IcdXmlConvert.ToString(TcpServerPort));
-
 			m_NetworkProperties.WriteElements(writer);
 			m_ComSpecProperties.WriteElements(writer);
 		}
@@ -191,9 +180,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		public override void ParseXml(string xml)
 		{
 			base.ParseXml(xml);
-
-			Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
-			TcpServerPort = XmlUtils.TryReadChildElementContentAsUShort(xml, TCP_SERVER_PORT_ELEMENT);
 
 			m_NetworkProperties.ParseXml(xml);
 			m_ComSpecProperties.ParseXml(xml);

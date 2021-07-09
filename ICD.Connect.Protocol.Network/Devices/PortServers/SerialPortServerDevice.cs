@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using ICD.Common.Properties;
+﻿using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Devices;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Network.Ports;
-using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
@@ -15,17 +9,15 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
+namespace ICD.Connect.Protocol.Network.Devices.PortServers
 {
-	public sealed class SerialPortServerDevice : AbstractDevice<SerialPortServerDeviceSettings>
+	public sealed class SerialPortServerDevice : AbstractPortServerDevice<ISerialPort, SerialPortServerDeviceSettings>
 	{
 		#region Fields
 
 		private readonly ComSpecProperties m_ComSpecProperties;
 		private readonly SecureNetworkProperties m_NetworkProperties;
 		private readonly ConnectionStateManager m_ConnectionStateManager;
-
-		private IcdTcpServer m_TcpServer;
 
 		#endregion
 
@@ -40,8 +32,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		/// Gets the network properties.
 		/// </summary>
 		private ISecureNetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
-
-		private ushort? TcpServerPort {get { return m_TcpServer != null ? m_TcpServer.Port : (ushort?)null; } }
 
 		#endregion
 
@@ -59,7 +49,7 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 			m_ConnectionStateManager.OnSerialDataReceived += CsmOnSerialDataReceived;
 		}
 
-		public void ConfigurePort(IPort port)
+		private void ConfigurePort(IPort port)
 		{
 			// Com
 			if (port is IComPort)
@@ -77,19 +67,9 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		[PublicAPI]
-		public void SetPort(ISerialPort port)
+		protected override void SetPortInternal(ISerialPort port)
 		{
 			m_ConnectionStateManager.SetPort(port, false);
-		}
-
-		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return m_ConnectionStateManager.Port != null && m_ConnectionStateManager.Port.IsOnline;
 		}
 
 		#endregion
@@ -103,8 +83,8 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		/// <param name="stringEventArgs"></param>
 		private void CsmOnSerialDataReceived(object sender, StringEventArgs stringEventArgs)
 		{
-			if (m_TcpServer != null)
-				m_TcpServer.Send(stringEventArgs.Data);
+			if (TcpServer != null)
+				TcpServer.Send(stringEventArgs.Data);
 		}
 
 		private void CsmOnIsOnlineStateChanged(object sender, BoolEventArgs e)
@@ -120,29 +100,12 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		#endregion
 
 		#region TCP Server
-
-		private void Subscribe(IcdTcpServer tcpServer)
-		{
-			if (tcpServer == null)
-				return;
-
-			tcpServer.OnDataReceived += IncomingServerOnDataReceived;
-		}
-
-		private void Unsubscribe(IcdTcpServer tcpServer)
-		{
-			if (tcpServer == null)
-				return;
-
-			tcpServer.OnDataReceived -= IncomingServerOnDataReceived;
-		}
-
 		/// <summary>
 		/// Send received server data to port
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="dataReceiveEventArgs"></param>
-		private void IncomingServerOnDataReceived(object sender, DataReceiveEventArgs dataReceiveEventArgs)
+		protected override void IncomingServerOnDataReceived(object sender, DataReceiveEventArgs dataReceiveEventArgs)
 		{
 			m_ConnectionStateManager.Send(dataReceiveEventArgs.Data);
 		}
@@ -159,9 +122,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Port = m_ConnectionStateManager.PortNumber;
-			settings.TcpServerPort = TcpServerPort;
-
 			settings.Copy(m_ComSpecProperties);
 			settings.Copy(m_NetworkProperties);
 		}
@@ -172,14 +132,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
-
-			SetPort(null);
-
-			if (m_TcpServer != null)
-				m_TcpServer.Stop();
-
-			Unsubscribe(m_TcpServer);
-			m_TcpServer = null;
 
 			m_ComSpecProperties.ClearComSpecProperties();
 			m_NetworkProperties.ClearNetworkProperties();
@@ -197,37 +149,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 
 			m_NetworkProperties.Copy(settings);
 			m_ComSpecProperties.Copy(settings);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				try
-				{
-					port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				}
-				catch (KeyNotFoundException)
-				{
-					Logger.Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
-				}
-			}
-
-			SetPort(port);
-			UpdateCachedOnlineStatus();
-
-			if (settings.TcpServerPort == null)
-			{
-				Logger.Log(eSeverity.Error, "TCP Server port not specified in config");
-			}
-			else
-			{
-				m_TcpServer = new IcdTcpServer();
-				Subscribe(m_TcpServer);
-				m_TcpServer.Name = String.Format("{0} TCP Server", settings.Name);
-				m_TcpServer.MaxNumberOfClients = 10;
-				m_TcpServer.Port = settings.TcpServerPort.Value;
-				
-			}
 		}
 
 		/// <summary>
@@ -238,24 +159,12 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		{
 			base.StartSettingsFinal();
 
-			m_TcpServer.Start();
 			m_ConnectionStateManager.Start();
 		}
 
 		#endregion
 
 		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("TCP Server Port", TcpServerPort);
-		}
 
 		/// <summary>
 		/// Gets the child console nodes.
@@ -265,9 +174,6 @@ namespace ICD.Connect.Protocol.Network.Devices.SerialPortServer
 		{
 			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
 				yield return node;
-
-			if (m_TcpServer != null)
-				yield return m_TcpServer;
 
 			if (m_ConnectionStateManager != null)
 				yield return m_ConnectionStateManager.Port;
