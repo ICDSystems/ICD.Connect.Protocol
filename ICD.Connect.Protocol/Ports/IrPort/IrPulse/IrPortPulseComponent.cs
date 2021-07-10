@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 
 namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
@@ -12,9 +10,12 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 	public sealed class IrPortPulseComponent : IDisposable
 	{
 		#region Members
+		
+		[NotNull]
+		private readonly Action<string> m_PressAction;
 
 		[NotNull]
-		private readonly IIrPort m_Port;
+		private readonly Action m_ReleaseAction;
 
 		private readonly SafeCriticalSection m_PulseSection;
 		private readonly SafeTimer m_PulseTimer;
@@ -31,12 +32,15 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public IrPortPulseComponent([NotNull] IIrPort parent)
+		public IrPortPulseComponent([NotNull] Action<string> press, [NotNull] Action release)
 		{
-			if (parent == null)
-				throw new ArgumentNullException("parent");
+			if (press == null)
+				throw new ArgumentNullException("press");
+			if (release == null)
+				throw new ArgumentNullException("release");
 
-			m_Port = parent;
+			m_PressAction = press;
+			m_ReleaseAction = release;
 
 			m_PulseSection = new SafeCriticalSection();
 			m_PulseTimer = SafeTimer.Stopped(PulseElapseCallback);
@@ -82,7 +86,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		public void Clear()
 		{
-			m_Port.Release();
+			m_ReleaseAction();
 
 			m_PulseSection.Enter();
 
@@ -130,8 +134,8 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 
 			m_BetweenTime = pulse.BetweenTime;
 
-			m_Port.Release();
-			m_Port.Press(pulse.Command);
+			m_ReleaseAction();
+			m_PressAction(pulse.Command);
 			m_PulseTimer.Reset(pulse.Duration);
 
 
@@ -142,7 +146,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 		/// </summary>
 		private void PulseElapseCallback()
 		{
-			m_Port.Release();
+			m_ReleaseAction();
 
 			m_BetweenTimer.Reset(m_BetweenTime);
 		}

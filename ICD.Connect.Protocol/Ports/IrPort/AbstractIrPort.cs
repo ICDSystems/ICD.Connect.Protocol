@@ -48,7 +48,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		protected AbstractIrPort()
 		{
-			m_PulseComponent = new IrPortPulseComponent(this);
+			m_PulseComponent = new IrPortPulseComponent(PressInternal, ReleaseInternal);
 		}
 
 		/// <summary>
@@ -88,6 +88,15 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 				return;
 			}
 
+			m_PulseComponent.Clear();
+
+			PressInternal(command);
+		}
+
+		private void PressInternal(string command)
+		{
+			PrintTx("Press", command);
+
 			PressFinal(command);
 		}
 
@@ -102,6 +111,13 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		public void Release()
 		{
+			ReleaseInternal();
+		}
+
+		private void ReleaseInternal()
+		{
+			PrintTx("Release", null);
+
 			ReleaseFinal();
 		}
 
