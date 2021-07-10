@@ -1,9 +1,11 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Protocol.Network.Devices.PortServers
 {
+	[KrangSettings("IrPortServerDevice", typeof(IrPortServerDevice))]
 	public sealed class IrPortServerDeviceSettings : AbstractPortServerDeviceSettings<IIrPort>, IIrDriverSettings
 	{
 

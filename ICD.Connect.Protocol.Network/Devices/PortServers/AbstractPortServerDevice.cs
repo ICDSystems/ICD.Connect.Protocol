@@ -45,8 +45,29 @@ namespace ICD.Connect.Protocol.Network.Devices.PortServers
 		}
 
 		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			base.DisposeFinal(disposing);
+
+			Unsubscribe(m_TcpServer);
+			if (m_TcpServer != null)
+			{
+				m_TcpServer.Stop();
+				m_TcpServer.Dispose();
+			}
+
+			m_TcpServer = null;
+
+			Unsubscribe(Port);
+			Port.Dispose();
+			Port = null;
+		}
+
+		/// <summary>
 		/// Called after the port is subscribed to
-		/// Run any action needed to set the port here
+		/// Run any action needed to set or configure the port here
 		/// </summary>
 		/// <param name="port"></param>
 		protected virtual void SetPortInternal(TPort port)
