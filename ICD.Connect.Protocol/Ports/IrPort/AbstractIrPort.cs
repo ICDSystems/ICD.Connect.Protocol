@@ -111,6 +111,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		public void Release()
 		{
+			m_PulseComponent.Clear();
 			ReleaseInternal();
 		}
 
