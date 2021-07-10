@@ -158,7 +158,7 @@ namespace ICD.Connect.Protocol.Network.Devices.PortServers
 			}
 
 			ushort holdTime;
-			ushort betweenTime = default;
+			ushort betweenTime = 0;
 
 			if (paramsArray.Length == 3)
 			{
@@ -185,7 +185,7 @@ namespace ICD.Connect.Protocol.Network.Devices.PortServers
 					return;
 				}
 
-				if (betweenTime == default)
+				if (betweenTime == 0)
 					Port.PressAndRelease(paramsArray[0], holdTime);
 				else
 					Port.PressAndRelease(paramsArray[0], holdTime, betweenTime);

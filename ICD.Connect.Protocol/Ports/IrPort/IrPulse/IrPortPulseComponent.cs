@@ -173,7 +173,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 			try
 			{
 				m_IsSending = false;
-				m_CurrentCommand = default;
+				m_CurrentCommand = default(IrPulse);
 
 				if (m_Queue.Count == 0)
 					return;

@@ -76,8 +76,13 @@
   <ItemGroup>
     <Compile Include="Devices\ConsoleServer\ConsoleServerDevice.cs" />
     <Compile Include="Devices\ConsoleServer\ConsoleServerSettings.cs" />
-    <Compile Include="Devices\SerialPortServer\SerialPortServerDevice.cs" />
-    <Compile Include="Devices\SerialPortServer\SerialPortServerDeviceSettings.cs" />
+    <Compile Include="Devices\PortServers\AbstractPortServerDevice.cs" />
+    <Compile Include="Devices\PortServers\AbstractPortServerDeviceSettings.cs" />
+    <Compile Include="Devices\PortServers\IPortServerDeviceSettings.cs" />
+    <Compile Include="Devices\PortServers\IrPortServerDevice.cs" />
+    <Compile Include="Devices\PortServers\IrPortServerDeviceSettings.cs" />
+    <Compile Include="Devices\PortServers\SerialPortServerDevice.cs" />
+    <Compile Include="Devices\PortServers\SerialPortServerDeviceSettings.cs" />
     <Compile Include="Direct\MessageConverter.cs" />
     <Compile Include="Direct\ClientBufferCallbackInfo.cs" />
     <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
