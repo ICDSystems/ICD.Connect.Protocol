@@ -1,23 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.EventArguments;
 using ICD.Connect.Protocol.Network.Settings;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	public sealed partial class IcdUdpClient : AbstractNetworkPort<IcdUdpClientSettings>
+	public sealed class IcdUdpClient : AbstractNetworkPort<IcdUdpClientSettings>
 	{
-		public const ushort DEFAULT_BUFFER_SIZE = 16384;
 		public const string ACCEPT_ALL = "0.0.0.0";
 
+		private static readonly IcdUdpSocketPool s_SocketPool;
 		private readonly NetworkProperties m_NetworkProperties;
 
 		private bool m_ListeningRequested;
+
+		[CanBeNull]
+		private IcdUdpSocket m_UdpSocket;
 
 		#region Properties
 
@@ -38,13 +41,17 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		[PublicAPI]
 		public override ushort Port { get; set; }
 
-		/// <summary>
-		/// Get or set the receive buffer size.
-		/// </summary>
-		[PublicAPI]
-		public int BufferSize { get; set; }
-
 		#endregion
+
+		#region Constructors
+
+		/// <summary>
+		/// Static constructor.
+		/// </summary>
+		static IcdUdpClient()
+		{
+			s_SocketPool = new IcdUdpSocketPool();
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -53,13 +60,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		{
 			m_NetworkProperties = new NetworkProperties();
 
-			BufferSize = DEFAULT_BUFFER_SIZE;
 			Address = ACCEPT_ALL;
 
 			IcdEnvironment.OnEthernetEvent += IcdEnvironmentOnEthernetEvent;
 		}
-
-		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -73,28 +77,119 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			Disconnect();
 		}
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
-		/// Sends serial data to a specific endpoint.
+		/// Connects to the end point.
 		/// </summary>
-		/// <param name="data"></param>
-		/// <param name="ipAddress"></param>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public bool SendToAddress(string data, string ipAddress, int port)
+		public override void Connect()
 		{
+			ushort port = Port;
+
 			try
 			{
-				if (IsConnected)
-					return SendToAddressFinal(data, ipAddress, port);
+				Unsubscribe(m_UdpSocket);
+				m_UdpSocket = s_SocketPool.GetSocket(this, port);
+				Subscribe(m_UdpSocket);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to connect - {0}", e.Message);
+				Disconnect();
+			}
 
-				Logger.Log(eSeverity.Error, "Unable to send to address - Port is not connected.");
+			UpdateIsConnectedState();
+		}
+
+		/// <summary>
+		/// Disconnects from the end point.
+		/// </summary>
+		public override void Disconnect()
+		{
+			m_ListeningRequested = false;
+
+			if (m_UdpSocket != null)
+			{
+				Unsubscribe(m_UdpSocket);
+				s_SocketPool.ReturnSocket(this, m_UdpSocket);
+			}
+			m_UdpSocket = null;
+
+			UpdateIsConnectedState();
+		}
+
+		/// <summary>
+		/// Returns the connection state of the port
+		/// </summary>
+		/// <returns></returns>
+		protected override bool GetIsConnectedState()
+		{
+			return m_UdpSocket != null && m_UdpSocket.IsConnected;
+		}
+
+		/// <summary>
+		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
+		/// </summary>
+		protected override bool SendFinal(string data)
+		{
+			if (Address != ACCEPT_ALL)
+				return SendToAddress(data, Address, Port);
+
+			if (m_UdpSocket == null)
+			{
+				Logger.Log(eSeverity.Error, "Failed to send data - Wrapped client is null");
 				return false;
+			}
+
+			try
+			{
+				m_UdpSocket.Send(data);
+				PrintTx(data);
+				return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to send data to {0} - {1}", Port, e.Message);
 			}
 			finally
 			{
 				UpdateIsConnectedState();
 			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Implements the actual sending logic. Wrapped by SendToAddress to handle connection status.
+		/// </summary>
+		public bool SendToAddress(string data, string ipAddress, int port)
+		{
+			if (m_UdpSocket == null)
+			{
+				Logger.Log(eSeverity.Error, "Failed to send data to {0}:{1} - Wrapped client is null",
+				           ipAddress, port);
+				return false;
+			}
+
+			try
+			{
+				m_UdpSocket.SendToAddress(data, ipAddress, port);
+				PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
+				return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "Failed to send data to {0}:{1} - {2}",
+				           ipAddress, port, e.Message);
+			}
+			finally
+			{
+				UpdateIsConnectedState();
+			}
+
+			return false;
 		}
 
 		#endregion
@@ -109,30 +204,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		private void IcdEnvironmentOnEthernetEvent(IcdEnvironment.eEthernetAdapterType adapter,
 		                                           IcdEnvironment.eEthernetEventType type)
 		{
-#if SIMPLSHARP
-			IcdEnvironment.eEthernetAdapterType adapterType =
-				m_UdpClient == null
-					? IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter
-					: IcdEnvironment.GetEthernetAdapterType(m_UdpClient.EthernetAdapterToBindTo);
-
-			if (adapter != adapterType && adapterType != IcdEnvironment.eEthernetAdapterType.EthernetUnknownAdapter)
-				return;
-#endif
 			switch (type)
 			{
 				case IcdEnvironment.eEthernetEventType.LinkUp:
-					if (m_ListeningRequested)
+					if (m_ListeningRequested &&
+						m_UdpSocket != null &&
+						!m_UdpSocket.IsConnected)
 						Connect();
-					break;
-
-				case IcdEnvironment.eEthernetEventType.LinkDown:
-					if (m_UdpClient == null)
-						break;
-#if SIMPLSHARP
-					m_UdpClient.DisableUDPServer();
-#else
-                    m_UdpClient.Dispose();
-#endif
 					break;
 
 				default:
@@ -140,6 +218,61 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 
 			UpdateIsConnectedState();
+		}
+
+		#endregion
+
+		#region UdpSocket Callbacks
+
+		/// <summary>
+		/// Subscribe to the UDP socket events.
+		/// </summary>
+		/// <param name="udpSocket"></param>
+		private void Subscribe([CanBeNull] IcdUdpSocket udpSocket)
+		{
+			if (udpSocket == null)
+				return;
+
+			udpSocket.OnIsConnectedStateChanged += UdpSocketOnIsConnectedStateChanged;
+			udpSocket.OnDataReceived += UdpSocketOnDataReceived;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the UDP socket events.
+		/// </summary>
+		/// <param name="udpSocket"></param>
+		private void Unsubscribe([CanBeNull] IcdUdpSocket udpSocket)
+		{
+			if (udpSocket == null)
+				return;
+
+			udpSocket.OnIsConnectedStateChanged -= UdpSocketOnIsConnectedStateChanged;
+			udpSocket.OnDataReceived -= UdpSocketOnDataReceived;
+		}
+
+		private void UdpSocketOnIsConnectedStateChanged(object sender, BoolEventArgs eventArgs)
+		{
+			UpdateIsConnectedState();
+		}
+
+		private void UdpSocketOnDataReceived(object sender, UdpDataReceivedEventArgs eventArgs)
+		{
+			try
+			{
+				HostInfo host = eventArgs.Host;
+				string data = eventArgs.Data;
+
+				// Ignore messages that aren't from the configured endpoint
+				if (Address != ACCEPT_ALL && Address != host.Address)
+					return;
+
+				PrintRx(host.ToString(), data);
+				Receive(data);
+			}
+			finally
+			{
+				UpdateIsConnectedState();
+			}
 		}
 
 		#endregion
@@ -166,47 +299,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			base.ApplySettingsFinal(settings, factory);
 
 			ApplyConfiguration();
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-			base.BuildConsoleStatus(addRow);
-
-			addRow("Buffer Size", BufferSize);
-#if SIMPLSHARP
-			addRow("Server Status", m_UdpClient == null ? string.Empty : m_UdpClient.ServerStatus.ToString());
-#endif
-		}
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new GenericConsoleCommand<ushort>("SetBufferSize",
-			                                               "Sets the buffer size for next connection attempt",
-			                                               s => BufferSize = s);
-		}
-
-		/// <summary>
-		/// Workaround to avoid "unverifiable code" warning.
-		/// </summary>
-		/// <returns></returns>
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
 		}
 
 		#endregion

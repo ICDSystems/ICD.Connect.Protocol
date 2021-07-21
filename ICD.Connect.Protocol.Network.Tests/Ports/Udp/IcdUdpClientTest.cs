@@ -32,15 +32,6 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.Udp
 			}
 		}
 
-		[TestCase(10000)]
-		public void BufferSizeTest(int bufferSize)
-		{
-			using (IcdUdpClient client = new IcdUdpClient { BufferSize = bufferSize})
-			{
-				Assert.AreEqual(bufferSize, client.BufferSize);
-			}
-		}
-
 		[Test]
 		public void ConnectTest()
 		{

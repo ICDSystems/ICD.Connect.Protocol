@@ -81,6 +81,7 @@
     <Compile Include="Direct\MessageConverter.cs" />
     <Compile Include="Direct\ClientBufferCallbackInfo.cs" />
     <Compile Include="EventArguments\MqttMessageEventArgs.cs" />
+    <Compile Include="EventArguments\UdpDataReceivedEventArgs.cs" />
     <Compile Include="Ports\AbstractNetworkPort.cs" />
     <Compile Include="Attributes\Rpc\RpcAttribute.cs" />
     <Compile Include="Broadcast\BroadcastData.cs" />
@@ -132,6 +133,8 @@
     <Compile Include="Ports\Tcp\AbstractTcpServer.cs" />
     <Compile Include="Ports\Tcp\ITcpServer.cs" />
     <Compile Include="Ports\Tcp\TelnetCommand.cs" />
+    <Compile Include="Ports\Udp\IcdUdpSocket.cs" />
+    <Compile Include="Ports\Udp\IcdUdpSocketPool.cs" />
     <Compile Include="Ports\Web\AbstractWebPort.cs" />
     <Compile Include="Ports\Web\AbstractWebPortSettings.cs" />
     <Compile Include="Ports\Web\eProxyAuthenticationMethod.cs" />
@@ -176,8 +179,6 @@
     <Compile Include="Servers\DataReceiveEventArgs.cs" />
     <Compile Include="Servers\NetworkServerBufferManager.cs" />
     <Compile Include="Ports\Udp\IcdUdpClient.cs" />
-    <Compile Include="Ports\Udp\IcdUdpClient.SimplSharp.cs" />
-    <Compile Include="Ports\Udp\IcdUdpClient.Standard.cs" />
     <Compile Include="Ports\Udp\IcdUdpClientSettings.cs" />
     <Compile Include="Utils\HttpUtils.cs" />
     <Compile Include="Utils\JwtUtils.cs" />
