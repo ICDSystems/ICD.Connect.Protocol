@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.1.0] - 2021-08-18
 ### Added
  - Added SerialPortAdapter for controlling NetStandard serial ports
  - Added NamedPipeClient and NamedPipeServer for communicating between processes
