@@ -22,7 +22,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.NamedPipe
 			string pipeName = Guid.NewGuid().ToString();
 
 			// Build the client
-			using NamedPipeClient client =
+			NamedPipeClient client =
 				new NamedPipeClient
 				{
 					PipeName = pipeName
@@ -31,7 +31,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.NamedPipe
 			client.OnSerialDataReceived += (sender, args) => clientSerialDataReceived.Add(args.Data);
 
 			// Build the server
-			using NamedPipeServer server =
+			NamedPipeServer server =
 				new NamedPipeServer
 				{
 					PipeName = pipeName

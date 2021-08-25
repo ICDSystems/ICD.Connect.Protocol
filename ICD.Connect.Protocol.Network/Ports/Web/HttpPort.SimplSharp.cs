@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿#if !NETSTANDARD
+using System.Linq;
 using ICD.Connect.API.Commands;
-#if SIMPLSHARP
 using System;
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Extensions;

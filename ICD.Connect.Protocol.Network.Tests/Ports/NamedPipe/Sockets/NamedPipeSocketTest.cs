@@ -29,7 +29,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.NamedPipe.Sockets
 				                          PipeTransmissionMode.Byte,
 				                          PipeOptions.Asynchronous);
 
-			using ServerNamedPipeSocket server = new ServerNamedPipeSocket(serverStream, pipeName);
+			ServerNamedPipeSocket server = new ServerNamedPipeSocket(serverStream, pipeName);
 			server.OnDataReceived += (sender, args) => serverDataReceived.Add(args.Data);
 			server.OnIsConnectedChanged += (sender, args) => serverConnectedChanged.Add(args.Data);
 
@@ -45,7 +45,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.NamedPipe.Sockets
 				                          PipeOptions.Asynchronous,
 				                          TokenImpersonationLevel.Impersonation);
 
-			using ClientNamedPipeSocket client = new ClientNamedPipeSocket(clientStream, ".", pipeName);
+			ClientNamedPipeSocket client = new ClientNamedPipeSocket(clientStream, ".", pipeName);
 			client.OnDataReceived += (sender, args) => clientDataReceived.Add(args.Data);
 			client.OnIsConnectedChanged += (sender, args) => clientConnectedChanged.Add(args.Data);
 

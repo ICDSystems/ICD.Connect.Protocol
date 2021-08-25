@@ -3,7 +3,7 @@
   <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <RootNamespace>ICD.Connect.Protocol.Crosspoints</RootNamespace>
     <AssemblyName>ICD.Connect.Protocol.Crosspoints</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -33,6 +33,9 @@
     <None Remove="ICD.Connect.Protocol.projectinfo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
     <None Remove="Properties\ControlSystem.cfg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Newtonsoft.Json" Version="13.0.1" Aliases="RealNewtonsoft"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Logging\ICD.Common.Logging\ICD.Common.Logging_NetStandard.csproj" />

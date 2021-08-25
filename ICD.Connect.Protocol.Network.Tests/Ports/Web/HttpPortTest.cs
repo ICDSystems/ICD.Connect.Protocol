@@ -1,8 +1,13 @@
+#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
 using System;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Ports.Web;
-using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace ICD.Connect.Protocol.Network.Tests.Ports.Web

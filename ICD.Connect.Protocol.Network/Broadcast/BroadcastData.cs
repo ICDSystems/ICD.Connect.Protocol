@@ -1,8 +1,13 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.Network.Broadcast.Converters;
 using ICD.Connect.Protocol.Ports;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
