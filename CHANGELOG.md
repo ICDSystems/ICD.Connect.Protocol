@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - IrPortServerDevice - allowing control of Krang IR ports from other applications
+ 
+ ## Changed
+  - SerialPortServerDevice inherits from AbstractPortServerDevice
+  - IrPulseComponent - changed press/release to be actions passed into constructor
+  - IrPulseComponent - fixed potential deadlocks, fix pulse time duration
 
 ## [14.1.0] - 2021-08-18
 ### Added
