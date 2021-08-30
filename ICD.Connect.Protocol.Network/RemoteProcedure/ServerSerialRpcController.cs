@@ -1,10 +1,15 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.SerialBuffers;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Network.RemoteProcedure
 {

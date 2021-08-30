@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -8,7 +14,6 @@ using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports.Tcp;
 using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.SerialBuffers;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Crosspoints.CrosspointManagers
 {

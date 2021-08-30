@@ -1,4 +1,4 @@
-#if STANDARD
+#if !SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using System.IO;

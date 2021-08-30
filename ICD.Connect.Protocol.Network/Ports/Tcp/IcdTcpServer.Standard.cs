@@ -1,4 +1,4 @@
-﻿#if STANDARD
+﻿#if !SIMPLSHARP
 using ICD.Common.Utils;
 using System;
 using System.Collections.Generic;

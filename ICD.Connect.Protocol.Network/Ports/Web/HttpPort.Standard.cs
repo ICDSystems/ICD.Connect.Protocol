@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if !SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.Network.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {

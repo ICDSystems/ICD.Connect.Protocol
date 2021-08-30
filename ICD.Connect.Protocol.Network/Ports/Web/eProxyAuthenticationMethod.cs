@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-#if !NETSTANDARD
+#if SIMPLSHARP
 using Crestron.SimplSharp.Net;
 #endif
 using ICD.Common.Utils;
@@ -25,7 +25,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 	public static class ProxyAuthenticationMethodExtensions
 	{
-#if !NETSTANDARD
+#if SIMPLSHARP
 		private static readonly BiDictionary<eProxyAuthenticationMethod, AuthMethod> s_Map =
 			new BiDictionary<eProxyAuthenticationMethod, AuthMethod>
 			{

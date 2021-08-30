@@ -1,7 +1,12 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Sigs;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Converters
 {

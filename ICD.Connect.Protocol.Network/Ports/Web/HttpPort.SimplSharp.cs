@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD
+﻿#if SIMPLSHARP
 using System.Linq;
 using ICD.Connect.API.Commands;
 using System;
