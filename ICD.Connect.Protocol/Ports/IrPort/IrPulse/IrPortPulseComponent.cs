@@ -132,7 +132,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 
 			m_Port.Release();
 			m_Port.Press(pulse.Command);
-			m_PulseTimer.Reset(pulse.Duration);
+			m_PulseTimer.Reset(pulse.PulseTime);
 
 
 		}
