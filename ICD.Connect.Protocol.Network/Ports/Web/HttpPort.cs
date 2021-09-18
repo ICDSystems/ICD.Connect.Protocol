@@ -60,7 +60,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsolute"></param>
 		/// <returns></returns>
-		private string GetRequestUrl(string relativeOrAbsolute)
+		private Uri GetRequestUrl(string relativeOrAbsolute)
 		{
 			IcdUriBuilder builder =
 				Uri == null
@@ -69,10 +69,13 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			// When no relative or absolute path is specified we return the URI configured on the port.
 			if (relativeOrAbsolute == null)
-				return builder.ToString();
+				return builder.Uri;
 
-			if (Uri.IsWellFormedUriString(relativeOrAbsolute, UriKind.Absolute))
-				builder = new IcdUriBuilder(relativeOrAbsolute);
+			// Is the path absolute?
+			Uri uri;
+			if (Uri.TryCreate(relativeOrAbsolute, UriKind.Absolute, out uri) &&
+				!uri.IsFile) // Hack - relative paths are parsed as absolute file paths in 3.5
+				builder = new IcdUriBuilder(uri);
 			else
 				builder.AppendPath(relativeOrAbsolute);
 
@@ -84,7 +87,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				: builder.Path.Replace("%", "%25");
 #endif
 
-			return builder.ToString();
+			return builder.Uri;
 		}
 
 		/// <summary>

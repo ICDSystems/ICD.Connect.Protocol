@@ -107,8 +107,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				string url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url);
+				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url.ToString());
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -138,8 +138,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				string url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url);
+				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url.ToString());
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url)
 				{
@@ -172,8 +172,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				string url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url);
+				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url.ToString());
 
 				HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
 				{
@@ -206,8 +206,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				string url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url);
+				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
+				PrintTx(url.ToString());
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url)
 				{

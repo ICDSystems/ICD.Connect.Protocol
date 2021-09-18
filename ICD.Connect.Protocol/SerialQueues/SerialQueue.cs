@@ -45,7 +45,7 @@ namespace ICD.Connect.Protocol.SerialQueues
 		private readonly PriorityQueue<ISerialData> m_CommandQueue;
 
 		/// <summary>
-		/// This acts as thread syncronization for both m_CommandQueue and m_CurrentCommand
+		/// This acts as thread synchronization for both m_CommandQueue and m_CurrentCommand
 		/// </summary>
 		private readonly SafeCriticalSection m_CommandSection;
 
