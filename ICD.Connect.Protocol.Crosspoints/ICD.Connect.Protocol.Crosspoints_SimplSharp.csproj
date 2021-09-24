@@ -111,6 +111,10 @@
     <Compile Include="SimplPlus\SimplPlusStaticCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimplPlus\CrosspointSmartObjectShims\AbstractSimplPlusXSigCrosspointSoShim.cs" />
+    <Compile Include="UiBindings\XP3\AbstractXp3UiBinding.cs" />
+    <Compile Include="UiBindings\XP3\AbstractXp3UiBindingSettings.cs" />
+    <Compile Include="UiBindings\XP3\IXp3UiBinding.cs" />
+    <Compile Include="UiBindings\XP3\IXp3UiBindingSettings.cs" />
     <Compile Include="Xp3.cs" />
     <Compile Include="Xp3Utils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
@@ -139,6 +143,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Telemetry\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
       <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
       <Name>ICD.Connect.Telemetry_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Themes\ICD.Connect.Themes\ICD.Connect.Themes_SimplSharp.csproj">
+      <Project>{7D599445-C1F9-4BBD-ACC4-DC80E3311376}</Project>
+      <Name>ICD.Connect.Themes_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
       <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
