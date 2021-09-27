@@ -1,5 +1,4 @@
-﻿
-#if STANDARD
+﻿#if STANDARD
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,6 @@ using System.Threading.Tasks;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Protocol.Network.Settings;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
 {
@@ -22,6 +20,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		private readonly HttpClient m_Client;
 		private readonly HttpClientHandler m_ClientHandler;
 		private readonly SafeCriticalSection m_ClientBusySection;
+		private bool m_ClientBusy;
 
 		#region Properties
 
@@ -50,11 +49,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			get
 			{
-				if (!m_ClientBusySection.TryEnter())
-					return true;
-
-				m_ClientBusySection.Leave();
-				return false;
+				return m_ClientBusySection.Execute(() => m_ClientBusy);
 			}
 		}
 
@@ -108,7 +103,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			if (headers == null)
 				throw new ArgumentNullException("headers");
 
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -126,7 +121,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 		}
 
@@ -139,7 +134,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		public override WebPortResponse Post(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
 		{
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -160,7 +155,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 		}
 
@@ -173,7 +168,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		public override WebPortResponse Patch(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
 		{
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -194,7 +189,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 		}
 
@@ -207,7 +202,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		public override WebPortResponse Put(string relativeOrAbsoluteUri, Dictionary<string, List<string>> headers, byte[] data)
 		{
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -228,7 +223,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 		}
 
@@ -244,7 +239,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			Accept = SOAP_ACCEPT;
 
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -263,7 +258,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 
 			SetLastRequestSucceeded(false);
@@ -283,7 +278,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		{
 			WebPortResponse output = WebPortResponse.Failed;
 
-			m_ClientBusySection.Enter();
+			m_ClientBusySection.Execute(() => m_ClientBusy = true);
 
 			try
 			{
@@ -339,7 +334,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 			finally
 			{
-				m_ClientBusySection.Leave();
+				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 
 			SetLastRequestSucceeded(output.Success);

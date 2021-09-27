@@ -27,6 +27,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 		private readonly long[] m_RampIntervalMs;
 		private readonly SafeTimer m_Timer;
 		private readonly SafeCriticalSection m_ConnectSection;
+		private bool m_ConnectInProgress;
 
 		private int m_ConnectAttempts;
 		private IConnectable m_Instance;
@@ -200,15 +201,23 @@ namespace ICD.Connect.Protocol.Heartbeat
 
 		private void HandleDisconnected()
 		{
-			if (!m_ConnectSection.TryEnter())
-				return;
+			IConnectable instance = m_Instance;
+
+			m_ConnectSection.Enter();
+			try
+			{
+				if (m_ConnectInProgress || instance == null)
+					return;
+
+				m_ConnectInProgress = true;
+			}
+			finally
+			{
+				m_ConnectSection.Leave();
+			}
 
 			try
 			{
-				IConnectable instance = m_Instance;
-				if (instance == null)
-					return;
-
 				long interval;
 				if (!m_RampIntervalMs.TryElementAt(m_ConnectAttempts, out interval))
 					interval = m_MaxIntervalMs;
@@ -231,7 +240,7 @@ namespace ICD.Connect.Protocol.Heartbeat
 			}
 			finally
 			{
-				m_ConnectSection.Leave();
+				m_ConnectSection.Execute(() => m_ConnectInProgress = false);
 			}
 		}
 

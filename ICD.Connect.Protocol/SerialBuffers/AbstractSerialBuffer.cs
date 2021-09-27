@@ -15,12 +15,30 @@ namespace ICD.Connect.Protocol.SerialBuffers
 
 		private readonly Queue<string> m_Queue;
 		private readonly SafeCriticalSection m_QueueSection;
-		private readonly SafeCriticalSection m_ParseSection;
+		private readonly IcdManualResetEvent m_ParsingEvent;
+		private bool m_Parsing;
 
 		/// <summary>
 		/// Sets while clearing, to tell the parse method to bail out early
 		/// </summary>
 		private bool m_Clearing;
+
+		private bool Parsing
+		{
+			get { return m_Parsing; }
+			set
+			{
+				if (m_Parsing == value)
+					return;
+
+				m_Parsing = value;
+
+				if (value)
+					m_ParsingEvent.Reset();
+				else
+					m_ParsingEvent.Set();
+			}
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -29,7 +47,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		{
 			m_Queue = new Queue<string>();
 			m_QueueSection = new SafeCriticalSection();
-			m_ParseSection = new SafeCriticalSection();
+			m_ParsingEvent = new IcdManualResetEvent(true);
 		}
 
 		#region Methods
@@ -51,7 +69,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		{
 			m_Clearing = true;
 
-			m_ParseSection.Enter();
+			m_ParsingEvent.WaitOne();
 
 			try
 			{
@@ -61,7 +79,6 @@ namespace ICD.Connect.Protocol.SerialBuffers
 			finally
 			{
 				m_Clearing = false;
-				m_ParseSection.Leave();
 			}
 		}
 
@@ -79,8 +96,17 @@ namespace ICD.Connect.Protocol.SerialBuffers
 		/// </summary>
 		private void Parse()
 		{
-			if (!m_ParseSection.TryEnter())
-				return;
+			m_QueueSection.Enter();
+			try
+			{
+				if (Parsing)
+					return;
+				Parsing = true;
+			}
+			finally
+			{
+				m_QueueSection.Leave();
+			}
 
 			try
 			{
@@ -91,7 +117,7 @@ namespace ICD.Connect.Protocol.SerialBuffers
 			}
 			finally
 			{
-				m_ParseSection.Leave();
+				m_QueueSection.Execute(() => Parsing = false);
 			}
 		}
 
