@@ -75,6 +75,8 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		{
 			IcdEnvironment.OnEthernetEvent -= IcdEnvironmentOnEthernetEvent;
 
+			m_SendWorkerQueue.Dispose();
+
 			base.DisposeFinal(disposing);
 		}
 

@@ -375,6 +375,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 				{
 					m_ClientSendQueues.Remove(clientId);
 					clientQueue.Clear();
+					clientQueue.Dispose();
 				}
 
 				Logger.Log(eSeverity.Notice, "Client {0} ({1}) disconnected", clientId, hostInfo);
