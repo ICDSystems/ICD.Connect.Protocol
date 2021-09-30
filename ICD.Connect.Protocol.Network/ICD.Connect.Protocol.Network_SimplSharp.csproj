@@ -145,6 +145,8 @@
     <Compile Include="Ports\Web\eProxyAuthenticationMethod.cs" />
     <Compile Include="Ports\Web\IWebPortSettings.cs" />
     <Compile Include="Ports\Web\WebPortResponse.cs" />
+    <Compile Include="Ports\Web\WebQueues\IcdWebRequest.cs" />
+    <Compile Include="Ports\Web\WebQueues\WebQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteProcedure\ClientSerialRpcController.cs" />
     <Compile Include="RemoteProcedure\Rpc.cs" />
