@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - IrPortServerDevice - allowing control of Krang IR ports from other applications
+ - WebQueue - PriorityQueue that regulates the sending of HTTP requests
+ - Add HttpClient back into SimplSharp HttpPort
  
- ## Changed
-  - SerialPortServerDevice inherits from AbstractPortServerDevice
-  - IrPulseComponent - changed press/release to be actions passed into constructor
-  - IrPulseComponent - fixed potential deadlocks, fix pulse time duration
+### Changed
+ - SerialPortServerDevice inherits from AbstractPortServerDevice
+ - IrPulseComponent - changed press/release to be actions passed into constructor
+ - IrPulseComponent - fixed potential deadlocks, fix pulse time duration
+ - WebPortResponse Success property split into GotResponse & IsSuccessCode properties
 
 ## [14.2.0] - 2021-10-04
 ### Changed
