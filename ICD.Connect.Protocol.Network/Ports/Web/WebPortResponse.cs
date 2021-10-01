@@ -7,8 +7,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	{
 		public static WebPortResponse Failed { get { return new WebPortResponse(); } }
 
-		public bool Success { get; set; }
+		public bool GotResponse { get; set; }
 		public int StatusCode { get; set; }
+		public bool IsSuccessCode { get { return StatusCode < 300; } }
 		public byte[] Data { get; set; }
 		public IDictionary<string, string[]> Headers { get; set; }
 		public string ResponseUrl { get; set; }

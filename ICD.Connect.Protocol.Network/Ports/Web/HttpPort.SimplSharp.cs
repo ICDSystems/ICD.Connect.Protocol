@@ -437,7 +437,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					output = new WebPortResponse
 					{
-						Success = response.Code < 300,
+						GotResponse = true,
 						StatusCode = response.Code,
 						Data = response.ContentBytes,
 						Headers = response.Header.Cast<HttpsHeader>().ToDictionary(h => h.Name, h => new[] {h.Value}),
@@ -454,7 +454,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				m_ClientBusySection.Leave();
 			}
 
-			SetLastRequestSucceeded(output.Success);
+			SetLastRequestSucceeded(output.GotResponse);
 			PrintRx(output.DataAsString);
 
 			return output;
@@ -488,7 +488,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					output = new WebPortResponse
 					{
-						Success = response.Code < 300,
+						GotResponse = true,
 						StatusCode = response.Code,
 						Data = response.ContentBytes,
 						Headers = response.Header.Cast<HttpHeader>().ToDictionary(h => h.Name, h => new[] { h.Value }),
@@ -505,7 +505,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				m_ClientBusySection.Leave();
 			}
 
-			SetLastRequestSucceeded(output.Success);
+			SetLastRequestSucceeded(output.GotResponse);
 			PrintRx(output.DataAsString);
 
 			return output;

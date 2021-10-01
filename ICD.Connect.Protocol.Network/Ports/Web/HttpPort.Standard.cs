@@ -297,7 +297,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					output = new WebPortResponse
 					{
-						Success = (int)response.StatusCode < 300,
+						GotResponse = true,
 						StatusCode = (int)response.StatusCode,
 						Data = response.Content.ReadAsByteArrayAsync().Result,
 						Headers = response.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
@@ -337,7 +337,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				m_ClientBusySection.Execute(() => m_ClientBusy = false);
 			}
 
-			SetLastRequestSucceeded(output.Success);
+			SetLastRequestSucceeded(output.GotResponse);
 			PrintRx(output.DataAsString);
 
 			return output;

@@ -64,7 +64,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.Web
 			};
 
 			WebPortResponse response = port.Get(request);
-			Assert.IsTrue(response.Success);
+			Assert.IsTrue(response.IsSuccessCode);
 
 			Post post = JsonConvert.DeserializeObject<Post>(response.DataAsString);
 
@@ -92,7 +92,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.Web
 			byte[] data = Encoding.ASCII.GetBytes(dataString);
 
 			var response = port.Post(request, data);
-			Assert.IsTrue(response.Success);
+			Assert.IsTrue(response.IsSuccessCode);
 
 			Post post = JsonConvert.DeserializeObject<Post>(response.DataAsString);
 
