@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - IrPulseComponent - changed press/release to be actions passed into constructor
   - IrPulseComponent - fixed potential deadlocks, fix pulse time duration
 
+## [14.2.0] - 2021-10-04
+### Changed
+ - Fixed IR Pulse Component to pulse for the correct pulse time, instead of the total duration
+ - Removed SafeCriticalSection.TryEnter from HttpPort.Standard, FeedbackDebounce, Heartbeat, and AbstractSerialBuffer
+ - IcdTcpClient, IcdSecureTcpClient, AbstractServer - Dispose of ThreadedWorkerQueues
+ - Added debugging to MockIrPort
+
 ## [14.1.0] - 2021-08-18
 ### Added
  - Added SerialPortAdapter for controlling NetStandard serial ports

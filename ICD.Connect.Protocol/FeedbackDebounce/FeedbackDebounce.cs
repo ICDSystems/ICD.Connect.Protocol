@@ -11,7 +11,7 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 		public event EventHandler<GenericEventArgs<T>> OnValue;
 
 		private readonly SafeCriticalSection m_QueueSection;
-		private readonly SafeCriticalSection m_ProcessSection;
+		private bool m_Processing;
 		private readonly List<T> m_FeedbackQueue;
 		private readonly IEqualityComparer<T> m_EqualityComparer;
 
@@ -32,7 +32,7 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 		public FeedbackDebounce(IEqualityComparer<T> equalityComparer)
 		{
 			m_QueueSection = new SafeCriticalSection();
-			m_ProcessSection = new SafeCriticalSection();
+			m_Processing = false;
 			m_FeedbackQueue = new List<T>();
 
 			m_EqualityComparer = equalityComparer;
@@ -49,26 +49,46 @@ namespace ICD.Connect.Protocol.FeedbackDebounce
 			ThreadingUtils.SafeInvoke(ProcessQueue);
 		}
 
+
 		private void ProcessQueue()
 		{
-			if (!m_ProcessSection.TryEnter())
-				return;
+			T newValue;
 
+			// If we're not already processing, and we can get a new value, start processing
+			m_QueueSection.Enter();
 			try
 			{
-				T newValue;
-				if (!CollapseQueue(out newValue))
+				if (m_Processing || !CollapseQueue(out newValue))
 					return;
 
-				m_MostRecentValue = newValue;
-
-				OnValue.Raise(this, new GenericEventArgs<T>(newValue));
-
-				ProcessQueue();
+				m_Processing = true;
 			}
 			finally
 			{
-				m_ProcessSection.Leave();
+				m_QueueSection.Leave();
+			}
+
+			// Continue processing as long as we continue to get a new value
+			while (true)
+			{
+				m_MostRecentValue = newValue;
+				OnValue.Raise(this, new GenericEventArgs<T>(newValue));
+
+				m_QueueSection.Enter();
+				try
+				{
+					// If we get a new value, continue processing
+					if (CollapseQueue(out newValue))
+						continue;
+
+					// If we don't get a new value, stop processing and return
+					m_Processing = false;
+					return;
+				}
+				finally
+				{
+					m_QueueSection.Leave();
+				}
 			}
 		}
 

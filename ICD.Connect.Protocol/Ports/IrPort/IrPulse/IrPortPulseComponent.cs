@@ -144,7 +144,6 @@ namespace ICD.Connect.Protocol.Ports.IrPort.IrPulse
 				m_PulseTimer.Reset(pulse.PulseTime);
 			}
 
-
 		}
 
 		/// <summary>
