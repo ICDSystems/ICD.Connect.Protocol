@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - IrPortServerDevice - allowing control of Krang IR ports from other applications
  - WebQueue - PriorityQueue that regulates the sending of HTTP requests
  - Add HttpClient back into SimplSharp HttpPort
+ - IcdUdpServer - Intended for use when a specific local port is needed to accept packets from other devices
  
 ### Changed
  - SerialPortServerDevice inherits from AbstractPortServerDevice
  - IrPulseComponent - changed press/release to be actions passed into constructor
  - IrPulseComponent - fixed potential deadlocks, fix pulse time duration
  - WebPortResponse Success property split into GotResponse & IsSuccessCode properties
+ - IcdUdpClient - changed client to use ephemeral local port instead of the report port
+ - IcdUdpClient - no longer uses UDP socket pool
+ - BroadcastManager - now uses IcdUdpServer instead of IcdUdpClient
+ - Crosspoint Advertisement Manager - now uses IcdUdpServer instead of IcdUdpClient
 
 ## [14.2.0] - 2021-10-04
 ### Changed

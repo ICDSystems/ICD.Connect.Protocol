@@ -4,8 +4,9 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Protocol.Network.Ports.Udp;
 
-namespace ICD.Connect.Protocol.Network.Ports.Udp
+namespace ICD.Connect.Protocol.Network.Servers
 {
 	/// <summary>
 	/// We can only host a UDP server per network port,
@@ -14,7 +15,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 	internal sealed class IcdUdpSocketPool
 	{
 		private readonly Dictionary<ushort, IcdUdpSocket> m_Sockets;
-		private readonly Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpClient>> m_SocketClients; 
+		private readonly Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpServer>> m_SocketClients; 
 		private readonly SafeCriticalSection m_SocketsSection;
 
 		/// <summary>
@@ -23,19 +24,19 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		public IcdUdpSocketPool()
 		{
 			m_Sockets = new Dictionary<ushort, IcdUdpSocket>();
-			m_SocketClients = new Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpClient>>();
+			m_SocketClients = new Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpServer>>();
 			m_SocketsSection = new SafeCriticalSection();
 		}
 
 		/// <summary>
-		/// Lazy-loads a socket for the given port.
+		/// Lazy-loads a socket for the given local port.
 		/// </summary>
-		/// <param name="client"></param>
+		/// <param name="server"></param>
 		/// <param name="port"></param>
 		/// <returns></returns>
-		public IcdUdpSocket GetSocket([NotNull] IcdUdpClient client, ushort port)
+		public IcdUdpSocket GetSocket([NotNull] IcdUdpServer server, ushort port)
 		{
-			if (client == null)
+			if (server == null)
 				throw new ArgumentNullException("client");
 
 			m_SocketsSection.Enter();
@@ -45,11 +46,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 				IcdUdpSocket socket =
 					m_Sockets.GetOrAddNew(port, () =>
 					{
-						IcdUdpSocket output = new IcdUdpSocket(port);
+						IcdUdpSocket output = new IcdUdpSocket(IcdUdpSocket.DEFAULT_ACCEPT_ADDRESS, port, port);
 						output.Connect();
 						return output;
 					});
-				m_SocketClients.GetOrAddNew(socket).Add(client);
+				m_SocketClients.GetOrAddNew(socket).Add(server);
 				return socket;
 			}
 			finally
@@ -61,11 +62,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <summary>
 		/// Returns a socket once the client is done with it.
 		/// </summary>
-		/// <param name="client"></param>
+		/// <param name="server"></param>
 		/// <param name="socket"></param>
-		public void ReturnSocket([NotNull] IcdUdpClient client, [NotNull] IcdUdpSocket socket)
+		public void ReturnSocket([NotNull] IcdUdpServer server, [NotNull] IcdUdpSocket socket)
 		{
-			if (client == null)
+			if (server == null)
 				throw new ArgumentNullException("client");
 
 			if (socket == null)
@@ -75,14 +76,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 
 			try
 			{
-				IcdHashSet<IcdUdpClient> clients;
-				bool dispose = m_SocketClients.TryGetValue(socket, out clients) &&
-				               clients.Remove(client) &&
-				               clients.Count == 0;
+				IcdHashSet<IcdUdpServer> servers;
+				bool dispose = m_SocketClients.TryGetValue(socket, out servers) &&
+				               servers.Remove(server) &&
+				               servers.Count == 0;
 				if (!dispose)
 					return;
 
-				m_Sockets.Remove(socket.Port);
+				m_Sockets.Remove(socket.LocalPort);
 				socket.Dispose();
 			}
 			finally

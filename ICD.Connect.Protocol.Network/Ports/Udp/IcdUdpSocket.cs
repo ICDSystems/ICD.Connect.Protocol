@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 #if SIMPLSHARP
 using System.Linq;
 using Crestron.SimplSharp;
@@ -20,11 +21,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 	public sealed class IcdUdpSocket : IDisposable
 	{
 		public const ushort DEFAULT_BUFFER_SIZE = 16384;
+		public const string DEFAULT_ACCEPT_ADDRESS = "0.0.0.0";
+		public const ushort EPHEMERAL_LOCAL_PORT = 0;
 
 		public event EventHandler<BoolEventArgs> OnIsConnectedStateChanged;
-		public event EventHandler<UdpDataReceivedEventArgs> OnDataReceived; 
+		public event EventHandler<UdpDataReceivedEventArgs> OnDataReceived;
 
-		private readonly ushort m_Port;
+		private readonly string m_AcceptAddress;
+		private readonly ushort m_RemotePort;
+		private readonly ushort m_LocalPort;
 
 		private UdpClient m_UdpClient;
 		private bool m_IsConnected;
@@ -45,17 +50,45 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			}
 		}
 
-		public ushort Port { get { return m_Port; } }
+		public ushort RemotePort { get { return m_RemotePort; } }
+
+		public ushort LocalPort { get { return m_LocalPort; } }
+
+		public string AcceptAddress { get { return m_AcceptAddress; } }
 
 		#endregion
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="port"></param>
-		public IcdUdpSocket(ushort port)
+		/// <param name="localPort"></param>
+		/// <param name="remotePort"></param>
+		/// <param name="acceptAddress"></param>
+		[PublicAPI]
+		public IcdUdpSocket(string acceptAddress, ushort localPort, ushort remotePort)
 		{
-			m_Port = port;
+			m_AcceptAddress = acceptAddress;
+			m_LocalPort = localPort;
+			m_RemotePort = remotePort;
+		}
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="remotePort"></param>
+		[PublicAPI]
+		public IcdUdpSocket(ushort remotePort): this(DEFAULT_ACCEPT_ADDRESS, EPHEMERAL_LOCAL_PORT, remotePort)
+		{
+		}
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="acceptAddress"></param>
+		/// <param name="remotePort"></param>
+		[PublicAPI]
+		public IcdUdpSocket(string acceptAddress, ushort remotePort) : this(acceptAddress, EPHEMERAL_LOCAL_PORT, remotePort)
+		{
 		}
 
 		/// <summary>
@@ -74,6 +107,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <summary>
 		/// Connects to the end point.
 		/// </summary>
+		[PublicAPI]
 		public void Connect()
 		{
 			Disconnect();
@@ -81,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			try
 			{
 #if SIMPLSHARP
-				m_UdpClient = new UDPServer("0.0.0.0", m_Port, DEFAULT_BUFFER_SIZE);
+				m_UdpClient = new UDPServer(AcceptAddress, LocalPort, DEFAULT_BUFFER_SIZE, RemotePort);
 				m_UdpClient.EnableUDPServer();
 
 				// Spawn new listening thread
@@ -94,7 +128,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 					throw new Exception(error.ToString());
 				}
 #else
-				m_UdpClient = new UdpClient(m_Port) { EnableBroadcast = true };
+				m_UdpClient = new UdpClient(LocalPort) { EnableBroadcast = true };
 				m_UdpClient.ReceiveAsync().ContinueWith(UdpClientReceiveHandler);
 #endif
 			}
@@ -110,6 +144,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <summary>
 		/// Disconnects from the end point.
 		/// </summary>
+		[PublicAPI]
 		public void Disconnect()
 		{
 			if (m_UdpClient != null)
@@ -127,6 +162,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// <summary>
 		/// Implements the actual sending logic. Wrapped by Send to handle connection status.
 		/// </summary>
+		[PublicAPI]
 		public void Send(string data)
 		{
 			if (m_UdpClient == null)
@@ -134,12 +170,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 
 			byte[] bytes = StringUtils.ToBytes(data);
 #if SIMPLSHARP
-			m_UdpClient.SendData(bytes, bytes.Length);
+			m_UdpClient.SendData(bytes, bytes.Length, AcceptAddress, RemotePort);
 #else
-			m_UdpClient.Send(bytes, bytes.Length);
+			m_UdpClient.Send(bytes, bytes.Length, AcceptAddress, RemotePort);
 #endif
 		}
 
+		/// <summary>
+		/// Implements the actual sending logic for sending to specific address/port
+		/// 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="ipAddress"></param>
+		/// <param name="port"></param>
+		[PublicAPI]
 		public void SendToAddress(string data, string ipAddress, int port)
 		{
 			if (m_UdpClient == null)

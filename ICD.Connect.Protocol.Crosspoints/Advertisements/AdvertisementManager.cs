@@ -16,9 +16,10 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Servers;
 using ICD.Connect.Protocol.Crosspoints.CrosspointManagers;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
-using ICD.Connect.Protocol.Network.Ports.Udp;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 
@@ -48,7 +49,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		private readonly Dictionary<string, eAdvertisementType> m_Addresses;
 		private readonly SafeCriticalSection m_AddressesSection;
 
-		private readonly IcdUdpClient m_UdpClient;
+		private readonly IcdUdpServer m_UdpServer;
 		private readonly JsonSerialBuffer m_Buffer;
 
 		private readonly SafeTimer m_BroadcastTimer;
@@ -96,20 +97,16 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 			m_SystemId = systemId;
 
-			m_UdpClient = new IcdUdpClient
-			{
-				Address = Xp3Utils.MULTICAST_ADDRESS,
-				Port = Xp3Utils.GetPortForSystem(systemId),
-			};
+			m_UdpServer = new IcdUdpServer(Xp3Utils.GetPortForSystem(systemId));
 
-			Subscribe(m_UdpClient);
+			Subscribe(m_UdpServer);
 
 			m_Buffer = new JsonSerialBuffer();
 			Subscribe(m_Buffer);
 
 			m_BroadcastTimer = new SafeTimer(TryBroadcast, BROADCAST_INTERVAL, BROADCAST_INTERVAL);
 
-			m_UdpClient.Connect();
+			m_UdpServer.Start();
 		}
 
 		#region Methods
@@ -123,8 +120,8 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 			m_BroadcastTimer.Dispose();
 
-			m_UdpClient.Dispose();
-			Unsubscribe(m_UdpClient);
+			m_UdpServer.Dispose();
+			Unsubscribe(m_UdpServer);
 
 			Unsubscribe(m_Buffer);
 
@@ -159,7 +156,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 				// Loop over the ports for the different program slots
 				foreach (ushort port in GetAdvertisementPorts())
-					m_UdpClient.SendToAddress(serial, address.Key, port);
+					m_UdpServer.Send(serial, address.Key, port);
 			}
 		}
 
@@ -187,7 +184,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			string serial = advertisement.Serialize();
 
 			foreach (ushort port in GetAdvertisementPorts())
-				m_UdpClient.SendToAddress(serial, address, port);
+				m_UdpServer.Send(serial, address, port);
 		}
 
 		/// <summary>
@@ -359,7 +356,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 		private void TryBroadcast()
 		{
-			if (!m_UdpClient.IsDisposed)
+			if (!m_UdpServer.IsDisposed)
 				Broadcast();
 		}
 
@@ -468,30 +465,30 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 			{
 				// Loop over the ports for the different program slots
 				foreach (ushort port in GetAdvertisementPorts())
-					m_UdpClient.SendToAddress(serial, address.Key, port);
+					m_UdpServer.Send(serial, address.Key, port);
 			}
 		}
 
 		#endregion
 
-		#region UDP Client Callbacks
+		#region UDP Server Callbacks
 
 		/// <summary>
 		/// Subscribe to the UDP Client events.
 		/// </summary>
-		/// <param name="udpClient"></param>
-		private void Subscribe(IcdUdpClient udpClient)
+		/// <param name="udpServer"></param>
+		private void Subscribe(IcdUdpServer udpServer)
 		{
-			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
+			udpServer.OnDataReceived += UdpClientOnSerialDataReceived;
 		}
 
 		/// <summary>
 		/// Unsubscribe from the UDP Client events.
 		/// </summary>
-		/// <param name="udpClient"></param>
-		private void Unsubscribe(IcdUdpClient udpClient)
+		/// <param name="udpServer"></param>
+		private void Unsubscribe(IcdUdpServer udpServer)
 		{
-			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
+			udpServer.OnDataReceived -= UdpClientOnSerialDataReceived;
 		}
 
 		/// <summary>
@@ -499,7 +496,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void UdpClientOnSerialDataReceived(object sender, StringEventArgs args)
+		private void UdpClientOnSerialDataReceived(object sender, UdpDataReceivedEventArgs args)
 		{
 			m_Buffer.Enqueue(args.Data);
 		}
@@ -589,7 +586,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 		/// <returns></returns>
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			yield return m_UdpClient;
+			yield return m_UdpServer;
 		}
 
 		/// <summary>

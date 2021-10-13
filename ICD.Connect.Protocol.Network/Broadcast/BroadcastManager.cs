@@ -17,16 +17,17 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Network.Broadcast.Broadcasters;
-using ICD.Connect.Protocol.Network.Ports.Udp;
 using ICD.Connect.Protocol.Network.Utils;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
+using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Servers;
 
 namespace ICD.Connect.Protocol.Network.Broadcast
 {
 	public sealed class BroadcastManager : IDisposable, IConsoleNode
 	{
-		private readonly IcdUdpClient m_UdpClient;
+		private readonly IcdUdpServer m_UdpServer;
 		private readonly JsonSerialBuffer m_Buffer;
 
 		private readonly IcdHashSet<string> m_Addresses;
@@ -58,17 +59,12 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_SystemId = systemId;
 			m_Session = Guid.NewGuid();
 
-			m_UdpClient = new IcdUdpClient
-			{
-				Name = GetType().Name,
-				Address = NetworkUtils.MULTICAST_ADDRESS,
-				Port = NetworkUtils.GetBroadcastPortForSystem(m_SystemId)
-			};
+			m_UdpServer = new IcdUdpServer(NetworkUtils.GetBroadcastPortForSystem(m_SystemId));
 
 			m_Addresses = new IcdHashSet<string>();
 			m_AddressesSection = new SafeCriticalSection();
 
-			Subscribe(m_UdpClient);
+			Subscribe(m_UdpServer);
 
 			m_Buffer = new JsonSerialBuffer();
 			Subscribe(m_Buffer);
@@ -76,8 +72,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 
 		public void Dispose()
 		{
-			Unsubscribe(m_UdpClient);
-			m_UdpClient.Dispose();
+			Unsubscribe(m_UdpServer);
+			m_UdpServer.Dispose();
 
 			Unsubscribe(m_Buffer);
 			foreach (KeyValuePair<Type, IBroadcaster> broadcast in m_Broadcasters)
@@ -94,8 +90,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public void Start()
 		{
-			if (!m_UdpClient.IsConnected)
-				m_UdpClient.Connect();
+			if (!m_UdpServer.IsListening)
+				m_UdpServer.Start();
 		}
 
 		/// <summary>
@@ -103,8 +99,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// </summary>
 		public void Stop()
 		{
-			if (m_UdpClient.IsConnected)
-				m_UdpClient.Disconnect();
+			if (m_UdpServer.IsListening)
+				m_UdpServer.Stop();
 		}
 
 		/// <summary>
@@ -227,7 +223,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			if (data == null)
 				return;
 
-			if (!m_UdpClient.IsConnected)
+			if (!m_UdpServer.IsListening)
 				return;
 
 			BroadcastData broadcastData = new BroadcastData {HostSession = GetHostSessionInfo()};
@@ -242,7 +238,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			foreach (string address in addresses)
 			{
 				foreach (ushort port in ports)
-					m_UdpClient.SendToAddress(serial, address, port);
+					m_UdpServer.Send(serial, address, port);
 			}
 		}
 
@@ -280,29 +276,29 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <summary>
 		/// Subscribe to the UDP Client events.
 		/// </summary>
-		/// <param name="udpClient"></param>
-		private void Subscribe(IcdUdpClient udpClient)
+		/// <param name="udpServer"></param>
+		private void Subscribe(IcdUdpServer udpServer)
 		{
-			udpClient.OnSerialDataReceived += UdpClientOnSerialDataReceived;
-			udpClient.OnConnectedStateChanged += UdpClientOnConnectedStateChanged;
+			udpServer.OnDataReceived += UdpServerOnDataReceived;
+			udpServer.OnIsListeningStateChanged += UdpServerOnIsListeningStateChanged;
 		}
 
 		/// <summary>
 		/// Unsubscribe from the UDP Client events.
 		/// </summary>
-		/// <param name="udpClient"></param>
-		private void Unsubscribe(IcdUdpClient udpClient)
+		/// <param name="udpServer"></param>
+		private void Unsubscribe(IcdUdpServer udpServer)
 		{
-			udpClient.OnSerialDataReceived -= UdpClientOnSerialDataReceived;
-			udpClient.OnConnectedStateChanged -= UdpClientOnConnectedStateChanged;
+			udpServer.OnDataReceived -= UdpServerOnDataReceived;
+			udpServer.OnIsListeningStateChanged -= UdpServerOnIsListeningStateChanged;
 		}
 
 		/// <summary>
-		/// Called when the UDP Client receives some data.
+		/// Called when the UDP Server receives some data.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void UdpClientOnSerialDataReceived(object sender, StringEventArgs args)
+		private void UdpServerOnDataReceived(object sender, UdpDataReceivedEventArgs args)
 		{
 			m_Buffer.Enqueue(args.Data);
 		}
@@ -311,8 +307,8 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// Called when the UDP Client connects/disconnects.
 		/// </summary>
 		/// <param name="sender"></param>
-		/// <param name="boolEventArgs"></param>
-		private void UdpClientOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		/// <param name="args"></param>
+		private void UdpServerOnIsListeningStateChanged(object sender, BoolEventArgs args)
 		{
 			m_Buffer.Clear();
 		}
@@ -386,7 +382,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
 
-			yield return m_UdpClient;
+			yield return m_UdpServer;
 
 			IEnumerable<IConsoleNodeBase> broadcasters =
 				m_Broadcasters.OrderBy(kvp => kvp.Key.Name)
@@ -400,7 +396,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		{
 			addRow("System ID", m_SystemId);
 			addRow("Host Session Info", GetHostSessionInfo());
-			addRow("Active", m_UdpClient.IsConnected);
+			addRow("Active", m_UdpServer.IsListening);
 			addRow("Addresses", StringUtils.ArrayFormat(GetAdvertisementAddresses().Order()));
 		}
 

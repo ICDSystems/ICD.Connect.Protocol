@@ -14,7 +14,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 	{
 		public const string ACCEPT_ALL = "0.0.0.0";
 
-		private static readonly IcdUdpSocketPool s_SocketPool;
 		private readonly NetworkProperties m_NetworkProperties;
 
 		private bool m_ListeningRequested;
@@ -44,14 +43,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		#endregion
 
 		#region Constructors
-
-		/// <summary>
-		/// Static constructor.
-		/// </summary>
-		static IcdUdpClient()
-		{
-			s_SocketPool = new IcdUdpSocketPool();
-		}
 
 		/// <summary>
 		/// Constructor.
@@ -87,11 +78,14 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		public override void Connect()
 		{
 			ushort port = Port;
+			string address = Address;
 
 			try
 			{
 				Unsubscribe(m_UdpSocket);
-				m_UdpSocket = s_SocketPool.GetSocket(this, port);
+				if (m_UdpSocket != null)
+					m_UdpSocket.Dispose();
+				m_UdpSocket = new IcdUdpSocket(address, port);
 				Subscribe(m_UdpSocket);
 			}
 			catch (Exception e)
@@ -113,7 +107,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			if (m_UdpSocket != null)
 			{
 				Unsubscribe(m_UdpSocket);
-				s_SocketPool.ReturnSocket(this, m_UdpSocket);
+				m_UdpSocket.Dispose();
 			}
 			m_UdpSocket = null;
 
