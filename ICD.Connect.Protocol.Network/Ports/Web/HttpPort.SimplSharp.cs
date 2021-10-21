@@ -2,7 +2,7 @@
 using System.Linq;
 using ICD.Connect.API.Commands;
 using System;
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using Crestron.SimplSharp.Net;

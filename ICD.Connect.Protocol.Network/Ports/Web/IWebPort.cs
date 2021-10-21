@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Connect.Protocol.Network.Settings;
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports.Web
