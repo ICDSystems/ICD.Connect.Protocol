@@ -213,81 +213,6 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		}
 
 		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(uint number, bool value)
-		{
-			SendInputSig(0, number, value);
-		}
-
-		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="smartObject"></param>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(ushort smartObject, uint number, bool value)
-		{
-			CrosspointData data = new CrosspointData();
-			data.AddSig(smartObject, number, value);
-			SendInputData(data);
-		}
-
-		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(uint number, ushort value)
-		{
-			SendInputSig(0, number, value);
-		}
-
-		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="smartObject"></param>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(ushort smartObject, uint number, ushort value)
-		{
-			CrosspointData data = new CrosspointData();
-			data.AddSig(smartObject, number, value);
-			SendInputData(data);
-		}
-
-		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(uint number, string value)
-		{
-			SendInputSig(0, number, value);
-		}
-
-		/// <summary>
-		/// Shorthand for sending a single sig value to XP3.
-		/// </summary>
-		/// <param name="smartObject"></param>
-		/// <param name="number"></param>
-		/// <param name="value"></param>
-		[PublicAPI]
-		public void SendInputSig(ushort smartObject, uint number, string value)
-		{
-			CrosspointData data = new CrosspointData();
-			data.AddSig(smartObject, number, value);
-			SendInputData(data);
-		}
-
-		/// <summary>
 		/// Gets the string representation for this crosspoint.
 		/// </summary>
 		/// <returns></returns>
@@ -551,17 +476,17 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 			yield return
 				new GenericConsoleCommand<ushort, uint, ushort>("SendInputAnalog",
 				                                                "SendInputAnalog <SMARTOBJECT> <NUMBER> <0-65535>",
-				                                                (s, n, a) => SendInputSig(s, n, a));
+				                                                (s, n, a) => this.SendInputSig(s, n, a));
 
 			yield return
 				new GenericConsoleCommand<ushort, uint, bool>("SendInputDigital",
 				                                              "SendInputDigital <SMARTOBJECT> <NUMBER> <true/false>",
-				                                              (s, n, b) => SendInputSig(s, n, b));
+				                                              (s, n, b) => this.SendInputSig(s, n, b));
 
 			yield return
 				new GenericConsoleCommand<ushort, uint, string>("SendInputSerial",
 				                                                "SendInputSerial <SMARTOBJECT> <NUMBER> <SERIAL>",
-				                                                (s, n, v) => SendInputSig(s, n, v));
+				                                                (s, n, v) => this.SendInputSig(s, n, v));
 		}
 
 		protected abstract string PrintSigs();
