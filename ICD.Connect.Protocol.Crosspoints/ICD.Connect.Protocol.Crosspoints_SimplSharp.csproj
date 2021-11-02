@@ -113,6 +113,14 @@
     <Compile Include="SimplPlus\CrosspointSmartObjectShims\AbstractSimplPlusXSigCrosspointSoShim.cs" />
     <Compile Include="UiBindings\XP3\AbstractXp3UiBinding.cs" />
     <Compile Include="UiBindings\XP3\AbstractXp3UiBindingSettings.cs" />
+    <Compile Include="UiBindings\XP3\Control\AbstractXp3ControlUiBinding.cs" />
+    <Compile Include="UiBindings\XP3\Control\AbstractXp3ControlUiBindingSettings.cs" />
+    <Compile Include="UiBindings\XP3\Control\IXp3ControlUiBinding.cs" />
+    <Compile Include="UiBindings\XP3\Control\IXp3ControlUiBindingSettings.cs" />
+    <Compile Include="UiBindings\XP3\Equipment\AbstractXp3EquipmentUiBinding.cs" />
+    <Compile Include="UiBindings\XP3\Equipment\AbstractXp3EquipmentUiBindingSettings.cs" />
+    <Compile Include="UiBindings\XP3\Equipment\IXp3EquipmentUiBinding.cs" />
+    <Compile Include="UiBindings\XP3\Equipment\IXp3EquipmentUiBindingSettings.cs" />
     <Compile Include="UiBindings\XP3\IXp3UiBinding.cs" />
     <Compile Include="UiBindings\XP3\IXp3UiBindingSettings.cs" />
     <Compile Include="Xp3.cs" />

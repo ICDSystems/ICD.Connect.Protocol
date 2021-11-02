@@ -4,9 +4,9 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
 {
 	public interface IXp3UiBindingSettings : IUiBindingSettings
 	{
+
 		int? Xp3SystemId { get; set; }
 
-		int? Xp3EquipmentId { get; set; }
 	}
 
 	public interface IXp3UiBindingSettings1Originator : IXp3UiBindingSettings, IUiBindingSettings1Originator

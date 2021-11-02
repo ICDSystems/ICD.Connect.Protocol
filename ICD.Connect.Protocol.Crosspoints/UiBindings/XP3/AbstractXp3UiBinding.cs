@@ -11,8 +11,6 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
     {
 	    public int SystemId { get; private set; }
 
-	    public int EquipmentId { get; private set; }
-
 	    public Xp3 Xp3 { get { return Xp3Service.Xp3; } }
 
 	    protected override void ClearSettingsFinal()
@@ -22,7 +20,6 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
 			Xp3.RemoveSystem(SystemId);
 
 			SystemId = 0;
-			EquipmentId = 0;
 		}
 
 		protected override void CopySettingsFinal(TSettings settings)
@@ -30,20 +27,14 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
 			base.CopySettingsFinal(settings);
 
 			settings.Xp3SystemId = SystemId;
-			settings.Xp3EquipmentId = EquipmentId;
 		}
 
 		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
 		{
 			SystemId = settings.Xp3SystemId != null ? settings.Xp3SystemId.Value : 0;
-			EquipmentId = settings.Xp3EquipmentId != null ? settings.Xp3EquipmentId.Value : 0;
-
-			ActivateCrosspoint();
 
 			base.ApplySettingsFinal(settings, factory);
 		}
-
-		protected abstract void ActivateCrosspoint();
     }
 
     public abstract class AbstractXp3UiBinding<TOriginator1, TOriginator2, TSettings> : AbstractUiBinding<TOriginator1, TOriginator2, TSettings>, IXp3UiBinding
@@ -51,10 +42,32 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
         where TOriginator2 : class, IOriginator
 	    where TSettings : IXp3UiBindingSettings2Originators, new()
     {
-	    public Xp3 Xp3
-	    {
-		    get { return Xp3Service.Xp3; }
-	    }
+		public int SystemId { get; private set; }
+
+		public Xp3 Xp3 { get { return Xp3Service.Xp3; } }
+
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			Xp3.RemoveSystem(SystemId);
+
+			SystemId = 0;
+		}
+
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Xp3SystemId = SystemId;
+		}
+
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			SystemId = settings.Xp3SystemId != null ? settings.Xp3SystemId.Value : 0;
+
+			base.ApplySettingsFinal(settings, factory);
+		}
 	}
 
     public abstract class AbstractXp3UiBinding<TOriginator1, TOriginator2, TOriginator3, TSettings> : AbstractUiBinding<TOriginator1, TOriginator2, TOriginator3, TSettings>, IXp3UiBinding
@@ -63,10 +76,32 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
         where TOriginator3 : class, IOriginator
 	    where TSettings : IXp3UiBindingSettings3Originators, new()
     {
-	    public Xp3 Xp3
-	    {
-		    get { return Xp3Service.Xp3; }
-	    }
+		public int SystemId { get; private set; }
+
+		public Xp3 Xp3 { get { return Xp3Service.Xp3; } }
+
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			Xp3.RemoveSystem(SystemId);
+
+			SystemId = 0;
+		}
+
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Xp3SystemId = SystemId;
+		}
+
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			SystemId = settings.Xp3SystemId != null ? settings.Xp3SystemId.Value : 0;
+
+			base.ApplySettingsFinal(settings, factory);
+		}
 	}
 
     public abstract class AbstractXp3UiBinding<TOriginator1, TOriginator2, TOriginator3, TOriginator4, TSettings> : AbstractUiBinding<TOriginator1, TOriginator2, TOriginator3, TOriginator4, TSettings>, IXp3UiBinding
@@ -76,9 +111,31 @@ namespace ICD.Connect.Protocol.Crosspoints.UiBindings.XP3
         where TOriginator4 : class, IOriginator
 	    where TSettings : IXp3UiBindingSettings4Originators, new()
     {
-	    public Xp3 Xp3
-	    {
-		    get { return Xp3Service.Xp3; }
-	    }
+		public int SystemId { get; private set; }
+
+		public Xp3 Xp3 { get { return Xp3Service.Xp3; } }
+
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			Xp3.RemoveSystem(SystemId);
+
+			SystemId = 0;
+		}
+
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Xp3SystemId = SystemId;
+		}
+
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			SystemId = settings.Xp3SystemId != null ? settings.Xp3SystemId.Value : 0;
+
+			base.ApplySettingsFinal(settings, factory);
+		}
 	}
 }
