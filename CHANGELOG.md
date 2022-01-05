@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - WebQueue - PriorityQueue that regulates the sending of HTTP requests
  - Add HttpClient back into SimplSharp HttpPort
  - IcdUdpServer - Intended for use when a specific local port is needed to accept packets from other devices
+ - Added request body support to HTTP/S GET requests
  
 ### Changed
  - SerialPortServerDevice inherits from AbstractPortServerDevice
@@ -21,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - BroadcastManager - now uses IcdUdpServer instead of IcdUdpClient
  - Crosspoint Advertisement Manager - now uses IcdUdpServer instead of IcdUdpClient
  - Crosspoint Info Converter - updated to support ReadObject with an existing value
+ - Performance improvements by no longer generating debug strings when debugging is disabled
+ - Caching HTTP/S serial data
 
 ## [14.2.0] - 2021-10-04
 ### Changed
