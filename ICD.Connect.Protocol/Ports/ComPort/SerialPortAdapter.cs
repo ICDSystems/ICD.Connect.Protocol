@@ -214,7 +214,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 				return false;
 			}
 
-			PrintTx(data);
+			PrintTx(() => data);
 			m_Port.Write(data);
 
 			return true;
@@ -317,7 +317,7 @@ namespace ICD.Connect.Protocol.Ports.ComPort
 			if (data == null)
 				return;
 
-			PrintRx(data);
+			PrintRx(() => data);
 			Receive(data);
 		}
 

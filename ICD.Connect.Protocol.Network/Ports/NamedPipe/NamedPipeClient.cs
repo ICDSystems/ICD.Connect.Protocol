@@ -274,7 +274,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				PrintTx(data);
+				PrintTx(() => data);
 				m_Socket.SendAsync(bytes);
 			}
 			catch (SocketException e)
@@ -353,7 +353,7 @@ namespace ICD.Connect.Protocol.Network.Ports.NamedPipe
 		{
 			string data = StringUtils.ToString(eventArgs.Data);
 
-			PrintRx(data);
+			PrintRx(() => data);
 			Receive(data);
 
 			UpdateIsConnectedState();

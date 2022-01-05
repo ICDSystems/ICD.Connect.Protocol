@@ -78,7 +78,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				if (Client != null && Client.IsConnected)
 					Disconnect();
 
-				string debug =
+				Func<object> debug = () =>
 					new StringBuilder()
 						.AppendFormat("Topic: {0}, ", Will.Topic)
 						.AppendFormat("Message: {0}", Will.Message)
@@ -152,7 +152,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			if (topics.Count == 0)
 				return 0;
 
-			string debug =
+			Func<object> debug = () =>
 				new StringBuilder()
 					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topics.Select(kvp => string.Format("{0} ({1})", kvp.Key, kvp.Value))))
 					.ToString();
@@ -201,7 +201,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 			if (topicsArray.Length == 0)
 				return 0;
 
-			string debug =
+			Func<object> debug = () =>
 				new StringBuilder()
 					.AppendFormat("Topics: {0}", StringUtils.ArrayFormat(topicsArray))
 					.ToString();
@@ -236,7 +236,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				return 0;
 			}
 
-			string debug =
+			Func<object> debug = () =>
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
 					.AppendFormat("Message: {0}", Encoding.UTF8.GetString(message))
@@ -274,7 +274,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 				return 0;
 			}
 
-			string debug =
+			Func<object> debug = () =>
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", topic)
 					.AppendFormat("QOS Level: {0}, ", qosLevel)
@@ -396,7 +396,7 @@ namespace ICD.Connect.Protocol.NetworkPro.Ports.Mqtt
 		/// <param name="eventArgs"></param>
 		private void ClientOnMqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs eventArgs)
 		{
-			string debug =
+			Func<object> debug = () =>
 				new StringBuilder()
 					.AppendFormat("Topic: {0}, ", eventArgs.Topic)
 					.AppendFormat("QOS Level: {0}, ", eventArgs.QosLevel)

@@ -337,7 +337,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 
 			try
 			{
-				DebugUtils.PrintData(this, null, data, direction, directionColor, eDebugMode.Ascii);
+				DebugUtils.PrintData(this, null, () => data, direction, directionColor, eDebugMode.Ascii);
 				foreach (SigInfo sig in data.GetSigs())
 					IcdConsole.PrintLine("\t{0} ", sig);
 			}

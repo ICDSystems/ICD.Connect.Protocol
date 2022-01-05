@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Connect.API.Commands;
@@ -39,39 +40,39 @@ namespace ICD.Connect.Protocol.Ports
 		/// <summary>
 		/// Formats and prints the received data to the console.
 		/// </summary>
-		/// <param name="data"></param>
-		protected void PrintRx(string data)
+		/// <param name="getData"></param>
+		protected void PrintRx(Func<object> getData)
 		{
-			DebugUtils.PrintRx(this, DebugRx, data);
+			DebugUtils.PrintRx(this, DebugRx, getData);
 		}
 
 		/// <summary>
 		/// Formats and prints the received data to the console.
 		/// </summary>
 		/// <param name="context"></param>
-		/// <param name="data"></param>
-		protected void PrintRx(string context, string data)
+		/// <param name="getData"></param>
+		protected void PrintRx(string context, Func<object> getData)
 		{
-			DebugUtils.PrintRx(this, DebugRx, context, data);
+			DebugUtils.PrintRx(this, DebugRx, context, getData);
 		}
 
 		/// <summary>
 		/// Formats and prints the transmitted data to the console.
 		/// </summary>
-		/// <param name="data"></param>
-		protected void PrintTx(string data)
+		/// <param name="getData"></param>
+		protected void PrintTx(Func<object> getData)
 		{
-			DebugUtils.PrintTx(this, DebugTx, data);
+			DebugUtils.PrintTx(this, DebugTx, getData);
 		}
 
 		/// <summary>
 		/// Formats and prints the transmitted data to the console.
 		/// </summary>
 		/// <param name="context"></param>
-		/// <param name="data"></param>
-		protected void PrintTx(string context, string data)
+		/// <param name="getData"></param>
+		protected void PrintTx(string context, Func<object> getData)
 		{
-			DebugUtils.PrintTx(this, DebugTx, context, data);
+			DebugUtils.PrintTx(this, DebugTx, context, getData);
 		}
 
 		#endregion

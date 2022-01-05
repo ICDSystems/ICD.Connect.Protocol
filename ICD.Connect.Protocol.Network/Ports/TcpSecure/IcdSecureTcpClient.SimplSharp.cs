@@ -115,7 +115,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				PrintTx(data);
+				PrintTx(() => data);
 				m_TcpClient.SendData(bytes, bytes.Length);
 			}
 			finally
@@ -202,7 +202,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 
 				string data = StringUtils.ToString(tcpClient.IncomingDataBuffer, bytesReceived);
 
-				PrintRx(data);
+				PrintRx(() => data);
 				Receive(data);
 			}
 			catch (Exception e)

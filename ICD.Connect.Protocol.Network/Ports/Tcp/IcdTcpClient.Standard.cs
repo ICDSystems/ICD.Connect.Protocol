@@ -106,7 +106,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
 			{
-				PrintTx(data);
+				PrintTx(() => data);
 				m_TcpClient.Client.SendAsync(new ArraySegment<byte>(bytes), SocketFlags.None);
 			}
 			catch (SocketException e)
@@ -139,7 +139,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 			string data = StringUtils.ToString(m_Buffer, bytesRead);
 
-			PrintRx(data);
+			PrintRx(() => data);
 			Receive(data);
 
 			if (m_TcpClient?.Connected ?? false)

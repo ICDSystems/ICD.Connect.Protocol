@@ -121,7 +121,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 		/// </summary>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		private void  SendWorkerAction(string data)
+		private void SendWorkerAction(string data)
 		{
 			byte[] bytes = StringUtils.ToBytes(data);
 			try
@@ -132,7 +132,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 					return;
 				}
 
-				PrintTx(data);
+				PrintTx(() => data);
 				m_Stream.Write(bytes);
 			}
 			catch (SocketException e)
@@ -165,7 +165,7 @@ namespace ICD.Connect.Protocol.Network.Ports.TcpSecure
 
 			string data = StringUtils.ToString(m_Buffer, bytesRead);
 
-			PrintRx(data);
+			PrintRx(() => data);
 			Receive(data);
 
 			if (m_TcpClient?.Connected ?? false)

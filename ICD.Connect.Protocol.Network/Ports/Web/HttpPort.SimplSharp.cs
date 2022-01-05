@@ -111,7 +111,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				if (url.Scheme == Uri.UriSchemeHttp)
 				{
@@ -168,7 +168,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				if (url.Scheme == Uri.UriSchemeHttp)
 				{
@@ -231,7 +231,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				if (url.Scheme == Uri.UriSchemeHttp)
 				{
@@ -294,7 +294,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				if (url.Scheme == Uri.UriSchemeHttp)
 				{
@@ -351,7 +351,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		public override WebPortResponse DispatchSoap(string action, string content)
 		{
-			PrintTx(action);
+			PrintTx(() => action);
 
 			Accept = SOAP_ACCEPT;
 			m_HttpsClient.IncludeHeaders = false;
@@ -455,7 +455,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(output.GotResponse);
-			PrintRx(output.DataAsString);
+			PrintRx(() => output.DataAsString);
 
 			return output;
 		}
@@ -506,7 +506,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(output.GotResponse);
-			PrintRx(output.DataAsString);
+			PrintRx(() => output.DataAsString);
 
 			return output;
 		}

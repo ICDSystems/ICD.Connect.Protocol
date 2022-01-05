@@ -108,7 +108,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -139,7 +139,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url)
 				{
@@ -173,7 +173,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
 				{
@@ -207,7 +207,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			try
 			{
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
-				PrintTx(url.ToString());
+				PrintTx(() => url);
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url)
 				{
@@ -235,7 +235,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <returns></returns>
 		public override WebPortResponse DispatchSoap(string action, string content)
 		{
-			PrintTx(action);
+			PrintTx(() => action);
 
 			Accept = SOAP_ACCEPT;
 
@@ -338,7 +338,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			}
 
 			SetLastRequestSucceeded(output.GotResponse);
-			PrintRx(output.DataAsString);
+			PrintRx(() => output.DataAsString);
 
 			return output;
 		}

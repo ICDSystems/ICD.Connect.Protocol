@@ -95,7 +95,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 
 		private void PressInternal(string command)
 		{
-			PrintTx("Press", command);
+			PrintTx("Press", () => command);
 
 			PressFinal(command);
 		}

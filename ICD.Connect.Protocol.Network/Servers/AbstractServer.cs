@@ -283,7 +283,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		protected void PrintRx(TClient client, string data)
 		{
 			string context = string.Format("Client:{0}", client);
-			DebugUtils.PrintRx(this, DebugRx, context, data);
+			DebugUtils.PrintRx(this, DebugRx, context, () => data);
 		}
 
 		/// <summary>
@@ -294,7 +294,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		protected void PrintTx(TClient client, string data)
 		{
 			string context = string.Format("Client:{0}", client);
-			DebugUtils.PrintTx(this, DebugTx, context, data);
+			DebugUtils.PrintTx(this, DebugTx, context, () => data);
 		}
 
 		/// <summary>

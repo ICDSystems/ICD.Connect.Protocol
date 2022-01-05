@@ -68,7 +68,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		/// <param name="command"></param>
 		protected override void PressFinal(string command)
 		{
-			PrintTx(command);
+			PrintTx(() => command);
 		}
 
 		/// <summary>
@@ -76,7 +76,7 @@ namespace ICD.Connect.Protocol.Mock.Ports.IrPort
 		/// </summary>
 		protected override void ReleaseFinal()
 		{
-			PrintTx("Release");
+			PrintTx(() => "Release");
 		}
 
 		#endregion

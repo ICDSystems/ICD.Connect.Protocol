@@ -140,7 +140,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			try
 			{
 				m_UdpSocket.Send(data);
-				PrintTx(data);
+				PrintTx(() => data);
 				return true;
 			}
 			catch (Exception e)
@@ -170,7 +170,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			try
 			{
 				m_UdpSocket.SendToAddress(data, ipAddress, port);
-				PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), data);
+				PrintTx(new HostInfo(ipAddress, (ushort)port).ToString(), () => data);
 				return true;
 			}
 			catch (Exception e)
@@ -260,7 +260,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 				if (Address != ACCEPT_ALL && Address != host.Address)
 					return;
 
-				PrintRx(host.ToString(), data);
+				PrintRx(host.ToString(), () => data);
 				Receive(data);
 			}
 			finally

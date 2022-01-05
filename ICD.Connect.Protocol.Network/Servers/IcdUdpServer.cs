@@ -261,7 +261,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <param name="data"></param>
 		private void PrintRx(string context, string data)
 		{
-			DebugUtils.PrintRx(this, DebugRx, context, data);
+			DebugUtils.PrintRx(this, DebugRx, context, () => data);
 		}
 
 		/// <summary>
@@ -271,7 +271,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <param name="data"></param>
 		private void PrintTx(string context, string data)
 		{
-			DebugUtils.PrintTx(this, DebugTx, context, data);
+			DebugUtils.PrintTx(this, DebugTx, context, () => data);
 		}
 
 		#endregion

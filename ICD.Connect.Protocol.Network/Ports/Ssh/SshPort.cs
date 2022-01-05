@@ -385,7 +385,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 					return false;
 				}
 
-				PrintTx(data);
+				PrintTx(() => data);
 
 				m_SshStream.Write(data);
 				return true;
@@ -626,7 +626,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Ssh
 		{
 			string data = Encoding.UTF8.GetString(args.Data, 0, args.Data.Length);
 
-			PrintRx(data);
+			PrintRx(() => data);
 			Receive(data);
 		}
 
