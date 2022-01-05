@@ -98,7 +98,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		public override WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers)
+		/// <param name="data"></param>
+		public override WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, byte[] data)
 		{
 			if (headers == null)
 				throw new ArgumentNullException("headers");
@@ -110,7 +111,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				Uri url = GetRequestUrl(relativeOrAbsoluteUri);
 				PrintTx(() => url);
 
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url)
+				{
+					Content = new ByteArrayContent(data ?? new byte[0])
+				};
 
 				SetAuthorizationHeader(request.RequestUri, request);
 
@@ -143,7 +147,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url)
 				{
-					Content = new ByteArrayContent(data)
+					Content = new ByteArrayContent(data ?? new byte[0])
 				};
 
 				SetAuthorizationHeader(request.RequestUri, request);
@@ -177,7 +181,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
 				{
-					Content = new ByteArrayContent(data)
+					Content = new ByteArrayContent(data ?? new byte[0])
 				};
 
 				SetAuthorizationHeader(request.RequestUri, request);
@@ -211,7 +215,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url)
 				{
-					Content = new ByteArrayContent(data)
+					Content = new ByteArrayContent(data ?? new byte[0])
 				};
 
 				SetAuthorizationHeader(request.RequestUri, request);

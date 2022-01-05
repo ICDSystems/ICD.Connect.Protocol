@@ -104,7 +104,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		public override WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers)
+		/// <param name="data"></param>
+		public override WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, byte[] data)
 		{
 			m_ClientBusySection.Enter();
 
@@ -118,6 +119,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					HttpClientRequest request = new HttpClientRequest
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
+						ContentBytes = data,
+						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Get,
 						Url = {Url = url.ToString()}
 					};
@@ -135,6 +138,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					HttpsClientRequest request = new HttpsClientRequest
 					{
 						KeepAlive = m_HttpsClient.KeepAlive,
+						ContentBytes = data,
+						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Get,
 						Url = {Url = url.ToString()}
 					};
@@ -176,7 +181,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpContentSource.ContentBytes,
+						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Post,
 						Url = {Url = url.ToString()}
 					};
@@ -196,7 +201,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpsContentSource.ContentBytes,
+						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Post,
 						Url = {Url = url.ToString()}
 					};
@@ -239,7 +244,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpContentSource.ContentBytes,
+						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Patch,
 						Url = { Url = url.ToString() }
 					};
@@ -259,7 +264,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpsContentSource.ContentBytes,
+						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Patch,
 						Url = { Url = url.ToString() }
 					};
@@ -302,7 +307,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpContentSource.ContentBytes,
+						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Put,
 						Url = { Url = url.ToString() }
 					};
@@ -322,7 +327,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					{
 						KeepAlive = m_HttpsClient.KeepAlive,
 						ContentBytes = data,
-						ContentSource = HttpsContentSource.ContentBytes,
+						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Put,
 						Url = { Url = url.ToString() }
 					};

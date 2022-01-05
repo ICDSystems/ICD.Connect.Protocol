@@ -62,9 +62,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
-		public WebPortResponse Get(string relativeOrAbsoluteUri)
+		/// <param name="data"></param>
+		public WebPortResponse Get(string relativeOrAbsoluteUri, byte[] data)
 		{
-			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>());
+			return Get(relativeOrAbsoluteUri, new Dictionary<string, List<string>>(), data);
 		}
 
 		/// <summary>
@@ -72,7 +73,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
-		public abstract WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers);
+		/// <param name="data"></param>
+		public abstract WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, byte[] data);
 
 		/// <summary>
 		/// Sends a POST request to the server.
@@ -394,7 +396,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// <param name="path"></param>
 		private string ConsoleGet(string path)
 		{
-			WebPortResponse response = Get(path);
+			WebPortResponse response = Get(path, null);
 			return response.DataAsString;
 		}
 

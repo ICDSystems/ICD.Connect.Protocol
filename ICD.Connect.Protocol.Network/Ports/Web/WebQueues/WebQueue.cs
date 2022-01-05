@@ -166,7 +166,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web.WebQueues
 				switch (m_CurrentRequest.RequestType)
 				{
 					case IcdWebRequest.eWebRequestType.Get:
-						response = Port.Get(m_CurrentRequest.RelativeOrAbsoluteUri);
+						response = Port.Get(m_CurrentRequest.RelativeOrAbsoluteUri, m_CurrentRequest.Data);
 						break;
 					case IcdWebRequest.eWebRequestType.Post:
 						response = Port.Post(m_CurrentRequest.RelativeOrAbsoluteUri, m_CurrentRequest.Data);

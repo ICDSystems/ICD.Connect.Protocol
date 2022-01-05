@@ -63,16 +63,18 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
+		/// <param name="data"></param>
 		[PublicAPI]
-		WebPortResponse Get(string relativeOrAbsoluteUri);
+		WebPortResponse Get(string relativeOrAbsoluteUri, byte[] data);
 
 		/// <summary>
 		/// Sends a GET request to the server.
 		/// </summary>
 		/// <param name="relativeOrAbsoluteUri"></param>
 		/// <param name="headers"></param>
+		/// <param name="data"></param>
 		[PublicAPI]
-		WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers);
+		WebPortResponse Get(string relativeOrAbsoluteUri, IDictionary<string, List<string>> headers, byte[] data);
 
 		/// <summary>
 		/// Sends a POST request to the server.

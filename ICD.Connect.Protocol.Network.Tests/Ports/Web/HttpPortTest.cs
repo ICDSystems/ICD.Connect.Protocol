@@ -63,7 +63,7 @@ namespace ICD.Connect.Protocol.Network.Tests.Ports.Web
 				Uri = new Uri(address)
 			};
 
-			WebPortResponse response = port.Get(request);
+			WebPortResponse response = port.Get(request, null);
 			Assert.IsTrue(response.IsSuccessCode);
 
 			Post post = JsonConvert.DeserializeObject<Post>(response.DataAsString);
