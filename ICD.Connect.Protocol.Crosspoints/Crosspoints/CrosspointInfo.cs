@@ -166,14 +166,15 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 		/// Override to handle deserialization of the current StartObject token.
 		/// </summary>
 		/// <param name="reader"></param>
+		/// <param name="existingValue"></param>
 		/// <param name="serializer"></param>
 		/// <returns></returns>
-		protected override CrosspointInfo ReadObject(JsonReader reader, JsonSerializer serializer)
+		protected override CrosspointInfo ReadObject(JsonReader reader, CrosspointInfo existingValue, JsonSerializer serializer)
 		{
-			HostInfo host = default(HostInfo);
-			int id = 0;
+			HostInfo? host = null;
+			int? id = null;
 			string name = null;
-
+			
 			reader.ReadObject(serializer, (p, r, s) =>
 			                              {
 				                              switch (p)
@@ -196,7 +197,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Crosspoints
 				                              }
 			                              });
 
-			return new CrosspointInfo(id, name, host);
+			return new CrosspointInfo(id ?? existingValue.Id, name ?? existingValue.Name, host ?? existingValue.Host);
 		}
 	}
 }

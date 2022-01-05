@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - IcdUdpClient - no longer uses UDP socket pool
  - BroadcastManager - now uses IcdUdpServer instead of IcdUdpClient
  - Crosspoint Advertisement Manager - now uses IcdUdpServer instead of IcdUdpClient
+ - Crosspoint Info Converter - updated to support ReadObject with an existing value
 
 ## [14.2.0] - 2021-10-04
 ### Changed
