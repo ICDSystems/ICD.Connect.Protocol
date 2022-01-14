@@ -138,6 +138,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 			m_ClientSendQueues = new Dictionary<uint, ThreadedWorkerQueue<string>>();
 			m_ClientsSection = new SafeCriticalSection();
 
+			Name = GetType().GetNameWithoutGenericArity();
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 			Port = DEFAULT_PORT;
 			BufferSize = DEFAULT_BUFFER_SIZE;
@@ -461,7 +462,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// <summary>
 		/// Gets the name of the node.
 		/// </summary>
-		public string ConsoleName { get { return Name; } }
+		public virtual string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().GetNameWithoutGenericArity() : Name; } }
 
 		/// <summary>
 		/// Gets the help information for the node.

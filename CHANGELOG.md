@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed a bug where default network servers would have an empty name and become unavailable in the console
+
 ## [13.4.0] - 2021-01-14
 ### Added
  - Added PATCH requests to IWebPort and Implemented in HttpPort
