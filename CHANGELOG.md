@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.4.1] - 2022-02-08
 ### Changed
  - Fixed a bug where default network servers would have an empty name and become unavailable in the console
  - Fixed BouncyCastle references and added reference to SimplSharpCryptographyInterface
