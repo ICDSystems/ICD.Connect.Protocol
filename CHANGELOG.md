@@ -63,6 +63,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Fixed bugs where TCP server would sometimes fail to lookup a client by ID
  - Fixed exception related to generating TCP certs with a negative hash
 
+## [13.4.1] - 2022-02-08
+### Changed
+ - Fixed a bug where default network servers would have an empty name and become unavailable in the console
+ - Fixed BouncyCastle references and added reference to SimplSharpCryptographyInterface
+
 ## [13.4.0] - 2021-01-14
 ### Added
  - Added PATCH requests to IWebPort and Implemented in HttpPort

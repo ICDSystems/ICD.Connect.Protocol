@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 
@@ -27,6 +28,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// </summary>
 		protected AbstractNetworkServer()
 		{
+			Name = GetType().GetNameWithoutGenericArity();
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 		}
 
