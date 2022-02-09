@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Ports;
 
@@ -27,15 +28,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		/// </summary>
 		protected AbstractNetworkServer()
 		{
-<<<<<<< HEAD
-=======
-			m_Logger = new ServiceLoggingContext(this);
-			m_Clients = new IcdOrderedDictionary<uint, HostInfo>();
-			m_ClientSendQueues = new Dictionary<uint, ThreadedWorkerQueue<string>>();
-			m_ClientsSection = new SafeCriticalSection();
-
 			Name = GetType().GetNameWithoutGenericArity();
->>>>>>> origin/Krang_v1.8
 			AddressToAcceptConnectionFrom = ACCEPT_ALL;
 		}
 
@@ -57,28 +50,6 @@ namespace ICD.Connect.Protocol.Network.Servers
 		#region Console
 
 		/// <summary>
-<<<<<<< HEAD
-=======
-		/// Gets the name of the node.
-		/// </summary>
-		public virtual string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().GetNameWithoutGenericArity() : Name; } }
-
-		/// <summary>
-		/// Gets the help information for the node.
-		/// </summary>
-		public string ConsoleHelp { get { return null; } }
-
-		/// <summary>
-		/// Gets the child console nodes.
-		/// </summary>
-		/// <returns></returns>
-		public virtual IEnumerable<IConsoleNodeBase> GetConsoleNodes()
-		{
-			yield break;
-		}
-
-		/// <summary>
->>>>>>> origin/Krang_v1.8
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
