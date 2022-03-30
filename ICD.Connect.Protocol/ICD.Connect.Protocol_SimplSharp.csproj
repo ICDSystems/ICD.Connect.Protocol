@@ -79,6 +79,7 @@
     <Compile Include="EventArguments\XSigEventArgs.cs" />
     <Compile Include="FeedbackDebounce\FeedbackDebounce.cs" />
     <Compile Include="FeedbackDebounce\IFeedbackDebounce.cs" />
+    <Compile Include="HardButtons\HardButtons.cs" />
     <Compile Include="Heartbeat\Heartbeat.cs" />
     <Compile Include="Heartbeat\IConnectable.cs" />
     <Compile Include="Ports\AbstractConnectablePort.cs" />
