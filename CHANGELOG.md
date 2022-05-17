@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Caching HTTP/S serial data
  - XP3 UI Bindings split to seperate Equipment and Control bindings
  - XP3 Sig Helper methods moved to extension class
+ - Fixed null ref exception in IrPort debugging
 
 ## [14.2.0] - 2021-10-04
 ### Changed

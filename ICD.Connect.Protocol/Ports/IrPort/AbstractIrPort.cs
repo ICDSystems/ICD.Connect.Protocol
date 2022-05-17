@@ -117,7 +117,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 
 		private void ReleaseInternal()
 		{
-			PrintTx("Release", null);
+			PrintTx("Release", () => String.Empty);
 
 			ReleaseFinal();
 		}
