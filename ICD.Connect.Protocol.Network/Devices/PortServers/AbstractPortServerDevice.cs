@@ -61,7 +61,8 @@ namespace ICD.Connect.Protocol.Network.Devices.PortServers
 			m_TcpServer = null;
 
 			Unsubscribe(Port);
-			Port.Dispose();
+			if (Port != null)
+				Port.Dispose();
 			Port = null;
 		}
 
