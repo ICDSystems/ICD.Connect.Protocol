@@ -227,7 +227,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			if (udpSocket == null)
 				return;
 
-			udpSocket.OnIsConnectedStateChanged += UdpSocketOnIsConnectedStateChanged;
+			udpSocket.OnConnectedStateChanged += UdpSocketOnIsConnectedStateChanged;
 			udpSocket.OnDataReceived += UdpSocketOnDataReceived;
 		}
 
@@ -240,7 +240,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			if (udpSocket == null)
 				return;
 
-			udpSocket.OnIsConnectedStateChanged -= UdpSocketOnIsConnectedStateChanged;
+			udpSocket.OnConnectedStateChanged -= UdpSocketOnIsConnectedStateChanged;
 			udpSocket.OnDataReceived -= UdpSocketOnDataReceived;
 		}
 

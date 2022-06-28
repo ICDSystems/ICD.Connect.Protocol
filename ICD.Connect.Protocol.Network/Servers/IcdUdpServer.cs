@@ -283,7 +283,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 			if (socket == null)
 				return;
 
-			socket.OnIsConnectedStateChanged += SocketOnIsConnectedStateChanged;
+			socket.OnConnectedStateChanged += SocketOnIsConnectedStateChanged;
 			socket.OnDataReceived += SocketOnDataReceived;
 		}
 
@@ -292,7 +292,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 			if (socket == null)
 				return;
 
-			socket.OnIsConnectedStateChanged -= SocketOnIsConnectedStateChanged;
+			socket.OnConnectedStateChanged -= SocketOnIsConnectedStateChanged;
 			socket.OnDataReceived -= SocketOnDataReceived;
 		}
 

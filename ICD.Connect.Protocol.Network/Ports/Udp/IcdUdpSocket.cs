@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Properties;
+using ICD.Connect.Protocol.Heartbeat;
 #if SIMPLSHARP
 using System.Linq;
 using Crestron.SimplSharp;
@@ -18,13 +19,13 @@ using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Protocol.Network.Ports.Udp
 {
-	public sealed class IcdUdpSocket : IDisposable
+	public sealed class IcdUdpSocket : IConnectable, IDisposable
 	{
 		public const ushort DEFAULT_BUFFER_SIZE = 16384;
 		public const string DEFAULT_ACCEPT_ADDRESS = "0.0.0.0";
 		public const ushort EPHEMERAL_LOCAL_PORT = 0;
 
-		public event EventHandler<BoolEventArgs> OnIsConnectedStateChanged;
+		public event EventHandler<BoolEventArgs> OnConnectedStateChanged;
 		public event EventHandler<UdpDataReceivedEventArgs> OnDataReceived;
 
 		private readonly string m_AcceptAddress;
@@ -46,7 +47,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 
 				m_IsConnected = value;
 
-				OnIsConnectedStateChanged.Raise(this, m_IsConnected);
+				OnConnectedStateChanged.Raise(this, m_IsConnected);
 			}
 		}
 
@@ -96,7 +97,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// </summary>
 		public void Dispose()
 		{
-			OnIsConnectedStateChanged = null;
+			OnConnectedStateChanged = null;
 			OnDataReceived = null;
 
 			Disconnect();
@@ -108,7 +109,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 		/// Connects to the end point.
 		/// </summary>
 		[PublicAPI]
-		public void Connect()
+		public bool Connect()
 		{
 			Disconnect();
 
@@ -125,7 +126,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 				    error != SocketErrorCodes.SOCKET_CONNECTION_IN_PROGRESS &&
 				    error != SocketErrorCodes.SOCKET_OPERATION_PENDING)
 				{
-					throw new Exception(error.ToString());
+					//Todo: Log Error here
 				}
 #else
 				m_UdpClient = new UdpClient(LocalPort) { EnableBroadcast = true };
@@ -135,10 +136,20 @@ namespace ICD.Connect.Protocol.Network.Ports.Udp
 			catch (Exception)
 			{
 				Disconnect();
-				throw;
+				//Todo: Log Exception here
+				return false;
 			}
 
 			UpdateIsConnectedState();
+			return IsConnected;
+		}
+
+		/// <summary>
+		/// Connect the instance to the remote endpoint.
+		/// </summary>
+		void IConnectable.Connect()
+		{
+			Connect();
 		}
 
 		/// <summary>
