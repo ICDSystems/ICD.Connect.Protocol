@@ -37,8 +37,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			m_TcpListener.SocketStatusChange += HandleSocketStatusChange;
 			m_TcpListener.WaitForConnectionsAlways(TcpClientConnectCallback);
 
-			// Hack - I think it takes a little while for the listening state to update
-			Listening = true;
+			UpdateListeningState();
 
 			Logger.Log(eSeverity.Notice,
 			                string.Format("Listening on port {0} with max # of connections {1}", Port,
@@ -69,6 +68,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 				try
 				{
+					// Encountered some instances of server that were still listening and holding on to their ports
+					// Run the stop first, just to be sure!
+					m_TcpListener.Stop();
 					m_TcpListener.DisconnectAll();
 				}
 				catch (Exception e)
@@ -97,6 +99,12 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 
 		protected override void SendWorkerAction(uint clientId, string data)
 		{
+			if (m_TcpListener == null)
+			{
+				Logger.Log(eSeverity.Warning, "Unable to send data to client, TcpListener null");
+				return;
+			}
+
 			HostInfo hostInfo;
 			if (!TryGetClientInfo(clientId, out hostInfo))
 			{
@@ -108,7 +116,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			byte[] byteData = StringUtils.ToBytes(data);
 
 			PrintTx(hostInfo, data);
-			m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
+				m_TcpListener.SendDataAsync(clientId, byteData, byteData.Length, (tcpListener, clientIndex, bytesCount) => { });
 		}
 
 		#endregion
@@ -123,9 +131,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		/// <param name="status"></param>
 		private void HandleSocketStatusChange(TCPServer tcpListener, uint clientId, SocketStatus status)
 		{
-			// Spawn a new thread to handle status changes
-			// Mitigation strategy for Creston TCPServer bugs
-			ThreadingUtils.SafeInvoke(() => SocketStatusChangeWorker(tcpListener, clientId, status));
+			SocketStatusChangeWorker(tcpListener, clientId, status);
 		}
 
 		/// <summary>
@@ -206,7 +212,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 			// Log if we hit max clients
 			if (tcpListener.NumberOfClientsConnected >= tcpListener.MaxNumberOfClientSupported)
 				Logger.Log(eSeverity.Warning, "{0} - Max number of clients reached:{1}", this,
-				           tcpListener.MaxNumberOfClientSupported);
+						   tcpListener.MaxNumberOfClientSupported);
+
+			// If called with a ClientId of 0, we might have stopped listening
+			if (clientId == 0)
+				UpdateListeningState();
 		}
 
 		/// <summary>
@@ -266,13 +276,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Tcp
 		private void UpdateListeningState()
 		{
 			Listening = m_TcpListener != null && m_TcpListener.State.HasFlag(ServerState.SERVER_LISTENING);
-
-			// If we are enabled but not listening, probably hit max clients - check to see if we're not and reset listener
-			if (m_TcpListener != null && Enabled && !Listening &&
-				m_TcpListener.NumberOfClientsConnected < m_TcpListener.MaxNumberOfClientSupported)
-			{
-				m_TcpListener.WaitForConnectionsAlways(TcpClientConnectCallback);
-			}
 		}
 
 		#endregion
