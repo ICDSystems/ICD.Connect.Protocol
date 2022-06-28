@@ -11,6 +11,13 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Protocol.Network.Devices.PortServers
 {
+	/// <summary>
+	/// Press(STOP)\x0d
+	/// Release()\x0d
+	/// PressAndRelease(STOP)\x0d
+	/// PressAndRelease(STOP, 50)\x0d
+	/// PressAndRelease(STOP, 50, 500)\x0d
+	/// </summary>
 	public sealed class IrPortServerDevice : AbstractPortServerDevice<IIrPort, IrPortServerDeviceSettings>
 	{
 		private const char COMMAND_DELIMITER = '\x0D';
