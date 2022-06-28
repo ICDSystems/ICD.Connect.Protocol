@@ -16,11 +16,6 @@ namespace ICD.Connect.Protocol.Heartbeat
 		bool IsConnected { get; }
 
 		/// <summary>
-		/// Gets the heartbeat instance that is enforcing the connection state.
-		/// </summary>
-		Heartbeat Heartbeat { get; }
-
-		/// <summary>
 		/// Connect the instance to the remote endpoint.
 		/// </summary>
 		void Connect();
