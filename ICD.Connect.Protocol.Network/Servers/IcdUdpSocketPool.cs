@@ -15,6 +15,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 	internal sealed class IcdUdpSocketPool
 	{
 		private readonly Dictionary<ushort, IcdUdpSocket> m_Sockets;
+		private readonly Dictionary<IcdUdpSocket, Heartbeat.Heartbeat> m_Heartbeats;
 		private readonly Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpServer>> m_SocketClients; 
 		private readonly SafeCriticalSection m_SocketsSection;
 
@@ -24,6 +25,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		public IcdUdpSocketPool()
 		{
 			m_Sockets = new Dictionary<ushort, IcdUdpSocket>();
+			m_Heartbeats = new Dictionary<IcdUdpSocket, Heartbeat.Heartbeat>();
 			m_SocketClients = new Dictionary<IcdUdpSocket, IcdHashSet<IcdUdpServer>>();
 			m_SocketsSection = new SafeCriticalSection();
 		}
@@ -47,7 +49,9 @@ namespace ICD.Connect.Protocol.Network.Servers
 					m_Sockets.GetOrAddNew(port, () =>
 					{
 						IcdUdpSocket output = new IcdUdpSocket(IcdUdpSocket.DEFAULT_ACCEPT_ADDRESS, port, port);
-						output.Connect();
+						Heartbeat.Heartbeat heartbeat = new Heartbeat.Heartbeat(output);
+						heartbeat.StartMonitoring();
+						m_Heartbeats[output] = heartbeat;
 						return output;
 					});
 				m_SocketClients.GetOrAddNew(socket).Add(server);
@@ -83,6 +87,16 @@ namespace ICD.Connect.Protocol.Network.Servers
 				if (!dispose)
 					return;
 
+				// Stop heartbeat monitoring and dispose
+				Heartbeat.Heartbeat heartbeat;
+				if (m_Heartbeats.TryGetValue(socket, out heartbeat))
+				{
+					heartbeat.StopMonitoring();
+					heartbeat.Dispose();
+					m_Heartbeats.Remove(socket);
+				}
+
+				// Remove socket and dispose
 				m_Sockets.Remove(socket.LocalPort);
 				socket.Dispose();
 			}
