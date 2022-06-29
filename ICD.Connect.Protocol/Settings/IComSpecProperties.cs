@@ -76,6 +76,29 @@ namespace ICD.Connect.Protocol.Settings
 			extends.ComSpecReportCtsChanges = other.ComSpecReportCtsChanges;
 		}
 
+        /// <summary>
+        /// Copies the configured properties from the given ComSpec instance.
+        /// </summary>
+        /// <param name="extends"></param>
+        /// <param name="other"></param>
+        public static void Copy(this IComSpecProperties extends, ComSpec other)
+        {
+            if (extends == null)
+                throw new ArgumentNullException("extends");
+
+            if (other == null)
+                throw new ArgumentNullException("other");
+
+            extends.ComSpecBaudRate = other.BaudRate;
+            extends.ComSpecNumberOfDataBits = other.NumberOfDataBits;
+            extends.ComSpecParityType = other.ParityType;
+            extends.ComSpecNumberOfStopBits = other.NumberOfStopBits;
+            extends.ComSpecProtocolType = other.ProtocolType;
+            extends.ComSpecHardwareHandshake = other.HardwareHandshake;
+            extends.ComSpecSoftwareHandshake = other.SoftwareHandshake;
+            extends.ComSpecReportCtsChanges = other.ReportCtsChanges;
+        }
+
 		/// <summary>
 		/// Updates the ComSpec Properties instance where values are not already configured.
 		/// </summary>
