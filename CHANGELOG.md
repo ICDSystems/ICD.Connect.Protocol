@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+ - Moved eHardButton enum and eButtonAction to protocol
+ - Fixed null ref exception when debugging IR ports
+ - Fixed bug disposing of AbstractPortServerDevices
+ - Removed Heartbeat property from IConnectable
+ - IcdUdpSocket now implements IConnectable
+ - IcdUdpSocketPool now uses heartbeats to keep sockets connected
+ - IcdTcpServer potential fixes for listening issues on stopping server
 
 ## [15.0.0] - 2022-05-23
 ### Added
