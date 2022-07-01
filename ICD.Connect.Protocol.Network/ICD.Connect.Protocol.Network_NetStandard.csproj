@@ -36,10 +36,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Condition="'$(TargetFramework)' == 'net472'" Include="System.Net.Http" />
-    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Crestron.SimplSharp.SDK.Library" Version="2.17.69" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Newtonsoft.Json" Version="13.0.1" Aliases="RealNewtonsoft"/>
+    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Crestron.SimplSharp.SDK.Library" Version="2.18.96" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Newtonsoft.Json" Version="13.0.1" Aliases="RealNewtonsoft" />
     <PackageReference Include="ICD.Common.BouncyCastle_NetStandard" Version="1.0.0" />
     <PackageReference Include="SSH.NET" Version="2020.0.1" />
   </ItemGroup>

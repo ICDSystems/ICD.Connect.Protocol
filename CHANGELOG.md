@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - IcdUdpSocketPool now uses heartbeats to keep sockets connected
  - IcdTcpServer potential fixes for listening issues on stopping server
  - Added ComSpecProperties exteison to copy from ComSpec
+ - Updated Crestron SDK to 2.18.96
 
 ## [15.0.0] - 2022-05-23
 ### Added

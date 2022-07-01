@@ -43,16 +43,20 @@
   <ItemGroup>
     <PackageReference Include="ICD_M2Mqtt.NetStandard" Version="1.0.1" />
     <PackageReference Include="websocketsharp.core" Version="1.0.0" />
-    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Crestron.SimplSharp.SDK.ProgramLibrary" Version="2.17.69" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net472'" Include="Crestron.SimplSharp.SDK.ProgramLibrary" Version="2.18.96" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
   </ItemGroup>
-
   <Target Name="ArchivePlugin" AfterTargets="AfterBuild" Condition="'$(Configuration)|$(OS)|$(TargetFramework)' == 'Release|Windows_NT|netstandard2.0'">
     <Delete Files="$(TargetDir)$(AssemblyName).kpz" />
     <ZipDirectory DestinationFile="$(TargetDir)..\$(AssemblyName).kpz" SourceDirectory="$(TargetDir)" Overwrite="true" />
     <Move SourceFiles="$(TargetDir)..\$(AssemblyName).kpz" DestinationFolder="$(TargetDir)" />
+  </Target>
+  <Target Name="ArchivePlugin" AfterTargets="AfterBuild" Condition="'$(TargetFramework)' == 'net472'">
+    <Delete Files="$(TargetDir)$(AssemblyName).cplz" />
+    <ZipDirectory DestinationFile="$(TargetDir)..\$(AssemblyName).cplz" SourceDirectory="$(TargetDir)" Overwrite="true" />
+    <Move SourceFiles="$(TargetDir)..\$(AssemblyName).cplz" DestinationFolder="$(TargetDir)" />
   </Target>
 </Project>
