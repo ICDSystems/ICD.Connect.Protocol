@@ -5,8 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.1.0] - 2022-07-01
+## Added
+ - eHardButton enum and eButtonAction (moved from ICD.Connect.Panels)
+ 
 ### Changed
- - Moved eHardButton enum and eButtonAction to protocol
  - Fixed null ref exception when debugging IR ports
  - Fixed bug disposing of AbstractPortServerDevices
  - Removed Heartbeat property from IConnectable
