@@ -1,4 +1,4 @@
-﻿#if !SIMPLSHARP
+﻿#if NETSTANDARD
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings.Attributes;
 

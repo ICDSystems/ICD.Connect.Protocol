@@ -1,5 +1,4 @@
-﻿#if SIMPLSHARP
-using ICD.Common.Properties;
+﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Advertisements;
 
 namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
@@ -53,5 +52,3 @@ namespace ICD.Connect.Protocol.Crosspoints.SimplPlus
 		#endregion
 	}
 }
-
-#endif
