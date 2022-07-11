@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.1.1] - 2022-07-11
+### Changed
+ - Fixed preprocessors
+ - Fixed package reference for NetStandard target
+
 ## [15.1.0] - 2022-07-01
-## Added
+### Added
  - eHardButton enum and eButtonAction (moved from ICD.Connect.Panels)
  
 ### Changed
