@@ -41,6 +41,9 @@ namespace ICD.Connect.Protocol.Network.Servers
 
 		private readonly ushort m_ListenPort;
 
+        [NotNull]
+        private readonly string m_AcceptAddress;
+
 		[CanBeNull]
 		private IcdUdpSocket m_Socket;
 
@@ -49,7 +52,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 		[NotNull]
 		private readonly ILoggingContext m_Logger;
 
-		[NotNull]
+	    [NotNull]
 		private ILoggingContext Logger
 		{
 			get { return m_Logger; }
@@ -97,6 +100,12 @@ namespace ICD.Connect.Protocol.Network.Servers
 		[PublicAPI]
 		public eDebugMode DefaultDebugMode { get; set; }
 
+        /// <summary>
+        /// Address to accept connections from
+        /// </summary>
+        [PublicAPI]
+        public string AcceptAddress {get { return m_AcceptAddress; }}
+
 		#region Constructors
 
 		/// <summary>
@@ -107,16 +116,30 @@ namespace ICD.Connect.Protocol.Network.Servers
 			s_SocketPool = new IcdUdpSocketPool();
 		}
 
-		/// <summary>
-		/// Constructor for UDP Server
-		/// Will always start a socket listening at 0.0.0.0 on the given port
-		/// </summary>
-		/// <param name="listenPort">Local port to listen on</param>
-		public IcdUdpServer(ushort listenPort)
+        /// <summary>
+        /// Constructor for UDP Server
+        /// Will always start a socket listening at 0.0.0.0 on the given port
+        /// </summary>
+        /// <param name="listenPort">Local port to listen on</param>
+	    public IcdUdpServer(ushort listenPort) : this(listenPort, IcdUdpSocket.DEFAULT_ACCEPT_ADDRESS)
+	    {
+	    }
+
+	    /// <summary>
+	    /// Constructor for UDP Server
+	    /// Will always start a socket listening on the given port at the given listen address
+	    /// </summary>
+	    /// <param name="listenPort">Local port to listen on</param>
+	    /// <param name="acceptAddress">Address to listen on</param>
+	    public IcdUdpServer(ushort listenPort, [NotNull] string acceptAddress)
 		{
-			m_Logger = new ServiceLoggingContext(this);
+	        if (acceptAddress == null)
+	            throw new ArgumentNullException("acceptAddress");
+
+	        m_Logger = new ServiceLoggingContext(this);
 			m_SocketSection = new SafeCriticalSection();
 			m_ListenPort = listenPort;
+	        m_AcceptAddress = acceptAddress;
 			DefaultDebugMode = eDebugMode.MixedAsciiHex;
 		}
 
@@ -147,7 +170,7 @@ namespace ICD.Connect.Protocol.Network.Servers
 				if (m_Socket != null)
 					return;
 
-				socket = s_SocketPool.GetSocket(this, m_ListenPort);
+				socket = s_SocketPool.GetSocket(this, m_ListenPort, m_AcceptAddress);
 				m_Socket = socket;
 			}
 			finally
@@ -274,6 +297,8 @@ namespace ICD.Connect.Protocol.Network.Servers
 			DebugUtils.PrintTx(this, DebugTx, context, () => data);
 		}
 
+
+
 		#endregion
 
 		#region Socket Callbacks
@@ -338,9 +363,17 @@ namespace ICD.Connect.Protocol.Network.Servers
 		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("ListenPort", ListenPort);
+		    addRow("AcceptAddress", AcceptAddress);
 			addRow("IsConnected", IsListening);
 			addRow("Debug Rx", DebugRx);
 			addRow("Debug Tx", DebugTx);
+
+            IcdUdpSocket socket = null;
+            m_SocketSection.Execute(() => socket = m_Socket);
+		    if (socket != null)
+		    {
+		        addRow("Socket AcceptAddress", socket.AcceptAddress);
+		    }
 		}
 
 		/// <summary>
