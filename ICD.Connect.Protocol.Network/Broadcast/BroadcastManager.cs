@@ -59,7 +59,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			m_SystemId = systemId;
 			m_Session = Guid.NewGuid();
 
-			m_UdpServer = new IcdUdpServer(NetworkUtils.GetBroadcastPortForSystem(m_SystemId));
+            m_UdpServer = new IcdUdpServer(NetworkUtils.GetBroadcastPortForSystem(m_SystemId), NetworkUtils.MULTICAST_ADDRESS);
 
 			m_Addresses = new IcdHashSet<string>();
 			m_AddressesSection = new SafeCriticalSection();
@@ -181,7 +181,7 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 		/// <returns></returns>
 		public IEnumerable<string> GetBroadcastAddresses()
 		{
-			return m_AddressesSection.Execute(() => m_Addresses.ToArray());
+			return m_AddressesSection.Execute(() => m_Addresses.ToArray(m_Addresses.Count));
 		}
 
 		/// <summary>
@@ -405,11 +405,15 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			yield return new ConsoleCommand("Start", "Resumes broadcasting and accepting broadcasts", () => Start());
 			yield return new ConsoleCommand("Stop", "Stops broadcasting and accepting broadcasts", () => Stop());
 
-			yield return
-				new GenericConsoleCommand<string>("AddAddress", "Adds an address to the broadcast list", a => AddBroadcastAddress(a))
-				;
+		    yield return
+		        new GenericConsoleCommand<string>("AddAddress", "Adds an address to the broadcast list",
+		                                          a => AddBroadcastAddress(a));
+		    yield return
+		        new GenericConsoleCommand<string>("RemoveAddress", "Removes an address from the broadcast list",
+		                                          a => RemoveBroadcastAddress(a));
 
-			yield return new ConsoleCommand("PrintBroadcasters", "Prints a table of the registered broadcasters", () => PrintBroadcasters());
+		    yield return new ConsoleCommand("PrintBroadcasters", "Prints a table of the registered broadcasters",
+		                                    () => PrintBroadcasters());
 		}
 
 		private string PrintBroadcasters()

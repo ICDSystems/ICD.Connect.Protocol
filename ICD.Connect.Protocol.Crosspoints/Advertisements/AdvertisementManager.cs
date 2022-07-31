@@ -97,7 +97,7 @@ namespace ICD.Connect.Protocol.Crosspoints.Advertisements
 
 			m_SystemId = systemId;
 
-			m_UdpServer = new IcdUdpServer(Xp3Utils.GetPortForSystem(systemId));
+			m_UdpServer = new IcdUdpServer(Xp3Utils.GetPortForSystem(systemId), Xp3Utils.MULTICAST_ADDRESS);
 
 			Subscribe(m_UdpServer);
 

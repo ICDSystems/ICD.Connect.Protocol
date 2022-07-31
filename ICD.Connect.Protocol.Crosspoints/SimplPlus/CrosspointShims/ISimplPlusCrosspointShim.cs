@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Protocol.Crosspoints.Crosspoints;
 using ICD.Connect.Settings.CrestronSPlus.SPlusShims;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using ICDPlatformString = Crestron.SimplSharp.SimplSharpString;
 #else
 using ICDPlatformString = System.String;
