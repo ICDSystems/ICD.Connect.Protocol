@@ -79,16 +79,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			else
 				builder.AppendPath(relativeOrAbsolute);
 
-#if SIMPLSHARP
-			// Crestron tries to strip out encoded spaces (and possibly other encodings?) from the path
-			// so we doubly-escape to prevent this from happening.
-			builder.Path = string.IsNullOrEmpty(builder.Path)
-				? builder.Path
-				: builder.Path.Replace("%", "%25");
-#endif
+            // Previously, Crestron tried to strip out encoded spaces (and possibly other encodings?) from the path so we doubly-escaped
+            // Crestorn fixed this at some point so that has been removed, but this comment lives on
 
-			return builder.Uri;
-		}
+		    return builder.Uri;
+    	}
 
 		/// <summary>
 		/// Updates the IsOnline status and raises events.
