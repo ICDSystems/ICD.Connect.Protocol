@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.2.1] - 2022-08-04
+### Changed
+ - Removed Crestron HTTP url encoding hack, since they fixed it and the hack broke it
+
 ## [15.2.0] - 2022-07-13
 ### Changed
  - IcdUdpServer allows different AcceptAddresses to be used
  - IcdUdpSocketPool warns of multiple servers using the same port with different AcceptAddresses
-  - XP3 and BroadcastManager use correct multicast AccpetAddress, fixes multicast discovery
+ - XP3 and BroadcastManager use correct multicast AccpetAddress, fixes multicast discovery
 
 ## [15.1.1] - 2022-07-11
 ### Changed
