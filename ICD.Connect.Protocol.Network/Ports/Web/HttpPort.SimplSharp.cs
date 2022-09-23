@@ -19,10 +19,15 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 	public sealed partial class HttpPort
 	{
 		private const string SOAP_CONTENT_TYPE = "text/xml; charset=utf-8";
+	    private const string DEFAULT_USER_AGENT = "Crestron SimplSharp Client";
+        private const string DEFAULT_ACCEPT = "*/*";
+	    private const int DEFAULT_TIMEOUT = 60;
 
-		private readonly HttpsClient m_HttpsClient;
-		private readonly HttpClient m_HttpClient;
+		//private readonly HttpsClient m_HttpsClient;
+		//private readonly HttpClient m_HttpClient;
 		private readonly SafeCriticalSection m_ClientBusySection;
+
+	    private string m_Accept;
 
 		#region Properties
 
@@ -31,18 +36,32 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		public override string Accept
 		{
-			get { return m_HttpsClient.Accept; }
+			get { return m_Accept; }
 			set
 			{
-				m_HttpsClient.Accept = string.IsNullOrEmpty(value) ? "*/*" : value;
-				m_HttpClient.Accept = string.IsNullOrEmpty(value) ? "*/*" : value;
+				m_Accept = string.IsNullOrEmpty(value) ? DEFAULT_ACCEPT : value;
 			}
 		}
 
 		/// <summary>
 		/// Returns true if currently waiting for a response from the server.
 		/// </summary>
-		public override bool Busy { get { return m_HttpsClient.ProcessBusy || m_HttpClient.ProcessBusy; } }
+		public override bool Busy {
+		    get
+		    {
+                //todo: Implement Something here, probably
+		        return false;
+		        //return m_HttpsClient.ProcessBusy || m_HttpClient.ProcessBusy;
+		    } }
+
+        /// <summary>
+        /// If requests should use the keepalive
+        /// </summary>
+        public bool KeepAlive { get; set; }
+
+        public string UserAgent { get; set; }
+
+        public bool VerboseMode { get; set; }
 
 		#endregion
 
@@ -53,25 +72,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		/// </summary>
 		public HttpPort()
 		{
-			m_HttpsClient = new HttpsClient
-			{
-				KeepAlive = true,
-				Accept = "*/*",
-				TimeoutEnabled = true,
-				Timeout = 60,
-				HostVerification = false,
-				PeerVerification = false,
-				UserAgent = "Crestron SimplSharp HTTPS Client"
-			};
-
-			m_HttpClient = new HttpClient
-			{
-				KeepAlive = true,
-				Accept = "*/*",
-				TimeoutEnabled = true,
-				Timeout = 60,
-				UserAgent = "Crestron SimplSharp HTTP Client"
-			};
+		    m_Accept = DEFAULT_ACCEPT;
+		    UserAgent = DEFAULT_USER_AGENT;
 
 			m_ClientBusySection = new SafeCriticalSection();
 
@@ -80,24 +82,55 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 		#endregion
 
+	    private HttpClient InstantiateHttpClient()
+	    {
+	        return InstantiateHttpClient(Accept);
+	    }
+
+	    private HttpClient InstantiateHttpClient(string accept)
+	    {
+	        return InstantiateHttpClient(accept, KeepAlive, VerboseMode);
+	    }
+
+	    private static HttpClient InstantiateHttpClient(string accept, bool keepAlive, bool verboseMode)
+	    {
+            return new HttpClient
+            {
+                KeepAlive = keepAlive,
+                Accept = accept,
+                TimeoutEnabled = true,
+                Timeout = DEFAULT_TIMEOUT,
+                UserAgent = DEFAULT_USER_AGENT,
+                Verbose = verboseMode
+            };
+	    }
+
+        private HttpsClient InstantiateHttpsClient()
+        {
+            return InstantiateHttpsClient(Accept);
+        }
+
+        private HttpsClient InstantiateHttpsClient(string accept)
+        {
+            return InstantiateHttpsClient(accept, KeepAlive, VerboseMode);
+        }
+
+	    private static HttpsClient InstantiateHttpsClient(string accept, bool keepAlive, bool verboseMode)
+	    {
+            return new HttpsClient
+            {
+                KeepAlive = keepAlive,
+                Accept = accept,
+                TimeoutEnabled = true,
+                Timeout = DEFAULT_TIMEOUT,
+                HostVerification = false,
+                PeerVerification = false,
+                UserAgent = DEFAULT_USER_AGENT,
+                Verbose =  verboseMode
+            };
+        }
+
 		#region Methods
-
-		/// <summary>
-		/// Release resources.
-		/// </summary>
-		protected override void DisposeFinal(bool disposing)
-		{
-			base.DisposeFinal(disposing);
-
-			try
-			{
-				m_HttpsClient.Abort();
-				m_HttpClient.Abort();
-			}
-			catch
-			{
-			}
-		}
 
 		/// <summary>
 		/// Sends a GET request to the server.
@@ -118,7 +151,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpClientRequest request = new HttpClientRequest
 					{
-						KeepAlive = m_HttpClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Get,
@@ -137,7 +170,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Get,
@@ -179,7 +212,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpClientRequest request = new HttpClientRequest
 					{
-						KeepAlive = m_HttpClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Post,
@@ -188,7 +221,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -199,7 +232,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Post,
@@ -208,7 +241,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -242,7 +275,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpClientRequest request = new HttpClientRequest
 					{
-						KeepAlive = m_HttpClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Patch,
@@ -251,7 +284,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -262,7 +295,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Patch,
@@ -271,7 +304,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -305,7 +338,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpClientRequest request = new HttpClientRequest
 					{
-						KeepAlive = m_HttpClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpContentSource.ContentNone : HttpContentSource.ContentBytes,
 						RequestType = HttpRequestType.Put,
@@ -314,7 +347,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -325,7 +358,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 				{
 					HttpsClientRequest request = new HttpsClientRequest
 					{
-						KeepAlive = m_HttpsClient.KeepAlive,
+						KeepAlive = KeepAlive,
 						ContentBytes = data,
 						ContentSource = data == null ? HttpsContentSource.ContentNone : HttpsContentSource.ContentBytes,
 						RequestType = HttpsRequestType.Put,
@@ -334,7 +367,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 					request.Header.SetHeaderValue("Accept", Accept);
 					request.Header.SetHeaderValue("Expect", "");
-					request.Header.SetHeaderValue("User-Agent", m_HttpsClient.UserAgent);
+					request.Header.SetHeaderValue("User-Agent", UserAgent);
 
 					foreach (KeyValuePair<string, List<string>> header in headers)
 						request.Header.SetHeaderValue(header.Key, string.Join(";", header.Value.ToArray()));
@@ -359,7 +392,6 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			PrintTx(() => action);
 
 			Accept = SOAP_ACCEPT;
-			m_HttpsClient.IncludeHeaders = false;
 
 			m_ClientBusySection.Enter();
 
@@ -380,7 +412,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 					request.Header.SetHeaderValue("Expect", "");
 
-					return Dispatch(request);
+				    using (var client = InstantiateHttpClient(SOAP_ACCEPT))
+				    {
+				        return Dispatch(request, client);
+				    }
 				}
 				else
 				{
@@ -394,7 +429,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 					request.Header.SetHeaderValue(SOAP_ACTION_HEADER, action);
 					request.Header.SetHeaderValue("Expect", "");
 
-					return Dispatch(request);
+				    using (var client = InstantiateHttpsClient(SOAP_ACCEPT))
+				    {
+				        client.IncludeHeaders = false;
+                        return Dispatch(request, client);
+				    }
 				}
 			}
 			catch (Exception e)
@@ -414,12 +453,26 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 		#region Private Methods
 
-		/// <summary>
-		/// Dispatches the request and returns the result.
-		/// </summary>
-		/// <param name="request"></param>
-		/// <returns></returns>
-		private WebPortResponse Dispatch(HttpsClientRequest request)
+        /// <summary>
+        /// Dispatches the request and returns the result.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+	    private WebPortResponse Dispatch(HttpsClientRequest request)
+	    {
+	        using (var client = InstantiateHttpsClient())
+	        {
+	            return Dispatch(request, client);
+	        }
+	    }
+
+	    /// <summary>
+	    /// Dispatches the request and returns the result.
+	    /// </summary>
+	    /// <param name="request"></param>
+	    /// <param name="client"></param>
+	    /// <returns></returns>
+	    private WebPortResponse Dispatch(HttpsClientRequest request, HttpsClient client)
 		{
 			WebPortResponse output = WebPortResponse.Failed;
 
@@ -427,9 +480,9 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				ConfigureProxySettings();
+				ConfigureProxySettings(client);
 
-				HttpsClientResponse response = m_HttpsClient.Dispatch(request);
+				HttpsClientResponse response = client.Dispatch(request);
 
 				if (response == null)
 				{
@@ -465,12 +518,26 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			return output;
 		}
 
-		/// <summary>
-		/// Dispatches the request and returns the result.
-		/// </summary>
-		/// <param name="request"></param>
-		/// <returns></returns>
-		private WebPortResponse Dispatch(HttpClientRequest request)
+	    /// <summary>
+	    /// Dispatches the request and returns the result.
+	    /// </summary>
+	    /// <param name="request"></param>
+	    /// <returns></returns>
+	    private WebPortResponse Dispatch(HttpClientRequest request)
+	    {
+	        using (var client = InstantiateHttpClient())
+	        {
+	            return Dispatch(request, client);
+	        }
+	    }
+
+	    /// <summary>
+	    /// Dispatches the request and returns the result.
+	    /// </summary>
+	    /// <param name="request"></param>
+	    /// <param name="client"></param>
+	    /// <returns></returns>
+	    private WebPortResponse Dispatch(HttpClientRequest request, HttpClient client)
 		{
 			WebPortResponse output = WebPortResponse.Failed;
 
@@ -478,9 +545,10 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			try
 			{
-				ConfigureProxySettings();
+                // No proxy for HTTP client
+				//ConfigureProxySettings();
 
-				HttpClientResponse response = m_HttpClient.Dispatch(request);
+				HttpClientResponse response = client.Dispatch(request);
 
 				if (response == null)
 				{
@@ -517,7 +585,7 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 		}
 
 
-		private void ConfigureProxySettings()
+		private void ConfigureProxySettings(HttpsClient client)
 		{
 			string urlOrHost =
 				ProxyUri == null || ProxyUri.GetIsDefault()
@@ -526,11 +594,11 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 
 			if (urlOrHost == null)
 			{
-				m_HttpsClient.Proxy = null;
+				client.Proxy = null;
 				return;
 			}
 
-			ProxySettings settings = m_HttpsClient.Proxy ?? (m_HttpsClient.Proxy = new ProxySettings(urlOrHost));
+			ProxySettings settings = client.Proxy ?? (client.Proxy = new ProxySettings(urlOrHost));
 
 			settings.Port = ProxyUri == null ? 0 : ProxyUri.Port;
 			settings.AuthenticationMethod = ProxyAuthenticationMethod.ToCrestron();
@@ -552,8 +620,8 @@ namespace ICD.Connect.Protocol.Network.Ports.Web
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("EnableVerboseMode", "Enables Verbose mode on the Crestron HttpsClient", () => m_HttpsClient.Verbose = true);
-			yield return new ConsoleCommand("DisableVerboseMode", "Disables Verbose mode on the Crestron HttpsClient", () => m_HttpsClient.Verbose = false);
+			yield return new ConsoleCommand("EnableVerboseMode", "Enables Verbose mode on the Crestron HttpsClient", () => VerboseMode = true);
+			yield return new ConsoleCommand("DisableVerboseMode", "Disables Verbose mode on the Crestron HttpsClient", () => VerboseMode = false);
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
