@@ -350,13 +350,14 @@ namespace ICD.Connect.Protocol.Network.Broadcast
 			}
 			catch (Exception e)
 			{
+				ServiceProvider.TryGetService<ILoggerService>().AddEntry(eSeverity.Error, "BroadcastData JsonException:{0} - Data:{1}", e.GetType(), args.Data);
 				if (e is JsonReaderException || e is JsonSerializationException)
 				{
 					ServiceProvider.TryGetService<ILoggerService>()
 					               .AddEntry(eSeverity.Error, "{0} Failed to deserialize broadcast - {1}", GetType().Name, e.Message);
 					return;
 				}
-
+				
 				throw;
 			}
 
