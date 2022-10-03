@@ -1,9 +1,14 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Json;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Protocol.Ports
 {
@@ -117,6 +122,9 @@ namespace ICD.Connect.Protocol.Ports
 		public static bool TryParse(string data, out HostSessionInfo info)
 		{
 			info = default(HostSessionInfo);
+
+			if (data == null)
+				return false;
 
 			Match match;
 			if (!RegexUtils.Matches(data, HOSTSESSIONINFO_REGEX, RegexOptions.IgnoreCase, out match))
