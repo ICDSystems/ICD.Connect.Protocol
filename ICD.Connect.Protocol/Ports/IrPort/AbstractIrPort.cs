@@ -48,7 +48,7 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 		/// </summary>
 		protected AbstractIrPort()
 		{
-			m_PulseComponent = new IrPortPulseComponent(PressInternal, ReleaseInternal);
+			m_PulseComponent = new IrPortPulseComponent(PressInternal, ReleaseInternal, false);
 		}
 
 		/// <summary>
@@ -200,6 +200,20 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 				LoadDriver(properties.IrDriverPath);
 		}
 
+		/// <summary>
+		/// Override to handle the device going online/offline.
+		/// </summary>
+		/// <param name="isOnline"></param>
+		protected override void HandleOnlineStateChange(bool isOnline)
+		{
+			base.HandleOnlineStateChange(isOnline);
+
+			m_PulseComponent.RunProcess = isOnline;
+			
+			if (!isOnline)
+				m_PulseComponent.Clear();
+		}
+
 		#endregion
 
 		#region Settings
@@ -235,6 +249,17 @@ namespace ICD.Connect.Protocol.Ports.IrPort
 			base.ApplySettingsFinal(settings, factory);
 
 			IrDriverProperties.Copy(settings);
+		}
+
+		/// <summary>
+		/// Override to add actions on StartSettings
+		/// This should be used to start communications with devices and perform initial actions
+		/// </summary>
+		protected override void StartSettingsFinal()
+		{
+			base.StartSettingsFinal();
+
+			m_PulseComponent.RunProcess = IsOnline;
 		}
 
 		#endregion
