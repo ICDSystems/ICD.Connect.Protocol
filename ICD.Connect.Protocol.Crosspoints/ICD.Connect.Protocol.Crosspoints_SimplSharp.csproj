@@ -112,18 +112,6 @@
     <Compile Include="SimplPlus\SimplPlusStaticCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimplPlus\CrosspointSmartObjectShims\AbstractSimplPlusXSigCrosspointSoShim.cs" />
-    <Compile Include="UiBindings\XP3\AbstractXp3UiBinding.cs" />
-    <Compile Include="UiBindings\XP3\AbstractXp3UiBindingSettings.cs" />
-    <Compile Include="UiBindings\XP3\Control\AbstractXp3ControlUiBinding.cs" />
-    <Compile Include="UiBindings\XP3\Control\AbstractXp3ControlUiBindingSettings.cs" />
-    <Compile Include="UiBindings\XP3\Control\IXp3ControlUiBinding.cs" />
-    <Compile Include="UiBindings\XP3\Control\IXp3ControlUiBindingSettings.cs" />
-    <Compile Include="UiBindings\XP3\Equipment\AbstractXp3EquipmentUiBinding.cs" />
-    <Compile Include="UiBindings\XP3\Equipment\AbstractXp3EquipmentUiBindingSettings.cs" />
-    <Compile Include="UiBindings\XP3\Equipment\IXp3EquipmentUiBinding.cs" />
-    <Compile Include="UiBindings\XP3\Equipment\IXp3EquipmentUiBindingSettings.cs" />
-    <Compile Include="UiBindings\XP3\IXp3UiBinding.cs" />
-    <Compile Include="UiBindings\XP3\IXp3UiBindingSettings.cs" />
     <Compile Include="Xp3.cs" />
     <Compile Include="Xp3Utils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
@@ -132,6 +120,10 @@
     <ProjectReference Include="..\..\ICD.Common.Logging\ICD.Common.Logging\ICD.Common.Logging_SimplSharp.csproj">
       <Project>{8093AE94-7250-411E-9C55-68AB2B5D705A}</Project>
       <Name>ICD.Common.Logging_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_SimplSharp.csproj">
+      <Project>{CB4055C6-D59E-479E-9C56-2C92335A7D9A}</Project>
+      <Name>ICD.Common.Utils_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
@@ -161,17 +153,13 @@
       <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
       <Name>ICD.Connect.Protocol.Network</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_SimplSharp.csproj">
-      <Project>{2E4E01B8-D4EA-4FB1-9FCE-0A0DC8D83C8A}</Project>
-      <Name>ICD.SimplSharp.Network.Protocol</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_SimplSharp.csproj">
-      <Project>{CB4055C6-D59E-479E-9C56-2C92335A7D9A}</Project>
-      <Name>ICD.SimplSharp.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
       <Name>ICD.Connect.Settings</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Connect.Protocol\ICD.Connect.Protocol_SimplSharp.csproj">
+      <Project>{2E4E01B8-D4EA-4FB1-9FCE-0A0DC8D83C8A}</Project>
+      <Name>ICD.Connect.Protocol_SimplSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
