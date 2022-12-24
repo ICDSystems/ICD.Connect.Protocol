@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [16.0.0] - 2022-12-24
+### Removed
+ - Moved XP3 UI Bindings to ICD.Connect.Themes.Crosspoints
+
 ## [15.3.0] - 2022-12-02
 ### Changed
  - Changed IR Pulse Component to fix deadlock issues and allow stopping processing the queue
