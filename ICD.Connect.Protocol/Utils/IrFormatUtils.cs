@@ -32,7 +32,7 @@ namespace ICD.Connect.Protocol.Utils
 		#region Regex
 
 		private const string GLOBAL_CACHE_IR_COMMAND_REGEX =
-			@"[a-zA-Z]+,\d+:\d+,\d+,(?'freq'\d+),\d+,\d+,(?'data'\d+(,\d+)*)";
+			@"[a-zA-Z]+,\d+:\d+,\d+,(?'freq'\d+),(?'repeat'\d+),(?'offset'\d+),(?'data'\d+(,\d+)*)";
 
 		#endregion
 
@@ -168,7 +168,9 @@ namespace ICD.Connect.Protocol.Utils
 		/// <returns></returns>
 		private static IrCommand CrestronToKrangCommand(byte[] crestronIr, string commandName)
 		{
-			int[] indexedInteger = new int[15];
+			//Note: This doesn't work with multi-codes!
+			
+			int[] indexedInteger = new int[16];
 			int dataOneTimeIndexed = crestronIr[3] & 0x0F;
 
 			int dataLength = crestronIr.Length - 4;
@@ -176,9 +178,10 @@ namespace ICD.Connect.Protocol.Utils
 
 			Array.Copy(crestronIr, 4, newArray, 0, newArray.Length);
 
-			int dataCcfFreq = 4000000 / crestronIr[0];
+			// Need to find an exact value for this constant
+			int dataCcfFreq = 3992000 / crestronIr[0];
 
-			List<int> data = new List<int> {1};
+			List<int> data = new List<int>();
 
 			for (int y = 0; y < dataOneTimeIndexed; y++)
 				indexedInteger[y] = (newArray[y * 2] << 8) + newArray[1 + (y * 2)];
@@ -188,8 +191,24 @@ namespace ICD.Connect.Protocol.Utils
 				int indexHighByte = (newArray[(dataOneTimeIndexed * 2) + y] & 0xF0) >> 4;
 				int indexLowByte = newArray[(dataOneTimeIndexed * 2) + y] & 0x0F;
 
-				data.Add(indexedInteger[indexHighByte]);
-				data.Add(indexedInteger[indexLowByte]);
+				
+				int onTime = indexedInteger[indexHighByte];
+				int offTime = indexedInteger[indexLowByte];
+
+				if (onTime <= 0)
+				{
+					throw new FormatException(string.Format("Bad IR Format for command {0} on time, index {1} ",
+						commandName, data.Count));
+				}
+
+				if (offTime <= 0)
+				{
+					throw new FormatException(string.Format("Bad IR Format for command {0} off time, index {1}",
+						commandName, data.Count + 1));
+				}
+				
+				data.Add(onTime);
+				data.Add(offTime);
 			}
 
 			return new IrCommand
@@ -197,7 +216,7 @@ namespace ICD.Connect.Protocol.Utils
 				Name = commandName,
 				Frequency = dataCcfFreq,
 				RepeatCount = 1,
-				Offset = false,
+				Offset = 1,
 				Data = data
 			};
 		}
@@ -291,14 +310,14 @@ namespace ICD.Connect.Protocol.Utils
 			                     .Select(s => int.Parse(s, System.Globalization.NumberStyles.HexNumber))
 			                     .ToArray();
 
-			int num = (((0xa1ea / intArray[1]) + 5) / 10) * 0x3e8;
+			int frequency = (((0xa1ea / intArray[1]) + 5) / 10) * 0x3e8;
 
 			return new IrCommand
 			{
 				Name = name,
-				Frequency = num,
+				Frequency = frequency,
 				RepeatCount = 1,
-				Offset = true,
+				Offset = 1,
 				Data = intArray.Skip(4).ToList()
 			};
 		}
@@ -350,18 +369,19 @@ namespace ICD.Connect.Protocol.Utils
 
 			Match match = Regex.Match(data, GLOBAL_CACHE_IR_COMMAND_REGEX);
 
+			int repeat = int.Parse(match.Groups["repeat"].Value);
 			int freq = int.Parse(match.Groups["freq"].Value);
+			int offset = int.Parse(match.Groups["offset"].Value);
 			List<int> intData = match.Groups["data"]
 			                         .Value
 			                         .Split(',')
 			                         .Select(s => int.Parse(s))
 			                         .ToList();
-			bool offset = intData.Count % 2 == 0;
 
 			return new IrCommand
 			{
 				Name = name,
-				RepeatCount = 1,
+				RepeatCount = repeat,
 				Frequency = freq,
 				Data = intData,
 				Offset = offset
