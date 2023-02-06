@@ -7,7 +7,7 @@ namespace ICD.Connect.Protocol.Data
 		public string Name { get; set; }
 		public int Frequency { get; set; }
 		public int RepeatCount { get; set; }
-		public bool Offset { get; set; }
+		public int Offset { get; set; }
 		public List<int> Data { get; set; }
 	}
 }
