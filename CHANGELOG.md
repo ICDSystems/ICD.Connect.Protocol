@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [17.0.0] - 2023-02-13
 ### Changed
  - IR Commands changed to use a int offset
  - MockIoPort can now set input status from the console
