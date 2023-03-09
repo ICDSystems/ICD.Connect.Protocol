@@ -14,6 +14,8 @@ namespace ICD.Connect.Protocol.Ports
 	public abstract class AbstractPort<T> : AbstractDeviceBase<T>, IPort
 		where T : IPortSettings, new()
 	{
+		private eDebugMode m_DefaultDebugMode;
+		
 		#region Properties
 
 		/// <summary>
@@ -33,7 +35,29 @@ namespace ICD.Connect.Protocol.Ports
 		[PublicAPI]
 		public eDebugMode DebugTx { get; set; }
 
+		/// <summary>
+		/// Sets the default debug mode that should be used when enabling debugging.
+		/// </summary>
+		public eDebugMode DefaultDebugMode
+		{
+			get
+			{
+				return m_DefaultDebugMode;
+			}
+			set
+			{
+				// Don't allow default to be set to off
+				if (value != eDebugMode.Off)
+					m_DefaultDebugMode = value;
+			}
+		}
+
 		#endregion
+
+		protected AbstractPort()
+		{
+			m_DefaultDebugMode = eDebugMode.MixedAsciiHex;
+		}
 
 		#region Private Methods
 
@@ -100,11 +124,11 @@ namespace ICD.Connect.Protocol.Ports
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("EnableDebug", "Sets debug mode for TX/RX to Ascii",
+			yield return new ConsoleCommand("EnableDebug", string.Format("Sets debug mode for TX/RX to {0}", DefaultDebugMode),
 			                                () =>
 			                                {
-				                                SetTxDebugMode(eDebugMode.Ascii);
-				                                SetRxDebugMode(eDebugMode.Ascii);
+				                                SetTxDebugMode(DefaultDebugMode);
+				                                SetRxDebugMode(DefaultDebugMode);
 			                                });
 
 			yield return new ConsoleCommand("DisableDebug", "Sets debug mode for TX/RX to Off",

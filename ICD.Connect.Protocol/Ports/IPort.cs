@@ -19,5 +19,11 @@ namespace ICD.Connect.Protocol.Ports
 		/// </summary>
 		[PublicAPI]
 		eDebugMode DebugTx { get; set; }
+		
+		/// <summary>
+		/// Sets the default debug mode that should be used when enabling debugging.
+		/// </summary>
+		[PublicAPI]
+		eDebugMode DefaultDebugMode { get; set; }
 	}
 }
