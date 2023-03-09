@@ -77,6 +77,11 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// Gets the current port.
 		/// </summary>
 		public ISerialPort Port { get; private set; }
+		
+		public ISerialBuffer Buffer
+		{
+			get { return m_Buffer; }
+		}
 
 		/// <summary>
 		/// When true the serial queue will ignore responses and immediately start processing the next command.
@@ -182,6 +187,14 @@ namespace ICD.Connect.Protocol.SerialQueues
 			Unsubscribe(m_Buffer);
 			m_Buffer = buffer;
 			Subscribe(m_Buffer);
+		}
+
+		/// <summary>
+		/// The current command being processed by the device
+		/// </summary>
+		public ISerialData CurrentCommand
+		{
+			get { return m_CurrentCommand; }
 		}
 
 		/// <summary>

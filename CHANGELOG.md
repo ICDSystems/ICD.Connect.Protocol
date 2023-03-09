@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - IPort now has DefaultDebuggingMode that can be set by devices
+ - ISerialQueue now has properties to get CurrentCommand and Buffer
  
 ### Changed
  - AbstractPort implements IDefaultDebuggingMode
+ - SerialQueue implements CurrentCommand and Buffer properties
 
 ## [17.0.0] - 2023-02-13
 ### Changed

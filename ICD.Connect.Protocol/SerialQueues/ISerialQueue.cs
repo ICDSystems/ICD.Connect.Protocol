@@ -1,7 +1,9 @@
 using System;
+using ICD.Common.Properties;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Protocol.SerialQueues
 {
@@ -57,11 +59,19 @@ namespace ICD.Connect.Protocol.SerialQueues
 		/// Gets the current port.
 		/// </summary>
 		ISerialPort Port { get; }
+		
+		ISerialBuffer Buffer { get; }
 
 		/// <summary>
 		/// When true the serial queue will ignore responses and immediately start processing the next command.
 		/// </summary>
 		bool Trust { get; set; }
+		
+		/// <summary>
+		/// The current command being processed by the device
+		/// </summary>
+		[CanBeNull]
+		ISerialData CurrentCommand { get; }
 
 		/// <summary>
 		/// Clears the command queue.
