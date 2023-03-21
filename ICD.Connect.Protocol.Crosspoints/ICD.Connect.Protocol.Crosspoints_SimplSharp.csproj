@@ -71,7 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Crosspoints\CrosspointExtensions.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Advertisements\Advertisement.cs" />
     <Compile Include="Advertisements\AdvertisementEventArgs.cs" />
     <Compile Include="Advertisements\AdvertisementManager.cs" />

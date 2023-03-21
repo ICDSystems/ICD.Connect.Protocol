@@ -85,7 +85,6 @@
     <Compile Include="Ports\AbstractConnectablePort.cs" />
     <Compile Include="Ports\AbstractConnectablePortSettings.cs" />
     <Compile Include="Ports\AbstractPortSettings.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Ports\IrPort\IrPulse\IrPortPulseComponent.cs" />
     <Compile Include="Ports\IrPort\IrPulse\IrPulse.cs" />
     <Compile Include="Utils\IrFormatUtils.cs" />

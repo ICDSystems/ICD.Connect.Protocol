@@ -105,7 +105,6 @@
     <Compile Include="Direct\AbstractMessageHandler.cs" />
     <Compile Include="Direct\DirectMessageManager.cs" />
     <Compile Include="Direct\IMessageHandler.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Ports\AbstractNetworkPortSettings.cs" />
     <Compile Include="Ports\AbstractSecureNetworkPort.cs" />
     <Compile Include="Ports\AbstractSecureNetworkPortSettings.cs" />
